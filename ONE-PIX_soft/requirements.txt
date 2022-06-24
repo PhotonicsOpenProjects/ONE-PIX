@@ -14,3 +14,7 @@ Pillow
 spectral
 Sphinx
 sphinx-rtd-theme
+src/
+src/pattern_bases
+src/reconstruction_methods
+src/spectrometer_bridges
