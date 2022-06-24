@@ -5,9 +5,8 @@ API Reference
 
 .. _api:
 
-The public api of `seabreeze` is provided by the `seabreeze.spectrometers` submodule.
-The basic features to acquire a spectrum are provided for all spectrometer models independent
-of the backend.
+The public api of ONE-PIX is provided allows to acquire hyperspectral datacubes using single pixel imaging.
+The basic features to acquire a datacube are provided, for several spectrometer brands or patterns bases.
 
 =======================================
 Hyperspectral SPI acquisition
@@ -17,7 +16,7 @@ Hyperspectral SPI acquisition
 Pattern Methods
 ------------------
 
-Provides a list of available instances of `SeaBreezeDevice`
+Class allowing to use a specific pattern method.
 
 .. automodule:: PatternMethods
    :members:
@@ -25,7 +24,7 @@ Provides a list of available instances of `SeaBreezeDevice`
 Spectrometer Selection
 ------------------------
 
-The `Spectrometer` class is used to access spectrometer features.
+This class is used to access spectrometer features.
 
 .. automodule:: SpectrometerBridge
    :members:
@@ -33,6 +32,8 @@ The `Spectrometer` class is used to access spectrometer features.
 
 Acquisition
 ------------------------
+This class allows to set acquisition parameters to perform ONE-PIX acqusitions.
+
 .. automodule:: AcquisitionConfig
    :members:
 
@@ -40,15 +41,17 @@ Acquisition
 Hyperspectral SPI reconstruction and analysis
 ====================================================
 
-
-
 Reconstruction
 ------------------
+This class contains the set of methods to reconstruct datacubes according to the chosen acquisition method.
+
 .. automodule:: DatacubeReconstructions
    :members:
 
 
 Analysis
 ------------------
+Library containing several methods to analyse datacube
+
 .. automodule:: datacube_analyse
    :members:
