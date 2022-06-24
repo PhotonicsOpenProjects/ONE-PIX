@@ -94,6 +94,31 @@ get its API necessary informations to open and close the communication with the 
 intensities and sampled wavelengths and set the integration times.</p>
 <p>Add a new spectrometer class python file to <cite>ONE-PIX_soft/src/spectrometer_bridges</cite> with the file name:
 &lt;Spectrometer_name&gt;Bridge.py</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Spectrometer_nameBridge</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">integration_time_ms</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">integration_time_ms</span><span class="o">=</span><span class="n">integration_time_ms</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="o">=</span><span class="p">[]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">DeviceName</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+
+        <span class="k">def</span> <span class="nf">spec_open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># commands to initiate the communication with the spectrometer</span>
+
+        <span class="k">def</span> <span class="nf">set_integration_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># commands to set the integration time in milliseconds self.integration_time_ms</span>
+
+        <span class="k">def</span> <span class="nf">get_wavelengths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># commands to get sampled wavelengths</span>
+                <span class="k">return</span> <span class="n">wavelengths</span>
+
+        <span class="k">def</span> <span class="nf">get_intensities</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># commands to get spectra intensities</span>
+                <span class="k">return</span> <span class="n">intensities</span>
+
+        <span class="k">def</span> <span class="nf">spec_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># commands to end the communication with the spectrometer</span>
+</pre></div>
+</div>
 <p>Fulfilling these lines allows to use your device with the ONE-PIX kit.</p>
 </section>
 <section id="adding-a-new-pattern-basis-or-method">
@@ -101,6 +126,17 @@ intensities and sampled wavelengths and set the integration times.</p>
 <p>You can also add new pattern bases or new methods for hyperspectral compressive imaging:
 Add a new pattern method class python file to <cite>ONE-PIX_soft/src/pattern_bases</cite> with the file name:
 &lt;Pattern_method&gt;Basis.py</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Pattern_methodBasis</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">sequence_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># create a list of string describing the name of the patterns</span>
+                <span class="k">return</span> <span class="n">pattern_order</span><span class="p">,</span><span class="o">...</span>
+
+        <span class="k">def</span> <span class="nf">creation_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># create the sequence(s) to be projected</span>
+                <span class="k">return</span> <span class="n">sequence</span>
+</pre></div>
+</div>
 </section>
 <section id="adding-a-new-reconstruction-method">
 <h2>Adding a new reconstruction method<a class="headerlink" href="#adding-a-new-reconstruction-method" title="Permalink to this headline"></a></h2>
@@ -108,6 +144,21 @@ Add a new pattern method class python file to <cite>ONE-PIX_soft/src/pattern_bas
 a new basis.</p>
 <p>To do so, add a new reconstruction method class python file to <cite>ONE-PIX_soft/src/reconstruction_methods</cite> with the file name:
 &lt;Reconstruction_method&gt;Reconstruction.py</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Pattern_methodBasis</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">spectra</span><span class="p">,</span><span class="n">pattern_order</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pattern_order</span><span class="o">=</span><span class="n">pattern_order</span>
+
+        <span class="k">def</span> <span class="nf">spectrum_reconstruction</span><span class="p">:</span>
+                <span class="c1"># allows to transform raw data into well shaped spectral datacube in spatial frequencies domain</span>
+                <span class="k">return</span> <span class="n">spectrum</span>
+
+        <span class="k">def</span> <span class="nf">datacube_reconstruction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="c1"># use spectrum reconstrum first and then apply your method to reconstruct an image datacube</span>
+                <span class="k">return</span> <span class="n">spectrum</span><span class="p">,</span><span class="n">datacube</span>
+</pre></div>
+</div>
 </section>
 </section>
 

@@ -46,8 +46,8 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#hyperspectral-spi-acquisition">Hyperspectral SPI acquisition</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pattern-methods">Pattern Methods</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#acquisition">Acquisition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spectrometer-selection">Spectrometer Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acquisition">Acquisition</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#hyperspectral-spi-reconstruction-and-analysis">Hyperspectral SPI reconstruction and analysis</a><ul>
@@ -89,7 +89,7 @@
              
   <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h1>
-<p id="api">The public api of ONE-PIX is provided allows to acquire hyperspectral datacubes using single pixel imaging.
+<p>The public api of ONE-PIX is provided allows to acquire hyperspectral datacubes using single pixel imaging.
 The basic features to acquire a datacube are provided, for several spectrometer brands or patterns bases.</p>
 <section id="hyperspectral-spi-acquisition">
 <h2>Hyperspectral SPI acquisition<a class="headerlink" href="#hyperspectral-spi-acquisition" title="Permalink to this headline"></a></h2>
@@ -109,6 +109,26 @@ use. The generic bridge is an abstract layer that wrap concrete implementation.<
 <li><p><strong>spatial_res</strong> (<em>int</em>) – Spatial resolution of the datacube to be acquired.</p></li>
 <li><p><strong>height</strong> (<em>int</em>) – number of pixels for the raws of patterns.</p></li>
 <li><p><strong>width</strong> (<em>int</em>) – number of pixels for the column of patterns.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="spectrometer-selection">
+<h3>Spectrometer Selection<a class="headerlink" href="#spectrometer-selection" title="Permalink to this headline"></a></h3>
+<p>This class is used to access spectrometer features.</p>
+<span class="target" id="module-SpectrometerBridge"></span><dl class="py class">
+<dt class="sig sig-object py" id="SpectrometerBridge.SpectrometerBridge">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">SpectrometerBridge.</span></span><span class="sig-name descname"><span class="pre">SpectrometerBridge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectro_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_time_ms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SpectrometerBridge.html#SpectrometerBridge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#SpectrometerBridge.SpectrometerBridge" title="Permalink to this definition"></a></dt>
+<dd><p>Allows to build a generic bridge based on a concrete one. Concrete
+bridge provides correct implementation regarding to spectrometer model
+use. The generic bridge is an abstract layer that wrap concrete implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
+<li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
 </ul>
 </dd>
 </dl>
@@ -257,26 +277,6 @@ extract means spectrums for each patterns.</p>
 <li><p><strong>* wavelengths</strong> (<em>(array of floats) 1D wavelengths sampled by the spectrometer.</em>)</p></li>
 </ul>
 </p>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="spectrometer-selection">
-<h3>Spectrometer Selection<a class="headerlink" href="#spectrometer-selection" title="Permalink to this headline"></a></h3>
-<p>This class is used to access spectrometer features.</p>
-<span class="target" id="module-SpectrometerBridge"></span><dl class="py class">
-<dt class="sig sig-object py" id="SpectrometerBridge.SpectrometerBridge">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">SpectrometerBridge.</span></span><span class="sig-name descname"><span class="pre">SpectrometerBridge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectro_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_time_ms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SpectrometerBridge.html#SpectrometerBridge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#SpectrometerBridge.SpectrometerBridge" title="Permalink to this definition"></a></dt>
-<dd><p>Allows to build a generic bridge based on a concrete one. Concrete
-bridge provides correct implementation regarding to spectrometer model
-use. The generic bridge is an abstract layer that wrap concrete implementation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
-<li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
-</ul>
 </dd>
 </dl>
 </dd></dl>

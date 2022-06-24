@@ -21,30 +21,30 @@ Add a new spectrometer class python file to `ONE-PIX_soft/src/spectrometer_bridg
 <Spectrometer_name>Bridge.py
 
 ..  code:: python
-	#import any needed libraries
-    class Spectrometer_nameBridge:
-		
-	def __init__(self,integration_time_ms):
-		self.integration_time_ms=integration_time_ms
-		self.spec=[]
-		self.DeviceName=''
-			
-	def spec_open(self):
-		# commands to initiate the communication with the spectrometer
-
-	def set_integration_time(self):
-		# commands to set the integration time in milliseconds self.integration_time_ms
-
-	def get_wavelengths(self):
-		# commands to get sampled wavelengths
-		return wavelengths
-		
-	def get_intensities(self):
-		# commands to get spectra intensities
-		return intensities
 	
-	def spec_close(self):
-		# commands to end the communication with the spectrometer
+	class Spectrometer_nameBridge:
+			
+		def __init__(self,integration_time_ms):
+			self.integration_time_ms=integration_time_ms
+			self.spec=[]
+			self.DeviceName=''
+				
+		def spec_open(self):
+			# commands to initiate the communication with the spectrometer
+
+		def set_integration_time(self):
+			# commands to set the integration time in milliseconds self.integration_time_ms
+
+		def get_wavelengths(self):
+			# commands to get sampled wavelengths
+			return wavelengths
+			
+		def get_intensities(self):
+			# commands to get spectra intensities
+			return intensities
+		
+		def spec_close(self):
+			# commands to end the communication with the spectrometer
 
 Fulfilling these lines allows to use your device with the ONE-PIX kit.
 
@@ -57,19 +57,18 @@ Add a new pattern method class python file to `ONE-PIX_soft/src/pattern_bases` w
 <Pattern_method>Basis.py
 
 ..  code:: python
-	# import any libraries needed
 	
 	class Pattern_methodBasis:
 	
-    def sequence_order(self):
-        # create a list of string describing the name of the patterns 
-		return pattern_order,...
+		def sequence_order(self):
+			# create a list of string describing the name of the patterns 
+			return pattern_order,...
 
-    def creation_sequence(self):
-        # create the sequence(s) to be projected
-		return sequence
+		def creation_sequence(self):
+			# create the sequence(s) to be projected
+			return sequence
 
-    
+		
 Adding a new reconstruction method
 -----------------------------------------
 
@@ -80,19 +79,18 @@ To do so, add a new reconstruction method class python file to `ONE-PIX_soft/src
 <Reconstruction_method>Reconstruction.py
 
 ..  code:: python
-	# import any libraries needed
 	
 	class Pattern_methodBasis:
 	
-	def __init__(self,spectra,pattern_order):
-        self.spectra=spectra
-        self.pattern_order=pattern_order
-		
-    def spectrum_reconstruction:
-		# allows to transform raw data into well shaped spectral datacube in spatial frequencies domain
-		return spectrum
-		
-	def datacube_reconstruction(self):
-		# use spectrum reconstrum first and then apply your method to reconstruct an image datacube
-		return spectrum,datacube
-		
+		def __init__(self,spectra,pattern_order):
+			self.spectra=spectra
+			self.pattern_order=pattern_order
+			
+		def spectrum_reconstruction:
+			# allows to transform raw data into well shaped spectral datacube in spatial frequencies domain
+			return spectrum
+			
+		def datacube_reconstruction(self):
+			# use spectrum reconstrum first and then apply your method to reconstruct an image datacube
+			return spectrum,datacube
+			
