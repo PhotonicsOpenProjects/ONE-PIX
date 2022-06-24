@@ -82,6 +82,7 @@
 <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Queue</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
 
 <span class="kn">from</span> <span class="nn">src.SpectrometerBridge</span> <span class="kn">import</span> <span class="o">*</span> 
 <span class="kn">from</span> <span class="nn">src.PatternMethods</span> <span class="kn">import</span> <span class="o">*</span>
@@ -89,6 +90,8 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">tkinter</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">tkinter.messagebox</span> <span class="kn">import</span> <span class="n">askquestion</span>
+
 
 <div class="viewcode-block" id="OPConfig"><a class="viewcode-back" href="../api.html#AcquisitionConfig.OPConfig">[docs]</a><span class="k">class</span> <span class="nc">OPConfig</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; </span>
@@ -115,8 +118,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mes_ratio</span><span class="o">=</span><span class="n">acqui_dict</span><span class="p">[</span><span class="s2">&quot;mes_ratio&quot;</span><span class="p">]</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">pattern_lib</span> <span class="o">=</span> <span class="n">PatternMethodSelection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pattern_method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spatial_res</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">orth_basis</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FourierShift&#39;</span><span class="p">,</span><span class="s1">&#39;FourierSplit&#39;</span><span class="p">,</span><span class="s1">&#39;Hadamard&#39;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">custom_basis</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BlackAndWhite&#39;</span><span class="p">,</span><span class="s1">&#39;CustomPatterns&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seq_basis</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FourierShift&#39;</span><span class="p">,</span><span class="s1">&#39;FourierSplit&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_basis</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BlackAndWhite&#39;</span><span class="p">,</span><span class="s1">&#39;Custom&#39;</span><span class="p">,</span><span class="s1">&#39;Hadamard&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">nb_patterns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern_lib</span><span class="o">.</span><span class="n">nb_patterns</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">chronograms</span> <span class="o">=</span> <span class="p">[]</span>
@@ -244,6 +247,8 @@
 <span class="sd">        actualised OPConfig class object.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+           
+        
     <span class="n">os_name</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">spec_lib</span><span class="o">.</span><span class="n">DeviceName</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="n">config</span><span class="o">.</span><span class="n">spec_lib</span><span class="o">.</span><span class="n">spec_open</span><span class="p">()</span>
@@ -375,7 +380,7 @@
         <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;ImageWindow&#39;</span><span class="p">,</span> <span class="n">black</span><span class="p">)</span>
         <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">duree_dark</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">pattern_method</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">orth_basis</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">pattern_method</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">seq_basis</span><span class="p">:</span>
         <span class="c1"># horizontal vector for the pattern creation</span>
         <span class="n">x</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">width</span><span class="p">))</span>
         <span class="c1"># vertical vector for the pattern creation</span>
@@ -406,8 +411,7 @@
                 
                 
 
-    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">pattern_method</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">custom_basis</span><span class="p">:</span>
-        <span class="c1"># sequence,pattern_order=config.pattern_lib.creation_sequence()</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">pattern_method</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">full_basis</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">pattern_lib</span><span class="o">.</span><span class="n">decorator</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
             <span class="n">temps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
             <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="s1">&#39;ImageWindow&#39;</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
@@ -444,22 +448,33 @@
 <span class="sd">    * wavelengths : (array of floats) 1D wavelengths sampled by the spectrometer.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
+    
     <span class="n">begin_acq</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
-    <span class="n">first_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
-        <span class="n">target</span><span class="o">=</span><span class="n">affichage_sequence</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">config</span><span class="p">))</span>
-    <span class="n">second_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
-        <span class="n">target</span><span class="o">=</span><span class="n">spectrometer_acquisition</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">config</span><span class="p">))</span>
-    <span class="n">first_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
-    <span class="n">second_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">pattern_method</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">full_basis</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">pattern_order</span><span class="p">,</span><span class="n">freq</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">pattern_lib</span><span class="o">.</span><span class="n">decorator</span><span class="o">.</span><span class="n">creation_patterns</span><span class="p">()</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">pattern_lib</span><span class="o">.</span><span class="n">nb_patterns</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">pattern_lib</span><span class="o">.</span><span class="n">decorator</span><span class="o">.</span><span class="n">nb_patterns</span>
+    <span class="n">est_duration</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="mf">1.2</span><span class="o">*</span><span class="n">config</span><span class="o">.</span><span class="n">pattern_lib</span><span class="o">.</span><span class="n">nb_patterns</span><span class="o">*</span><span class="n">config</span><span class="o">.</span><span class="n">periode_pattern</span><span class="o">/</span><span class="p">(</span><span class="mi">60</span><span class="o">*</span><span class="mi">1000</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">ans</span><span class="o">=</span><span class="n">askquestion</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Estimated acquisition duration : </span><span class="si">{</span><span class="n">est_duration</span><span class="si">}</span><span class="s2"> min &quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ans</span><span class="o">==</span><span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+        <span class="n">est_end</span><span class="o">=</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">+</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="nb">round</span><span class="p">(</span><span class="n">est_duration</span><span class="p">)))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Estimated end of the acquisition: &quot;</span><span class="o">+</span><span class="n">est_end</span><span class="p">)</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="n">first_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">affichage_sequence</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">config</span><span class="p">))</span>
+        <span class="n">second_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">spectrometer_acquisition</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">config</span><span class="p">))</span>
+        <span class="n">first_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">second_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
 
-    <span class="n">first_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
-    <span class="n">second_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">first_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">second_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
-    <span class="n">config</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">begin_acq</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">begin_acq</span>
 
-    <span class="n">save_acquisition</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">save_acquisition</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+   
     <span class="k">return</span> <span class="n">config</span></div>
 
 <span class="sd">&quot;&quot;&quot;</span>
@@ -490,7 +505,7 @@
     <span class="n">config</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">calculate_pattern_spectrum</span><span class="p">(</span>
         <span class="n">config</span><span class="o">.</span><span class="n">display_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">time_spectro</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">chronograms</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     
-    <span class="k">del</span> <span class="n">config</span><span class="o">.</span><span class="n">chronograms</span> <span class="c1"># saves RAM for large acquisitions</span>
+    
     
     <span class="n">root_path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
     <span class="n">path</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root_path</span><span class="p">,</span><span class="s1">&#39;Hypercubes&#39;</span><span class="p">)</span>
@@ -559,7 +574,7 @@
         <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">root</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
     <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">root_path</span><span class="p">)</span>
-    <span class="k">del</span> <span class="n">config</span></div>
+    <span class="k">del</span> <span class="n">config</span><span class="o">.</span><span class="n">chronograms</span> <span class="c1"># saves RAM for large acquisitions</span></div>
 
     
 <span class="c1"># def save_chronograms(config):</span>
