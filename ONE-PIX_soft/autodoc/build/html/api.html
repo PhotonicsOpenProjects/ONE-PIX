@@ -106,15 +106,9 @@ use. The generic bridge is an abstract layer that wrap concrete implementation.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pattern_method</strong> (<em>str</em>) – </p></li>
-<li><p><strong>spatial_res</strong> (<em>int</em>) – <blockquote>
-<div><p>Spatial resolution of the datacube to be acquired.</p>
-</div></blockquote>
-</p></li>
-<li><p><strong>height</strong> (<em>int</em>) – <blockquote>
-<div><p>number of pixels for the raws of patterns.</p>
-</div></blockquote>
-</p></li>
+<li><p><strong>pattern_method</strong> (<em>str</em>) – ONE-PIX pattern method to invoke one specific class of patterns.</p></li>
+<li><p><strong>spatial_res</strong> (<em>int</em>) – Spatial resolution of the datacube to be acquired.</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – number of pixels for the raws of patterns.</p></li>
 <li><p><strong>width</strong> (<em>int</em>) – number of pixels for the column of patterns.</p></li>
 </ul>
 </dd>
@@ -134,7 +128,7 @@ use. The generic bridge is an abstract layer that wrap concrete implementation.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>spectro_name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
 <li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
 </ul>
 </dd>
@@ -151,7 +145,7 @@ use. The generic bridge is an abstract layer that wrap concrete implementation.<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>spectro_name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
 <li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
 </ul>
 </dd>

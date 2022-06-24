@@ -11,13 +11,13 @@ class PatternMethodSelection:
 
      :param str pattern_method:
     		ONE-PIX pattern method to invoke one specific class of patterns.
-    		~~~~
+    		
      :param int spatial_res:
     		Spatial resolution of the datacube to be acquired.
-            ~~~~
+            
      :param int height:
     		number of pixels for the raws of patterns.
-            ~~~~
+            
      :param int width:
     		number of pixels for the column of patterns.
     """

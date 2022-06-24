@@ -9,7 +9,7 @@ class SpectrometerBridge:
     
      :param str spectro_name:
     		Spectrometer concrete bridge implementation:
-    		~~~~
+    		
      :param float integration_time_ms:
     		spectrometer integration time in milliseconds.
     """
