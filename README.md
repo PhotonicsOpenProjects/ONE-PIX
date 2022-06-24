@@ -74,7 +74,7 @@ The software architecture of the ONE-PIX kit offers different ways to measure, r
 </p>
 
 - The fastest way to measure and analyze hyperspectral images is to use the [GUI interface](ONE-PIX_soft/doc/ONE-PIX_GUI_user_manual.pdf)
-- For more advanced acquisitions,use directly ONEPIX_acquisition.py and ONEPIX_reconstruction.py [Python examples scripts](ONE-PIX_soft) and improve them with using  [API](ONE-PIX_soft/autodoc/build/html/index.html).
+- For more advanced acquisitions,use directly ONEPIX_acquisition.py and ONEPIX_reconstruction.py [Python examples scripts](ONE-PIX_soft) and improve them with using  [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
  
 ## Contribution 
 
