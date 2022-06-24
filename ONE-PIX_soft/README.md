@@ -38,7 +38,7 @@ cd Desktop
 Download the ONE-PIX software from git 
 
 ```
-sudo git clone url
+sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
 ```
 
 ## Requirements installation
@@ -50,7 +50,7 @@ with the terminal go in this folder
 cd Desktop/ONE-PIX/ONE-PIX_soft
 ```
 
-You need to install Python packages to run ONE-PIX _soft. 
+You need to install Python packages to run ONE-PIX_soft. 
 For that, just run the following command:
 
 ```
@@ -90,7 +90,7 @@ You need to configure USB rules to allow data tranferts from your spectrometer.
 
 If the spectrometer used is this [list of tested spectrometer](../ONE-PIX_soft/doc/tested_spectrometers.pdf) follow steps for your model. 
 
-Else, the spectrometer used is not in this list, you need to see [how to implement a new spectrometer](../ONE-PIX_soft/doc/implement_untested_spectrometer.pdf)
+Else, the spectrometer used is not in this list, you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
 
 ### Ocean Insight spectrometers 
 
