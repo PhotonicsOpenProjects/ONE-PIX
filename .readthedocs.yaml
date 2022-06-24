@@ -9,6 +9,10 @@ version: 1
 sphinx:
   configuration: ONE-PIX_soft/autodoc/doc/conf.py
 
+formats:
+  - pdf
+  - epub
+  
 # Optionally set the version of Python and requirements required to build your docs
 python:
   version: 3.8
