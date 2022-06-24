@@ -63,7 +63,7 @@ This folder contains:
 ### Install ONE-PIX software on the Raspberry Pi 
 
 To install the ONE-PIX kit software you need to follow steps discribed in [Readme installation](ONE-PIX_soft/README.md) before measuring hyperspectral images.
-For troubleshooting in installation you can go to the FAQ [here]()
+For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
 
 ###  Measuring and analysing hypercubes 
 
