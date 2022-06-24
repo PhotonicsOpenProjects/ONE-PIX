@@ -46,13 +46,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#hyperspectral-spi-acquisition">Hyperspectral SPI acquisition</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#pattern-methods">Pattern Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acquisition">Acquisition</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#spectrometer-selection">Spectrometer Selection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-AcquisitionConfig">Acquisition</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#hyperspectral-spi-reconstruction-and-analysis">Hyperspectral SPI reconstruction and analysis</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#module-DatacubeReconstructions">Reconstruction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-datacube_analyse">Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reconstruction">Reconstruction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis">Analysis</a></li>
 </ul>
 </li>
 </ul>
@@ -89,14 +89,13 @@
              
   <section id="api-reference">
 <h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h1>
-<p id="api">The public api of <cite>seabreeze</cite> is provided by the <cite>seabreeze.spectrometers</cite> submodule.
-The basic features to acquire a spectrum are provided for all spectrometer models independent
-of the backend.</p>
+<p id="api">The public api of ONE-PIX is provided allows to acquire hyperspectral datacubes using single pixel imaging.
+The basic features to acquire a datacube are provided, for several spectrometer brands or patterns bases.</p>
 <section id="hyperspectral-spi-acquisition">
 <h2>Hyperspectral SPI acquisition<a class="headerlink" href="#hyperspectral-spi-acquisition" title="Permalink to this headline"></a></h2>
 <section id="pattern-methods">
 <h3>Pattern Methods<a class="headerlink" href="#pattern-methods" title="Permalink to this headline"></a></h3>
-<p>Provides a list of available instances of <cite>SeaBreezeDevice</cite></p>
+<p>Class allowing to use a specific pattern method.</p>
 <span class="target" id="module-PatternMethods"></span><dl class="py class">
 <dt class="sig sig-object py" id="PatternMethods.PatternMethodSelection">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">PatternMethods.</span></span><span class="sig-name descname"><span class="pre">PatternMethodSelection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PatternMethods.html#PatternMethodSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#PatternMethods.PatternMethodSelection" title="Permalink to this definition"></a></dt>
@@ -116,29 +115,10 @@ use. The generic bridge is an abstract layer that wrap concrete implementation.<
 </dd></dl>
 
 </section>
-<section id="spectrometer-selection">
-<h3>Spectrometer Selection<a class="headerlink" href="#spectrometer-selection" title="Permalink to this headline"></a></h3>
-<p>The <cite>Spectrometer</cite> class is used to access spectrometer features.</p>
-<span class="target" id="module-SpectrometerBridge"></span><dl class="py class">
-<dt class="sig sig-object py" id="SpectrometerBridge.SpectrometerBridge">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">SpectrometerBridge.</span></span><span class="sig-name descname"><span class="pre">SpectrometerBridge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectro_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_time_ms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SpectrometerBridge.html#SpectrometerBridge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#SpectrometerBridge.SpectrometerBridge" title="Permalink to this definition"></a></dt>
-<dd><p>Allows to build a generic bridge based on a concrete one. Concrete
-bridge provides correct implementation regarding to spectrometer model
-use. The generic bridge is an abstract layer that wrap concrete implementation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
-<li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</section>
-<section id="module-AcquisitionConfig">
-<span id="acquisition"></span><h3>Acquisition<a class="headerlink" href="#module-AcquisitionConfig" title="Permalink to this headline"></a></h3>
-<dl class="py class">
+<section id="acquisition">
+<h3>Acquisition<a class="headerlink" href="#acquisition" title="Permalink to this headline"></a></h3>
+<p>This class allows to set acquisition parameters to perform ONE-PIX acqusitions.</p>
+<span class="target" id="module-AcquisitionConfig"></span><dl class="py class">
 <dt class="sig sig-object py" id="AcquisitionConfig.OPConfig">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">OPConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#OPConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#AcquisitionConfig.OPConfig" title="Permalink to this definition"></a></dt>
 <dd><p>Class OPConfig is used to set up ONE-PIX acquisitions</p>
@@ -282,12 +262,33 @@ extract means spectrums for each patterns.</p>
 </dd></dl>
 
 </section>
+<section id="spectrometer-selection">
+<h3>Spectrometer Selection<a class="headerlink" href="#spectrometer-selection" title="Permalink to this headline"></a></h3>
+<p>This class is used to access spectrometer features.</p>
+<span class="target" id="module-SpectrometerBridge"></span><dl class="py class">
+<dt class="sig sig-object py" id="SpectrometerBridge.SpectrometerBridge">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">SpectrometerBridge.</span></span><span class="sig-name descname"><span class="pre">SpectrometerBridge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectro_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_time_ms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SpectrometerBridge.html#SpectrometerBridge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#SpectrometerBridge.SpectrometerBridge" title="Permalink to this definition"></a></dt>
+<dd><p>Allows to build a generic bridge based on a concrete one. Concrete
+bridge provides correct implementation regarding to spectrometer model
+use. The generic bridge is an abstract layer that wrap concrete implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
+<li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 <section id="hyperspectral-spi-reconstruction-and-analysis">
 <h2>Hyperspectral SPI reconstruction and analysis<a class="headerlink" href="#hyperspectral-spi-reconstruction-and-analysis" title="Permalink to this headline"></a></h2>
-<section id="module-DatacubeReconstructions">
-<span id="reconstruction"></span><h3>Reconstruction<a class="headerlink" href="#module-DatacubeReconstructions" title="Permalink to this headline"></a></h3>
-<dl class="py class">
+<section id="reconstruction">
+<h3>Reconstruction<a class="headerlink" href="#reconstruction" title="Permalink to this headline"></a></h3>
+<p>This class contains the set of methods to reconstruct datacubes according to the chosen acquisition method.</p>
+<span class="target" id="module-DatacubeReconstructions"></span><dl class="py class">
 <dt class="sig sig-object py" id="DatacubeReconstructions.OPReconstruction">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">OPReconstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imag_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#OPReconstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#DatacubeReconstructions.OPReconstruction" title="Permalink to this definition"></a></dt>
 <dd><p>Class OPReconstruction to reconstruct datacubes according to a ONE-PIX method</p>
@@ -459,9 +460,10 @@ measurements of the initialization B&amp;W sequence.</p>
 </dd></dl>
 
 </section>
-<section id="module-datacube_analyse">
-<span id="analysis"></span><h3>Analysis<a class="headerlink" href="#module-datacube_analyse" title="Permalink to this headline"></a></h3>
-<dl class="py function">
+<section id="analysis">
+<h3>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline"></a></h3>
+<p>Library containing several methods to analyse datacube</p>
+<span class="target" id="module-datacube_analyse"></span><dl class="py function">
 <dt class="sig sig-object py" id="datacube_analyse.Flux2Ref">
 <span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">Flux2Ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rawHypercube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wavelengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#Flux2Ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.Flux2Ref" title="Permalink to this definition"></a></dt>
 <dd><p>Flux2Ref allows to normalize a raw hypercube in reflectance using a standard present in

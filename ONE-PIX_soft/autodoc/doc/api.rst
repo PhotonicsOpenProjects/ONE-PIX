@@ -21,6 +21,13 @@ Class allowing to use a specific pattern method.
 .. automodule:: PatternMethods
    :members:
 
+Acquisition
+---------------
+This class allows to set acquisition parameters to perform ONE-PIX acqusitions.
+
+.. automodule:: AcquisitionConfig
+   :members:
+
 Spectrometer Selection
 ------------------------
 
@@ -30,12 +37,7 @@ This class is used to access spectrometer features.
    :members:
 
 
-Acquisition
-------------------------
-This class allows to set acquisition parameters to perform ONE-PIX acqusitions.
 
-.. automodule:: AcquisitionConfig
-   :members:
 
 ====================================================
 Hyperspectral SPI reconstruction and analysis
