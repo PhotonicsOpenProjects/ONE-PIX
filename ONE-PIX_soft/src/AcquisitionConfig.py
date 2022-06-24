@@ -302,9 +302,9 @@ def affichage_sequence(q, config):
     for i in range(0, np.size(sequence_tampon, 2)):
 
         cv2.imshow('ImageWindow', sequence_tampon[:, :, i])
-        cv2.waitKey(config.periode_pattern)
+        cv2.waitKey(round(config.periode_pattern))
         cv2.imshow('ImageWindow', black)
-        cv2.waitKey(config.duree_dark)
+        cv2.waitKey(round(config.duree_dark))
 
     if config.pattern_method in config.seq_basis:
         # horizontal vector for the pattern creation
@@ -327,7 +327,7 @@ def affichage_sequence(q, config):
                 
                 temps.append(time.time())
                 cv2.imshow('ImageWindow', pattern)
-                cv2.waitKey(config.periode_pattern)
+                cv2.waitKey(round(config.periode_pattern))
                 temps.append(time.time())
                 
                 if freq==(0,0):
@@ -341,7 +341,7 @@ def affichage_sequence(q, config):
         for pattern in config.pattern_lib.decorator.sequence:
             temps.append(time.time())
             cv2.imshow('ImageWindow', pattern)
-            cv2.waitKey(config.periode_pattern)
+            cv2.waitKey(round(config.periode_pattern))
             temps.append(time.time())
 
     time.sleep(0.1)
