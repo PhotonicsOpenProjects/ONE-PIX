@@ -1,5 +1,5 @@
 Sphinx==4.2.0
 sphinx-rtd-theme==0.5.0
-sphinxcontrib-napoleon==0.7
+sphinxcontrib-napoleon
 sphinxcontrib-autodoc
 sphinxcontrib-autosummary
