@@ -16,5 +16,7 @@ formats:
 # Optionally set the version of Python and requirements required to build your docs
 python:
   version: 3.9
+  install:
+    - requirements: ONE-PIX_soft/autodoc/doc/requirements.txt
 
     
