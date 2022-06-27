@@ -190,7 +190,7 @@ click one the green ticks to validate changes.
 </p>
 
 The installation is now complete. 
-Now you can follow the tutorial [tutorial measure hyperspectral image](/ONE-PIX_soft/doc/tutorial_measure_hyperspectral_image.pdf) to measure your first hyperspectral datacube ! 
+Now you can follow the [tutorial measure hyperspectral image](/ONE-PIX_soft/doc/tutorial_measure_hyperspectral_image.pdf) to measure your first hyperspectral datacube ! 
 
 
 
