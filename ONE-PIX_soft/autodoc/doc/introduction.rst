@@ -1,4 +1,4 @@
-.. image:: ONE-PIX/imgs/logos.png
+.. image:: ../../../imgs/logos.png
   :width: 400
   :alt: Alternative text
 
