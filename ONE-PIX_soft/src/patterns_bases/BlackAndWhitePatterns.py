@@ -61,5 +61,5 @@ class BlackAndWhitePatterns:
         self.sequence=np.zeros((self.height,self.width,self.nb_patterns),dtype=np.float32)
         self.sequence[:,:,0::2]=1
         self.sequence=np.split(self.sequence,self.nb_patterns,axis=2)
-        
-        return self.sequence
+        self.pattern_order=self.sequence_order()
+        return self.pattern_order,[]
