@@ -13,14 +13,18 @@ The current implementation has been developed in Python 3 and tested on a Raspbe
   :width: 400
   :align: center
  
+ 
+ 
 Motivations
 ------------
 As the various spectral imaging technologies are relatively very expensive, we want to popularise the use of these new cutting-edge technologies. Thus, this kit aims to allow anyone to design their own kit or to order one from Photonics Bretagne.
 As this research topic remains very broad, a Github repository allows to share all the contributions made within a community dedicated to single-pixel hyperspectral imaging.
 
 
-This package is intended to provide 
+
+This package is intended to provide:
 --------------------------------------------
 
 - Python scripts for interfacing the kit.
-- Scripts implementing various compressed imaging methods
+- Acquisitions and reconstructions scripts implementing various compressed imaging methods 
+- Analysis tools to make use of the measured datacubes 
