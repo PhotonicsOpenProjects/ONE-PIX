@@ -156,8 +156,11 @@ def window_size_test(config):
 
     proj = tk.Tk()
     dim = str(config.width + 100) + "x" + str(config.height + 100)
-    proj.geometry("{}x{}+{}+{}".format(config.width + 25, config.height + 25, 1000, 0))
-
+    os_name = platform.system()
+    if os_name == 'Linux':
+        proj.geometry("{}x{}+{}+{}".format(config.width, config.height, 1024, 0))
+    else:
+        proj.geometry("{}x{}+{}+{}".format(config.width, config.height, 1920, 0))
     proj.update()
 
     x = list(range(config.height))  # horizontal vector for the pattern creation
