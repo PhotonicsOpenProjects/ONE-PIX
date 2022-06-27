@@ -1,5 +1,6 @@
+===================
 Contributing Guide
-==================
+===================
 If you want to contribute to ONE-PIX kit, please create a pull request on Github.
 Documentation improvements are very welcome!
 Extending ONE-PIX kit can be performed in several ways. Look at the guides below.
@@ -93,4 +94,5 @@ To do so, add a new reconstruction method class python file to `ONE-PIX_soft/src
 		def datacube_reconstruction(self):
 			# use spectrum reconstrum first and then apply your method to reconstruct an image datacube
 			return spectrum,datacube
+
 			

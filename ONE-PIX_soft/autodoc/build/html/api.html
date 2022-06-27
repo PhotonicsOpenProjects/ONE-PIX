@@ -52,7 +52,21 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#hyperspectral-spi-reconstruction-and-analysis">Hyperspectral SPI reconstruction and analysis</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#reconstruction">Reconstruction</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#analysis">Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis">Analysis</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id1">API Reference</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">Hyperspectral SPI acquisition</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Pattern Methods</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Spectrometer Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">Acquisition</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">Hyperspectral SPI reconstruction and analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Reconstruction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id29">Analysis</a></li>
 </ul>
 </li>
 </ul>
@@ -463,62 +477,124 @@ measurements of the initialization B&amp;W sequence.</p>
 <section id="analysis">
 <h3>Analysis<a class="headerlink" href="#analysis" title="Permalink to this headline"></a></h3>
 <p>Library containing several methods to analyse datacube</p>
-<span class="target" id="module-datacube_analyse"></span><dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.Flux2Ref">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">Flux2Ref</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rawHypercube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Wavelengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#Flux2Ref"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.Flux2Ref" title="Permalink to this definition"></a></dt>
-<dd><p>Flux2Ref allows to normalize a raw hypercube in reflectance using a standard present in
-the reconstructed image and its reflectance certificate.</p>
+<span class="target" id="module-datacube_analyse"></span><section id="id1">
+<h4>API Reference<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h4>
+<p>The public api of ONE-PIX is provided allows to acquire hyperspectral datacubes using single pixel imaging.
+The basic features to acquire a datacube are provided, for several spectrometer brands or patterns bases.</p>
+</section>
+</section>
+</section>
+<section id="id2">
+<h2>Hyperspectral SPI acquisition<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h2>
+<section id="id3">
+<h3>Pattern Methods<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<p>Class allowing to use a specific pattern method.</p>
+<span class="target" id="module-0"></span><dl class="py class">
+<dt class="sig sig-object py" id="id0">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">PatternMethods.</span></span><span class="sig-name descname"><span class="pre">PatternMethodSelection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spatial_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PatternMethods.html#PatternMethodSelection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition"></a></dt>
+<dd><p>Allows to build a generic bridge based on a concrete one. Concrete
+bridge provides correct implementation regarding to pattern bases model
+use. The generic bridge is an abstract layer that wrap concrete implementation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rawHypercube</strong> (<em>numpy.array</em>) – 3D array of spectral intensities data cube.</p></li>
-<li><p><strong>Wavelengths</strong> (<em>numpy.array of floats</em>) – 1D array of spectrometer’s sampled wavelengths.</p></li>
-<li><p><strong>reference</strong> (<em>numpy.array</em><em>, </em><em>optional</em>) – 2D array of reflectance certificate composed of wavelengths and reflectance data.
-The default is None for RELATIVE reflectances.</p></li>
+<li><p><strong>pattern_method</strong> (<em>str</em>) – ONE-PIX pattern method to invoke one specific class of patterns.</p></li>
+<li><p><strong>spatial_res</strong> (<em>int</em>) – Spatial resolution of the datacube to be acquired.</p></li>
+<li><p><strong>height</strong> (<em>int</em>) – number of pixels for the raws of patterns.</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – number of pixels for the column of patterns.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>Normalised_Hypercube (numpy.array)</em> – Reflectance normalised hypercube.</p>
+</dl>
+</dd></dl>
+
+</section>
+<section id="id4">
+<h3>Spectrometer Selection<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<p>This class is used to access spectrometer features.</p>
+<span class="target" id="module-1"></span><dl class="py class">
+<dt class="sig sig-object py" id="id5">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">SpectrometerBridge.</span></span><span class="sig-name descname"><span class="pre">SpectrometerBridge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectro_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">integration_time_ms</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/SpectrometerBridge.html#SpectrometerBridge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition"></a></dt>
+<dd><p>Allows to build a generic bridge based on a concrete one. Concrete
+bridge provides correct implementation regarding to spectrometer model
+use. The generic bridge is an abstract layer that wrap concrete implementation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
+<li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="id6">
+<h3>Acquisition<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<p>This class allows to set acquisition parameters to perform ONE-PIX acqusitions.</p>
+<span class="target" id="module-2"></span><dl class="py class">
+<dt class="sig sig-object py" id="id7">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">OPConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">img</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_patterns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#OPConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition"></a></dt>
+<dd><p>Class OPConfig is used to set up ONE-PIX acquisitions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectro_name</strong> (<em>str</em>) – Spectrometer concrete bridge implementation:</p></li>
+<li><p><strong>integration_time_ms</strong> (<em>float</em>) – spectrometer integration time in milliseconds.</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.RGB_reconstruction">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">RGB_reconstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelengths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#RGB_reconstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.RGB_reconstruction" title="Permalink to this definition"></a></dt>
-<dd><p>RGB_reconstruction allows to extract red, green and blue channels from a datacube
-to create a false RGB image to represent it in the visible spectral range.</p>
+<dt class="sig sig-object py" id="id8">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">OP_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#OP_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id8" title="Permalink to this definition"></a></dt>
+<dd><p>This functions allows to display one Fourier pattern and then adapt and
+set the spectrometer’s integration time within the OPConfig class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datacube</strong> (<em>array of floats</em>) – 3D image data cube.</p></li>
-<li><p><strong>wavelengths</strong> (<em>array of floats</em>) – 1D sampled spectrometers wavelengths.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>config</strong> (<em>class</em>) – OPConfig class object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>image_rgb</strong> (<em>array</em>) – 3D array containing red, green and blue channels of the datacube.</p>
+<dd class="field-even"><p><strong>config</strong> (<em>class</em>) – actualised OPConfig class object.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.clip_datacube">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">clip_datacube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">upper_bound</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#clip_datacube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.clip_datacube" title="Permalink to this definition"></a></dt>
-<dd><p>rognage_hyp allows to clip spectral (3rd) dimension of a datacube to
-limit the analyse to the part of the measured spectra of interest.</p>
+<dt class="sig sig-object py" id="id9">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">affichage_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#affichage_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to display a sequence of patterns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datacube</strong> (<em>array</em>) – 3D image data cube.</p></li>
-<li><p><strong>wavelengths</strong> (<em>array of floats</em>) – 1D sampled spectrometers wavelengths.</p></li>
-<li><p><strong>lower_bound</strong> (<em>int</em>) – lower bound pixel of the associated wavelengths to start.</p></li>
-<li><p><strong>upper_bound</strong> (<em>int</em>) – upper bound pixel of the associated wavelengths to end.</p></li>
+<li><p><strong>q</strong> (<em>Queue</em>) – queue to check when patterns display is over.</p></li>
+<li><p><strong>config</strong> (<em>class</em>) – OPConfig class object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>None.</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">create_banw_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">height</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nb_pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#create_banw_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id10" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to create a sequence containing alternate
+white and black images.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>height</strong> (<em>int</em>) – heigth of patterns in number of pixel .</p></li>
+<li><p><strong>width</strong> (<em>int</em>) – with of patterns in number of pixel.</p></li>
+<li><p><strong>nb_pattern</strong> (<em>int</em>) – total number of images in the B&amp;W sequence.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><ul class="simple">
-<li><p><strong>datacube_rogn</strong> (<em>array</em>) – 3D clipped datacube.</p></li>
-<li><p><strong>wavelengths_rogn</strong> (<em>array</em>) – 1D array of clipped wavelengths.</p></li>
+<li><p><strong>sequence</strong> (<em>array</em>) – sequence of black and white patterns stored in a 3d numpy array.</p></li>
+<li><p><strong>pattern_order</strong> (<em>list</em>) – list of names of images’names containing white or black and the
+corresponding chronological position in the sequence.</p></li>
 </ul>
 </p>
 </dd>
@@ -526,55 +602,28 @@ limit the analyse to the part of the measured spectra of interest.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.clustering">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">clustering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cluster</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#clustering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.clustering" title="Permalink to this definition"></a></dt>
-<dd><p>Clustering function allow to realize classification of the datacube
-using kmeans algorithm on princpal components of the PCA.</p>
+<dt class="sig sig-object py" id="id11">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">get_optimal_integration_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#get_optimal_integration_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to automatically set the right integration time for
+ONE-PIX acqusitions depending on the mesurable optical flux.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datacube</strong> (<em>array</em>) – 3D image data cube.</p></li>
-<li><p><strong>components</strong> (<em>int</em>) – number of principal component used for the kmeans clustering.</p></li>
-<li><p><strong>n_cluster</strong> (<em>int</em>) – number of cluster for the kmeans clustering.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>config</strong> (<em>class</em>) – OPConfig class object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>image_seg</strong> (<em>array of int</em>) – 2D array of clustered image.</p>
+<dd class="field-even"><p><em>None. Actualisation of the integration_time_ms parameter of config</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.display_clust_spectra">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">display_clust_spectra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image_seg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wl</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#display_clust_spectra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.display_clust_spectra" title="Permalink to this definition"></a></dt>
-<dd><p>display_clust_spectra allows to display mean spectra of each cluster
-of a segmented image.</p>
+<dt class="sig sig-object py" id="id12">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">save_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#save_acquisition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id12" title="Permalink to this definition"></a></dt>
+<dd><p>This function allow to save the resulting acquisitions from one
+OPConfig object into the Hypercube folder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>image_seg</strong> (<em>array of int</em>) – 2D array of clustered image.</p></li>
-<li><p><strong>datacube</strong> (<em>array</em>) – 3D image data cube.</p></li>
-<li><p><strong>wl</strong> (<em>array of floats</em>) – 1D sampled spectrometers wavelengths.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>spec</strong> (<em>array of floats</em>) – spectra of each cluster.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.py2envi">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">py2envi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_envi_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelengths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#py2envi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.py2envi" title="Permalink to this definition"></a></dt>
-<dd><p>py2ms allows to save ONE-PIX data into ENVI format <a class="reference external" href="https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html">https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html</a>
-metadata can be improved !</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>save_envi_name</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>datacube</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-<li><p><strong>wavelengths</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>config</strong> (<em>class</em>) – OPConfig class object.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p><em>None.</em></p>
@@ -583,85 +632,231 @@ metadata can be improved !</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.py2ms">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">py2ms</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_gerbil_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelengths</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#py2ms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.py2ms" title="Permalink to this definition"></a></dt>
-<dd><p>py2ms allows to save ONE-PIX data into Gerbil format <a class="reference external" href="http://gerbilvis.org/">http://gerbilvis.org/</a>
-a window appears to select the directory where the hyperspectral data will be saved in gebril format
-Input:</p>
-<blockquote>
-<div><p>save_gerbil_name : the name of the saved data into gerbil format (without .txt extension)</p>
-</div></blockquote>
+<dt class="sig sig-object py" id="id13">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">spectrometer_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#spectrometer_acquisition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id13" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to use the spectrometer in free runing mode to record
+a chronogram of acquisitions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>save_gerbil_name</strong> (<em>str</em>) – the name of the saved data into gerbil format (without .txt extension).</p></li>
-<li><p><strong>datacube</strong> (<em>array</em>) – datacube to export into Gerbil format.</p></li>
-<li><p><strong>wavelengths</strong> (<em>array</em>) – Sampled wavelengths associated to the measured datacube.</p></li>
+<li><p><strong>q</strong> (<em>Queue</em>) – queue to check when patterns display is over.</p></li>
+<li><p><strong>config</strong> (<em>class</em>) – OPConfig class object.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>None.</em></p>
+<dd class="field-even"><p><em>None. chronograms are stored in config.</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.select_disp_spectra">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">select_disp_spectra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelengths</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#select_disp_spectra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.select_disp_spectra" title="Permalink to this definition"></a></dt>
-<dd><p>select_disp_spectra allows to select pixel(s) of one hypercube and plot their spectra.</p>
+<dt class="sig sig-object py" id="id14">
+<span class="sig-prename descclassname"><span class="pre">AcquisitionConfig.</span></span><span class="sig-name descname"><span class="pre">thread_acquisition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/AcquisitionConfig.html#thread_acquisition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id14" title="Permalink to this definition"></a></dt>
+<dd><p>This funtion allows to run in parallel the projection of a sequence of
+patterns and spectrometers’ measurements in free running mode.
+The result is measured hyperspectral chronograms need to be processed to
+extract means spectrums for each patterns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datacube</strong> (<em>array of floats</em>) – 3D image data cube.</p></li>
-<li><p><strong>wavelengths</strong> (<em>array of floats</em>) – 1D array of sampled wavelengths.</p></li>
-<li><p><strong>n</strong> (<em>int</em>) – Number of spectra to plot.</p></li>
-<li><p><strong>mode</strong> (<em>str</em>) – for the mean area of spectra allows to plot mean (‘mean’) or each
-selected spectrum in one figure (‘single’).</p></li>
+<dd class="field-odd"><p><strong>config</strong> (<em>class</em>) – OPConfig class object.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>config</strong> (<em>class</em>)</p></li>
+<li><p><em>* actualised OPConfig class object.</em></p></li>
+<li><p><strong>* display_time</strong> (<em>(array of floats) 1D array of time values of the beginning and the end of projection for each pattern.</em>)</p></li>
+<li><p><strong>* time_spectro</strong> (<em>(array of floats) 1D array of time values for each measured spectrum.</em>)</p></li>
+<li><p><strong>* chronograms</strong> (<em>(array of floats) 3D array of spectra stored in chronological order.</em>)</p></li>
+<li><p><strong>* wavelengths</strong> (<em>(array of floats) 1D wavelengths sampled by the spectrometer.</em>)</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>spec</strong> (<em>array</em>) – Spectra selected by the user from the data cube.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.smooth_datacube">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">smooth_datacube</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datacube</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polyorder</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#smooth_datacube"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.smooth_datacube" title="Permalink to this definition"></a></dt>
-<dd><p>This function allows to smooth spectra of a whole datacube using Savitzky-Golay filter.
-See more at :
-<a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html</a></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>datacube</strong> (<em>array of floats</em>) – 3D image data cube.</p></li>
-<li><p><strong>window_length</strong> (<em>int</em>) – The length of the filter window.</p></li>
-<li><p><strong>polyorder</strong> (<em>int</em>) – The order of the polynomial used to fit the samples.
-polyorder must be less than window_length.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>smoothed_datacube</strong> (<em>array</em>) – 3D array of smoothed datacube.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="datacube_analyse.spikes_correction">
-<span class="sig-prename descclassname"><span class="pre">datacube_analyse.</span></span><span class="sig-name descname"><span class="pre">spikes_correction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/datacube_analyse.html#spikes_correction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#datacube_analyse.spikes_correction" title="Permalink to this definition"></a></dt>
-<dd><p>Allows to correct by clicking on an over represented frequency in the Fourier domain.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>res</strong> (<em>dict</em>) – dictionnary of acquisition results. Especially contains the whole spatial spectrum data cube
-and the association image datacube.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><strong>res</strong> (<em>dict</em>) – actualised dictionnary of acquisition results.</p>
+</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
+</section>
+<section id="id15">
+<h2>Hyperspectral SPI reconstruction and analysis<a class="headerlink" href="#id15" title="Permalink to this headline"></a></h2>
+<section id="id16">
+<h3>Reconstruction<a class="headerlink" href="#id16" title="Permalink to this headline"></a></h3>
+<p>This class contains the set of methods to reconstruct datacubes according to the chosen acquisition method.</p>
+<span class="target" id="module-3"></span><dl class="py class">
+<dt class="sig sig-object py" id="id17">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">OPReconstruction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imag_method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pattern_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#OPReconstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id17" title="Permalink to this definition"></a></dt>
+<dd><p>Class OPReconstruction to reconstruct datacubes according to a ONE-PIX method</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">Selection</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#OPReconstruction.Selection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id18" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to reconstruct spatial spectra and images data cubes.
+These data are stored in the OPReconstruction class object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>None.</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">image_reconstruction</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#OPReconstruction.image_reconstruction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id19" title="Permalink to this definition"></a></dt>
+<dd><p>image_reconstruction allows to reconstruct an image data cube from an actualised
+spatial spectra data cube. Both are stored in the HSPIReconstruction class object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>None.</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">nan_corr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#OPReconstruction.nan_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id20" title="Permalink to this definition"></a></dt>
+<dd><p>nan_corr allows to filter nan from acquired spectra</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>None.</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">calculate_pattern_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_proj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_spectro</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#calculate_pattern_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id21" title="Permalink to this definition"></a></dt>
+<dd><p>This function calculates from chronograms each pattern mean spectrum.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>display_time</strong> (<em>array of floats</em>) – times of displayed patterns.</p></li>
+<li><p><strong>delay_proj</strong> (<em>TYPE</em>) – DESCRIPTION.</p></li>
+<li><p><strong>time_spectro</strong> (<em>array of floats</em>) – times of each spectrometer’s measures.</p></li>
+<li><p><strong>chronograms</strong> (<em>aray of floats</em>) – array with all spectras saved in the chronological order .</p></li>
+<li><p><strong>target</strong> (<em>int</em>) – number of spectra to ignore for the mean spectrum calculation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>spectre_pattern</strong> (<em>array of floats</em>) – 2D array of spectra for each displayed pattern.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">get_header_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#get_header_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id22" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to generate a dictionnary containing acquisition data
+useful for the data cube reconstruction.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Header file path</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>acq_data</strong> (<em>dict</em>) – Dictionnary containing acquisition data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id23">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">load_analysed_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#load_analysed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id23" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to reload already reconstructed data cubes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>data_cube</strong> (<em>array of floats</em>) – 3D array of spectra constituting an image data cube.</p></li>
+<li><p><strong>wavelengths</strong> (<em>array of floats</em>) – wavelengths sampled by the spectrometer.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id24">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">load_chronograms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#load_chronograms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id24" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to load saved chronograms with timers of the displays and spectrometers.
+at runtime, a window appears to select the folder path in which the data are located.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>acq_data</strong> (<em>dict</em>) – Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id25">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">load_spectra</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#load_spectra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id25" title="Permalink to this definition"></a></dt>
+<dd><p>This function allows to load saved spectra with timers of the displays and spectrometers.
+at runtime, a window appears to select the folder path in which the data are located.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><strong>acq_data</strong> (<em>dict</em>) – Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id26">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">preview_chronogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">display_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_spectro</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chronograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wavelength</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#preview_chronogram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id26" title="Permalink to this definition"></a></dt>
+<dd><p>This function displays the most intense spectrum of the chronograms and the
+chronogram at the most intense wavelength. Purple vertical bars are timers of displays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>display_time</strong> (<em>array of floats</em>) – times of displayed patterns.</p></li>
+<li><p><strong>time_spectro</strong> (<em>array of floats</em>) – times of each spectrometer’s measures.</p></li>
+<li><p><strong>chronograms</strong> (<em>aray of floats</em>) – array with all spectras saved in the chronological order .</p></li>
+<li><p><strong>wavelength</strong> (<em>array of floats</em>) – 1d array of sampled wavelengths of the spectrometer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>None.</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id27">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">snr_filt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spectre_desplit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#snr_filt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id27" title="Permalink to this definition"></a></dt>
+<dd><p>snr_filt filters spectra in which the maximum intensity is lower than a defined level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectre_desplit</strong> (<em>array of floats</em>) – 2D array of spectra.</p></li>
+<li><p><strong>noise_level</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum accepted intensity level. The default is 500.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>spectre_desplit</strong> (<em>array of floats</em>) – filtered 2D array of spectra.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="id28">
+<span class="sig-prename descclassname"><span class="pre">DatacubeReconstructions.</span></span><span class="sig-name descname"><span class="pre">time_aff_corr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chronograms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_spectro</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_aff</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DatacubeReconstructions.html#time_aff_corr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id28" title="Permalink to this definition"></a></dt>
+<dd><p>This function automatically corrects the display times according to the
+measurements of the initialization B&amp;W sequence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>chronograms</strong> (<em>array of floats</em>) – 3D array of spectra stored in chronological order.</p></li>
+<li><p><strong>time_spectro</strong> (<em>array of floats</em>) – 1D array of time values for each measured spectrum.</p></li>
+<li><p><strong>time_aff</strong> (<em>array of floats</em>) – 1D array of time values of the beginning and the end of projection for each pattern.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>time_aff</strong> (<em>array of floats</em>) – corrected array of time values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="id29">
+<h3>Analysis<a class="headerlink" href="#id29" title="Permalink to this headline"></a></h3>
+<p>Library containing several methods to analyse datacube</p>
+<span class="target" id="module-4"></span></section>
 </section>
 </section>
 
