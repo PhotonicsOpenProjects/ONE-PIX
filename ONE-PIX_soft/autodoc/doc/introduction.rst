@@ -1,4 +1,4 @@
-.. image:: ../../../imgs/logos.png
+.. figure:: ../../../imgs/logos.png
   :align: center
  
 
