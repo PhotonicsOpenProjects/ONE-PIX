@@ -1,7 +1,8 @@
-.. figure:: ../../../imgs/logos.png
-  :align: center
- 
-
+.. figure:: _static/logos.png
+    :figwidth: 75%
+    :align: center
+	
+	
 ============
 Introduction
 ============
@@ -25,6 +26,7 @@ This package is intended to provide:
 - Analysis tools to make use of the measured datacubes 
 
 
-.. image:: ../../../imgs/ONEPIX_kit.JPG
-  :width: 400
-  :align: center
+.. figure:: _static/ONEPIX_kit.JPG
+    :figwidth: 50%
+    :align: center
+
