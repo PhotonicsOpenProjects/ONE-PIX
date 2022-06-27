@@ -1,6 +1,7 @@
 .. image:: ../../../imgs/logos.png
   :width: 800
   :align: center
+  :margin:0px auto
   :alt: Logos
 
 ============
@@ -13,6 +14,7 @@ The current implementation has been developed in Python 3 and tested on a Raspbe
 .. image:: ../../../imgs/ONEPIX_kit.JPG
   :width: 400
   :align: center
+  :margin:0px auto
   :alt: ONE-PIX kit
 
 Motivations
