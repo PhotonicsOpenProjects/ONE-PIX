@@ -47,7 +47,7 @@ class BlackAndWhitePatterns:
         return self.pattern_order
     
   
-    def creation_sequence(self):
+    def creation_patterns(self):
         """
         This function allows to create a sequence containing alternate white and black patterns
 
