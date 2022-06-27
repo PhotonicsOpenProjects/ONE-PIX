@@ -70,7 +70,7 @@ For troubleshooting in installation you can go to the [issue section](https://gi
 The software architecture of the ONE-PIX kit offers different ways to measure, reconstruct and analyze hyperspectral images. 
 
 <p align="center">
-<img src="imgs/software_architecture.png" alt="ONE-PIX software architecture" width="300"/ >
+<img src="imgs/software_architecture.png" alt="ONE-PIX software architecture" width="100"/ >
 </p>
 
 - The fastest way to measure and analyze hyperspectral images is to use the [GUI interface](ONE-PIX_soft/doc/ONE-PIX_GUI_user_manual.pdf)
