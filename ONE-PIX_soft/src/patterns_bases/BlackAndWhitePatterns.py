@@ -3,7 +3,7 @@ import numpy as np
 class BlackAndWhitePatterns:
     """ Class BlackAndWhitePatterns allows to create B&W patterns and their order list"""
     
-    def __init__(self,nb_patterns,height,width):
+    def __init__(self,nb_patterns,height=600,width=800):
         """
 
         Parameters
