@@ -9,7 +9,7 @@ Introduction
 The ONE-PIX kit is a low-cost single-pixel hyperspectral imaging education kit. This module is fully available on Github (see `here <https://github.com/IanHarvey/bluepy/>`_)
 The current implementation has been developed in Python 3 and tested on a Raspberry Pi 4 8 Go, running Raspbian 11 (bullseye), but should also work with Windows or Ubuntu on most computers.
 
-.. image:: ../../../ONEPIX_kit.png
+.. image:: ../../../ONEPIX_kit.jpg
   :width: 400
   :alt: ONE-PIX kit
 
