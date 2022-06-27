@@ -183,7 +183,7 @@ set the resolution of the screen 1 with 1024x768 pix and the screen 2 in 600x800
 
 click one the green ticks to validate changes.
 
-:warning: **Tip:** For long acquisition it may be necessary to deactivate the sleepmode. you can follow this [tutorial](https://pimylifeup.com/raspberry-pi-screensaver/)
+:warning: **Warning:** For long acquisition it may be necessary to deactivate the sleepmode. you can follow this [tutorial](https://pimylifeup.com/raspberry-pi-screensaver/)
 
 <p align="center">
 <img src="imgs\double_screen.png" alt="vnc vnc viewer double screen" width="500"/>
