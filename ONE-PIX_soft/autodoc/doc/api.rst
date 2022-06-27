@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ###############
 API Reference
 ###############
@@ -102,5 +101,3 @@ Analysis
 Library containing several methods to analyse datacube
 
 .. automodule:: datacube_analyse
->>>>>>> b83d7ab72af233494327e2e2566d3e3a1e69515b
-   :members:
