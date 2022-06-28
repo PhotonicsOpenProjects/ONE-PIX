@@ -9,6 +9,8 @@ Extending ONE-PIX kit can be performed in several ways. Look at the guides below
 
     You can pull request your contributions and their associated documentation.
 
+.. note::
+    If you are not familiar with Github, you can find more information by following this link: :ref: 'https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/about-collaborative-development-models'
 
 Adding a new spectrometer
 -------------------------
