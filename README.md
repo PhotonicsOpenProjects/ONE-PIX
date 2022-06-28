@@ -12,7 +12,7 @@ The ONE-PIX kit is an hyperspectral camera using single pixel imaging principle 
 This kit is ideal for getting started with hyperspectral imaging or single pixel imaging. Thus it is a tool for teachers and students to discover non conventional imaging. It is also an economic tool to produce low cost hypercubes of tailored scenes or to reproduce academical results within the robotic vision field. 
 To learn more about single pixel imaging theory used for hyperspectral imaging, read our [article. ](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7070961/)
 
-This kit was developped with in our mind the primary necessity to be capable of being asssembled it on a standard fablab with a lasercut. Few wirring (all low voltage) and no soldering are necessary. You should found in your neighbourhood a fablab capable (and enthousiast) to help you building this cool artifact, especially  if they can play with it a little afterward.^^
+This kit was developped with in our mind the primary necessity to be capable of being asssembled it on a standard fablab with a lasercut. Few wirring (all low voltage) and no soldering are necessary. You should found in your neighbourhood a fablab capable (and enthousiast) to help you building this cool artifact, especially  if they can play with it a little afterward.
 
 ### License
 
