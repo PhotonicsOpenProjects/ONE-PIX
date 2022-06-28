@@ -23,7 +23,7 @@ This kit is distributed under CC-by license that you can consult [here ](https:/
 The ONE-PIX kit contains a projector and a fibered spectrometer with superimposed field of views. Both are connected and driven by a Raspberry Pi board.
  
 <p align="center">
-<img src="imgs/principle.png" alt="ONE-PIX principle" >
+<img src="imgs/principle.png" alt="ONE-PIX principle" width="500"/>
 </p>
 
 ONE-PIX technology involves projecting a series of patterns onto a scene to be imaged. A spectrometer measures the average reflected spectrum of the scene for each projection. An algorithm then reconstructs the hypercube of the scene from all the spectra measured during the acquisition.
