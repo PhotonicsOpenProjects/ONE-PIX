@@ -4,7 +4,7 @@ from src.spectrometer_bridges.AbstractBridge import AbstractBridge
 class SpectrometerBridge:
     """
      Allows to build a generic bridge based on a concrete one. Concrete 
-     bridge provides correct implementation regarding to spectrometer model 
+     bridge provides correct implementation regarding spectrometer model
      use. The generic bridge is an abstract layer that wrap concrete implementation.
     
      :param str spectro_name:
@@ -22,7 +22,7 @@ class SpectrometerBridge:
             module=importlib.import_module('src.spectrometer_bridges.'+className)
             classObj = getattr(module, className)
             self.decorator = classObj(integration_time_ms)
-        except:
+        except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + spectro_name + "\" implementation has not been found.")
 #         if not isinstance(self.decorator, AbstractBridge):
 #             raise Exception("Concrete bridge \"" + spectro_name + "\" must implement class bridges.AbstractBridge.")

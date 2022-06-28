@@ -5,10 +5,11 @@ import struct
 from enum import Enum
 import os
 # import debugpy
-
-path = os.getcwd()+'\\src\\DLL\\'
-os_name = os.name
-
+if os.getcwd()[-12:]=='ONE-PIX_soft':
+    path='./src/DLL/'
+else:
+    path = '../src/DLL/'
+    
 if 'linux' in sys.platform: # Linux will have 'linux' or 'linux2'
     # this is the DLL for ubuntu
     #lib = ctypes.CDLL("/home/mark/field_kit/DLL/libavs.so.0.9.9")

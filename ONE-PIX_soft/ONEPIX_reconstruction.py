@@ -19,7 +19,7 @@ spectra=acq_data['spectra']
 # ONEPIX datacube reconstruction
 res=OPReconstruction(acq_data['pattern_method'],spectra,acq_data['pattern_order'])
 res.Selection()
-# res=hp.spikes_correction(res)
+res=hp.spikes_correction(res)
 
 # Display spectral mean of the datacube
 plt.figure()

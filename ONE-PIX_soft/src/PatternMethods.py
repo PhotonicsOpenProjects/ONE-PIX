@@ -35,7 +35,7 @@ class PatternMethodSelection:
             module=importlib.import_module('src.patterns_bases.'+pattern_method+'Patterns')
             classObj = getattr(module, className)
             self.decorator = classObj(spatial_res)
-        except:
+        except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + pattern_method + "\" implementation has not been found.")
         # if not isinstance(self.decorator, AbstractBasis):
         #     raise Exception("Concrete bridge \"" + pattern_method + "\" must implement class bridges.AbstractBridge.")
