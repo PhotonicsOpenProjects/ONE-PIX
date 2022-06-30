@@ -5,7 +5,7 @@
 
 Single pixel imaging enables one to reproduce a parsimonious under-sampled image of a scene using a single detector and several acquisitions. For each measurement, a specific pattern is projected onto a scene and an associated spectral coefficient is acquired.
 
-A measurement, $ m_{k} \in \mathbb{R}_{+} $ (photon counts), of a scene, $ S \in \mathbb{R}_{M \times N}$, of height M and width N can be expressed as a function of the integration time of the detector,$\Delta t$ (s), where the power is emitted by the source, $\phi_{0} $(photons counts/s), a $p_{k} \in \mathbb{R}_{M \times N}$, and the dark current of the detector, D (photons/s), such that:
+A measurement, $ m_{k} \in \mathbb{R}_{+} $ (photon counts), of a scene, $ S \in \mathbb{R}_{M \times N} $, of height M and width N can be expressed as a function of the integration time of the detector,$\Delta t$ (s), where the power is emitted by the source, $\phi_{0} $(photons counts/s), a $p_{k} \in \mathbb{R}_{M \times N}$, and the dark current of the detector, D (photons/s), such that:
 
 $$
 m_{k}=\Delta t \cdot (\phi_{0} \cdot p_{k}^{t}\cdot S+D)
