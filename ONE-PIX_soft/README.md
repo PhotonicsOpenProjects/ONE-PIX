@@ -3,7 +3,7 @@
 
 The installation of the ONE-PIX software is achievable as the hardware installation is fully completed..
 To do so, you can follow the [hardware building tutorial](/hardware_build/hardware_building_tutorial.pdf) .
-You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/en/perfos-rto/services/)
+You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/)
 
 This tutorial details all the steps required to install the ONE-PIX software on a Raspberry Pi 4 board. 
 
