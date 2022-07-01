@@ -53,7 +53,7 @@ This folder contains:
 - The [CAO files to modify hardware](hardware_build/CAO_files_to_modify_hardware) folder containting the complet CAO of the ONE-PIX kit if you want to adapt the hardware to your application.
 
 
-> **_NOTE:_** You can also buy a premounted and adapted ONE-PIX kit [here](https://www.photonics-bretagne.com/en/perfos-rto/services/). 
+> **_NOTE:_** You can also buy a premounted and adapted ONE-PIX kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/). 
 > Keep in mind that it is also the best way to help us maintaining the forge, integrating contribution and even propose one day industrial implementation of this technology for the broader audience and usage possible.
 
 
