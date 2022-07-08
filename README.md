@@ -1,4 +1,4 @@
-# Readme of the ONE-PIX kit project repository  #
+# ONE-PIX kit project   #
 
 <p align="center">
 <img src="imgs/logos.png" alt="logos" width="500"/>
