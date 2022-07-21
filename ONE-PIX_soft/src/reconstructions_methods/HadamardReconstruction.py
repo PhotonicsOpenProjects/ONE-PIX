@@ -44,7 +44,7 @@ class HadamardReconstruction:
         y=np.asarray(y)     
         spectre_desplit=np.asarray(spectre_desplit)
         
-        whole_spectrum=np.zeros((np.max(x)+1,np.max(y)+1,np.size(spectre_desplit,1)),dtype=np.complex64)
+        whole_spectrum=np.zeros((np.max(x)+1,np.max(y)+1,np.size(spectre_desplit,1)))
         
         for i in range(0,np.size(x)):
             whole_spectrum[x[i],y[i]]=spectre_desplit[i,:]
