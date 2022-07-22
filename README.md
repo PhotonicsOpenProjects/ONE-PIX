@@ -17,7 +17,7 @@ This kit was developed with the primary need in mind to be able to be assembled 
 The ONE-PIX kit contains a video projector and a fibered spectrometer with superimposed fields of view. Both are connected and controlled by a Raspberry Pi board.
  
 <p align="center">
-<img src="imgs/principle.png" alt="ONE-PIX principle" width="400"/>
+<img src="imgs/principle.png" alt="ONE-PIX principle" width="500"/>
 </p>
 
 For more information about the single pixel imaging you can go [here](ONE-PIX_soft/doc/Single%20Pixel%20Imaging%20tutorial/Single%20Pixel%20Imaging.ipynb)
