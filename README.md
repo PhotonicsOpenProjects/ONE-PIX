@@ -17,7 +17,7 @@ This kit was developed with the primary need in mind to be able to be assembled 
 The ONE-PIX kit contains a video projector and a fibered spectrometer with superimposed fields of view. Both are connected and controlled by a Raspberry Pi board.
  
 <p align="center">
-<img src="imgs/principle.png" alt="ONE-PIX principle" width="600"/>
+<img src="imgs/principle.png" alt="ONE-PIX principle" width="400"/>
 </p>
 
 For more information about the single pixel imaging you can go [here](ONE-PIX_soft/doc/Single%20Pixel%20Imaging%20tutorial/Single%20Pixel%20Imaging.ipynb)
@@ -65,7 +65,7 @@ For troubleshooting in installation you can go to the [issue section](https://gi
 The software architecture of the ONE-PIX kit offers different ways to measure, reconstruct and analyze hyperspectral images. 
 
 <p align="center">
-<img src="imgs/software_architecture.png" alt="ONE-PIX software architecture" width="500"/ >
+<img src="imgs/software_architecture.png" alt="ONE-PIX software architecture" width="400"/ >
 </p>
 
 - The fastest way to measure and analyze hyperspectral images is to use the [GUI interface](ONE-PIX_soft/doc/ONE-PIX_GUI_user_manual.pdf)
