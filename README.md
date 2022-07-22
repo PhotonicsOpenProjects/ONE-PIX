@@ -39,7 +39,7 @@ These followings steps are presented in chronological order to create a ONE-PIX 
 Every informations and files to build your own hardware kit are avalaible in the [hardware build folder](hardware_build)
 
 <p align="center">
-<img src="imgs/ONEPIX_kit.JPG" alt="ONE-PIX kit photo" width="500"/>
+<img src="imgs/ONEPIX_kit.JPG" alt="ONE-PIX kit photo" width="300"/>
 </p>
 
 This folder contains:
