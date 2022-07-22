@@ -340,7 +340,7 @@ def affichage_sequence(q, config):
     elif config.pattern_method in config.full_basis:
         for pattern in config.pattern_lib.decorator.sequence:
             temps.append(time.time())
-            cv2.imshow('ImageWindow', pattern)
+            cv2.imshow('ImageWindow', cv2.resize(pattern,(800,600),interpolation=cv2.INTER_AREA))
             cv2.waitKey(round(config.periode_pattern))
             temps.append(time.time())
 
