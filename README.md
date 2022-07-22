@@ -3,8 +3,7 @@
 </p>
 
 # ONE-PIX kit project   #
-## General
-### Introduction 
+## Introduction 
 
 The ONE-PIX kit is an hyperspectral camera using single pixel imaging principle to measure hypercubes in the visible region. It can be enhanced towards the infrared region. This modular kit can be used with different spectrometers and optical elements for the collection. To date, it can measure scenes exposed to ambient light, but it has been primarily tested and developed for use in dimly lit indoor environments.
 
