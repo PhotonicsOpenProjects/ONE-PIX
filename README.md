@@ -1,9 +1,8 @@
-# ONE-PIX kit project   #
-
 <p align="center">
 <img src="imgs/logos.png" alt="logos" width="500"/>
 </p>
 
+# ONE-PIX kit project   #
 ## General
 ### Introduction 
 
