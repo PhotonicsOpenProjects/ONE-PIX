@@ -1,4 +1,4 @@
-# Readme for the ONE-PIX software installation #
+# Readme for the ONE-PIX/coprocess software installation #
 # Introduction 
 
 The installation of the ONE-PIX software is achievable as the hardware installation is fully completed..
