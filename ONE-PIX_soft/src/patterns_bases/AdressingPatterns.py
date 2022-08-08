@@ -32,10 +32,10 @@ class AdressingPatterns:
     def creation_patterns(self):
 
         #parameters to connect by SSH to the GPU server and execute SCP command get/add
-        server='192.168.0.107'
+        server='ip'
         port ='22'
-        user ='eflam'
-        password='33325daf04'
+        user ='user'
+        password='****'
 
 
         ssh = createSSHClient(server, port, user, password) #create a secured connection canal
