@@ -45,7 +45,7 @@ class OPConfig:
         
         self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
         self.seq_basis = ['FourierShift','FourierSplit']
-        self.full_basis = ['BlackAndWhite','Custom','Hadamard']
+        self.full_basis = ['BlackAndWhite','Custom','Hadamard','Adressing']
         self.nb_patterns = self.pattern_lib.nb_patterns
 
         self.chronograms = []
