@@ -158,7 +158,7 @@ class Root(tk.Tk):
         self.title("Tkinter First Window")
 
         # figure creation
-        self.f = Figure(figsize=(4,3), dpi=100, layout=None)
+        self.f = Figure(figsize=(4,3), dpi=100)
 
         gs = self.f.add_gridspec(1,50)
         self.a = self.f.add_subplot(gs[:,:-1])
