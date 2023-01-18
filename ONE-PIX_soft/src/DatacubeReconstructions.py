@@ -6,8 +6,10 @@ import tkinter as Tk
 from tkinter import filedialog
 from tkinter import *
 import importlib
-
+import platform
+from sklearn import mixture
 #%% Raw data pre-treatment
+
 def time_aff_corr(chronograms,time_spectro,time_aff):
     """
     This function automatically corrects the display times according to the 
@@ -28,14 +30,22 @@ def time_aff_corr(chronograms,time_spectro,time_aff):
         corrected array of time values.
 
     """
-    data=chronograms[:,1000]
-    delta=round((np.mean(abs(time_aff[0::2]-time_aff[1::2]))/(time_spectro[1]-time_spectro[0]))/2)
-    idx=np.abs(time_spectro-time_aff[0]).argmin()
+    mes_ratio=np.size(time_spectro)/np.size(time_aff)
+    if(mes_ratio<1):mes_ratio=int(1/mes_ratio) 
+    else: mes_ratio=int(mes_ratio)
+    max_pt=int(((-3+np.sqrt(1+np.size(time_aff)))-1)*mes_ratio)
+    #chronograms=get_spectra_from_txt(0,max_pt)
+    wl_sz=np.size(chronograms,1)
     
-    value=np.mean(data[idx-delta:idx])
-    var=np.std(data[idx-delta:idx].astype(np.float64))
-
-    start_idx=idx+np.argmax(data[idx:]>value+5*var)+1
+    data=np.array(chronograms[2*mes_ratio:max_pt]).reshape(max_pt-2*mes_ratio,wl_sz)[:,wl_sz//2]
+    
+    gmm = mixture.GaussianMixture(n_components=2)
+    gmm.fit(data.reshape(-1,1))
+    
+    start=np.argmin(data>float(min(gmm.means_)))
+    
+    dv=abs(gmm.means_[0]-gmm.means_[1])
+    start_idx=np.argmax(data[start:]>float(min(gmm.means_))+(dv/2))-1+2*mes_ratio+start
     delay=time_spectro[start_idx]-time_aff[0]
     time_aff=time_aff+delay
     
@@ -248,7 +258,7 @@ def calculate_pattern_spectrum(display_time,delay_proj,time_spectro,chronograms,
         indice_spectro.append(np.abs(time_spectro-i).argmin())
     spectre_pattern=[]
     for j in range(0,np.size(indice_spectro),2):
-        value=chronograms[indice_spectro[j]+target:indice_spectro[j+1]-target,:]
+        value=np.array(chronograms[indice_spectro[j]+target:indice_spectro[j+1]-target])
         
         if np.size(value)==0: 
             spectre_pattern.append(np.zeros_like(spectre_pattern[-1]))
