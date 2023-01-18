@@ -58,7 +58,9 @@ class OPConfig:
         self.wavelengths = []
 
         self.duration = 0
-        self.periode_pattern = 80
+        self.periode_pattern = self.mes_ratio*self.integration_time_ms
+        if self.periode_pattern < 80: self.periode_pattern = 80
+        
         self.display_time = []
         self.duree_dark = 2
         self.time_spectro = []
@@ -248,7 +250,7 @@ def spectrometer_acquisition(q, config):
             pass
 
     config.spec_lib.spec_close()
-    config.chronograms = np.array(config.chronograms)
+    #config.chronograms = np.array(config.chronograms)
 
 
 """
@@ -265,6 +267,7 @@ Outputs :
     display_time.npy : containing the time of the beginning and the end of projection for each pattern  
 
 """
+
 def affichage_sequence(q, config):
     """
     This function allows to display a sequence of patterns.
@@ -286,11 +289,10 @@ def affichage_sequence(q, config):
 
     begin = time.time()
 
-    black = np.zeros((config.height, config.width))
+    black_patterns = np.zeros((config.height, config.width,10))
     temps = []
-    pattern_tampon = round(300/(config.periode_pattern+config.duree_dark))
-    sequence_tampon, un = create_banw_sequence(
-        config.height, config.width, pattern_tampon)
+    pattern_tampon = 12
+    #sequence_tampon, un = create_banw_sequence(config.height, config.width, pattern_tampon)
 
     cv2.namedWindow('ImageWindow', cv2.WND_PROP_FULLSCREEN)
     if os_name=='Windows':
@@ -299,12 +301,11 @@ def affichage_sequence(q, config):
         cv2.moveWindow('ImageWindow', 1024, 0)
        
     cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
-    for i in range(0, np.size(sequence_tampon, 2)):
+    for i in range(0, np.size(black_patterns, 2)):
 
-        cv2.imshow('ImageWindow', sequence_tampon[:, :, i])
+        cv2.imshow('ImageWindow', black_patterns[:, :, i])
         cv2.waitKey(round(config.periode_pattern))
-        cv2.imshow('ImageWindow', black)
-        cv2.waitKey(round(config.duree_dark))
+        
 
     if config.pattern_method in config.seq_basis:
         # horizontal vector for the pattern creation
@@ -379,7 +380,7 @@ def thread_acquisition(config):
     if config.pattern_method in config.full_basis:
         config.pattern_order,freq=config.pattern_lib.decorator.creation_patterns()
         config.pattern_lib.nb_patterns=config.pattern_lib.decorator.nb_patterns
-    est_duration=round(1.2*config.pattern_lib.nb_patterns*config.periode_pattern/(60*1000),2)
+    est_duration=round(1.5*config.pattern_lib.nb_patterns*config.periode_pattern/(60*1000),2)
     ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
     if ans=='yes':
         est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
@@ -424,7 +425,6 @@ def save_acquisition(config):
 
     """
     
-    #np.save('chronograms',config.chronograms)
     #extract spectra from chronograms
     config.display_time = time_aff_corr(
         config.chronograms, config.time_spectro, config.display_time)
@@ -479,80 +479,31 @@ def save_acquisition(config):
     
     os_name=platform.system()
     if os_name=='Linux':
-        root=Tk()
-        root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
-        root.wm_attributes('-fullscreen', 'True')
-        c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
-        c.pack()
-        root.update()
-        
-        from picamera import PiCamera
-        camera = PiCamera()
-        camera.resolution = (1024, 768)
-        camera.start_preview()
-        camera.shutter_speed=7*1176
-        camera.vflip=True
-        camera.hflip=True
-        # Camera warm-up time
-        time.sleep(2)
-        camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
-        camera.close()
-        time.sleep(1)
-        root.destroy()
+        try:
+            root=Tk()
+            root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
+            root.wm_attributes('-fullscreen', 'True')
+            c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
+            c.pack()
+            root.update()
+
+            from picamera import PiCamera
+            camera = PiCamera()
+            camera.resolution = (1024, 768)
+            camera.start_preview()
+            camera.shutter_speed=7*1176
+            camera.vflip=True
+            camera.hflip=True
+            # Camera warm-up time
+            time.sleep(2)
+            camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
+            camera.close()
+            time.sleep(1)
+            root.destroy()
+        except PiCamera.PiCameraError:
+            print("Warning; check a RPi camera is connected. No picture were stored !")
+            
     os.chdir(root_path)
     del config.chronograms # saves RAM for large acquisitions
 
     
-# def save_chronograms(config):
-
-#     """
-
-#     This function allow to save raw chronograms results measured in threading  in a dedicated folder
-#     Inputs :
-#         display_time : the time of the beginning and the end of projection for each pattern
-#         time_spectro : time value for each measured spectrum
-#         chronograms : array of spectras stored in chronological order
-#         pattern_order : list of name of pattern contained in sequence
-#         wavelength : wavelength of the used spectrometer
-
-#     """
-#     # today = date.today()#get the current date
-#     fdate = date.today().strftime('%d_%m_%Y')#convert the current date in string
-#     actual_time=time.strftime("%H-%M-%S")#get the current time
-
-#     title_display_time=f"display_time_{fdate}_{actual_time}.npy"
-#     title_time_spectro=f"time_spectro_{fdate}_{actual_time}.npy"
-#     title_chronograms=f"chronograms_{fdate}_{actual_time}.npy"
-#     title_patterns=f"pattern_order_{fdate}_{actual_time}.npy"
-#     title_wavelength=f"wavelength_{fdate}_{actual_time}.npy"
-
-#     folder_name=f"chronograms_{fdate}_{actual_time}"
-
-#     os.mkdir(folder_name)
-#     os.chdir(folder_name)
-#     np.save(title_display_time,config.display_time) #saving the half right spectrum
-#     np.save(title_time_spectro,config.time_spectro)#saving wavelength
-#     np.save(title_chronograms,config.chronograms)#saving wavelength
-#     np.save(title_patterns,config.pattern_order)#saving wavelength
-#     np.save(title_wavelength,config.wavelengths)#saving wavelength
-
-#     # Header
-#     title_param=f"Acquisition_parameters_{fdate}_{actual_time}.txt"
-
-#     header=f"ONE-PIX acquisition_{fdate}_{actual_time}"+"\n"\
-#         +"--------------------------------------------------------"+"\n"\
-#         +"\n"\
-#         +f"Acquisition method : {config.pattern_method}"+"\n"\
-#         +"Acquisition time : %f s" %config.duration+"\n" \
-#         +"Number of projected patterns : %d"%config.nb_patterns+"\n" \
-#         +"Height of pattern window : %d pixels"%config.height+"\n" \
-#         +"Width of pattern window : %d pixels"%config.width+"\n" \
-#         +"Dark pattern duration : %d ms"%config.duree_dark+"\n" \
-#         +"Integration time : %d ms"%config.integration_time_ms+"\n" \
-
-
-#     text_file = open(title_param, "w+")
-#     text_file.write(header)
-#     text_file.close()
-
-#     os.chdir("../")
