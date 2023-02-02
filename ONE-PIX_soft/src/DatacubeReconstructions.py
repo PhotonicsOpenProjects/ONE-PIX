@@ -8,6 +8,8 @@ from tkinter import *
 import importlib
 import platform
 from sklearn import mixture
+import spectral.io.envi as envi
+
 #%% Raw data pre-treatment
 
 def time_aff_corr(chronograms,time_spectro,time_aff):
@@ -73,6 +75,7 @@ def get_header_data(path):
        for line in file.readlines():
            header.append(line.split(':'))
     acq_data=dict()
+    acq_data['Acquisition_name']=header[0][0][8:]
     for x in header:
         if x[0].strip()=='Acquisition method':
             acq_data['pattern_method']=x[1].strip()
@@ -166,6 +169,40 @@ def load_spectra():
     os.chdir(chemin_script)
     
     return acq_data
+
+def load_hypercube(opt=None):
+    """
+    This function allows to load saved spectra with timers of the displays and spectrometers.
+    at runtime, a window appears to select the folder path in which the data are located. 
+
+    Returns
+    -------
+    acq_data : dict
+        Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.
+
+    """
+   
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', 1)
+    res={"hyperspectral_image":[],"wavelengths":[]}
+    
+    if opt==None:
+        meas_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions")
+    elif opt=='last':
+        root_path=os.getcwd()
+        path=os.path.join(root_path,'Hypercubes')
+        meas_path=max(glob.glob(os.path.join(path, '*/')), key=os.path.getmtime)
+       
+    else:
+        meas_path=opt
+        
+    hyp_filename=glob.glob(f'{meas_path}/*.hdr')[0]
+    data=envi.open(hyp_filename)
+    res["hyperspectral_image"]=data.load()
+    res["wavelengths"]=np.array(data.bands.centers)
+        
+    return res
 
 def load_analysed_data():
     """

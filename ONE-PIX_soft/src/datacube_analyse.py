@@ -395,7 +395,7 @@ def py2ms(save_gerbil_name,datacube,wavelengths):
     fid.close()
     
 
-def py2envi(save_envi_name,datacube,wavelengths):
+def py2envi(save_envi_name,datacube,wavelengths,save_path=None):
     """
     py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
     metadata can be improved !
@@ -414,17 +414,15 @@ def py2envi(save_envi_name,datacube,wavelengths):
     None.
 
     """
-    save_path= filedialog.askdirectory(title = "Open the save directory")
-    foldername=save_path+'\\'+save_envi_name
-    filename=foldername+'\\'+save_envi_name+'.hdr'
-    os.mkdir(foldername)
+    if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
+    # foldername=save_path+'\\'+save_envi_name
+    filename=save_envi_name+'.hdr'
+    # os.mkdir(foldername)
     
-    envi.save_image(filename, datacube,dtype=np.float64,metadata={'wavelength':wavelengths,})
-    
-    
+    envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
     
     
-    
+
     
     
     

@@ -13,6 +13,7 @@ import datetime
 from src.SpectrometerBridge import * 
 from src.PatternMethods import *
 from src.DatacubeReconstructions import *
+from src.datacube_analyse import *
 from pathlib import Path
 import json
 from tkinter import *
@@ -44,8 +45,8 @@ class OPConfig:
         self.mes_ratio=acqui_dict["mes_ratio"]
         
         self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
-        self.seq_basis = ['FourierShift','FourierSplit']
-        self.full_basis = ['BlackAndWhite','Custom','Hadamard']
+        self.seq_basis = ['FourierSplit','FourierShift']
+        self.full_basis = ['Custom','Hadamard']
         self.nb_patterns = self.pattern_lib.nb_patterns
 
         self.chronograms = []
@@ -398,17 +399,106 @@ def thread_acquisition(config):
 
         config.duration = time.time()-begin_acq
 
-        save_acquisition(config)
+        save_acquisition_envi(config)
     else:
         pass
    
     return config
 
-"""
+def save_acquisition_envi(config):
+    """
+    This function allow to save the resulting acquisitions from one 
+    OPConfig object into the Hypercube folder.
+
+    Parameters
+    ----------
+    config : class
+        OPConfig class object.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    #extract spectra from chronograms
+    config.display_time = time_aff_corr(
+        config.chronograms, config.time_spectro, config.display_time)
+    config.spectra = calculate_pattern_spectrum(
+        config.display_time, 0, config.time_spectro, config.chronograms, 0)
+    
+    res=OPReconstruction(config.pattern_method,config.spectra,config.pattern_order)
+    res.Selection()
+    
+    root_path=os.getcwd()
+    path=os.path.join(root_path,'Hypercubes')
+    if(os.path.isdir(path)):
+        pass
+    else:
+        os.mkdir('Hypercubes')
+    os.chdir(path)
+    
+    fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
+    actual_time = time.strftime("%H-%M-%S")  # get the current time
+    
+    title_acq = f"spectra_{fdate}_{actual_time}.npy"
+    
+
+    folder_name = f"ONE-PIX_acquisition_{fdate}_{actual_time}"
+    os.mkdir(folder_name)
+    os.chdir(folder_name)
+    # saving the acquired spatial spectra hypercube
+    py2envi(folder_name,res.hyperspectral_image,config.wavelengths,os.getcwd())
+
+    # Header
+    title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
+
+    header = f"ONE-PIX acquisition_{fdate}_{actual_time}"+"\n"\
+        + "--------------------------------------------------------"+"\n"\
+        + "\n"\
+        + f"Acquisition method : {config.pattern_method}"+"\n"\
+        + "Acquisition time : %f s" % config.duration+"\n" \
+        + f"Spectrometer {config.name_spectro} : {config.spec_lib.DeviceName}"+"\n"\
+        + "Number of projected patterns : %d" % config.nb_patterns+"\n" \
+        + "Height of pattern window : %d pixels" % config.height+"\n" \
+        + "Width of pattern window : %d pixels" % config.width+"\n" \
+        + "Dark pattern duration : %d ms" % config.duree_dark+"\n" \
+        + "Integration time : %d ms" % config.integration_time_ms+"\n" 
 
 
+    text_file = open(title_param, "w+")
+    text_file.write(header)
+    text_file.close()
+    
+    
+    os_name=platform.system()
+    if os_name=='Linux':
+        try:
+            root=Tk()
+            root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
+            root.wm_attributes('-fullscreen', 'True')
+            c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
+            c.pack()
+            root.update()
 
-"""
+            from picamera import PiCamera, PiCameraError
+            camera = PiCamera()
+            camera.resolution = (1024, 768)
+            camera.start_preview()
+            camera.shutter_speed=7*1176
+            camera.vflip=True
+            camera.hflip=True
+            # Camera warm-up time
+            time.sleep(2)
+            camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
+            camera.close()
+            root.destroy()
+        except PiCameraError:
+            print("Warning; check a RPi camera is connected. No picture were stored !")
+            root.destroy()
+    os.chdir(root_path)
+    del config.chronograms,config.time_spectro, config.display_time # saves RAM for large acquisitions
+
 def save_acquisition(config):
     """
     This function allow to save the resulting acquisitions from one 
@@ -463,13 +553,13 @@ def save_acquisition(config):
         + "--------------------------------------------------------"+"\n"\
         + "\n"\
         + f"Acquisition method : {config.pattern_method}"+"\n"\
-        + "Acquisition time : %f s" % config.duration+"\n" \
+        + "Acquisition duration : %f s" % config.duration+"\n" \
         + f"Spectrometer {config.name_spectro} : {config.spec_lib.DeviceName}"+"\n"\
+        + "Pattern duration : %d ms" % config.periode_pattern+"\n" \
+        + "Integration time : %d ms" % config.integration_time_ms+"\n"\
         + "Number of projected patterns : %d" % config.nb_patterns+"\n" \
         + "Height of pattern window : %d pixels" % config.height+"\n" \
-        + "Width of pattern window : %d pixels" % config.width+"\n" \
-        + "Dark pattern duration : %d ms" % config.duree_dark+"\n" \
-        + "Integration time : %d ms" % config.integration_time_ms+"\n" 
+        + "Width of pattern window : %d pixels" % config.width+"\n" 
 
 
     text_file = open(title_param, "w+")
