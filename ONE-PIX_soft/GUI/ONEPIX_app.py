@@ -8,6 +8,7 @@ from tkinter.messagebox import showwarning
 from functools import partial
 import PIL.Image, PIL.ImageTk
 
+import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
@@ -318,6 +319,7 @@ class OPApp(ctk.CTk):
         self.draw_button = ctk.CTkButton(self.analysis_frame, text="Draw spectrum",command=self.draw_spectra)
         self.draw_button.grid(row=1, column=0,sticky='w')
         self.entry_draw = ctk.CTkEntry(self.analysis_frame,width=45)
+        self.entry_draw.insert(0,'5')
         self.entry_draw.grid(row=1, column=1,sticky='w')
         
         self.trim_button = ctk.CTkButton(self.analysis_frame, text="Trim spectra",command=self.rogn)
@@ -326,6 +328,8 @@ class OPApp(ctk.CTk):
         self.entry_wmin.grid(row=2, column=1,pady=10,sticky='w')
         self.entry_wmax = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_wmax.grid(row=2, column=1,pady=10,padx=50,sticky='w')
+        
+        self.wl_limits=[0,0]
         
         self.normalisation_button = ctk.CTkButton(self.analysis_frame, text="Normalisation",height=40,width=60,command=self.refl_norm)
         self.normalisation_button.grid(row=3, column=0,padx=0, pady=20,columnspan=2,sticky='nsew')
@@ -700,10 +704,12 @@ class OPApp(ctk.CTk):
             self.window_size_test()
             self.acq_config = OP_init(self.acq_config)
             self.close_window_proj()
-            self.entry_integration_time.configure(state = 'normal',value=self.acq_config.integration_time_ms)
+            self.entry_integration_time.configure(state = 'normal')
+            self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
             self.entry_integration_time.configure(state= 'disabled')
  
-            self.entry_pattern_duration.configure(state= 'normal',value=self.acq_config.periode_pattern)
+            self.entry_pattern_duration.configure(state= 'normal')
+            self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
             self.entry_pattern_duration.configure(state = 'disabled')
  
         if (self.button_wind_test.cget("state") == "disabled"):
@@ -782,15 +788,16 @@ class OPApp(ctk.CTk):
             
             self.entry_wmin.configure(state='normal')
             self.entry_wmax.configure(state='normal')
+            self.wl_limits=[round(self.res["wavelengths"][0],2),round(self.res["wavelengths"][-1],2)]
             self.entry_wmin.select_clear()
-            self.entry_wmin.insert(0, round(self.res["wavelengths"][0],2))
+            self.entry_wmin.insert(0, self.wl_limits[0])
             self.entry_wmax.select_clear()
-            self.entry_wmax.insert(0, round(self.res["wavelengths"][-1],2))
+            self.entry_wmax.insert(0,self.wl_limits[1])
     
             self.rgb_display(self.res["hyperspectral_image"],self.res["wavelengths"],title="RGB reconstructed image")
             self.a_rgb.set_axis_on
             self.label_data_info.configure(text='Data loaded',text_color='white')
-            
+            self.normalisation_button.configure(state='normal')
         except IndexError:
             pass
     
@@ -804,9 +811,14 @@ class OPApp(ctk.CTk):
         if self.res==0:
             showwarning("DataError","Load data first")
         else:
-            self.res["spectra"] = hsa.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
             self.clear_analysis_graph()
-            self.a_analysis.plot(self.res["wavelengths"],self.res["spectra"].T)
+            if self.res["current_data_level"]=="hyperspectral_image_clipped":
+                self.res["spectra_clipped"] = hsa.select_disp_spectra(self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"], int(self.entry_draw.get()), 'single')
+                self.a_analysis.plot(self.res["wavelengths_clipped"],self.res["spectra_clipped"].T)
+            else:    
+                self.res["spectra"] = hsa.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
+                self.a_analysis.plot(self.res["wavelengths"],self.res["spectra"].T)
+            
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
             self.a_analysis.grid(True, linestyle='--')
@@ -815,10 +827,35 @@ class OPApp(ctk.CTk):
         if self.res==0:
             showwarning("DataError","Load data first")
         else:
+            user_wl=[round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get()))]
+            if user_wl[0]<self.wl_limits[0]:
+                user_wl[0]=self.wl_limits[0]
+                showwarning("ValueError",f"This datacube does not contain images below {self.wl_limits[0]} nm")
+                self.entry_wmin.select_clear()
+                self.entry_wmin.insert(0,user_wl[0])
+            if user_wl[1]>self.wl_limits[1]:
+                user_wl[1]=self.wl_limits[1]
+                showwarning("ValueError",f"This datacube does not contain images beyond {self.wl_limits[1]} nm")
+                self.entry_wmax.select_clear()
+                self.entry_wmax.insert(0,user_wl[1])
+            try:
+                wl=self.res["wavelengths_clipped"]
+            except KeyError:
+                wl=self.res["wavelengths"]
+                
             self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"] = hsa.clip_datacube(self.res[self.res["current_data_level"]], 
-                                                    self.res["wavelengths"],round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get())))
+                                                    wl,user_wl[0],user_wl[1])
             self.rgb_display(self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"],"RGB reconstructed image (spectral clip)")
-    
+            self.res["current_data_level"]="hyperspectral_image_clipped"
+            self.a_analysis.set_xlim([round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get()))])
+            self.analysis_canvas.draw_idle()
+           
+            try:
+                self.res["spectra_clipped"],wl=hsa.clip_datacube(self.res["spectra"].reshape(1,self.res["spectra"].shape[0],self.res["spectra"].shape[1]),
+                                                                 wl,round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get())))
+                self.res["spectra_clipped"]=self.res["spectra_clipped"].squeeze()
+            except KeyError:
+                pass
 
     def clustering(self):
         if self.res==0:
@@ -841,21 +878,96 @@ class OPApp(ctk.CTk):
             try:
                 self.res["hyperspectral_image_smoothed"] = hsa.smooth_datacube(self.res[self.res["current_data_level"]],
                                                                            int(self.entry_boxcar.get()), int(self.entry_polyorder.get()))
-                self.rgb_display(self.res["hyperspectral_image_smoothed"], self.res["wavelengths"],title="RGB reconstructed image (smoothed)")
-    
+                try:
+                    wl=self.res["wavelengths_clipped"]
+                    spectra=self.res['spectra_clipped']
+                except KeyError :
+                    wl=self.res["wavelengths"]
+                    spectra=self.res["spectra"]
+                
+                self.rgb_display(self.res["hyperspectral_image_smoothed"], wl,title="RGB reconstructed image (smoothed)")
+                spectra_smooth=hsa.smooth_datacube(spectra.reshape(1,spectra.shape[0],spectra.shape[1]),int(self.entry_boxcar.get()), int(self.entry_polyorder.get())).squeeze()
+                self.clear_analysis_graph()
+                self.a_analysis.plot(wl,spectra_smooth.T)
+                self.analysis_canvas.draw_idle()
+                self.a_analysis.set_axis_on()
+                self.a_analysis.grid(True, linestyle='--')
             except ValueError:
                 showwarning(title="ValueError",message="Polyorder must be less than window_length.")
-                
-       
+            except KeyError :
+                pass
+    def flux2ref(self,raw_hypercube,wavelengths,reference=None):
+        """
+        flux2ref allows to normalize a raw hypercube in reflectance using a standard present in 
+        the reconstructed image and its reflectance certificate.
+    
+        Parameters
+        ----------
+        raw_hypercube: numpy.array 
+            3D array of spectral intensities data cube.
+        Wavelengths: numpy.array of floats 
+            1D array of spectrometer's sampled wavelengths.
+        reference: numpy.array, optional 
+            2D array of reflectance certificate composed of wavelengths and reflectance data.
+            The default is None for RELATIVE reflectances.
+        
+        Returns
+        ----------
+        Normalised_Hypercube (numpy.array)
+            Reflectance normalised hypercube.
+        """
+        if reference==None:
+            reference=np.array([wavelengths,np.ones_like(wavelengths)])
+        sz=np.shape(raw_hypercube) # Hypercube dimensions    
+        # Display spectral mean of the hypercube and select the reference area
+        fig,ax=plt.subplots(1)
+        ax.imshow(np.mean(raw_hypercube,axis=2))
+        plt.title('Select a reference area to normalise the data cube')
+        x1,x2=plt.ginput(2) # Select two points to define reference area 
+        x1=np.round(x1).astype(np.int32)
+        x2=np.round(x2).astype(np.int32)
+        # Create a Rectangle patch
+        rect = patches.Rectangle((x1[0],x1[1]),x2[0]-x1[0],x2[1]-x1[1],linewidth=1,edgecolor='r',facecolor='none')  
+        ax.add_patch(rect) # Add the patch to the Axes
+        plt.show()
+        # Determine the spectral normalization coefficient  
+        Refmes=np.mean(raw_hypercube[x1[1]:x2[1],x1[0]:x2[0],:],axis=(0,1)) # 2D spatial mean of the selected area
+        Lref = np.squeeze(np.interp(wavelengths,reference[:,0],reference[:,1])) # Interpolation of the reflectance certificate to fit with experimental Wavelengths sampling
+        norm_coeff=Lref/Refmes #Normalisation coefficient
+        
+        #Hypercube normalisation without for loops
+        ref_hypercube=np.tile(np.reshape(norm_coeff,[1,1,sz[2]]),[sz[0],sz[1],1]) # reshape NormCoeff into a hypercube
+        normalised_hypercube=raw_hypercube*ref_hypercube #Hypercube Normalisation
+        
+        return normalised_hypercube,norm_coeff
 
     def refl_norm(self):
         if self.res==0:
             showwarning("DataError","Load data first")
         else:
-            self.res["hyperspectral_image_norm"] = hsa.Flux2Ref(self.res[self.res["current_data_level"]], self.res["wavelengths"])
-            self.rgb_display(self.res["hyperspectral_image_norm"], self.res["wavelengths"]
+            try:
+                wl=self.res["wavelengths_clipped"]
+                spectra=self.res["spectra_clipped"]
+            except KeyError:
+                wl=self.res["wavelengths"]
+                spectra=self.res["spectra"]
+            except KeyError:
+                pass
+            
+            self.res["hyperspectral_image_norm"],norm_coeff = self.flux2ref(self.res[self.res["current_data_level"]], wl)
+            self.rgb_display(self.res["hyperspectral_image_norm"],wl
                              ,title="RGB reconstructed image (reflectance)")
-
+            self.normalisation_button.configure(state='disabled')
+            
+            try:
+                self.clear_analysis_graph()
+                self.a_analysis.plot(wl,(spectra.squeeze()*norm_coeff).T)
+                self.analysis_canvas.draw_idle()
+                self.a_analysis.set_axis_on()
+                self.a_analysis.grid(True, linestyle='--')
+            except KeyError:
+                pass
+            
     def save_analysis_opt(self):
         if self.res==0:
             showwarning("DataError","Load data first")
