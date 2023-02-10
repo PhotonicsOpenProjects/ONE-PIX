@@ -70,7 +70,7 @@ class HadamardReconstruction:
         whole_spectrum=self.spectrum_reconstruction()
         dim=np.size(whole_spectrum,0)
         H=hadamard(dim)
-        H=np.dstack([H]*np.size(whole_spectrum,2))
+        # H=np.dstack([H]*np.size(whole_spectrum,2))
         hyperspectral_image=np.zeros_like(whole_spectrum)
         for wl in range(np.size(whole_spectrum,2)): hyperspectral_image[:,:,wl]=H@whole_spectrum[:,:,wl]@H
         

@@ -341,11 +341,20 @@ def affichage_sequence(q, config):
 
     elif config.pattern_method in config.full_basis:
         for pattern in config.pattern_lib.decorator.sequence:
+            if pattern.all()==config.pattern_lib.decorator.sequence[0].all() and config.pattern_method=='Hadamard':
+                config.integ_time_flag=False
+                config.spec_lib.integration_time_ms=config.spec_lib.integration_time_ms/2
+                config.spec_lib.set_integration_time()
             temps.append(time.time())
             cv2.imshow('ImageWindow', cv2.resize(pattern,(800,600),interpolation=cv2.INTER_AREA))
             cv2.waitKey(round(config.periode_pattern))
             temps.append(time.time())
-
+            
+            if pattern.all()==config.pattern_lib.decorator.sequence[0].all() and config.pattern_method=='Hadamard':
+                config.integ_time_flag=True
+                config.spec_lib.integration_time_ms=config.spec_lib.integration_time_ms*2
+                config.spec_lib.set_integration_time()
+    
     time.sleep(0.1)
     q.put(True)
 

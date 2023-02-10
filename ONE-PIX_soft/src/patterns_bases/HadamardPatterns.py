@@ -59,9 +59,9 @@ class HadamardPatterns:
             patterns[:,:,col]=np.reshape(hadamard_matrix[:,col],[self.dim,self.dim]) # reshape of the Patterns in 2D(dim X dim) 
         
         split_patterns=np.zeros((self.dim,self.dim,2*self.dim**2),np.uint8)
-        split_patterns[:,:,0::2]=np.uint8((1+patterns)/2)
-        split_patterns[:,:,1::2]=np.uint8((1-patterns)/2)
-        split_patterns=np.split(split_patterns,2*self.dim**2,axis=2)
+        split_patterns[:,:,0::2]=np.uint8((1+patterns)/2)*255
+        split_patterns[:,:,1::2]=np.uint8((1-patterns)/2)*255
+        split_patterns=[ np.squeeze(x) for x in np.split(split_patterns,2*self.dim**2,axis=2)]
         self.sequence=split_patterns
         self.pattern_order,freqs=self.sequence_order()
         return self.pattern_order,freqs

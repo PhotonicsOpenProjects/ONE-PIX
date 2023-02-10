@@ -558,6 +558,7 @@ class OPApp(ctk.CTk):
  
         self.button_wind_test.configure(state= "normal")
         plt.close('all')
+        
         self.proj.destroy()
  
  
@@ -577,7 +578,6 @@ class OPApp(ctk.CTk):
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, 1024, 0))
         else:
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, self.winfo_screenwidth(), 0))
-        self.proj.update()
  
         x = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
         y = list(range(self.acq_config.width))  # vertical vector for the pattern creation
@@ -597,10 +597,10 @@ class OPApp(ctk.CTk):
         self.label_test_proj.bind('<Configure>', self._resize_image)
         self.label_test_proj.pack()
  
-        button_quit_proj = ctk.CTkButton(self.proj, text="Close", command=self.close_window_proj)
+        button_quit_proj = tk.Button(self.proj, text="Close", command=self.close_window_proj)
         button_quit_proj.pack()
         self.button_wind_test.configure(state = "disabled")
-        self.proj.update()
+        
  
     def switch_spectro_command(self):
         if self.switch_spectro.get()==0:
@@ -623,15 +623,18 @@ class OPApp(ctk.CTk):
        
             
     def spec_connection(self):
-        self.acq_config.name_spectro =self.spectro_optionemenu.get()
-        self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms)
-        self.acq_config.spec_lib.spec_open()
- 
-        if self.acq_config.spec_lib.DeviceName != '':
-            self.switch_spectro.configure(text=self.acq_config.spec_lib.DeviceName)
-            self.switch_spectro.select()
-            self.button_acquire_hyp.configure(state = "normal")
-            self.button_co.configure(text='Spectrometer disconnection',command=self.spec_disconnection)
+        try:
+            self.acq_config.name_spectro =self.spectro_optionemenu.get()
+            self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms)
+            self.acq_config.spec_lib.spec_open()
+     
+            if self.acq_config.spec_lib.DeviceName != '':
+                self.switch_spectro.configure(text=self.acq_config.spec_lib.DeviceName)
+                self.switch_spectro.select()
+                self.button_acquire_hyp.configure(state = "normal")
+                self.button_co.configure(text='Spectrometer disconnection',command=self.spec_disconnection)
+        except Exception:
+            showwarning('Spectrometer error',f"{self.acq_config.name_spectro} is not available")
 
 
     def spec_disconnection(self):
@@ -705,10 +708,12 @@ class OPApp(ctk.CTk):
             self.acq_config = OP_init(self.acq_config)
             self.close_window_proj()
             self.entry_integration_time.configure(state = 'normal')
+            self.entry_integration_time.delete(0,10)
             self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
             self.entry_integration_time.configure(state= 'disabled')
  
             self.entry_pattern_duration.configure(state= 'normal')
+            self.entry_pattern_duration.delete(0,10)
             self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
             self.entry_pattern_duration.configure(state = 'disabled')
  
