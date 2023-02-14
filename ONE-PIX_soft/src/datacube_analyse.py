@@ -418,9 +418,10 @@ def py2envi(save_envi_name,datacube,wavelengths,save_path=None):
     # foldername=save_path+'\\'+save_envi_name
     filename=save_envi_name+'.hdr'
     # os.mkdir(foldername)
-    
+    path=os.getcwd()
+    os.chdir(save_path)
     envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
-    
+    os.chdir(path)
     
 
     

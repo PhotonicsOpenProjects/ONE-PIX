@@ -201,7 +201,7 @@ def load_hypercube(opt=None):
     data=envi.open(hyp_filename)
     res["hyperspectral_image"]=data.load()
     res["wavelengths"]=np.array(data.bands.centers)
-        
+    res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]   
     return res
 
 def load_analysed_data():

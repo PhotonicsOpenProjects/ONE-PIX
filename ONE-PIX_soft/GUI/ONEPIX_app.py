@@ -175,7 +175,7 @@ class OPApp(ctk.CTk):
         
         self.switch_spectro = ctk.CTkSwitch(master=self.acq_mode_frame,text='No spectrometer connected',text_color='red',command=self.switch_spectro_command)
         self.switch_spectro.deselect()
-        self.switch_spectro.grid(row=0,column=1, padx=5)
+        self.switch_spectro.grid(row=0,column=1, padx=10)
         
         self.button_co = ctk.CTkButton(self.acq_mode_frame, text="Spectrometer connection",state='normal',height=40,command=self.spec_connection)
         self.button_co.grid(row=4, column=0)
@@ -188,15 +188,15 @@ class OPApp(ctk.CTk):
         # =====================================================================
         # create Display frame
         self.display_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, padx=(0, 0), pady=(20, 0), sticky="nsew")
+        self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, padx=(0, 0), pady=(20, 0), sticky="nw")
         self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text="Display: ", font=ctk.CTkFont(size=16, weight="bold"))
-        self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=0,pady=10)
+        self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
 
         self.fig = Figure(figsize=(5,4), dpi=100)
         self.fig.patch.set_facecolor('#2D2D2D')
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=1,column=0,padx=50,pady=5,sticky="w")
+        self.canvas.get_tk_widget().grid(row=1,column=0,padx=25,pady=5,sticky="w")
         self.a_acq= self.fig.add_subplot(111)
         self.a_acq.set_axis_off()
         
@@ -361,8 +361,7 @@ class OPApp(ctk.CTk):
     
         self.save_opt_button = ctk.CTkButton(self.analysis_frame, text="Save",width=65,command=self.save_analysis_opt)
         self.save_opt_button.grid(row=9, column=0,pady=20,padx=(80,0),sticky='e')
-        # self.save_button = ctk.CTkButton(self.analysis_frame, text="Save",width=50,height=30,command=self.save_analysis_data)
-        # self.save_button.grid(row=9, column=1,pady=20,sticky='')
+        
         
 # =============================================================================
 #         VI Analysis tab
@@ -391,12 +390,12 @@ class OPApp(ctk.CTk):
         # figure creation
         self.f = Figure(figsize=(3.5,2.5), dpi=100)
         self.f.patch.set_facecolor('#2D2D2D')
-        # gs = self.f.add_gridspec(1,50)
+        gs = self.f.add_gridspec(1,40)
         self.a = self.f.add_subplot(111)
-        # self.color = self.f.add_subplot(gs[:,-1])
-        # self.color.tick_params(labelsize=6)
-        self.a.axis('off')
-        # self.color.axis('off')
+        self.color = self.f.add_subplot(gs[:,-1])
+        self.color.tick_params(labelsize=6)
+        self.a.set_axis_off()
+        self.color.axis('off')
         
         
         # =====================================================================
@@ -405,23 +404,23 @@ class OPApp(ctk.CTk):
         self.loadfiles_frame=ctk.CTkFrame(self.VI,width=window_width)
         self.loadfiles_frame.grid(row=0, column=0,padx=50, pady=10, rowspan =1, columnspan=5,sticky='nsew')
         
-        self.sat_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Fichier de données satellites :")
+        self.sat_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Satelite data file (.csv) :")
         self.sat_desc.grid(column=0, row=0)
         
         self.sat_path =''
-        self.sat_path_label = ctk.CTkLabel(self.loadfiles_frame, text = "Sélectionner un chemin", width=550,text_color='red')
+        self.sat_path_label = ctk.CTkLabel(self.loadfiles_frame, text = "Select data path", width=550,text_color='red')
         self.sat_path_label.grid(column=3, row=0, padx=10, pady=10, rowspan =1, columnspan=3,sticky='e')
 
-        self.sat_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Parcourir",
+        self.sat_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Browse",
                                         command = lambda : self.get_path("sat"))
         self.sat_bouton.grid(column=6, row=0, padx=10, pady=10, rowspan =1, columnspan=3,sticky='w')
 
-        self.data_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Image ONE-PIX :")
+        self.data_desc = ctk.CTkLabel(self.loadfiles_frame, text = "ONE-PIX data cube (.hdr):")
         self.data_desc.grid(column=0, row=1,sticky='e')
         self.data_path=''
-        self.data_path_label = ctk.CTkLabel(self.loadfiles_frame, text = "Sélectionner un chemin", width=550,text_color='red')
+        self.data_path_label = ctk.CTkLabel(self.loadfiles_frame, text = "Select data path", width=550,text_color='red')
         self.data_path_label.grid(column=3, row=1, padx=10, pady=10, rowspan =1, columnspan=3,sticky='e')
-        self.data_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Parcourir"
+        self.data_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Browse"
                                          , command = lambda : self.get_path("data"))
         self.data_bouton.grid(column=6, row=1, padx=10, pady=10, rowspan =1, columnspan=3,sticky='w')
 
@@ -431,7 +430,7 @@ class OPApp(ctk.CTk):
         self.commands_frame=ctk.CTkFrame(self.VI)
         self.commands_frame.grid(row=1, column=0, pady=10, rowspan =4)
         
-        self.domain_desc = ctk.CTkLabel(self.commands_frame,text = "Domaine d'application :")
+        self.domain_desc = ctk.CTkLabel(self.commands_frame,text = "Field of application :")
         self.domain_desc.grid(column=0, row=0, padx=10, pady=10, rowspan=1, columnspan=1)
 
         self.domain = ctk.CTkComboBox(self.commands_frame)
@@ -453,7 +452,7 @@ class OPApp(ctk.CTk):
         self.nb_keep = ctk.CTkEntry(self.commands_frame, state = "disabled")
         self.nb_keep.grid(column=1, row=2, padx=10, pady=10, rowspan=1, columnspan=1)
         
-        self.calc_bouton = ctk.CTkButton(self.commands_frame , text = "Afficher les indices", 
+        self.calc_bouton = ctk.CTkButton(self.commands_frame , text = "Display indices", 
                             state = "disabled",command = self.calculation)
                            
         self.calc_bouton.grid(column=1, row=1, padx=10, pady=10, rowspan=1, columnspan=1)
@@ -471,7 +470,7 @@ class OPApp(ctk.CTk):
         self.indices_frame.grid(row=1, column=1,padx=10, pady=10, rowspan =5, columnspan=5,sticky='')
 
         self.canvas_b3 = FigureCanvasTkAgg(self.f, self.indices_frame)
-        self.canvas_b3.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=5)
+        self.canvas_b3.get_tk_widget().grid(column=0, row=2, padx=0, pady=10,rowspan=1, columnspan=5)
 
         self.toolbarFrame = ctk.CTkFrame(master=self.indices_frame, width=100, height=100)
         self.toolbarFrame.grid(column=0, row=1, padx=10, pady=10, rowspan=1, columnspan=5)
@@ -688,6 +687,7 @@ class OPApp(ctk.CTk):
     def entries_actualisation(self):
         self.json_actualisation()
         self.acq_config.spec_lib.spec_close()
+        del self.acq_config
         self.acq_config = OPConfig(json_path)
         self.acq_config.spec_lib.spec_open()
         if (self.simple_mode_button.cget("state") == "normal"):
@@ -702,10 +702,10 @@ class OPApp(ctk.CTk):
         cv2.destroyAllWindows()
         # Entries actualisation
         self.entries_actualisation()
- 
+        self.acq_res=[]
         if (self.simple_mode_button.cget("state") =="disabled"):
             self.window_size_test()
-            self.acq_config = OP_init(self.acq_config)
+            self.acq_config.OP_init()
             self.close_window_proj()
             self.entry_integration_time.configure(state = 'normal')
             self.entry_integration_time.delete(0,10)
@@ -725,7 +725,7 @@ class OPApp(ctk.CTk):
         est_duration=round(1.5*self.acq_config.pattern_lib.nb_patterns*self.acq_config.periode_pattern/(60*1000),2)
         est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
         self.est_time_label.configure(text=f"Estimated end: {est_end}")
-        self.acq_config = thread_acquisition(self.acq_config)
+        self.acq_config.thread_acquisition()
         self.progressbar.stop()
         self.est_time_label.configure(text="Estimated end: ")
         self.progressbar.set(value=0)
@@ -794,9 +794,9 @@ class OPApp(ctk.CTk):
             self.entry_wmin.configure(state='normal')
             self.entry_wmax.configure(state='normal')
             self.wl_limits=[round(self.res["wavelengths"][0],2),round(self.res["wavelengths"][-1],2)]
-            self.entry_wmin.select_clear()
+            self.entry_wmin.delete(0,10)
             self.entry_wmin.insert(0, self.wl_limits[0])
-            self.entry_wmax.select_clear()
+            self.entry_wmax.delete(0,10)
             self.entry_wmax.insert(0,self.wl_limits[1])
     
             self.rgb_display(self.res["hyperspectral_image"],self.res["wavelengths"],title="RGB reconstructed image")
@@ -833,15 +833,15 @@ class OPApp(ctk.CTk):
             showwarning("DataError","Load data first")
         else:
             user_wl=[round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get()))]
-            if user_wl[0]<self.wl_limits[0]:
+            if user_wl[0]<round(self.wl_limits[0]):
                 user_wl[0]=self.wl_limits[0]
                 showwarning("ValueError",f"This datacube does not contain images below {self.wl_limits[0]} nm")
-                self.entry_wmin.select_clear()
+                self.entry_wmin.delete(0,10)
                 self.entry_wmin.insert(0,user_wl[0])
-            if user_wl[1]>self.wl_limits[1]:
+            if user_wl[1]>round(self.wl_limits[1]):
                 user_wl[1]=self.wl_limits[1]
                 showwarning("ValueError",f"This datacube does not contain images beyond {self.wl_limits[1]} nm")
-                self.entry_wmax.select_clear()
+                self.entry_wmax.delete(0,10)
                 self.entry_wmax.insert(0,user_wl[1])
             try:
                 wl=self.res["wavelengths_clipped"]
@@ -897,10 +897,12 @@ class OPApp(ctk.CTk):
                 self.analysis_canvas.draw_idle()
                 self.a_analysis.set_axis_on()
                 self.a_analysis.grid(True, linestyle='--')
+                self.res["current_data_level"]="hyperspectral_image_smoothed"
             except ValueError:
                 showwarning(title="ValueError",message="Polyorder must be less than window_length.")
             except KeyError :
                 pass
+            
     def flux2ref(self,raw_hypercube,wavelengths,reference=None):
         """
         flux2ref allows to normalize a raw hypercube in reflectance using a standard present in 
@@ -963,6 +965,7 @@ class OPApp(ctk.CTk):
             self.rgb_display(self.res["hyperspectral_image_norm"],wl
                              ,title="RGB reconstructed image (reflectance)")
             self.normalisation_button.configure(state='disabled')
+            self.res["current_data_level"]="hyperspectral_image_norm"
             
             try:
                 self.clear_analysis_graph()
@@ -985,20 +988,11 @@ class OPApp(ctk.CTk):
             self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="w")
             
             self.data_choice = ctk.CTkComboBox(self.d, variable = ("All", "Raw data"),
-                                        values = ["All", "Raw data"],
+                                        values = [self.res["current_data_level"],"All"],
                                         state = "readonly")
-            self.data_choice.set("All") #index de l'élément sélectionné
+            self.data_choice.set(self.res["current_data_level"]) #index de l'élément sélectionné
             self.data_choice.grid(column=1, row=0, padx=10, pady=10, rowspan =1, columnspan=2)
-            
-            # self.label_radio_group = ctk.CTkLabel(master=self.d, text="Select data format:")
-            # self.label_radio_group.grid(row=1, column=0, columnspan=1, padx=10, pady=10, sticky="w")
-            
-            # self.format_choice = ctk.CTkComboBox(self.d, variable = ("ENVI","PNG", "Numpy array"),
-            #                             values = ["ENVI","PNG", "Numpy array"],
-            #                             state = "readonly")
-            # self.format_choice.set("ENVI") #index de l'élément sélectionné
-            # self.format_choice.grid(column=1, row=1, padx=10, pady=10, rowspan =1, columnspan=2)
-            
+                    
             self.save_desc = ctk.CTkLabel(self.d, text = "Select save path :",text_color='red')
             self.save_desc.grid(column=0, row=2, padx=10, pady=10, rowspan =1, columnspan=1,sticky='w')
                 
@@ -1023,23 +1017,30 @@ class OPApp(ctk.CTk):
             # self.analysis_save_format = self.format_choice.get()
     
     def save_analysis_data(self):
-            path=os.getcwd()
-            os.chdir(self.analysis_save_path)
             data_list=list(self.res.keys())
             data_list.remove('wavelengths')
             data_list.remove('current_data_level')
-            
+            path=self.analysis_save_path+'/'+self.res["infos"]
+            os.mkdir(path)
+                
+            try:
+                wl=self.res["wavelengths_clipped"]
+            except KeyError:
+                wl=self.res["wavelengths"]
+                
             if self.data_choice.get()=='All':
                 for datacube in data_list:
-                    if datacube=='rgb_image':
-                        plt.imsave(datacube+'.png',self.res[datacube])
+                    if datacube in ['rgb_image','image_seg']:
+                        plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
                     elif datacube in ['wavelengths','current_data_level','spectra']:
                         pass
+                    elif datacube=='hyperspectral_image':
+                        py2envi(datacube,self.res[datacube],self.res["wavelengths"],path)
                     else:
-                        py2envi(datacube,self.res[datacube],self.res["wavelengths"],os.getcwd())
+                        py2envi(datacube,self.res[datacube],wl,path)
+            else:
+                py2envi(self.res["current_data_level"],self.res[self.res["current_data_level"]],wl,path)
             
-            
-            os.chdir(path)
             self.d.destroy()
             
 # =============================================================================
@@ -1061,14 +1062,14 @@ class OPApp(ctk.CTk):
         self.format_choice.set("PNG") #index de l'élément sélectionné
         self.format_choice.grid(column=0, row=0, padx=10, pady=10, rowspan =1, columnspan=2)
         
-        self.save_desc = ctk.CTkLabel(self.d, text = "dossier de sauvegarde :")
+        self.save_desc = ctk.CTkLabel(self.d, text = "Save folder :")
         self.save_desc.grid(column=0, row=1, padx=10, pady=10, rowspan =1, columnspan=1)
     
-        self.save_path_label = ctk.CTkLabel(self.d, text = "Sélectionner un chemin")
+        self.save_path_label = ctk.CTkLabel(self.d, text = "Select data path")
                             
         self.save_path_label.grid(column=0, row=2, padx=10, pady=10, rowspan =1, columnspan=2)
     
-        self.explore_bouton = ctk.CTkButton(self.d, text = "Parcourir", 
+        self.explore_bouton = ctk.CTkButton(self.d, text = "Browse", 
                                  command = lambda : self.get_dir())
         self.explore_bouton.grid(column=1, row=1, padx=10, pady=10, rowspan =1, columnspan=1)
         
@@ -1086,11 +1087,12 @@ class OPApp(ctk.CTk):
 # =============================================================================
 
     def get_combobox_value(self):
-        idx = self.indice_list.get()
-        self.shown_IDX = idx
-        # self.scale.configure(showvalue=self.IDXS["names"].index(idx))
-        self.scale.set(self.IDXS["names"].index(idx))
-#         self.update()
+        try:
+            self.shown_IDX = self.indice_list.get()
+            self.scale.set(self.IDXS["names"].index(self.shown_IDX))
+        except ValueError:
+            showwarning('Unknown VI','Select a VI from the list')
+            self.indice_list.set(self.IDXS["names"][0])
             
         
     
@@ -1121,7 +1123,7 @@ class OPApp(ctk.CTk):
                 self.sat_path_label.configure(text = os.path.join('', *path.split('/')[-3:]),text_color='white')
                 self.sat_path=path
             else:
-                self.sat_path_label.configure(text = os.path.join('', *path.split('/')[-3:]),text_color='red')
+                # self.sat_path_label.configure(text = os.path.join('', *path.split('/')[-3:]),text_color='red')
                 self.calc_bouton.configure(state = "disabled")
             
         else: #if name == "data"
@@ -1129,7 +1131,7 @@ class OPApp(ctk.CTk):
                 self.data_path_label.configure(text =os.path.join('', *path.split('/')[-3:]),text_color='white')
                 self.data_path=path
             else:
-                self.data_path_label.configure(text =os.path.join('', *path.split('/')[-3:]),text_color='red')
+                # self.data_path_label.configure(text =os.path.join('', *path.split('/')[-3:]),text_color='red')
                 self.calc_bouton.configure(state = "disabled")
     
         if (self.sat_path.endswith(".csv") and self.data_path.endswith((".tif",".hdr"))):
@@ -1151,15 +1153,15 @@ class OPApp(ctk.CTk):
         
     def plot_indices(self, val):
             VAL = int(val)
-            self.a.axis('off')
+            self.a.set_axis_off()
             self.a.clear()
             self.a.set_title(self.IDXS["names"][VAL],color='white')
-            # self.color.clear()
+            self.color.clear()
             shw = self.a.imshow((self.IDXS["id"][VAL]))
-            # self.f.colorbar(shw, cax = self.color)
+            self.f.colorbar(shw, cax = self.color)
             self.f.canvas.draw_idle()
             self.scale.configure(label = self.IDXS["names"][VAL])
-            self.indice_list.set(VAL)
+            self.indice_list.set(self.IDXS["names"][VAL])
     
     
     def calculation(self):
@@ -1182,7 +1184,7 @@ class OPApp(ctk.CTk):
         self.indice_list.configure(state = "normal")
         self.save_options.configure(state = "normal")
         self.indice_list.set_completion_list(self.IDXS["names"])
-        self.indice_list.set(0)
+        self.indice_list.set(self.IDXS["names"][0])
 
     
 # =============================================================================
