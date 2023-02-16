@@ -7,8 +7,8 @@ from tkinter.messagebox import showwarning
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
-
 import matplotlib.patches as patches
+import matplotlib.cm as CM
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams, ticker
@@ -1321,11 +1321,19 @@ class OPApp(ctk.CTk):
     # =========================================================================
     def get_combobox_value(self, sel):
         if sel=="idx":
-            self.shown_IDX = self.indice_list.get()
-            self.indices_scale.set(self.IDXS["names"].index(self.shown_IDX))
+            try:
+                self.shown_IDX = self.indice_list.get()
+                self.indices_scale.set(self.IDXS["names"].index(self.shown_IDX))
+            except ValueError:
+                showwarning('Unknown VI','Select a VI from the list')
+                self.indice_scale.set(self.IDXS["names"][0])
         elif sel=="bands":
-            self.shown_band = self.bands_list.get()
-            self.bands_scale.set(self.IM["bands_names"].index(self.shown_band))
+            try:
+                self.shown_band = self.bands_list.get()
+                self.bands_scale.set(self.IM["bands_names"].index(self.shown_band))
+            except ValueError:
+                showwarning('Unknown band','Select a band from the list')
+                self.bands_scale.set(self.IM["bands_names"][0])
         self.update()
             
         
@@ -1380,6 +1388,8 @@ class OPApp(ctk.CTk):
             VAL = int(val)
             self.a.clear()
             self.a.axis('off')
+            current_cmap = CM.get_cmap()
+            current_cmap.set_bad(color='white')
             self.a.set_title(self.IDXS["names"][VAL],color='white')
             self.color.clear()
             shw = self.a.imshow((self.IDXS["id"][VAL]))
@@ -1453,7 +1463,7 @@ class OPApp(ctk.CTk):
 #         fonctions de réduction du nombre d'indices affichés
 # =============================================================================
     def sort_idx(self):
-        # filtering "only background" images
+        # filtering "only background" and outliers
         temp = {"id":[], "names":[]}
         for i in range(len(self.IDXS["names"])):
             if len(np.unique(self.IDXS["id"][i]))!=1:
@@ -1466,16 +1476,33 @@ class OPApp(ctk.CTk):
             nb = int(self.nb_keep.get())
             if nb>len(self.IDXS["names"]):
                 nb = len(self.IDXS["names"])
+                
+            # entropy of the image (without nans and outliers)
             if self.critere.get() == "Entropy":
-                ENTR = [entropy(self.IDXS["id"][k]) for k in range(len(self.IDXS["names"]))]
+                ENTR = []
+                for i in range(len(self.IDXS["names"])):
+                    im = self.IDXS["id"][i]
+                    im = im[~np.isnan(im)]
+                    im[im>np.quantile(im,q = .95)]=np.nan
+                    im[im<np.quantile(im,q = .05)]=np.nan
+                    im = im[~np.isnan(im)]
+                    ENTR.append(np.var(im))
                 names = self.IDXS["names"]
                 ids = self.IDXS["id"] #no need to set it as a list, sort will do
                 ENTR, names, ids = zip(*sorted(zip(ENTR, names, ids), reverse=True))
                 self.IDXS = {"id": np.asarray(ids[:nb]),
                         "names": names[:nb]}
                 
+            # variance of the image (without nans and outliers)
             elif self.critere.get() == "Variance":
-                VAR = [np.var(self.IDXS["id"][k]) for k in range(len(self.IDXS["names"]))]
+                VAR = []
+                for i in range(len(self.IDXS["names"])):
+                    im = self.IDXS["id"][i]
+                    im = im[~np.isnan(im)]
+                    im[im>np.quantile(im,q = .95)]=np.nan
+                    im[im<np.quantile(im,q = .05)]=np.nan
+                    im = im[~np.isnan(im)]
+                    VAR.append(np.var(im))
                 names = self.IDXS["names"]
                 ids = self.IDXS["id"] #no need to set it as a list, sort will do
                 VAR, names, ids = zip(*sorted(zip(VAR, names, ids), reverse=True))
