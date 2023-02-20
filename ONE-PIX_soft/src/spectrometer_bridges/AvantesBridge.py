@@ -1,5 +1,6 @@
 from src.DLL.avaspec import *
 import time
+import numpy as np
 
 class AvantesBridge:
     """ Class AvantesBridge allows to use Avantes spectrometers with the ONE-PIX
