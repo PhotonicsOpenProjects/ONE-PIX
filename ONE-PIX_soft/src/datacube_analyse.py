@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
@@ -116,33 +117,34 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
 
     """
     # Display Hypercube spectral mean to visualise an image
+    matplotlib.use('TkAgg')
     rgb_image=RGB_reconstruction(datacube,wavelengths)
     fig,ax=plt.subplots()
-    plt.subplot(1,2,1)
-    plt.imshow(rgb_image)
+#     plt.subplot(1,2,1)
+    ax.imshow(rgb_image)
     
     
     # Selection of pixel(s) or region of interest
     if mode=='single':
         tick=np.arange(n)+1
         # Select pixel(s)
-        p=plt.ginput(n)
+        p=fig.ginput(n)
         p=np.round(p).astype(np.int)
         # Display results
         plt.plot(p[:,0],p[:,1],'x',color='red')
         for i, txt in enumerate(tick):
             plt.annotate(txt, (p[i,0]+1, p[i,1]+1),color='r',bbox=dict(boxstyle="circle"))
         spec=datacube[p[:,1],p[:,0],:]
-        
-        plt.subplot(1,2,2)
-        
-        plt.plot(wavelengths,np.transpose(spec))
-        plt.xlabel('Wavelengths (nm)')
-        plt.ylabel('Intensity (counts)')
-        plt.legend(tick)
-        fig.canvas.draw()
         plt.show(block=False)
-        
+#         plt.subplot(1,2,2)
+#         
+#         plt.plot(wavelengths,np.transpose(spec))
+#         plt.xlabel('Wavelengths (nm)')
+#         plt.ylabel('Intensity (counts)')
+#         plt.legend(tick)
+#         fig.canvas.draw()
+#         plt.show(block=False)
+#         plt.pause(0.001)
     elif mode=='mean':
         # Select 2 corner pixels of rectangle area
         p=plt.ginput(2)
@@ -161,8 +163,9 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
     else:
         print("mode='single' to display each spectrum or mode='mean' to display the mean of the spectra from the selected area")
 
-    plt.show()
-    
+    plt.close()
+    del fig,ax
+    plt.switch_backend('Agg')
     return spec
 
  

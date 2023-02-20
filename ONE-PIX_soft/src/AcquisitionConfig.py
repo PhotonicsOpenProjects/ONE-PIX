@@ -9,6 +9,7 @@ from queue import Queue
 import sys
 import platform
 import datetime
+import gc
 
 from src.SpectrometerBridge import * 
 from src.PatternMethods import *
@@ -55,8 +56,10 @@ class OPConfig:
 
         
         # spectrometer acquistion time in ms
-        self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms)
+        self.wl_lim=acqui_dict["wl_lim"]
+        self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms,self.wl_lim)
         self.wavelengths = []
+        self.spectro_flag=False
 
         self.duration = 0
         self.periode_pattern = self.mes_ratio*self.integration_time_ms
@@ -90,13 +93,15 @@ class OPConfig:
         self.spec_lib.set_integration_time()
         
         flag = True
+        self.spectro_flag=True
         count=0
+        delta_wl=round(0.05*np.size(self.spec_lib.get_wavelengths()))
         while flag:
             #mes=self.spec_lib.get_intensities()[100:-100]
             mes = []
             for acq in range(10):
                 mes.append(self.spec_lib.get_intensities())
-            mes = np.mean(np.array(mes), 0)[100:-100]
+            mes = np.mean(np.array(mes), 0)[delta_wl:-delta_wl]
             delta = max(mes)-max_counts
             print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
     
@@ -119,7 +124,7 @@ class OPConfig:
                 self.spec_lib.set_integration_time()
                 
             self.spec_lib.set_integration_time()
-            
+            self.spectro_flag=False
         print(f"Integration time (ms): {self.integration_time_ms}")
 
 
@@ -199,11 +204,11 @@ class OPConfig:
         while True:
             flag=self.integ_time_flag
             if flag:
-                self.chronograms.append(np.asarray(self.spec_lib.get_intensities(), dtype=np.float32))
+                self.chronograms.append(np.float32(self.spec_lib.get_intensities()))
                 self.time_spectro.append((time.time()-begin)*1e3)
             else:
                 
-                self.chronograms.append(2*np.asarray(self.spec_lib.get_intensities(), dtype=np.float32))
+                self.chronograms.append(2*np.float32(self.spec_lib.get_intensities()))
                 self.time_spectro.append((time.time()-begin)*1e3)
     
             try:
@@ -214,7 +219,6 @@ class OPConfig:
                 pass
     
         self.spec_lib.spec_close()
-        #self.chronograms = np.array(self.chronograms)
 
 
     def affichage_sequence(self):
@@ -282,7 +286,8 @@ class OPConfig:
                         self.integ_time_flag=True
                         self.spec_lib.integration_time_ms=self.spec_lib.integration_time_ms*2
                         self.spec_lib.set_integration_time()
-                    
+                del patterns
+                gc.collect()
                     
     
         elif self.pattern_method in self.full_basis:
@@ -303,7 +308,7 @@ class OPConfig:
         
         time.sleep(0.1)
         self.q.put(True)
-    
+        gc.collect()
         cv2.destroyAllWindows()
         self.display_time = (np.asarray(temps)-begin)*1e3
 
@@ -355,6 +360,7 @@ class OPConfig:
             self.duration = time.time()-begin_acq
     
             self.save_acquisition_envi()
+            gc.collect()
         else:
             pass
        
@@ -449,7 +455,7 @@ class OPConfig:
                 root.destroy()
         os.chdir(root_path)
         del self.chronograms,self.time_spectro, self.display_time # saves RAM for large acquisitions
-
+        gc.collect()
 # def save_acquisition(config):
 #     """
 #     This function allow to save the resulting acquisitions from one 

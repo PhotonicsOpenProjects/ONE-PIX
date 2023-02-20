@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 18 17:47:42 2021
-
-@author: mribes
-"""
-
 from src.DLL.avaspec import *
 import time
 

@@ -7,12 +7,13 @@ from tkinter.messagebox import showwarning
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
-
+import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
-rcParams.update({'figure.autolayout': True})
+# rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
 rcParams['xtick.color']='white'
 rcParams['ytick.color']='white'
@@ -39,7 +40,7 @@ import json
 from decimal import Decimal
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
-
+import threading
 
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -49,13 +50,6 @@ VERSION = '2.0.0'
 root_path = os.getcwd()
 os_name=platform.system()
 json_path = "../acquisition_param_ONEPIX.json"
-
-
-# app = tk.Tk()
-
-# screen_width = app.winfo_screenwidth()
-# screen_height = app.winfo_screenheight()
-# app.destroy()
 
 window_height = 600
 window_width = 1020
@@ -180,7 +174,7 @@ class OPApp(ctk.CTk):
         self.button_co = ctk.CTkButton(self.acq_mode_frame, text="Spectrometer connection",state='normal',height=40,command=self.spec_connection)
         self.button_co.grid(row=4, column=0)
         
-        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command=self.acquire_hyp)
+        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command= self.acquire_hyp)
         self.button_acquire_hyp.grid(row=4, column=1)
         
         # =====================================================================
@@ -261,13 +255,13 @@ class OPApp(ctk.CTk):
 
         #create left side bar's buttons
         self.load_button = ctk.CTkButton(self.load_frame, text="Load data",width=80,height=40,command=self.load_data)
-        self.load_button.grid(row=0, column=0,padx=60,pady=5,sticky='w')
+        self.load_button.grid(row=1, column=0,padx=60,pady=5,sticky='w')
         
         self.clear_button = ctk.CTkButton(self.load_frame, text="Clear all",height=40,width=80,command=self.clear_analysis)
-        self.clear_button.grid(row=0, column=0,padx=(100,0),pady=5)
+        self.clear_button.grid(row=1, column=0,padx=(100,0),pady=5)
         
-        self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=12, weight="bold"))
-        self.label_data_info.grid(row=1, column=0,sticky='w',pady=10)
+        self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=14, weight="bold"))
+        self.label_data_info.grid(row=0, column=0,sticky='w',pady=10)
         
         self.rgb_fig = Figure(figsize=(3.5,3), dpi=80)
         self.rgb_fig.patch.set_facecolor('#2D2D2D')
@@ -278,7 +272,7 @@ class OPApp(ctk.CTk):
         self.rgb_canvas.get_tk_widget().grid(row=2,column=0,pady=20,sticky='w')
         
         self.rgb_toolbar_frame=ctk.CTkFrame(self.load_frame)
-        self.rgb_toolbar_frame.grid(row=3, column=0,padx=0,pady=20)
+        self.rgb_toolbar_frame.grid(row=3, column=0,padx=0,pady=10)
         self.rgb_toolbar = Toolbar(self.rgb_canvas, self.rgb_toolbar_frame)
         self.rgb_toolbar.config(background='#2D2D2D')
         self.rgb_toolbar._message_label.config(background='#2D2D2D')
@@ -331,8 +325,8 @@ class OPApp(ctk.CTk):
         
         self.wl_limits=[0,0]
         
-        self.normalisation_button = ctk.CTkButton(self.analysis_frame, text="Normalisation",height=40,width=60,command=self.refl_norm)
-        self.normalisation_button.grid(row=3, column=0,padx=0, pady=20,columnspan=2,sticky='nsew')
+        self.normalisation_button = ctk.CTkButton(self.analysis_frame, text="Normalisation",height=40,width=80,command=self.refl_norm)
+        self.normalisation_button.grid(row=3, column=0,padx=0, pady=20,columnspan=2,sticky='')
         
         self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text="Advanced analysis: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=4,column=0)
@@ -360,7 +354,7 @@ class OPApp(ctk.CTk):
         self.smooth_button.grid(row=8, column=1,pady=5)
     
         self.save_opt_button = ctk.CTkButton(self.analysis_frame, text="Save",width=65,command=self.save_analysis_opt)
-        self.save_opt_button.grid(row=9, column=0,pady=20,padx=(80,0),sticky='e')
+        self.save_opt_button.grid(row=9, column=0,pady=30,padx=(80,0),sticky='e')
         
         
 # =============================================================================
@@ -368,14 +362,14 @@ class OPApp(ctk.CTk):
 # =============================================================================
 
             ###############################################
-            #               block 1                       #
+            #          block 1         #     block2       #
             ###############################################
             #                  #                          #
+            #     block 3      #                          #
             #                  #                          #
+            ####################          block 5         #
             #                  #                          #
-            #   block 2        #     block 3              #
-            #                  #                          #
-            #                  #                          #
+            #     block 4      #                          #
             #                  #                          #
             ###############################################
 
@@ -384,17 +378,30 @@ class OPApp(ctk.CTk):
     
         self.IDXS = None
         self.shown_IDX = None
+        self.shown_band = None
         self.save_path = None
-        self.save_format = None
+        self.id_SaveFormat = None
+        self.bands_SaveFormat = None
+        self.save_comment = ctk.StringVar()
+        self.chkSave_id = ctk.IntVar()
+        self.chkSave_id.set(1)
+        self.chkSave_bands = ctk.IntVar()
+        self.chkSave_bands.set(0)
         
-        # figure creation
-        self.f = Figure(figsize=(3.5,2.5), dpi=100)
+        # figure création for bands preview
+        self.bands_graph = Figure(figsize=(2.8,2), dpi=100)
+        self.bands_graph.patch.set_facecolor('#2D2D2D')
+        self.bands_subplot = self.bands_graph.add_subplot(111)
+        self.bands_subplot.axis('off')
+        
+        # figure creation for index
+        self.f = Figure(figsize=(3.8,2.5), dpi=100)
         self.f.patch.set_facecolor('#2D2D2D')
-        gs = self.f.add_gridspec(1,40)
-        self.a = self.f.add_subplot(111)
-        self.color = self.f.add_subplot(gs[:,-1])
+        gs = self.f.add_gridspec(1,50)
+        self.a = self.f.add_subplot(gs[:,:-10], anchor='W')
+        self.color = self.f.add_subplot(gs[:,-10], anchor='W')
         self.color.tick_params(labelsize=6)
-        self.a.set_axis_off()
+        self.a.axis('off')
         self.color.axis('off')
         
         
@@ -402,95 +409,148 @@ class OPApp(ctk.CTk):
         #         Block 1
         # =====================================================================
         self.loadfiles_frame=ctk.CTkFrame(self.VI,width=window_width)
-        self.loadfiles_frame.grid(row=0, column=0,padx=50, pady=10, rowspan =1, columnspan=5,sticky='nsew')
+        self.loadfiles_frame.grid(row=0, column=0, padx=40, pady=10, rowspan =1, columnspan=3,sticky='nsew')
         
-        self.sat_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Satelite data file (.csv) :")
+        self.sat_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Path to satelite data .csv")
         self.sat_desc.grid(column=0, row=0)
         
-        self.sat_path =''
-        self.sat_path_label = ctk.CTkLabel(self.loadfiles_frame, text = "Select data path", width=550,text_color='red')
-        self.sat_path_label.grid(column=3, row=0, padx=10, pady=10, rowspan =1, columnspan=3,sticky='e')
-
-        self.sat_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Browse",
+        self.shown_sat_path = ctk.StringVar()
+        self.shown_sat_path.set("Select a path")
+        self.shown_data_path = ctk.StringVar()
+        self.shown_data_path.set("Select a path")
+        
+        self.sat_path = ''
+        self.sat_path_label = ctk.CTkEntry(self.loadfiles_frame, textvariable = self.shown_sat_path,
+                                           state = 'readonly',width=300,text_color='red')
+        self.sat_path_label.grid(column=1, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='e')
+        
+        self.sat_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Explore",
                                         command = lambda : self.get_path("sat"))
-        self.sat_bouton.grid(column=6, row=0, padx=10, pady=10, rowspan =1, columnspan=3,sticky='w')
-
-        self.data_desc = ctk.CTkLabel(self.loadfiles_frame, text = "ONE-PIX data cube (.hdr):")
+        self.sat_bouton.grid(column=2, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='w')
+        
+        
+        self.data_path = ''
+        self.data_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Path to ONE-PIX image :")
         self.data_desc.grid(column=0, row=1,sticky='e')
-        self.data_path=''
-        self.data_path_label = ctk.CTkLabel(self.loadfiles_frame, text = "Select data path", width=550,text_color='red')
-        self.data_path_label.grid(column=3, row=1, padx=10, pady=10, rowspan =1, columnspan=3,sticky='e')
-        self.data_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Browse"
+        self.data_path_label = ctk.CTkEntry(self.loadfiles_frame, textvariable = self.shown_data_path,
+                                            state = 'readonly',width=300,text_color='red')
+        self.data_path_label.grid(column=1, row=1, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='e')
+        self.data_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Explore"
                                          , command = lambda : self.get_path("data"))
-        self.data_bouton.grid(column=6, row=1, padx=10, pady=10, rowspan =1, columnspan=3,sticky='w')
+        self.data_bouton.grid(column=2, row=1, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='w')
+
+        
+        
+          
 
         # =====================================================================
         #         Block 2
         # =====================================================================
-        self.commands_frame=ctk.CTkFrame(self.VI)
-        self.commands_frame.grid(row=1, column=0, pady=10, rowspan =4)
+        self.seldomain_frame = ctk.CTkFrame(self.VI)
+        self.seldomain_frame.grid(row=0, column=3, pady=10, rowspan =1, sticky="w")
         
-        self.domain_desc = ctk.CTkLabel(self.commands_frame,text = "Field of application :")
-        self.domain_desc.grid(column=0, row=0, padx=10, pady=10, rowspan=1, columnspan=1)
-
-        self.domain = ctk.CTkComboBox(self.commands_frame)
+        self.domain_desc = ctk.CTkLabel(self.seldomain_frame,text = "Application domain")
+        self.domain_desc.grid(column=0, row=0, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+        test = ctk.CTkButton(self.seldomain_frame, text = "?",
+                             font=(tk.font.nametofont("TkDefaultFont"),20),text_color='red', width =12)
+        test.grid(column=1, row=0, padx=30, pady=(10,2.5), rowspan=1, columnspan=1)
+        self.domain = ctk.CTkComboBox(self.seldomain_frame)
         self.domain.configure(values= ("vegetation","snow","water"))
         self.domain.set("vegetation") #index de l'élément sélectionné
-        self.domain.grid(column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=1)    
-
-        self.sort_choice = ctk.CTkComboBox(self.commands_frame, variable = ("keep all", "siple filter"),
-                                   state = "readonly")
-        self.sort_choice.configure(values= ("keep all", "siple filter"))
-        self.sort_choice.set("keep all") #index de l'élément sélectionné
-        self.sort_choice.grid(column=0, row=1, padx=10, pady=10, rowspan=1, columnspan=1)
+        self.domain.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)  
         
-        self.critere = ctk.CTkComboBox(self.commands_frame, state = "readonly")
-        self.critere.configure(values= ("Variance", "Entropie"))
-        self.critere.set("Variance") #index de l'élément sélectionné
-        self.critere.grid(column=0, row=2, padx=10, pady=10, rowspan=1, columnspan=1)
         
-        self.nb_keep = ctk.CTkEntry(self.commands_frame, state = "disabled")
-        self.nb_keep.grid(column=1, row=2, padx=10, pady=10, rowspan=1, columnspan=1)
-        
-        self.calc_bouton = ctk.CTkButton(self.commands_frame , text = "Display indices", 
-                            state = "disabled",command = self.calculation)
-                           
-        self.calc_bouton.grid(column=1, row=1, padx=10, pady=10, rowspan=1, columnspan=1)
-
-        self.WIP = ctk.CTkLabel(self.commands_frame, text = "Waiting")
-        self.WIP.grid(column=0, row=3, padx=10, pady=10, rowspan=1, columnspan=1)
-
-        self.sort_choice.bind("<<ComboboxSelected>>", lambda event=None:
-                         self.get_mode_choice)
-            
         # =====================================================================
         #         Block 3
         # =====================================================================
-        self.indices_frame=ctk.CTkFrame(self.VI,width=250,height=600)
-        self.indices_frame.grid(row=1, column=1,padx=10, pady=10, rowspan =5, columnspan=5,sticky='')
+        self.preview_frame = ctk.CTkFrame(self.VI)
+        self.preview_frame.grid(row=1, column=0, pady=(5,5), rowspan =1)
+        
+        self.canvas_b3 = FigureCanvasTkAgg(self.bands_graph, self.preview_frame)
+        self.canvas_b3.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=5)
+        self.toolbarFrame_bX = ctk.CTkFrame(master=self.preview_frame, width=100, height=100)
+        self.toolbarFrame_bX.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=5)
+        NavigationToolbar2Tk(self.canvas_b3, self.toolbarFrame_bX)
+        
+        self.bands_list = AutocompleteCombobox(self.preview_frame)
+        self.bands_list["state"]= "disabled" # initialement grise
+        self.bands_list.set_completion_list([''])
+        self.bands_list.grid(column=0, row=0, padx=10, pady=10)
+        for binds in [self.bands_list]:
+            self.bands_list.bind("<<ComboboxSelected>>", lambda event=None:
+                         self.get_combobox_value("bands"))
+            self.bands_list.bind("<Return>", lambda event=None:
+                         self.get_combobox_value("bands"))
+        
+        self.bands_scale = tk.Scale(self.preview_frame, orient='horizontal', from_=0, to_=0, length=200,
+                          showvalue = 0, state = "disabled",
+                          repeatdelay = 100,
+                          command = self.plot_bands, var = self.shown_band)
+        self.bands_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=3)
+        
+        
 
-        self.canvas_b3 = FigureCanvasTkAgg(self.f, self.indices_frame)
-        self.canvas_b3.get_tk_widget().grid(column=0, row=2, padx=0, pady=10,rowspan=1, columnspan=5)
+
+
+        # =====================================================================
+        #         Block 4
+        # =====================================================================
+        self.commands_frame=ctk.CTkFrame(self.VI)
+        self.commands_frame.grid(row=2, column=0, pady=10, rowspan =1)
+
+        self.sort_choice = ttk.Combobox(self.commands_frame, textvariable = ("keep all", "simple filter"),
+                                   state = "readonly")
+        self.sort_choice['values']=["keep all", "simple filter"]
+        self.sort_choice.current(0) #index de l'élément sélectionné
+        self.sort_choice.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)        
+        self.sort_choice.bind("<<ComboboxSelected>>", lambda event=None:
+                         self.get_mode_choice())
+            
+        self.critere = ctk.CTkComboBox(self.commands_frame, values= ("Variance", "Entropy"), state = "readonly")
+        self.critere.set("Variance") #index de l'élément sélectionné
+        self.critere.configure(state = "disable")
+        self.critere.grid(column=0, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+        
+        self.nb_keep = ctk.CTkEntry(self.commands_frame, state = "disabled")
+        self.nb_keep.grid(column=1, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+        
+        self.calc_bouton = ctk.CTkButton(self.commands_frame , text = "Plot indices", 
+                            state = "disabled",command = self.calculation)
+                           
+        self.calc_bouton.grid(column=1, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+
+        self.WIP = ctk.CTkLabel(self.commands_frame, text = "Waiting")
+        self.WIP.grid(column=0, row=3, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+
+            
+        # =====================================================================
+        #         Block 5
+        # =====================================================================
+        self.indices_frame=ctk.CTkFrame(self.VI,width=250,height=600)
+        self.indices_frame.grid(row=1, column=1,padx=10, pady=10, rowspan =2, columnspan=3,sticky='NW')
+
+        self.canvas_b5 = FigureCanvasTkAgg(self.f, self.indices_frame)
+        self.canvas_b5.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=2)
 
         self.toolbarFrame = ctk.CTkFrame(master=self.indices_frame, width=100, height=100)
-        self.toolbarFrame.grid(column=0, row=1, padx=10, pady=10, rowspan=1, columnspan=5)
-        NavigationToolbar2Tk(self.canvas_b3, self.toolbarFrame)
+        self.toolbarFrame.grid(column=0, row=1, padx=10, pady=10, rowspan=1, columnspan=2)
+        NavigationToolbar2Tk(self.canvas_b5, self.toolbarFrame)
         
         self.indice_list = AutocompleteCombobox(self.indices_frame)
-        self.indice_list["state"]= "disabled" # initialement grise
+        self.indice_list.configure(state = "disabled") # initialement grise
         self.indice_list.set_completion_list([''])
         self.indice_list.grid(column=0, row=0, padx=10, pady=10)
         for binds in [self.indice_list]:
             self.indice_list.bind("<<ComboboxSelected>>", lambda event=None:
-                         self.get_combobox_value())
+                         self.get_combobox_value("idx"))
             self.indice_list.bind("<Return>", lambda event=None:
-                         self.get_combobox_value())
+                         self.get_combobox_value("idx"))
         
-        self.scale = tk.Scale(self.indices_frame, orient='horizontal', from_=0, to_=0, length=300,
+        self.indices_scale = tk.Scale(self.indices_frame, orient='horizontal', from_=0, to_=0, length=200,
                           showvalue = 0, state = "disabled",
                           repeatdelay = 100,
                           command = self.plot_indices, var = self.shown_IDX)
-        self.scale.grid(column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=3)
+        self.indices_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=3)
         
         self.save_options = ctk.CTkButton(self.indices_frame, text = 'Save options', state = "disabled",
                                        command = self.save_menu)
@@ -499,7 +559,7 @@ class OPApp(ctk.CTk):
         self.save_confirm = ctk.CTkButton(self.indices_frame, text = 'Save',state = "disabled",
                                       command = self.save_data)
         
-        self.save_confirm.grid(column=1, row=3, padx=(0,20), pady=10)   
+        self.save_confirm.grid(column=1, row=3, padx=(0,20), pady=10)
     
    
     
@@ -556,8 +616,7 @@ class OPApp(ctk.CTk):
     def close_window_proj(self):
  
         self.button_wind_test.configure(state= "normal")
-        plt.close('all')
-        
+#         plt.close('all')
         self.proj.destroy()
  
  
@@ -571,15 +630,13 @@ class OPApp(ctk.CTk):
  
     def window_size_test(self):      
         self.proj = tk.Tk()
-        dim = str(self.acq_config.width + 100) + "x" + str(self.acq_config.height + 100)
         os_name = platform.system()
         if os_name == 'Linux':
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, 1024, 0))
         else:
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, self.winfo_screenwidth(), 0))
- 
-        x = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
-        y = list(range(self.acq_config.width))  # vertical vector for the pattern creation
+        y = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
+        x = list(range(self.acq_config.width))  # vertical vector for the pattern creation
         Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
         A = 2 * np.pi * X * 10 / self.acq_config.height
         B = 2 * np.pi * Y * 10 / self.acq_config.width
@@ -587,17 +644,15 @@ class OPApp(ctk.CTk):
         pos_r[pos_r < 0] = 0
  
         pil_img = PIL.Image.fromarray(255 * pos_r)
-        self.copy_of_pil_img = pil_img.copy()
  
         img = PIL.ImageTk.PhotoImage(master=self.proj, image=pil_img)
         self.label_test_proj = tk.Label(self.proj, image=img)
         self.label_test_proj.image = img
  
-        self.label_test_proj.bind('<Configure>', self._resize_image)
+#         self.label_test_proj.bind('<Configure>', self._resize_image)
         self.label_test_proj.pack()
- 
-        button_quit_proj = tk.Button(self.proj, text="Close", command=self.close_window_proj)
-        button_quit_proj.pack()
+        self.proj.protocol("WM_DELETE_WINDOW", partial(self.close_window_proj))
+        self.proj.update()
         self.button_wind_test.configure(state = "disabled")
         
  
@@ -624,7 +679,7 @@ class OPApp(ctk.CTk):
     def spec_connection(self):
         try:
             self.acq_config.name_spectro =self.spectro_optionemenu.get()
-            self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms)
+            self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms,self.acq_config.wl_lim)
             self.acq_config.spec_lib.spec_open()
      
             if self.acq_config.spec_lib.DeviceName != '':
@@ -688,6 +743,7 @@ class OPApp(ctk.CTk):
         self.json_actualisation()
         self.acq_config.spec_lib.spec_close()
         del self.acq_config
+        gc.collect()
         self.acq_config = OPConfig(json_path)
         self.acq_config.spec_lib.spec_open()
         if (self.simple_mode_button.cget("state") == "normal"):
@@ -698,14 +754,16 @@ class OPApp(ctk.CTk):
  
  
     def acquire_hyp(self):
-        plt.close('all')
-        cv2.destroyAllWindows()
+#         plt.close('all')
+#         cv2.destroyAllWindows()
         # Entries actualisation
         self.entries_actualisation()
         self.acq_res=[]
         if (self.simple_mode_button.cget("state") =="disabled"):
             self.window_size_test()
             self.acq_config.OP_init()
+            while self.acq_config.spectro_flag:
+                pass
             self.close_window_proj()
             self.entry_integration_time.configure(state = 'normal')
             self.entry_integration_time.delete(0,10)
@@ -717,8 +775,8 @@ class OPApp(ctk.CTk):
             self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
             self.entry_pattern_duration.configure(state = 'disabled')
  
-        if (self.button_wind_test.cget("state") == "disabled"):
-            self.close_window_proj()
+#         if (self.button_wind_test.cget("state") == "disabled"):
+#             self.close_window_proj()
  
         # Start acquisition
         self.progressbar.start()
@@ -823,7 +881,6 @@ class OPApp(ctk.CTk):
             else:    
                 self.res["spectra"] = hsa.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths"],self.res["spectra"].T)
-            
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
             self.a_analysis.grid(True, linestyle='--')
@@ -1047,65 +1104,215 @@ class OPApp(ctk.CTk):
 #         VI's tab functions
 # =============================================================================
        
-# =============================================================================
-#         popup sauvegarde
-# =============================================================================
-
+    # =========================================================================
+    #     fonctions pour la sauvegarde
+    # =========================================================================
     def save_menu(self):
+        self.save_options.configure(state = "disabled")
         self.d = ctk.CTkToplevel(self)
         self.d.maxsize(500,400)
         self.d.attributes('-topmost', 'true')
         
-        self.format_choice = ctk.CTkComboBox(self.d, variable = ("PNG", "np array"),
-                                    values = ["PNG", "np array"],
-                                    state = "readonly")
-        self.format_choice.set("PNG") #index de l'élément sélectionné
-        self.format_choice.grid(column=0, row=0, padx=10, pady=10, rowspan =1, columnspan=2)
+        self.chkSave_id.set(1)
+        self.save_id_CB = ctk.CTkCheckBox(self.d, text = "Save indices", variable = self.chkSave_id)
+        self.save_id_CB.grid(column=0, row=0, padx=10, pady=2.5, rowspan =1, columnspan=1,
+                                sticky = "w")
         
-        self.save_desc = ctk.CTkLabel(self.d, text = "Save folder :")
-        self.save_desc.grid(column=0, row=1, padx=10, pady=10, rowspan =1, columnspan=1)
-    
-        self.save_path_label = ctk.CTkLabel(self.d, text = "Select data path")
-                            
-        self.save_path_label.grid(column=0, row=2, padx=10, pady=10, rowspan =1, columnspan=2)
-    
-        self.explore_bouton = ctk.CTkButton(self.d, text = "Browse", 
+        self.chkSave_bands.set(0)
+        self.save_bands_CB = ctk.CTkCheckBox(self.d, text = "Save bands", variable = self.chkSave_bands)
+        self.save_bands_CB.grid(column=2, row=0, padx=10, pady=2.5, rowspan =1, columnspan=1,
+                                sticky = "w")
+
+        
+        self.id_format = ctk.CTkComboBox(self.d, variable = ("id_np", "id_tif", "id_png"),
+                                    values = ["np array", "TIFF", "PNG"],
+                                    state = "readonly")
+        self.id_format.set("np array") #index de l'élément sélectionné
+        self.id_format.grid(column=0, row=1, padx=10, pady=2.5, rowspan =1, columnspan=1,
+                                sticky = "w")
+        
+        self.bands_format = ctk.CTkComboBox(self.d, variable = ("b_np", "b_tif", "b_png"),
+                                    values = ["np array", "TIFF", "PNG"],
+                                    state = "readonly")
+        self.bands_format.set("np array") #index de l'élément sélectionné
+        self.bands_format.grid(column=2, row=1, padx=10, pady=2.5, rowspan =1, columnspan=1,
+                                sticky = "w")
+        
+        
+        self.save_desc = ctk.CTkLabel(self.d, text = "Save directory :")
+        self.save_desc.grid(column=0, row=2, padx=10, pady=(10,2.5), rowspan =1, columnspan=1,
+                            sticky="w")
+        
+        self.shown_save_path = ctk.StringVar()
+        self.shown_save_path.set("Select a path")
+        self.save_path_label = ctk.CTkEntry(self.d, textvariable = self.shown_save_path,
+                                           state = 'readonly',width=300,text_color='red')
+        self.save_path_label.grid(column=0, row=3, padx=10, pady=(2.5,10), rowspan =1, columnspan=2)
+
+        self.explore_bouton = ctk.CTkButton(self.d, text = "Parcourir", 
                                  command = lambda : self.get_dir())
-        self.explore_bouton.grid(column=1, row=1, padx=10, pady=10, rowspan =1, columnspan=1)
+        self.explore_bouton.grid(column=2, row=3, padx=10, pady=(2.5,10), rowspan =1, columnspan=1)
+        
+        self.comment_label = ctk.CTkLabel(self.d, text = "Enter a comment : ")
+        self.comment_label.grid(column=0, row=4, padx=10, pady=10, rowspan =1, columnspan=1, sticky="w")
+        
+        self.save_comment.set("")
+        self.comment_text = ctk.CTkEntry(self.d, textvariable = self.save_comment,
+                                           state = 'normal',width=300)
+        self.comment_text.grid(column=1, row=4, padx=10, pady=10, rowspan =1, columnspan=2,
+                            sticky="w")
+        
+        
         
         self.CANCEL_save_bouton = ctk.CTkButton(self.d, text = "Cancel",
-                                            state = "normal", command = self.d.destroy)
-        self.CANCEL_save_bouton.grid(column=2, row=3, padx=10, pady=10, rowspan =1, columnspan=1)
+                                            state = "normal", command = lambda :[self.d.destroy(),
+                                                                                           self.save_options.configure(state = "normal")])
+        self.CANCEL_save_bouton.grid(column=0, row=5, padx=10, pady=10, rowspan =1, columnspan=1)
         
         self.confirm_bouton = ctk.CTkButton(self.d, text = "Confirm", state = "disabled",
                                         command = self.check_path)
-        self.confirm_bouton.grid(column=1, row=3, padx=10, pady=10, rowspan =1, columnspan=1)
+        self.confirm_bouton.grid(column=2, row=5, padx=10, pady=10, rowspan =1, columnspan=1)
+        self.d.protocol("WM_DELETE_WINDOW", lambda :[self.d.destroy(),
+                                                        self.save_options.configure(state = "normal")])
 
 
-# =============================================================================
-#         pour le bind de la combobox des indices
-# =============================================================================
+    def get_dir(self):
+        path = filedialog.askdirectory(parent=self.d)
+        if path != "" and path!=(): # because returns a tupple in the first place
+            self.confirm_bouton.configure(state = "normal")
+            self.shown_save_path.set(path)
+            self.save_path_label.configure(text_color="white")
+            self.save_path = path
+        else:
+            self.confirm_bouton.configure(state = "disabled")
+            
 
-    def get_combobox_value(self):
-        try:
-            self.shown_IDX = self.indice_list.get()
-            self.scale.set(self.IDXS["names"].index(self.shown_IDX))
-        except ValueError:
-            showwarning('Unknown VI','Select a VI from the list')
-            self.indice_list.set(self.IDXS["names"][0])
+
+    def check_path(self):
+        # self.save_path = self.save_path_label["text"]
+        self.save_confirm.configure(state = "normal")
+        self.id_SaveFormat = self.id_format.get()
+        self.bands_SaveFormat = self.bands_format.get()
+        self.d.destroy()
+        self.save_options.configure(state="normal")
+        
+
+    def save_data(self):
+        today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
+        self.save_confirm.configure(state = "disabled")
+        self.WIP.configure(text = "Saving...")
+        foldername='ONE-PIX_VI'+self.IM["folder_name"]
+        path = self.save_path+"/"+foldername
+        if not(os.path.exists(path)):
+            os.mkdir(path)
+        path += "/"+today
+        os.mkdir(path)
+            
+        # saving the spectral indices
+        if self.chkSave_id.get():
+            if self.id_SaveFormat == "PNG":
+                os.mkdir(path+"/VI")
+                for i in range(len(self.IDXS['names'])):
+                    temp_im = self.IDXS['id'][i]
+                    temp_im = temp_im + abs(temp_im.min())
+                    temp_im = 255 * (temp_im - temp_im.min())/(temp_im.max() - temp_im.min())
+                    
+                    
+                    cv2.imwrite(path+"/VI/"+self.IDXS['names'][i] + ".png", 
+                                np.uint8(temp_im))
+            
+            else:
+                im = []
+                for i in range(len(self.IDXS['names'])):
+                    im.append(self.IDXS['id'][i].reshape(-1))
+                np.save(path+"/"+"indices_names", np.asarray(self.IDXS['names']))
+                if self.id_SaveFormat == "np array":
+                    np.save(path+"/"+"VI", np.asarray(im))
+                    
+                elif self.id_SaveFormat == "TIFF":
+                    tiff.imsave(path+"/"+"indices.tiff",
+                               np.asarray([np.uint8(255*(i-i.min())/(i.max()-i.min())) for i in self.IDXS['id']]))
+        # saving the bands
+        if self.chkSave_bands.get():
+            if self.bands_SaveFormat == "PNG":
+                os.mkdir(path+"/bands")
+                for i in range(len(self.IM['bands_names'])):
+                    temp_im = self.IM['bands'][i]
+                    temp_im = temp_im + abs(temp_im.min())
+                    temp_im = 255 * (temp_im - temp_im.min())/(temp_im.max() - temp_im.min())
+                
+                    cv2.imwrite(path+"/bands/"+self.IM['bands_names'][i] + ".png", 
+                                np.uint8(temp_im))
+            
+            else:
+                im = []
+                for i in range(len(self.IM['bands_names'])):
+                    im.append(self.IM['bands'][i].reshape(-1))
+                np.save(path+"/"+"bands_names", np.asarray(self.IM['bands_names']))
+                if self.id_SaveFormat == "np array":
+                    np.save(path+"/"+"bands", np.asarray(im))
+                    
+                elif self.id_SaveFormat == "TIFF":
+                    tiff.imsave(path+"/"+"bands.tiff", np.asarray(self.IM['shown_bands']))
+        
+        # creation of the log file
+        with open(path+"/"+"log.txt", "w") as f:
+            print("version : alpha-2023_02_16", file = f)
+            print("satellite name : " + self.sat_path.split('/')[-1][:-4], file = f)
+            print("original data file : " + self.IM["folder_name"], file = f)
+            print("chosen domain : " + self.domain.get(), file = f)
+            if self.sort_choice.get() =="keep all":
+                print("filtering method : " + "None", file = f)
+            else:
+                print("filtering method : " + "max-"+self.critere.get(), file = f)
+            if self.chkSave_id.get():
+                print("number of kept Spectral Indices : " + str(len(self.IDXS["names"])), file = f)
+                print("chosen format for indices : " + self.id_SaveFormat, file = f)
+            else:
+                print("number of kept Spectral Indices : " + "0", file = f)
+                print("chosen format for indices : " + "None", file = f)
+                
+            if self.chkSave_bands.get():
+                print("chosen format for bands : " + self.bands_SaveFormat, file = f)
+            else:
+                print("chosen format for bands : " + "None", file = f)
+            print("comment : " + self.save_comment.get(), file = f)
+        self.save_options.configure(state = "normal")
+        self.WIP.configure(text = "Done")
+        
+                    
+            
+    # =========================================================================
+    #     pour le bind des combobox des indices et des bandes
+    # =========================================================================
+    def get_combobox_value(self, sel):
+        if sel=="idx":
+            try:
+                self.shown_IDX = self.indice_list.get()
+                self.indices_scale.set(self.IDXS["names"].index(self.shown_IDX))
+            except ValueError:
+                showwarning('Unknown VI','Select a VI from the list')
+                self.indice_scale.set(self.IDXS["names"][0])
+        elif sel=="bands":
+            try:
+                self.shown_band = self.bands_list.get()
+                self.bands_scale.set(self.IM["bands_names"].index(self.shown_band))
+            except ValueError:
+                showwarning('Unknown band','Select a band from the list')
+                self.bands_scale.set(self.IM["bands_names"][0])
+        self.update()
             
         
-    
-# =============================================================================
-#         griser sur selection dans la combobox
-# =============================================================================
+
+    # =========================================================================
+    #     griser sur selection dans la combobox
+    # =========================================================================
     def get_mode_choice(self):
         sel = self.sort_choice.get()
         if sel == "keep all":
             self.critere.configure(state = "disabled")
             self.nb_keep.configure(state = "disabled")
-            #self.update()
-        elif sel == "siple filter":
+        elif sel == "simple filter":
             self.critere.configure(state = "normal")
             self.nb_keep.configure(state = "normal")
             self.nb_keep.delete(0,tk.END)
@@ -1113,147 +1320,162 @@ class OPApp(ctk.CTk):
         
         
         
-# =============================================================================
-#         demande des chemins pour le calcul
-# =============================================================================
+    # =========================================================================
+    #     demande des chemins pour le calcul
+    # =========================================================================
     def get_path(self, name = None):
         path = filedialog.askopenfilename()
         if name =="sat":
             if path.endswith(".csv"):
-                self.sat_path_label.configure(text = os.path.join('', *path.split('/')[-3:]),text_color='white')
+                self.sat_path_label.configure(text_color='white')
+                self.shown_sat_path.set(os.path.join('', *path.split('/')[-3:]))
                 self.sat_path=path
             else:
-                # self.sat_path_label.configure(text = os.path.join('', *path.split('/')[-3:]),text_color='red')
+                self.sat_path_label.configure(text_color='red')
+                self.shown_sat_path.set(os.path.join('', *path.split('/')[-3:]))
                 self.calc_bouton.configure(state = "disabled")
             
         else: #if name == "data"
             if path.endswith((".tif",".hdr")):
-                self.data_path_label.configure(text =os.path.join('', *path.split('/')[-3:]),text_color='white')
+                self.data_path_label.configure(text_color='white')
+                self.shown_data_path.set(os.path.join('', *path.split('/')[-3:]))
                 self.data_path=path
             else:
-                # self.data_path_label.configure(text =os.path.join('', *path.split('/')[-3:]),text_color='red')
+                self.data_path_label.configure(text_color='red')
+                self.shown_data_path.set(os.path.join('', *path.split('/')[-3:]))
                 self.calc_bouton.configure(state = "disabled")
-    
+
         if (self.sat_path.endswith(".csv") and self.data_path.endswith((".tif",".hdr"))):
             self.calc_bouton.configure(state = "normal")
+
             
-            
-# =============================================================================
-#             demande du dossier de sauvegarde
-# =============================================================================
-    def get_dir(self):
-        path = filedialog.askdirectory(parent=self.d)
-        if path != "":
-            self.confirm_bouton.configure(state = "normal")
-            self.save_path_label.configure(text= path)
-            self.save_path = path
-            self.save_format = self.format_choice.get()
-                
-        
-        
+
     def plot_indices(self, val):
             VAL = int(val)
-            self.a.set_axis_off()
             self.a.clear()
+            self.a.axis('off')
+            current_cmap = CM.get_cmap()
+            current_cmap.set_bad(color='white')
             self.a.set_title(self.IDXS["names"][VAL],color='white')
             self.color.clear()
             shw = self.a.imshow((self.IDXS["id"][VAL]))
             self.f.colorbar(shw, cax = self.color)
+            self.color.ticklabel_format(useOffset=False)
             self.f.canvas.draw_idle()
-            self.scale.configure(label = self.IDXS["names"][VAL])
-            self.indice_list.set(self.IDXS["names"][VAL])
-    
-    
+            self.indices_scale.configure(label = self.IDXS["names"][VAL])
+            self.indice_list.current(VAL)
+            
+    def plot_bands(self, val):
+            VAL = int(val)
+            self.bands_subplot.axis('off')
+            self.bands_subplot.clear()
+            self.bands_subplot.axis('off')
+            self.bands_subplot.set_title(self.IM["bands_names"][VAL],color='white')
+            shw = self.bands_subplot.imshow((self.IM["shown_bands"][VAL]))
+            self.bands_graph.canvas.draw_idle()
+            self.bands_scale.configure(label = self.IM["bands_names"][VAL])
+            self.bands_list.current(VAL)
+
+
     def calculation(self):
-        self.scale.configure(state = "disabled")
+        self.indices_scale.configure(state = "disabled")
         self.indice_list.configure(state = "disabled")
+        
+        self.bands_scale.configure(state = "disabled")
+        self.bands_list.configure(state = "disabled")
+        
         self.save_options.configure(state = "disabled")
         self.WIP.configure(text = "Computing...")
         self.update()
         id_names = [n for n in sp.indices if (sp.indices[n].application_domain==self.domain.get())]
         self.get_idx(id_names)
-        for i in range(len(id_names)):
-            indice = self.IDXS["id"][i]
-            self.IDXS["id"][i] = indice/np.max(abs(indice))
+        # for i in range(len(id_names)):
+        #     indice = self.IDXS["id"][i]
+        #     self.IDXS["id"][i] = indice/np.max(abs(indice))
         self.sort_idx()
+        # tri des indices dans l'ordre alphabétique (majuscules exclues) pour isoler le code
+        any, self.IDXS["names"], self.IDXS["id"] = zip(*sorted(
+            zip([name.lower() for name in self.IDXS["names"]],
+                self.IDXS["names"], self.IDXS["id"])))
+        
+        # tri des bandes dans l'ordre alphabétique (majuscules exclues) pour isoler le code
+        any, self.IM["bands_names"], self.IM["shown_bands"] = zip(*sorted(
+            zip([name.lower() for name in self.IM["bands_names"]],
+                self.IM["bands_names"], self.IM["shown_bands"])))
+        
         self.WIP.configure(text = "Done")
-        self.scale.configure(state = "normal", to_ = len(self.IDXS["names"]) - 1,
+        self.indices_scale.configure(state = "normal", to_ = len(self.IDXS["names"]) - 1,
                               label = self.IDXS["names"][0])
-        self.scale.set(0) #after the state = activate to provide refresh the label
-        self.plot_indices(self.scale.get())
+        self.bands_scale.configure(state = "normal", to_ = len(self.IM["bands_names"]) - 1,
+                              label = self.IM["bands_names"][0])
+        self.indices_scale.set(0) #after the state = activate to provide refresh the label
+        self.bands_scale.set(0)
+        
+        self.plot_indices(self.indices_scale.get())
+        self.plot_bands(self.bands_scale.get())
+        
         self.indice_list.configure(state = "normal")
         self.save_options.configure(state = "normal")
+        self.bands_list.configure(state = "normal")
+        
+        
         self.indice_list.set_completion_list(self.IDXS["names"])
-        self.indice_list.set(self.IDXS["names"][0])
+        self.bands_list.set_completion_list(self.IM["bands_names"])
+        self.indice_list.current(0)
+        self.bands_list.current(0)
+        self.update()
 
-    
-# =============================================================================
-#         fonctions de réduction du nombre d'indices affichés
-# =============================================================================
+    # =============================================================================
+    #         fonctions de réduction du nombre d'indices affichés
+    # =============================================================================
     def sort_idx(self):
-        if self.sort_choice.get() == "keep all": #delete constant images
-            temp = {"id":[], "names":[]}
-            for i in range(len(self.IDXS["names"])):
-                if len(np.unique(self.IDXS["id"][i]))!=1:
-                    temp["id"].append(self.IDXS["id"][i])
-                    temp["names"].append(self.IDXS["names"][i])
-            temp["id"] = np.asarray(temp["id"])
-            self.IDXS = temp
-            
-        elif self.sort_choice.get() == "siple filter":
+        # filtering "only background" and outliers
+        temp = {"id":[], "names":[]}
+        for i in range(len(self.IDXS["names"])):
+            if len(np.unique(self.IDXS["id"][i]))!=1:
+                temp["id"].append(self.IDXS["id"][i])
+                temp["names"].append(self.IDXS["names"][i])
+        temp["id"] = np.asarray(temp["id"])
+        self.IDXS = temp
+        
+        if self.sort_choice.get() == "simple filter":
             nb = int(self.nb_keep.get())
             if nb>len(self.IDXS["names"]):
                 nb = len(self.IDXS["names"])
-            if self.critere.get() == "entropie":
-                ENTR = [entropy(self.IDXS["id"][k]) for k in range(len(self.IDXS["names"]))]
+                
+            # entropy of the image (without nans and outliers)
+            if self.critere.get() == "Entropy":
+                ENTR = []
+                for i in range(len(self.IDXS["names"])):
+                    im = self.IDXS["id"][i]
+                    im = im[~np.isnan(im)]
+                    im[im>np.quantile(im,q = .95)]=np.nan
+                    im[im<np.quantile(im,q = .05)]=np.nan
+                    im = im[~np.isnan(im)]
+                    ENTR.append(np.var(im))
                 names = self.IDXS["names"]
                 ids = self.IDXS["id"] #no need to set it as a list, sort will do
                 ENTR, names, ids = zip(*sorted(zip(ENTR, names, ids), reverse=True))
                 self.IDXS = {"id": np.asarray(ids[:nb]),
                         "names": names[:nb]}
                 
-            elif self.critere.get() == "variance":
-                VAR = [np.var(self.IDXS["id"][k]) for k in range(len(self.IDXS["names"]))]
+            # variance of the image (without nans and outliers)
+            elif self.critere.get() == "Variance":
+                VAR = []
+                for i in range(len(self.IDXS["names"])):
+                    im = self.IDXS["id"][i]
+                    im = im[~np.isnan(im)]
+                    im[im>np.quantile(im,q = .95)]=np.nan
+                    im[im<np.quantile(im,q = .05)]=np.nan
+                    im = im[~np.isnan(im)]
+                    VAR.append(np.var(im))
                 names = self.IDXS["names"]
                 ids = self.IDXS["id"] #no need to set it as a list, sort will do
                 VAR, names, ids = zip(*sorted(zip(VAR, names, ids), reverse=True))
                 self.IDXS = {"id": np.asarray(ids[:nb]),
                         "names": names[:nb]}
-                
-    
-        
-# =============================================================================
-#         sauvegarde des indices calculés
-# =============================================================================
-    def save_data(self):
-        self.save_confirm.configure(state = "disabled")
-        self.WIP.configure(text = "Saving...")
-        foldername='ONE-PIX_VI'+self.data_path.split('/')[-2][19:]
-        os.mkdir(self.save_path+"/"+foldername)
-        if self.save_format == "PNG":
-            for i in range(len(self.IDXS['names'])):
-                temp_im = self.IDXS['id'][i]
-                temp_im = temp_im + abs(temp_im.min())
-                temp_im = 255 * (temp_im - temp_im.min())/(temp_im.max() - temp_im.min())
-                
-                
-                cv2.imwrite(self.save_path+"/"+foldername+"/"+self.IDXS['names'][i] + ".png", 
-                            np.uint8(temp_im))
-        elif self.save_format == "np array":
-            im = []
-            for i in range(len(self.IDXS['names'])):
-                im.append(self.IDXS['id'][i].reshape(-1))
-            np.save(self.save_path+"/"+foldername+"/"+"indices", np.asarray(im))
-            np.save(self.save_path+"/"+foldername+"/"+"indices_names", np.asarray(self.IDXS['names']))
-        self.WIP.configure(text = "Done")
-                
-    
-        
-    def check_path(self):
-        # self.save_path = self.save_path_label["text"]
-        self.save_confirm.configure(state = "normal")
-        self.d.destroy()
-    
+
+
         
     def get_idx(self, idx_to_compute, C1 = sp.constants.C1.default,
                 C2 = sp.constants.C2.default,
@@ -1279,15 +1501,17 @@ class OPApp(ctk.CTk):
         df = pd.read_csv(self.sat_path, delimiter=';', engine = 'c')
         df2=df.dropna(axis = 0, how = 'all').dropna(axis = 1, how = 'all')
         
-        if self.data_path.endswith('.tif'):
+        if self.data_path.endswith('.tif') or self.data_path.endswith('.tiff'):
             self.IM = {"IM" : tiff.imread(self.data_path),
                         "wl" : np.load([f for f in os.listdir(os.chdir(os.path.dirname(self.data_path)))
-                                        if f.startswith("wavelengths")][0])}
+                                        if f.startswith("wavelengths")][0]),
+                        "folder_name" : self.data_path.split('/')[-2][:]}
         
         elif self.data_path.endswith('.hdr'):
             res=load_hypercube(opt=os.path.dirname(self.data_path))
             self.IM = {"IM" : res["hyperspectral_image"].T,
-                        "wl" : res["wavelengths"]}
+                        "wl" : res["wavelengths"],
+                        "folder_name" : self.data_path.split('/')[-2][19:]}
         
         bands = []
         f = []
@@ -1297,18 +1521,21 @@ class OPApp(ctk.CTk):
         bands = np.asarray(bands)
         
         self.IM["bands"] = bands #ajout des bandes spectrales dans le dictionnaire
+        self.IM["shown_bands"] = [np.uint8(255*(i-i.min())/(i.max()-i.min())) for i in self.IM["bands"]]
         
-        A,B,G,R,RE1,RE2,RE3,N,N2,any,WV,S1,S2 = list(bands[np.arange(13),:,:])
+        self.IM["bands_names"] = ["Aerosols", "Blue", "Green", "Red",
+                          "Red Edge 1", "Red Edge 2", "Red Edge 3",
+                          "NIR", "NIR 2", "Water Vapour", "SWIR 1",
+                          "SWIR 2"]
+        
+        A,B,G,R,RE1,RE2,RE3,N,N2,WV,any,S1,S2 = list(bands[np.arange(13),:,:])
         bands = np.array([A,B,G,R,RE1,RE2,RE3,N,N2,WV,S1,S2])
         
         
         da = xr.DataArray(
             bands,
             dims = ("band","x","y"),
-            coords = {"band":["Aerosols", "Blue", "Green", "Red",
-                              "Red Edge 1", "Red Edge 2", "Red Edge 3",
-                              "NIR", "NIR 2", "Water Vapour", "SWIR 1",
-                              "SWIR 2"]}
+            coords = {"band":self.IM["bands_names"]}
             )
         
         idx = sp.computeIndex(
@@ -1354,7 +1581,9 @@ class Toolbar(NavigationToolbar2Tk):
         pass
 
 class AutocompleteCombobox(ttk.Combobox):
-    """:class:`ttk.Combobox` widget that features autocompletion."""
+    """
+    :class:`ttk.Combobox` widget that features autocompletion.
+    """
     def __init__(self, master=None, completevalues=None, **kwargs):
         """
         Create an AutocompleteCombobox.
@@ -1451,7 +1680,7 @@ class AutocompleteCombobox(ttk.Combobox):
         """
         self.icursor(tk.END)
         self.selection_clear()
-        
+            
         
 if __name__ == "__main__":
     app = OPApp()
