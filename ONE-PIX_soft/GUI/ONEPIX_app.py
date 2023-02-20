@@ -637,6 +637,7 @@ class OPApp(ctk.CTk):
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, self.winfo_screenwidth(), 0))
         y = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
         x = list(range(self.acq_config.width))  # vertical vector for the pattern creation
+
         Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
         A = 2 * np.pi * X * 10 / self.acq_config.height
         B = 2 * np.pi * Y * 10 / self.acq_config.width
@@ -1386,7 +1387,7 @@ class OPApp(ctk.CTk):
         
         self.save_options.configure(state = "disabled")
         self.WIP.configure(text = "Computing...")
-        self.update()
+#         self.update()
         id_names = [n for n in sp.indices if (sp.indices[n].application_domain==self.domain.get())]
         self.get_idx(id_names)
         # for i in range(len(id_names)):

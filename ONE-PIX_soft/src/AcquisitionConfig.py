@@ -60,7 +60,6 @@ class OPConfig:
         self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms,self.wl_lim)
         self.wavelengths = []
         self.spectro_flag=False
-
         self.duration = 0
         self.periode_pattern = self.mes_ratio*self.integration_time_ms
         if self.periode_pattern < 80: self.periode_pattern = 80
