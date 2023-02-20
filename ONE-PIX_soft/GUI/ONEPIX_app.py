@@ -13,7 +13,7 @@ import matplotlib.cm as CM
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams, ticker
-rcParams.update({'figure.autolayout': True})
+#rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
 rcParams['xtick.color']='white'
 rcParams['ytick.color']='white'
@@ -1207,7 +1207,7 @@ class OPApp(ctk.CTk):
         today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
         self.save_confirm.configure(state = "disabled")
         self.WIP.configure(text = "Saving...")
-        foldername='ONE-PIX_VI'+self.IM["folder_name"]
+        foldername='ONE-PIX_VI'+'_'+self.IM["folder_name"]
         path = self.save_path+"/"+foldername
         if not(os.path.exists(path)):
             os.mkdir(path)
