@@ -10,6 +10,7 @@ class OceanInsightBridge:
         self.integration_time_ms=integration_time_ms
         self.spec=[]
         self.DeviceName=''
+       
         
     def spec_open(self):
         """
@@ -24,6 +25,7 @@ class OceanInsightBridge:
             self.spec=Spectrometer.spec=Spectrometer.from_first_available()
             self.spec.open() #open the communication with the spectrometer
             self.DeviceName=str(self.spec.serial_number)
+            
         except seabreeze.cseabreeze.SeaBreezeError as e:
             raise Exception ('No Ocean Insight device was detected : %s'%e)
             

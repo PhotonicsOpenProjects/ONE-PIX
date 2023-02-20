@@ -7,6 +7,7 @@ from tkinter.messagebox import showwarning
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
+
 import matplotlib.patches as patches
 import matplotlib.cm as CM
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -39,7 +40,7 @@ import json
 from decimal import Decimal
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
-
+import threading
 
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -180,7 +181,7 @@ class OPApp(ctk.CTk):
         self.button_co = ctk.CTkButton(self.acq_mode_frame, text="Spectrometer connection",state='normal',height=40,command=self.spec_connection)
         self.button_co.grid(row=4, column=0)
         
-        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command=self.acquire_hyp)
+        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command= self.acquire_hyp)
         self.button_acquire_hyp.grid(row=4, column=1)
         
         # =====================================================================
@@ -261,13 +262,13 @@ class OPApp(ctk.CTk):
 
         #create left side bar's buttons
         self.load_button = ctk.CTkButton(self.load_frame, text="Load data",width=80,height=40,command=self.load_data)
-        self.load_button.grid(row=0, column=0,padx=60,pady=5,sticky='w')
+        self.load_button.grid(row=1, column=0,padx=60,pady=5,sticky='w')
         
         self.clear_button = ctk.CTkButton(self.load_frame, text="Clear all",height=40,width=80,command=self.clear_analysis)
-        self.clear_button.grid(row=0, column=0,padx=(100,0),pady=5)
+        self.clear_button.grid(row=1, column=0,padx=(100,0),pady=5)
         
-        self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=12, weight="bold"))
-        self.label_data_info.grid(row=1, column=0,sticky='w',pady=10)
+        self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=14, weight="bold"))
+        self.label_data_info.grid(row=0, column=0,sticky='w',pady=10)
         
         self.rgb_fig = Figure(figsize=(3.5,3), dpi=80)
         self.rgb_fig.patch.set_facecolor('#2D2D2D')
@@ -278,7 +279,7 @@ class OPApp(ctk.CTk):
         self.rgb_canvas.get_tk_widget().grid(row=2,column=0,pady=20,sticky='w')
         
         self.rgb_toolbar_frame=ctk.CTkFrame(self.load_frame)
-        self.rgb_toolbar_frame.grid(row=3, column=0,padx=0,pady=20)
+        self.rgb_toolbar_frame.grid(row=3, column=0,padx=0,pady=10)
         self.rgb_toolbar = Toolbar(self.rgb_canvas, self.rgb_toolbar_frame)
         self.rgb_toolbar.config(background='#2D2D2D')
         self.rgb_toolbar._message_label.config(background='#2D2D2D')
@@ -331,8 +332,8 @@ class OPApp(ctk.CTk):
         
         self.wl_limits=[0,0]
         
-        self.normalisation_button = ctk.CTkButton(self.analysis_frame, text="Normalisation",height=40,width=60,command=self.refl_norm)
-        self.normalisation_button.grid(row=3, column=0,padx=0, pady=20,columnspan=2,sticky='nsew')
+        self.normalisation_button = ctk.CTkButton(self.analysis_frame, text="Normalisation",height=40,width=80,command=self.refl_norm)
+        self.normalisation_button.grid(row=3, column=0,padx=0, pady=20,columnspan=2,sticky='')
         
         self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text="Advanced analysis: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=4,column=0)
@@ -360,9 +361,7 @@ class OPApp(ctk.CTk):
         self.smooth_button.grid(row=8, column=1,pady=5)
     
         self.save_opt_button = ctk.CTkButton(self.analysis_frame, text="Save",width=65,command=self.save_analysis_opt)
-        self.save_opt_button.grid(row=9, column=0,pady=20,padx=(80,0),sticky='e')
-        # self.save_button = ctk.CTkButton(self.analysis_frame, text="Save",width=50,height=30,command=self.save_analysis_data)
-        # self.save_button.grid(row=9, column=1,pady=20,sticky='')
+
         
 # =============================================================================
 #         VI Analysis tab
@@ -644,7 +643,7 @@ class OPApp(ctk.CTk):
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, 1024, 0))
         else:
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, self.winfo_screenwidth(), 0))
- 
+        print(self.winfo_screenwidth())
         x = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
         y = list(range(self.acq_config.width))  # vertical vector for the pattern creation
         Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
@@ -691,7 +690,7 @@ class OPApp(ctk.CTk):
     def spec_connection(self):
         try:
             self.acq_config.name_spectro =self.spectro_optionemenu.get()
-            self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms)
+            self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms,self.acq_config.wl_lim)
             self.acq_config.spec_lib.spec_open()
      
             if self.acq_config.spec_lib.DeviceName != '':
@@ -754,6 +753,7 @@ class OPApp(ctk.CTk):
     def entries_actualisation(self):
         self.json_actualisation()
         self.acq_config.spec_lib.spec_close()
+
         self.acq_config = OPConfig(json_path)
         self.acq_config.spec_lib.spec_open()
         if (self.simple_mode_button.cget("state") == "normal"):
@@ -764,8 +764,8 @@ class OPApp(ctk.CTk):
  
  
     def acquire_hyp(self):
-        plt.close('all')
-        cv2.destroyAllWindows()
+#         plt.close('all')
+#         cv2.destroyAllWindows()
         # Entries actualisation
         self.entries_actualisation()
  
@@ -889,7 +889,6 @@ class OPApp(ctk.CTk):
             else:    
                 self.res["spectra"] = hsa.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths"],self.res["spectra"].T)
-            
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
             self.a_analysis.grid(True, linestyle='--')
@@ -1420,7 +1419,7 @@ class OPApp(ctk.CTk):
         
         self.save_options.configure(state = "disabled")
         self.WIP.configure(text = "Computing...")
-        self.update()
+#         self.update()
         id_names = [n for n in sp.indices if (sp.indices[n].application_domain==self.domain.get())]
         self.get_idx(id_names)
         # for i in range(len(id_names)):
