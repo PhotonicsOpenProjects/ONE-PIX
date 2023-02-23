@@ -188,7 +188,7 @@ def load_hypercube(opt=None):
     res={"hyperspectral_image":[],"wavelengths":[]}
     
     if opt==None:
-        meas_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions")
+        meas_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions",initialdir=os.getcwd())
     elif opt=='last':
         root_path=os.getcwd()
         path=os.path.join(root_path,'Hypercubes')

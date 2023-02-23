@@ -88,7 +88,7 @@ class OPConfig:
     
         """
         
-        max_counts = 45000
+        max_counts = 40000
         self.spec_lib.set_integration_time()
         
         flag = True

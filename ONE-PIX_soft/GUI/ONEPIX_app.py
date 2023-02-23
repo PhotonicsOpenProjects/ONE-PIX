@@ -8,7 +8,8 @@ from tkinter.messagebox import showwarning
 from functools import partial
 import PIL.Image, PIL.ImageTk
 import matplotlib.pyplot as plt
-plt.switch_backend('agg')
+plt.switch_backend('Agg')
+import matplotlib.cm as CM
 import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
@@ -182,15 +183,15 @@ class OPApp(ctk.CTk):
         # =====================================================================
         # create Display frame
         self.display_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, padx=(0, 0), pady=(20, 0), sticky="nw")
+        self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, pady=(20, 0), sticky="nsew")
         self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text="Display: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
 
-        self.fig = Figure(figsize=(5,4), dpi=100)
+        self.fig = Figure(figsize=(6.5,5.5), dpi=100)
         self.fig.patch.set_facecolor('#2D2D2D')
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=1,column=0,padx=25,pady=5,sticky="w")
+        self.canvas.get_tk_widget().grid(row=1,column=0,padx=20,pady=5,sticky="")
         self.a_acq= self.fig.add_subplot(111)
         self.a_acq.set_axis_off()
         
@@ -250,15 +251,15 @@ class OPApp(ctk.CTk):
         #         block 1
         # =====================================================================
         #Create left side bar
-        self.load_frame = ctk.CTkFrame(self.analysis_tab,width=280)
-        self.load_frame.grid(row=0, column=0)
+        self.load_frame = ctk.CTkFrame(self.analysis_tab)
+        self.load_frame.grid(row=0, column=0,sticky='nsew',padx=10)
 
         #create left side bar's buttons
         self.load_button = ctk.CTkButton(self.load_frame, text="Load data",width=80,height=40,command=self.load_data)
-        self.load_button.grid(row=1, column=0,padx=60,pady=5,sticky='w')
+        self.load_button.grid(row=1, column=0,padx=20,pady=5,sticky='w')
         
         self.clear_button = ctk.CTkButton(self.load_frame, text="Clear all",height=40,width=80,command=self.clear_analysis)
-        self.clear_button.grid(row=1, column=0,padx=(100,0),pady=5)
+        self.clear_button.grid(row=1, column=0,padx=(90,0),pady=5)
         
         self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=14, weight="bold"))
         self.label_data_info.grid(row=0, column=0,sticky='w',pady=10)
@@ -269,7 +270,7 @@ class OPApp(ctk.CTk):
         self.a_rgb.set_axis_off()
         self.rgb_canvas = FigureCanvasTkAgg(self.rgb_fig,master=self.load_frame)  # A tk.DrawingArea.
         self.rgb_canvas.draw()
-        self.rgb_canvas.get_tk_widget().grid(row=2,column=0,pady=20,sticky='w')
+        self.rgb_canvas.get_tk_widget().grid(row=2,column=0,padx=20,pady=20,sticky='w')
         
         self.rgb_toolbar_frame=ctk.CTkFrame(self.load_frame)
         self.rgb_toolbar_frame.grid(row=3, column=0,padx=0,pady=10)
@@ -282,11 +283,11 @@ class OPApp(ctk.CTk):
         #         block 2
         # =====================================================================
         self.analysis_disp_frame = ctk.CTkFrame(self.analysis_tab)
-        self.analysis_disp_frame.grid(row=0, column=1,padx=10)
+        self.analysis_disp_frame.grid(row=0, column=1,sticky='nsew',padx=10)
         self.label_mode_group = ctk.CTkLabel(master=self.analysis_disp_frame, anchor='w',text="RGB preview: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10)
 
-        self.analysis_fig = Figure(figsize=(4.5,4), dpi=80)
+        self.analysis_fig = Figure(figsize=(5.5,4), dpi=80)
         self.analysis_fig.patch.set_facecolor('#2D2D2D')
         self.a_analysis= self.analysis_fig.add_subplot(111)
         self.a_analysis.set_axis_off()
@@ -306,7 +307,7 @@ class OPApp(ctk.CTk):
         # =====================================================================
                 
         self.analysis_frame = ctk.CTkFrame(self.analysis_tab)
-        self.analysis_frame.grid(row=0, column=2,padx=0, pady=20,sticky='n')
+        self.analysis_frame.grid(row=0, column=2,sticky='nsew',padx=10)
         self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text="Basic analysis: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, padx=10, pady=10)
 
@@ -872,6 +873,7 @@ class OPApp(ctk.CTk):
         self.label_data_info.configure(text='Load Data ',text_color='red')
         
     def draw_spectra(self):
+        plt.switch_backend('TkAgg')
         if self.res==0:
             showwarning("DataError","Load data first")
         else:
@@ -885,6 +887,7 @@ class OPApp(ctk.CTk):
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
             self.a_analysis.grid(True, linestyle='--')
+        plt.switch_backend('Agg')
             
     def rogn(self):
         if self.res==0:
@@ -1003,10 +1006,11 @@ class OPApp(ctk.CTk):
         #Hypercube normalisation without for loops
         ref_hypercube=np.tile(np.reshape(norm_coeff,[1,1,sz[2]]),[sz[0],sz[1],1]) # reshape NormCoeff into a hypercube
         normalised_hypercube=raw_hypercube*ref_hypercube #Hypercube Normalisation
-        
+        plt.close('all')
         return normalised_hypercube,norm_coeff
 
     def refl_norm(self):
+        plt.switch_backend('TkAgg')
         if self.res==0:
             showwarning("DataError","Load data first")
         else:
@@ -1014,10 +1018,11 @@ class OPApp(ctk.CTk):
                 wl=self.res["wavelengths_clipped"]
                 spectra=self.res["spectra_clipped"]
             except KeyError:
-                wl=self.res["wavelengths"]
-                spectra=self.res["spectra"]
-            except KeyError:
-                pass
+                try:
+                    wl=self.res["wavelengths"]
+                    spectra=self.res["spectra"]
+                except KeyError:
+                    pass
             
             self.res["hyperspectral_image_norm"],norm_coeff = self.flux2ref(self.res[self.res["current_data_level"]], wl)
             self.rgb_display(self.res["hyperspectral_image_norm"],wl
@@ -1033,6 +1038,7 @@ class OPApp(ctk.CTk):
                 self.a_analysis.grid(True, linestyle='--')
             except KeyError:
                 pass
+        plt.switch_backend('Agg')
             
     def save_analysis_opt(self):
         if self.res==0:
@@ -1067,7 +1073,7 @@ class OPApp(ctk.CTk):
             self.confirm_bouton.grid(column=1, row=4, padx=10, pady=10, rowspan =1, columnspan=1)
     
     def get_dir_analysis(self):
-        path = filedialog.askdirectory(title="Select save path :",parent=self.d)
+        path = filedialog.askdirectory(title="Select save path :",parent=self.d,initialdir=os.getcwd())
         if path != "":
             self.save_desc.configure(text_color='white')
             self.confirm_bouton.configure(state = "normal")
@@ -1178,7 +1184,7 @@ class OPApp(ctk.CTk):
 
 
     def get_dir(self):
-        path = filedialog.askdirectory(parent=self.d)
+        path = filedialog.askdirectory(parent=self.d,initialdir=os.getcwd())
         if path != "" and path!=(): # because returns a tupple in the first place
             self.confirm_bouton.configure(state = "normal")
             self.shown_save_path.set(path)
@@ -1202,7 +1208,7 @@ class OPApp(ctk.CTk):
         today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
         self.save_confirm.configure(state = "disabled")
         self.WIP.configure(text = "Saving...")
-        foldername='ONE-PIX_VI'+self.IM["folder_name"]
+        foldername='ONE-PIX_VI_'+self.IM["folder_name"]
         path = self.save_path+"/"+foldername
         if not(os.path.exists(path)):
             os.mkdir(path)
@@ -1325,8 +1331,9 @@ class OPApp(ctk.CTk):
     #     demande des chemins pour le calcul
     # =========================================================================
     def get_path(self, name = None):
-        path = filedialog.askopenfilename()
+       
         if name =="sat":
+            path = filedialog.askopenfilename(initialdir=os.getcwd())
             if path.endswith(".csv"):
                 self.sat_path_label.configure(text_color='white')
                 self.shown_sat_path.set(os.path.join('', *path.split('/')[-3:]))
@@ -1337,13 +1344,15 @@ class OPApp(ctk.CTk):
                 self.calc_bouton.configure(state = "disabled")
             
         else: #if name == "data"
-            if path.endswith((".tif",".hdr")):
+            folder_path=filedialog.askdirectory(initialdir=os.getcwd())
+            data_list=glob.glob(folder_path+'/*.hdr')+glob.glob(folder_path+'/*.tif')
+            if data_list[0].endswith((".tif",".hdr")):
                 self.data_path_label.configure(text_color='white')
-                self.shown_data_path.set(os.path.join('', *path.split('/')[-3:]))
-                self.data_path=path
+                self.shown_data_path.set(os.path.join('', *data_list[0].split('/')[-3:]))
+                self.data_path=data_list[0]
             else:
                 self.data_path_label.configure(text_color='red')
-                self.shown_data_path.set(os.path.join('', *path.split('/')[-3:]))
+                self.shown_data_path.set(os.path.join('', *data_list[0].split('/')[-3:]))
                 self.calc_bouton.configure(state = "disabled")
 
         if (self.sat_path.endswith(".csv") and self.data_path.endswith((".tif",".hdr"))):
@@ -1512,7 +1521,7 @@ class OPApp(ctk.CTk):
             res=load_hypercube(opt=os.path.dirname(self.data_path))
             self.IM = {"IM" : res["hyperspectral_image"].T,
                         "wl" : res["wavelengths"],
-                        "folder_name" : self.data_path.split('/')[-2][19:]}
+                        "folder_name" : self.data_path.split('/')[-2][:]}
         
         bands = []
         f = []
