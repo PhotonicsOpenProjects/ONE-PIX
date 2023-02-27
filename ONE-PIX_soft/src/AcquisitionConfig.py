@@ -451,7 +451,7 @@ class OPConfig:
                 root.destroy()
             except PiCameraError:
                 print("Warning; check a RPi camera is connected. No picture were stored !")
-                root.destroy()
+            root.destroy()
         os.chdir(root_path)
         del self.chronograms,self.time_spectro, self.display_time # saves RAM for large acquisitions
         gc.collect()

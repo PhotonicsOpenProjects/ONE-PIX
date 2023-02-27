@@ -185,7 +185,7 @@ class OPApp(ctk.CTk):
         self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text="Display: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
 
-        self.fig = Figure(figsize=(6.5,5.5), dpi=100)
+        self.fig = Figure(figsize=(5,4), dpi=100)
         self.fig.patch.set_facecolor('#2D2D2D')
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
         self.canvas.draw()
@@ -265,7 +265,7 @@ class OPApp(ctk.CTk):
         self.switch_spat2im_analysis = ctk.CTkSwitch(master=self.load_frame,text="Spatial domain <----> Image",command=self.switch_spat2im_command_analysis,state='disabled')
         self.switch_spat2im_analysis.grid(row=2,column=0,sticky='',padx=20)
         
-        self.rgb_fig = Figure(figsize=(3.5,3), dpi=80)
+        self.rgb_fig = Figure(figsize=(3,3), dpi=80)
         self.rgb_fig.patch.set_facecolor('#2D2D2D')
         self.a_rgb= self.rgb_fig.add_subplot(111)
         self.a_rgb.set_axis_off()
@@ -288,7 +288,7 @@ class OPApp(ctk.CTk):
         self.label_mode_group = ctk.CTkLabel(master=self.analysis_disp_frame, anchor='w',text="RGB preview: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10)
 
-        self.analysis_fig = Figure(figsize=(5.5,5), dpi=80)
+        self.analysis_fig = Figure(figsize=(4,5), dpi=80)
         self.analysis_fig.patch.set_facecolor('#2D2D2D')
         self.a_analysis= self.analysis_fig.add_subplot(111)
         self.a_analysis.set_axis_off()

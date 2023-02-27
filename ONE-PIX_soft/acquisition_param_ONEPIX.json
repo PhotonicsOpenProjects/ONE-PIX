@@ -1,1 +1,1 @@
-{"pattern_method": "FourierSplit", "name_spectro": "OceanInsight", "wl_lim": [350, 800], "spatial_res": 5, "integration_time_ms": 5.0, "height": 600, "width": 800, "mes_ratio": 1}
+{"pattern_method": "FourierSplit", "name_spectro": "Avantes", "wl_lim": [350, 800], "spatial_res": 21, "integration_time_ms": 12.0, "height": 600, "width": 800, "mes_ratio": 1}
