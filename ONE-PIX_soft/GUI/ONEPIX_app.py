@@ -1,5 +1,3 @@
-import tkinter
-import tkinter.messagebox
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
@@ -138,7 +136,7 @@ class OPApp(ctk.CTk):
         self.entry_integration_time = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_integration_time.grid(row=1, column=0, pady=(0,20), padx=(0,140))
         self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
-        self.entry_integration_time.configure(state = tkinter.DISABLED,text_color='gray')
+        self.entry_integration_time.configure(state = tk.DISABLED,text_color='gray')
         self.label_integration_time =ctk.CTkLabel(self.acq_mode_frame, text="Integration time (ms)")
         self.label_integration_time.grid(row=1, column=0, pady=(0,20), padx=(65,0))
 
@@ -151,7 +149,7 @@ class OPApp(ctk.CTk):
         self.entry_pattern_duration = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_pattern_duration.grid(row=3, column=0, pady=(0,20),padx=(0,140), sticky="")
         self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-        self.entry_pattern_duration.configure(state = tkinter.DISABLED,text_color='gray')
+        self.entry_pattern_duration.configure(state = tk.DISABLED,text_color='gray')
         
         self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text="Patterns duration (ms) ")
         self.label_pattern_duration.grid(row=3, column=0, pady=(0,20), padx=(65,0))
@@ -175,7 +173,7 @@ class OPApp(ctk.CTk):
         self.button_co = ctk.CTkButton(self.acq_mode_frame, text="Spectrometer connection",state='normal',height=40,command=self.spec_connection)
         self.button_co.grid(row=4, column=0)
         
-        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command= self.acquire_hyp)
+        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command=lambda: threading.Thread(target=self.acquire_hyp).start())
         self.button_acquire_hyp.grid(row=4, column=1)
         
         # =====================================================================
@@ -264,16 +262,19 @@ class OPApp(ctk.CTk):
         self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=14, weight="bold"))
         self.label_data_info.grid(row=0, column=0,sticky='w',pady=10)
         
+        self.switch_spat2im_analysis = ctk.CTkSwitch(master=self.load_frame,text="Spatial domain <----> Image",command=self.switch_spat2im_command_analysis,state='disabled')
+        self.switch_spat2im_analysis.grid(row=2,column=0,sticky='',padx=20)
+        
         self.rgb_fig = Figure(figsize=(3.5,3), dpi=80)
         self.rgb_fig.patch.set_facecolor('#2D2D2D')
         self.a_rgb= self.rgb_fig.add_subplot(111)
         self.a_rgb.set_axis_off()
         self.rgb_canvas = FigureCanvasTkAgg(self.rgb_fig,master=self.load_frame)  # A tk.DrawingArea.
         self.rgb_canvas.draw()
-        self.rgb_canvas.get_tk_widget().grid(row=2,column=0,padx=20,pady=20,sticky='w')
-        
+        self.rgb_canvas.get_tk_widget().grid(row=3,column=0,padx=20,pady=20,sticky='w')
+                
         self.rgb_toolbar_frame=ctk.CTkFrame(self.load_frame)
-        self.rgb_toolbar_frame.grid(row=3, column=0,padx=0,pady=10)
+        self.rgb_toolbar_frame.grid(row=4, column=0,padx=0,pady=10)
         self.rgb_toolbar = Toolbar(self.rgb_canvas, self.rgb_toolbar_frame)
         self.rgb_toolbar.config(background='#2D2D2D')
         self.rgb_toolbar._message_label.config(background='#2D2D2D')
@@ -287,7 +288,7 @@ class OPApp(ctk.CTk):
         self.label_mode_group = ctk.CTkLabel(master=self.analysis_disp_frame, anchor='w',text="RGB preview: ", font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10)
 
-        self.analysis_fig = Figure(figsize=(5.5,4), dpi=80)
+        self.analysis_fig = Figure(figsize=(5.5,5), dpi=80)
         self.analysis_fig.patch.set_facecolor('#2D2D2D')
         self.a_analysis= self.analysis_fig.add_subplot(111)
         self.a_analysis.set_axis_off()
@@ -824,6 +825,7 @@ class OPApp(ctk.CTk):
         self.a_rgb.set_axis_off()
         self.rgb_canvas.draw_idle()
         
+        
     def clear_analysis_graph(self):
         self.analysis_fig.clear() 
         self.a_analysis.clear()
@@ -841,7 +843,15 @@ class OPApp(ctk.CTk):
         self.a_rgb.set_axis_on()
         self.rgb_canvas.draw_idle()
         
-       
+    def switch_spat2im_command_analysis(self):
+        self.clear_rgb_graph()
+        if self.switch_spat2im_analysis.get()==0:
+            #display spectra
+            self.a_rgb.imshow(self.res['rgb_spectrum'])
+        else:
+            #display image
+            self.a_rgb.imshow(self.res["rgb_image"])
+            
     def load_data(self):
         self.clear_rgb_graph()
         self.clear_analysis_graph()
@@ -863,6 +873,18 @@ class OPApp(ctk.CTk):
             self.a_rgb.set_axis_on
             self.label_data_info.configure(text='Data loaded',text_color='white')
             self.normalisation_button.configure(state='normal')
+            
+            if self.res['pattern_method'] in ['FourierSplit','Fourier']:
+                self.switch_spat2im_analysis.configure(state='normal')
+                self.switch_spat2im_analysis.select()
+                self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))
+            elif self.res['pattern_method']=='Hadamard':
+                self.switch_spat2im_analysis.configure(state='normal')
+                self.switch_spat2im_analysis.select()
+                self.rgb_spectrum=0
+            else:
+                self.switch_spat2im_analysis.configure(state='disabled')
+                
         except IndexError:
             pass
     
@@ -871,6 +893,7 @@ class OPApp(ctk.CTk):
         self.clear_rgb_graph()
         self.res=0
         self.label_data_info.configure(text='Load Data ',text_color='red')
+        self.switch_spat2im_analysis.configure(state='disabled')
         
     def draw_spectra(self):
         plt.switch_backend('TkAgg')
