@@ -12,7 +12,7 @@ import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
-# rcParams.update({'figure.autolayout': True})
+rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
 rcParams['xtick.color']='white'
 rcParams['ytick.color']='white'
@@ -40,7 +40,6 @@ from decimal import Decimal
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
 import threading
-
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -173,9 +172,10 @@ class OPApp(ctk.CTk):
         self.button_co = ctk.CTkButton(self.acq_mode_frame, text="Spectrometer connection",state='normal',height=40,command=self.spec_connection)
         self.button_co.grid(row=4, column=0)
         
-        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command=lambda: threading.Thread(target=self.acquire_hyp).start())
+        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command=self.thread_acquire_hyp)
         self.button_acquire_hyp.grid(row=4, column=1)
-        
+        self.process=0
+        self.process_alive=False
         # =====================================================================
         #         block 3
         # =====================================================================
@@ -616,11 +616,11 @@ class OPApp(ctk.CTk):
         self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
  
     def close_window_proj(self):
- 
-        self.button_wind_test.configure(state= "normal")
-#         plt.close('all')
-        self.proj.destroy()
- 
+        try:
+            self.proj.destroy()
+            self.button_wind_test.configure(state= "normal")
+        except (AttributeError,RuntimeError):
+            pass
  
     def _resize_image(self,event):
         img_pil = self.copy_of_pil_img.resize((self.proj.winfo_width() - 100, self.proj.winfo_height() - 100))
@@ -655,7 +655,7 @@ class OPApp(ctk.CTk):
 #         self.label_test_proj.bind('<Configure>', self._resize_image)
         self.label_test_proj.pack()
         self.proj.protocol("WM_DELETE_WINDOW", partial(self.close_window_proj))
-        self.proj.update()
+#         self.proj.update()
         self.button_wind_test.configure(state = "disabled")
         
  
@@ -754,12 +754,16 @@ class OPApp(ctk.CTk):
             self.acq_config.spec_lib.set_integration_time()
             self.acq_config.periode_pattern = int(self.entry_pattern_duration.get())
  
- 
- 
+    def thread_acquire_hyp(self):
+        self.close_window_proj()
+        self.process=threading.Thread(target=self.acquire_hyp)
+        self.process.start()
+    
     def acquire_hyp(self):
 #         plt.close('all')
 #         cv2.destroyAllWindows()
         # Entries actualisation
+        
         self.entries_actualisation()
         self.acq_res=[]
         if (self.simple_mode_button.cget("state") =="disabled"):
@@ -786,6 +790,7 @@ class OPApp(ctk.CTk):
         est_duration=round(1.5*self.acq_config.pattern_lib.nb_patterns*self.acq_config.periode_pattern/(60*1000),2)
         est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
         self.est_time_label.configure(text=f"Estimated end: {est_end}")
+        self.button_acquire_hyp.configure(state='disabled')
         self.acq_config.thread_acquisition()
         self.progressbar.stop()
         self.est_time_label.configure(text="Estimated end: ")
@@ -813,7 +818,7 @@ class OPApp(ctk.CTk):
                 
             elif self.acq_config.pattern_method in self.acq_config.full_basis:
                 pass
-
+            self.button_acquire_hyp.configure(state='normal')
 # =============================================================================
 #         Analysis' tab functions
 # =============================================================================
@@ -1104,10 +1109,11 @@ class OPApp(ctk.CTk):
             # self.analysis_save_format = self.format_choice.get()
     
     def save_analysis_data(self):
+            today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
             data_list=list(self.res.keys())
             data_list.remove('wavelengths')
             data_list.remove('current_data_level')
-            path=self.analysis_save_path+'/'+self.res["infos"]
+            path=self.analysis_save_path+'/'+today
             os.mkdir(path)
                 
             try:
@@ -1713,8 +1719,7 @@ class AutocompleteCombobox(ttk.Combobox):
         """
         self.icursor(tk.END)
         self.selection_clear()
-            
-        
+
 if __name__ == "__main__":
     app = OPApp()
     app.protocol("WM_DELETE_WINDOW", partial(app.close_window))
