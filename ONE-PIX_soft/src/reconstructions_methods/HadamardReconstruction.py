@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 14 10:22:17 2022
-
-@author: mribes
-"""
 import numpy as np
 from scipy.linalg import hadamard
 
