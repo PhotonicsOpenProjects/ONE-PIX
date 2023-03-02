@@ -57,8 +57,8 @@ class HadamardPatterns:
         hadamard_matrix=hadamard(self.dim**2,dtype=np.int8) # initialized an dim by dim Hadamard matrix
         self.sequence=[]
         for col in range(self.dim**2):
-            self.sequence.append(np.uint8(255*(1+(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim]))//2))) # reshape of the Patterns in 2D(dim X dim)
-            self.sequence.append(np.uint8(255*(1-(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim]))//2)))
+            self.sequence.append(np.uint8(255*((1+(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim])))//2))) # reshape of the Patterns in 2D(dim X dim)
+            self.sequence.append(np.uint8(255*((1-(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim])))//2)))
         del hadamard_matrix
         gc.collect()
         
