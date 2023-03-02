@@ -429,14 +429,13 @@ class OPConfig:
         
         os_name=platform.system()
         if os_name=='Linux':
+            root=Tk()
+            root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
+            root.wm_attributes('-fullscreen', 'True')
+            c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
+            c.pack()
+            root.update()
             try:
-                root=Tk()
-                root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
-                root.wm_attributes('-fullscreen', 'True')
-                c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
-                c.pack()
-                root.update()
-    
                 from picamera import PiCamera, PiCameraError
                 camera = PiCamera()
                 camera.resolution = (1024, 768)
@@ -448,7 +447,6 @@ class OPConfig:
                 time.sleep(2)
                 camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
                 camera.close()
-                root.destroy()
             except PiCameraError:
                 print("Warning; check a RPi camera is connected. No picture were stored !")
             root.destroy()
