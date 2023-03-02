@@ -5,8 +5,9 @@ from tkinter.messagebox import showwarning
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-plt.switch_backend('Agg')
 import matplotlib.cm as CM
 import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -619,7 +620,7 @@ class OPApp(ctk.CTk):
         try:
             self.proj.destroy()
             self.button_wind_test.configure(state= "normal")
-        except (AttributeError,RuntimeError):
+        except (AttributeError,RuntimeError,tk._tkinter.TclError):
             pass
  
     def _resize_image(self,event):
@@ -631,12 +632,14 @@ class OPApp(ctk.CTk):
  
  
     def window_size_test(self):      
-        self.proj = tk.Tk()
+        self.proj = ctk.CTkToplevel()
+        
         os_name = platform.system()
         if os_name == 'Linux':
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, 1024, 0))
         else:
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, self.winfo_screenwidth(), 0))
+        self.proj.update()
         y = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
         x = list(range(self.acq_config.width))  # vertical vector for the pattern creation
 
@@ -760,10 +763,7 @@ class OPApp(ctk.CTk):
         self.process.start()
     
     def acquire_hyp(self):
-#         plt.close('all')
-#         cv2.destroyAllWindows()
         # Entries actualisation
-        
         self.entries_actualisation()
         self.acq_res=[]
         if (self.simple_mode_button.cget("state") =="disabled"):
