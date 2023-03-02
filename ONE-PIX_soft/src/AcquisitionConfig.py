@@ -62,7 +62,7 @@ class OPConfig:
         self.spectro_flag=False
         self.duration = 0
         self.periode_pattern = self.mes_ratio*self.integration_time_ms
-        if self.periode_pattern < 80: self.periode_pattern = 80
+        if self.periode_pattern < 120: self.periode_pattern = 120
         
         self.display_time = []
         self.duree_dark = 2
@@ -169,8 +169,8 @@ class OPConfig:
         
         self.periode_pattern = self.mes_ratio*self.integration_time_ms
     
-        if self.periode_pattern < 80:
-            self.periode_pattern = 80
+        if self.periode_pattern < 120:
+            self.periode_pattern = 120
         #self.spec_lib.set_integration_time()
         
 
