@@ -99,5 +99,5 @@ class CustomPatterns:
             os.chdir(chemin_script)
             self.nb_patterns=len(self.sequence)
             return self.pattern_order,[]
-        except OSError:
+        except (OSError,TypeError):
             showwarning('Path error','Undefined folder path')

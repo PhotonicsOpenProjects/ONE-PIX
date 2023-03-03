@@ -1,7 +1,7 @@
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
-from tkinter.messagebox import showwarning
+from tkinter.messagebox import showwarning,showinfo
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
@@ -633,7 +633,6 @@ class OPApp(ctk.CTk):
  
     def window_size_test(self):      
         self.proj = ctk.CTkToplevel()
-        
         os_name = platform.system()
         if os_name == 'Linux':
             self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, 1024, 0))
@@ -658,7 +657,6 @@ class OPApp(ctk.CTk):
 #         self.label_test_proj.bind('<Configure>', self._resize_image)
         self.label_test_proj.pack()
         self.proj.protocol("WM_DELETE_WINDOW", partial(self.close_window_proj))
-#         self.proj.update()
         self.button_wind_test.configure(state = "disabled")
         
  
@@ -689,7 +687,10 @@ class OPApp(ctk.CTk):
             self.acq_config.spec_lib.spec_open()
      
             if self.acq_config.spec_lib.DeviceName != '':
-                self.switch_spectro.configure(text=self.acq_config.spec_lib.DeviceName)
+                spectro_name=self.acq_config.spec_lib.DeviceName
+                if len(spectro_name)<30: spectro_name+=(30-len(spectro_name))*' '
+                else: spectro_name=spectro_name[:30]
+                self.switch_spectro.configure(text=spectro_name)
                 self.switch_spectro.select()
                 self.button_acquire_hyp.configure(state = "normal")
                 self.button_co.configure(text='Spectrometer disconnection',command=self.spec_disconnection)
@@ -698,7 +699,7 @@ class OPApp(ctk.CTk):
 
 
     def spec_disconnection(self):
-        self.switch_spectro.configure(text='No spectrometer conected')
+        self.switch_spectro.configure(text='No spectrometer connected ')
         self.switch_spectro.deselect()
         self.button_acquire_hyp.configure(state = "disabled")
  
@@ -781,7 +782,7 @@ class OPApp(ctk.CTk):
             self.entry_pattern_duration.delete(0,10)
             self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
             self.entry_pattern_duration.configure(state = 'disabled')
- 
+            time.sleep(1)
 #         if (self.button_wind_test.cget("state") == "disabled"):
 #             self.close_window_proj()
  
@@ -816,9 +817,9 @@ class OPApp(ctk.CTk):
                 self.switch_spat2im.configure(state='normal')
                 self.switch_spat2im.select()
                 
-            elif self.acq_config.pattern_method in self.acq_config.full_basis:
-                pass
-            self.button_acquire_hyp.configure(state='normal')
+        elif self.acq_config.pattern_method in self.acq_config.full_basis:
+            pass
+        self.button_acquire_hyp.configure(state='normal')
 # =============================================================================
 #         Analysis' tab functions
 # =============================================================================

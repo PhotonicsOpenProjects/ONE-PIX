@@ -104,7 +104,7 @@ class OPConfig:
             delta = max(mes)-max_counts
             print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
     
-            if (abs(delta)<5000):
+            if (abs(delta)<2500):
                 flag = False
             elif self.spec_lib.integration_time_ms >= 10E3 or self.spec_lib.integration_time_ms==0:
                 flag = False
@@ -385,10 +385,6 @@ class OPConfig:
             self.chronograms, self.time_spectro, self.display_time)
         self.spectra = calculate_pattern_spectrum(
             self.display_time, 0, self.time_spectro, self.chronograms, 0)
-        
-        res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
-        res.Selection()
-        
         root_path=os.getcwd()
         path=os.path.join(root_path,'Hypercubes')
         if(os.path.isdir(path)):
@@ -399,13 +395,18 @@ class OPConfig:
         
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time
-    
         folder_name = f"ONE-PIX_acquisition_{fdate}_{actual_time}"
         os.mkdir(folder_name)
         os.chdir(folder_name)
-        # saving the acquired spatial spectra hypercube
-        py2envi(folder_name,res.hyperspectral_image,self.wavelengths,os.getcwd())
-    
+        
+        if self.pattern_method not in ['Custom']:
+            res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
+            res.Selection()
+            # saving the acquired spatial spectra hypercube
+            py2envi(folder_name,res.hyperspectral_image,self.wavelengths,os.getcwd())
+        else:
+            np.save(folder_name,self.spectra)
+            
         # Header
         title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
     
