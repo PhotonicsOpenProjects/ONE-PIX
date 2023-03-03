@@ -4,6 +4,8 @@ import numpy as np
 from tkinter import *
 from tkinter import filedialog
 import glob
+from tkinter.messagebox import showwarning
+
 
 class CustomPatterns:
     """ Class CustomPatterns allows to create a sequence of loaded patterns and their order list"""
@@ -71,28 +73,31 @@ class CustomPatterns:
         -------
         None.
     
-        """        
-        chemin_script = os.getcwd()
-        root = Tk()
-        root.withdraw()
-        root.attributes('-topmost', 1)
-        chemin_mesure = filedialog.askdirectory(title = "Select the folder containing the patterns to be projected", initialdir = chemin_script)
-        os.chdir(chemin_mesure)
-        # list_nom_mesure = sorted(glob.glob(('*.jpg')),key=os.path.getmtime)
-        types = ["*.jpg", "*.png"]
-        list_nom_mesure=[]
-        # list_nom_mesure = sorted(glob.glob(('*.jpg')),key=os.path.getmtime)
-        for ext in types:
-            this_type_files = sorted(glob.glob(ext),key=os.path.getmtime)
-            list_nom_mesure += this_type_files
-        
-        for i in range(len(list_nom_mesure)):
-            try:
-                self.sequence.append(cv2.cvtColor(cv2.imread(list_nom_mesure[i]), cv2.COLOR_BGR2GRAY)/255)
-                self.pattern_order.append(list_nom_mesure[i][:-4])
-            except cv2.error:
-                pass
+        """ 
+        try:
+            chemin_script = os.getcwd()
+            root = Tk()
+            root.withdraw()
+            root.attributes('-topmost', 1)
+            chemin_mesure = filedialog.askdirectory(title = "Select the folder containing the patterns to be projected", initialdir = chemin_script)
+            os.chdir(chemin_mesure)
+            # list_nom_mesure = sorted(glob.glob(('*.jpg')),key=os.path.getmtime)
+            types = ["*.jpg", "*.png"]
+            list_nom_mesure=[]
+            # list_nom_mesure = sorted(glob.glob(('*.jpg')),key=os.path.getmtime)
+            for ext in types:
+                this_type_files = sorted(glob.glob(ext),key=os.path.getmtime)
+                list_nom_mesure += this_type_files
             
-        os.chdir(chemin_script)
-        self.nb_patterns=len(self.sequence)
-        return self.pattern_order,[]
+            for i in range(len(list_nom_mesure)):
+                try:
+                    self.sequence.append(cv2.cvtColor(cv2.imread(list_nom_mesure[i]), cv2.COLOR_BGR2GRAY)/255)
+                    self.pattern_order.append(list_nom_mesure[i][:-4])
+                except cv2.error:
+                    pass
+                
+            os.chdir(chemin_script)
+            self.nb_patterns=len(self.sequence)
+            return self.pattern_order,[]
+        except (OSError,TypeError):
+            showwarning('Path error','Undefined folder path')

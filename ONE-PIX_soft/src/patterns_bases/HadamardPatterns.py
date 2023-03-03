@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.linalg import hadamard
+import gc
 
 class HadamardPatterns:
     """ Class HadamardPatterns allows to create a sequence of 
@@ -53,15 +54,13 @@ class HadamardPatterns:
 
         """
         
-        hadamard_matrix=hadamard(self.dim**2) # initialized an dim by dim Hadamard matrix
-        patterns=np.zeros([self.dim,self.dim,self.dim**2])   # 3D Patterns initialization with zeros values
+        hadamard_matrix=hadamard(self.dim**2,dtype=np.int8) # initialized an dim by dim Hadamard matrix
+        self.sequence=[]
         for col in range(self.dim**2):
-            patterns[:,:,col]=np.reshape(hadamard_matrix[:,col],[self.dim,self.dim]) # reshape of the Patterns in 2D(dim X dim) 
+            self.sequence.append(np.uint8(255*((1+(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim])))//2))) # reshape of the Patterns in 2D(dim X dim)
+            self.sequence.append(np.uint8(255*((1-(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim])))//2)))
+        del hadamard_matrix
+        gc.collect()
         
-        split_patterns=np.zeros((self.dim,self.dim,2*self.dim**2),np.uint8)
-        split_patterns[:,:,0::2]=np.uint8((1+patterns)/2)
-        split_patterns[:,:,1::2]=np.uint8((1-patterns)/2)
-        split_patterns=np.split(split_patterns,2*self.dim**2,axis=2)
-        self.sequence=split_patterns
         self.pattern_order,freqs=self.sequence_order()
         return self.pattern_order,freqs

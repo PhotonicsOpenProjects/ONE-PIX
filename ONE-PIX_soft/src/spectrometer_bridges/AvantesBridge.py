@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 18 17:47:42 2021
-
-@author: mribes
-"""
-
 from src.DLL.avaspec import *
 import time
+import numpy as np
 
 class AvantesBridge:
     """ Class AvantesBridge allows to use Avantes spectrometers with the ONE-PIX
@@ -59,7 +53,7 @@ class AvantesBridge:
             self.measconfig.m_Control_m_LaserDelay = 0 
             self.measconfig.m_Control_m_LaserWidth = 0 
             self.measconfig.m_Control_m_LaserWaveLength = 0.0 
-            self.measconfig.m_Control_m_StoreToRam = 0
+            self.measconfig.m_Control_m_StoreToRam =0
             
         elif (NbDev==0):
             raise Exception('No Avantes device was detected')
@@ -76,7 +70,7 @@ class AvantesBridge:
 
         """
         self.measconfig.m_IntegrationTime = self.integration_time_ms
-        
+        ret = AVS_PrepareMeasure(self.handle,self.measconfig)
         
     def get_wavelengths(self):
         """
@@ -103,15 +97,14 @@ class AvantesBridge:
             1D array of spectral measurements.
 
         """
-        ret = AVS_PrepareMeasure(self.handle,self.measconfig)
+        
         ret = AVS_Measure(self.handle,0,1)                                     # tell it to scan
         dataready = False                                                      # while the data is false
         while (dataready == False):
             dataready = (AVS_PollScan(self.handle) == True)                    # get the status of data
-            time.sleep(self.integration_time_ms/1000)
-        if dataready == True:
-            ret = AVS_GetScopeData(self.handle)
-            spectrum = ret[1][:self.pixels]
+            time.sleep(0.0001)
+     
+        spectrum = AVS_GetScopeData(self.handle)[1][:self.pixels]
 
         return spectrum
     
