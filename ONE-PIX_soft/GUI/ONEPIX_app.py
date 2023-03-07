@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.abspath('../'))
 from src.AcquisitionConfig import *
 from src.DatacubeReconstructions import *
 import src.datacube_analyse as hsa
+from scipy.linalg import hadamard
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -887,7 +888,9 @@ class OPApp(ctk.CTk):
             elif self.res['pattern_method']=='Hadamard':
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
-                self.rgb_spectrum=0
+                dim=len(self.res['rgb_image'])
+                self.res['rgb_spectrum']=adamard(dim)@np.mean(self.res['rgb_image'],2)@hadamard(dim)
+                
             else:
                 self.switch_spat2im_analysis.configure(state='disabled')
                 
