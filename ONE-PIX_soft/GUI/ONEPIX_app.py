@@ -889,7 +889,7 @@ class OPApp(ctk.CTk):
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 dim=len(self.res['rgb_image'])
-                self.res['rgb_spectrum']=adamard(dim)@np.mean(self.res['rgb_image'],2)@hadamard(dim)
+                self.res['rgb_spectrum']=hadamard(dim)@np.mean(self.res['rgb_image'],2)@hadamard(dim)
                 
             else:
                 self.switch_spat2im_analysis.configure(state='disabled')
