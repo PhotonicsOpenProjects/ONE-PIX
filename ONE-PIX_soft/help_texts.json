@@ -1,0 +1,16 @@
+{
+	"mode": {
+		"description":"  There are two modes for the interface. The firsi one is the simple mode and is made for those who want to discover the ONE-PIX and the hyperspectral imaging field. In this mode, the parameter that are allowed to be changed are verry limitted, so it provides a quick and efficient way to acquiere images.",
+
+		"simple_mode":{
+			"full":"  - all the setting from the complete mode are automatically chosen\n  - only the last layer of data is to be stored\n  - The interface contains one acquisition tab and one tab for the calculation of spectral indices",
+		"addressed":"  - only the last layer of data is to be stored"},
+
+		"advanced_mode":{ 
+			"full":"  - The settings can be modified manually\n  - There is one more tab that provides quick data analasis",
+			"addressed":"  - All the layers of data are kept"}},
+
+	"acquisition": "  There is currently two strategies to acquire images with the ONE-PIX : the full acquisition and the addressed acquisition.\n\n  FULL ACQUISITION : this mode measures the responses to patterns from a complete base to reconstitute an hypercube of data (an image in which each pixel is a spectrum). For example, Fourier patterns can be projected, so that a simple FFT (Fast Fourier Transform) can reconstruct the spatial aspect of the scene.\n\n  ADDRESSED ACQUISITION : This strategy uses the RGB camera of the ONE-PIX to find the Region of interest so that the projector illuminates them one by one while the spectrometter sample their mean spectra. There to fonction to perform the segmentation into masks : a half-automatic k-means labeling, and a manual labeling.",
+
+	"normalization": "  The normalization process is here to fix both the system vignetting and the light dependencies to provide a true reflectance output. Since its main origin is the fiber collection, it is needed to perform a full acquisition of a well known referennce, so that the vignetting can be modelled and corrected. Such a reference must be spectrally homogeneous, lambertian and must have a calibrated BRDF.\nIf you want to normalize your data, put your spectral reference under the light of the projector prior to validate."
+}

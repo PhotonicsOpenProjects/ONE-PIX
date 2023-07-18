@@ -28,6 +28,7 @@ sys.path.insert(0, os.path.abspath('../'))
 from src.AcquisitionConfig import *
 from src.DatacubeReconstructions import *
 import src.datacube_analyse as hsa
+from scipy.linalg import hadamard
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -41,6 +42,8 @@ from decimal import Decimal
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
 import threading
+import screeninfo
+screenWidth = screeninfo.get_monitors()[0].width
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -57,6 +60,7 @@ window_width = 1020
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.open_languageConfig()
         self.acq_config=OPConfig(json_path)
         # configure window
         self.resizable(False, False)
@@ -69,9 +73,9 @@ class OPApp(ctk.CTk):
         # create tabviews
         self.tabview = ctk.CTkTabview(self, width=window_width,height=window_height)
         self.tabview.grid(row=1, column=1)
-        self.tabview.add("Acquisition")
-        self.tabview.add("Hypercubes analysis")
-        self.tabview.add("VI analysis")
+        self.tabview.add(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["title"])
+        self.tabview.add(self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["title"])
+        self.tabview.add(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["title"])
         
 # =============================================================================
 #         Acquisition tab
@@ -90,8 +94,7 @@ class OPApp(ctk.CTk):
          ###################################################
 
             
-        self.acquisition_tab=self.tabview.tab("Acquisition")
-        
+        self.acquisition_tab=self.tabview.tab(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["title"])
         #configure grid layout (4x4)
         self.acquisition_tab.grid_columnconfigure(2, weight=1)
         self.acquisition_tab.grid_columnconfigure((0,1), weight=0)
@@ -103,17 +106,17 @@ class OPApp(ctk.CTk):
         # Create left side bar
         self.sidebar_frame = ctk.CTkFrame(self.acquisition_tab)
         self.sidebar_frame.grid(row=0, column=0, rowspan=1,padx=(20, 20), pady=(20, 0), sticky="nsew")
-        self.label_mode_group = ctk.CTkLabel(master=self.sidebar_frame, text="Acquisition mode: ", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_mode_group = ctk.CTkLabel(master=self.sidebar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 1"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
         
         # create left side bar's buttons
-        self.simple_mode_button = ctk.CTkButton(self.sidebar_frame, text="Simple",state='disabled',height=40,command=self.simple_acq_mode)
+        self.simple_mode_button = ctk.CTkButton(self.sidebar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 1"]["simple_mode_button"],state='disabled',height=40,command=self.simple_acq_mode)
         self.simple_mode_button.grid(row=1, column=0, padx=0, pady=(0,10))
-        self.expert_mode_button = ctk.CTkButton(self.sidebar_frame, text="Expert",state='normal',height=40,command=self.expert_acq_mode)
+        self.expert_mode_button = ctk.CTkButton(self.sidebar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 1"]["expert_mode_button"],state='normal',height=40,command=self.expert_acq_mode)
         self.expert_mode_button.grid(row=1, column=1, padx=0, pady=(0,10))
-        self.button_wind_test = ctk.CTkButton(self.sidebar_frame, text="Display test pattern",state='disabled',command=self.window_size_test)
+        self.button_wind_test = ctk.CTkButton(self.sidebar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 1"]["button_wind_test"],state='disabled',command=self.window_size_test)
         self.button_wind_test.grid(row=2, column=0, padx=10, pady=0)
-        self.button_acquire_spec = ctk.CTkButton(self.sidebar_frame, text="Acquire spectrum",state='disabled',command=self.draw_spectrum)
+        self.button_acquire_spec = ctk.CTkButton(self.sidebar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 1"]["button_acquire_spec"],state='disabled',command=self.draw_spectrum)
         self.button_acquire_spec.grid(row=2, column=1, padx=10, pady=0)
         
         # Pattern test window settings initialisation 
@@ -130,20 +133,20 @@ class OPApp(ctk.CTk):
         # create acquisition settings frame
         self.acq_mode_frame = ctk.CTkFrame(self.acquisition_tab)
         self.acq_mode_frame.grid(row=1, column=0,rowspan=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
-        self.label_acq_mode = ctk.CTkLabel(master=self.acq_mode_frame, text="Acquisition's settings: ", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_acq_mode = ctk.CTkLabel(master=self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_acq_mode.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
         
         self.entry_integration_time = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_integration_time.grid(row=1, column=0, pady=(0,20), padx=(0,140))
         self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
         self.entry_integration_time.configure(state = tk.DISABLED,text_color='gray')
-        self.label_integration_time =ctk.CTkLabel(self.acq_mode_frame, text="Integration time (ms)")
+        self.label_integration_time =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_integration_time"])
         self.label_integration_time.grid(row=1, column=0, pady=(0,20), padx=(65,0))
 
         self.entry_img_res = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_img_res.insert(0,str(self.acq_config.spatial_res))
         self.entry_img_res.grid(row=2, column=0, pady=(0,20), padx=(0,140), sticky="")
-        self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text="Image resolution")
+        self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_img_res"])
         self.label_img_res.grid(row=2, column=0, pady=(0,20), padx=(40,0))
         
         self.entry_pattern_duration = ctk.CTkEntry(self.acq_mode_frame,width=45)
@@ -151,7 +154,7 @@ class OPApp(ctk.CTk):
         self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
         self.entry_pattern_duration.configure(state = tk.DISABLED,text_color='gray')
         
-        self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text="Patterns duration (ms) ")
+        self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_pattern_duration"])
         self.label_pattern_duration.grid(row=3, column=0, pady=(0,20), padx=(65,0))
         
         self.methods_list=self.acq_config.seq_basis+self.acq_config.full_basis
@@ -166,14 +169,14 @@ class OPApp(ctk.CTk):
         self.spectro_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.spectro_list)
         self.spectro_optionemenu.grid(row=2, column=1)
         
-        self.switch_spectro = ctk.CTkSwitch(master=self.acq_mode_frame,text='No spectrometer connected',text_color='red',command=self.switch_spectro_command)
+        self.switch_spectro = ctk.CTkSwitch(master=self.acq_mode_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["switch_spectro"],text_color='red',command=self.switch_spectro_command)
         self.switch_spectro.deselect()
         self.switch_spectro.grid(row=0,column=1, padx=10)
         
-        self.button_co = ctk.CTkButton(self.acq_mode_frame, text="Spectrometer connection",state='normal',height=40,command=self.spec_connection)
+        self.button_co = ctk.CTkButton(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["button_co"],state='normal',height=40,command=self.spec_connection)
         self.button_co.grid(row=4, column=0)
         
-        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text="Acquire hypercube",state='disabled',height=40,command=self.thread_acquire_hyp)
+        self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["button_acquire_hyp"],state='disabled',height=40,command=self.thread_acquire_hyp)
         self.button_acquire_hyp.grid(row=4, column=1)
         self.process=0
         self.process_alive=False
@@ -183,7 +186,7 @@ class OPApp(ctk.CTk):
         # create Display frame
         self.display_frame = ctk.CTkFrame(self.acquisition_tab)
         self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, pady=(20, 0), sticky="nsew")
-        self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text="Display: ", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
 
         self.fig = Figure(figsize=(5,4), dpi=100)
@@ -201,7 +204,7 @@ class OPApp(ctk.CTk):
         self.acq_toolbar._message_label.config(background='#2D2D2D')
         self.acq_toolbar.update()
         
-        self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text="Spatial domain <----> Image",command=self.switch_spat2im_command,state='disabled')
+        self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_spat2im"],command=self.switch_spat2im_command,state='disabled')
         self.switch_spat2im.grid(row=0,column=0,sticky='w',padx=120)
 
         # =====================================================================
@@ -210,9 +213,9 @@ class OPApp(ctk.CTk):
         # create GUI apparence frame
         self.appearence_frame = ctk.CTkFrame(self.acquisition_tab)
         self.appearence_frame.grid(row=2, column=0,rowspan=1, padx=(20, 20), pady=(20, 0),sticky='w')
-        self.appearance_mode_label = ctk.CTkLabel(self.appearence_frame, text="Appearance Mode:", anchor="w")
+        self.appearance_mode_label = ctk.CTkLabel(self.appearence_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_label"], anchor="w")
         self.appearance_mode_label.grid(row=0, column=0)
-        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.appearence_frame, values=["Dark", "Light"],
+        self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.appearence_frame, values=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_optionemenu"], 
                                                                        command=self.change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(row=1, column=0, padx=0, pady=(0, 10))
         
@@ -225,7 +228,7 @@ class OPApp(ctk.CTk):
         self.progressbar= ctk.CTkProgressBar(self.pg_bar_frame)
         self.progressbar.grid(row=1, column=1,pady=10)
         self.progressbar.set(value=0)
-        self.est_time_label=ctk.CTkLabel(self.pg_bar_frame, text="Estimated end: ",anchor='w', font=ctk.CTkFont( weight="bold"))
+        self.est_time_label=ctk.CTkLabel(self.pg_bar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 5"]["est_time_label"],anchor='w', font=ctk.CTkFont( weight="bold"))
         self.est_time_label.grid(row=0, column=1,pady=(0,0))
         
 # =============================================================================
@@ -244,7 +247,7 @@ class OPApp(ctk.CTk):
          ###################################################
  
  
-        self.analysis_tab=self.tabview.tab("Hypercubes analysis")
+        self.analysis_tab=self.tabview.tab(self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["title"])
        
         # =====================================================================
         #         block 1
@@ -254,16 +257,16 @@ class OPApp(ctk.CTk):
         self.load_frame.grid(row=0, column=0,sticky='nsew',padx=10)
 
         #create left side bar's buttons
-        self.load_button = ctk.CTkButton(self.load_frame, text="Load data",width=80,height=40,command=self.load_data)
+        self.load_button = ctk.CTkButton(self.load_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 1"]["load_button"],width=80,height=40,command=self.load_data)
         self.load_button.grid(row=1, column=0,padx=20,pady=5,sticky='w')
         
-        self.clear_button = ctk.CTkButton(self.load_frame, text="Clear all",height=40,width=80,command=self.clear_analysis)
+        self.clear_button = ctk.CTkButton(self.load_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 1"]["clear_button"],height=40,width=80,command=self.clear_analysis)
         self.clear_button.grid(row=1, column=0,padx=(90,0),pady=5)
         
-        self.label_data_info = ctk.CTkLabel(master=self.load_frame, text="Load data: ",text_color='red', font=ctk.CTkFont(size=14, weight="bold"))
+        self.label_data_info = ctk.CTkLabel(master=self.load_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 1"]["label_data_info"],text_color='red', font=ctk.CTkFont(size=14, weight="bold"))
         self.label_data_info.grid(row=0, column=0,sticky='w',pady=10)
         
-        self.switch_spat2im_analysis = ctk.CTkSwitch(master=self.load_frame,text="Spatial domain <----> Image",command=self.switch_spat2im_command_analysis,state='disabled')
+        self.switch_spat2im_analysis = ctk.CTkSwitch(master=self.load_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 1"]["switch_spat2im_analysis"],command=self.switch_spat2im_command_analysis,state='disabled')
         self.switch_spat2im_analysis.grid(row=2,column=0,sticky='',padx=20)
         
         self.rgb_fig = Figure(figsize=(3,3), dpi=80)
@@ -286,7 +289,7 @@ class OPApp(ctk.CTk):
         # =====================================================================
         self.analysis_disp_frame = ctk.CTkFrame(self.analysis_tab)
         self.analysis_disp_frame.grid(row=0, column=1,sticky='nsew',padx=10)
-        self.label_mode_group = ctk.CTkLabel(master=self.analysis_disp_frame, anchor='w',text="RGB preview: ", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_mode_group = ctk.CTkLabel(master=self.analysis_disp_frame, anchor='w',text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 2"]["label_mode_group"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10)
 
         self.analysis_fig = Figure(figsize=(4,5), dpi=80)
@@ -310,16 +313,16 @@ class OPApp(ctk.CTk):
                 
         self.analysis_frame = ctk.CTkFrame(self.analysis_tab)
         self.analysis_frame.grid(row=0, column=2,sticky='nsew',padx=10)
-        self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text="Basic analysis: ", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["label_mode_group"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, padx=10, pady=10)
 
-        self.draw_button = ctk.CTkButton(self.analysis_frame, text="Draw spectrum",command=self.draw_spectra)
+        self.draw_button = ctk.CTkButton(self.analysis_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["draw_button"],command=self.draw_spectra)
         self.draw_button.grid(row=1, column=0,sticky='w')
         self.entry_draw = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_draw.insert(0,'5')
         self.entry_draw.grid(row=1, column=1,sticky='w')
         
-        self.trim_button = ctk.CTkButton(self.analysis_frame, text="Trim spectra",command=self.rogn)
+        self.trim_button = ctk.CTkButton(self.analysis_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["trim_button"],command=self.rogn)
         self.trim_button.grid(row=2, column=0,sticky='w')
         self.entry_wmin = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_wmin.grid(row=2, column=1,pady=10,sticky='w')
@@ -328,35 +331,35 @@ class OPApp(ctk.CTk):
         
         self.wl_limits=[0,0]
         
-        self.normalisation_button = ctk.CTkButton(self.analysis_frame, text="Normalisation",height=40,width=80,command=self.refl_norm)
+        self.normalisation_button = ctk.CTkButton(self.analysis_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["normalisation_button"],height=40,width=80,command=self.refl_norm)
         self.normalisation_button.grid(row=3, column=0,padx=0, pady=20,columnspan=2,sticky='')
         
-        self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text="Advanced analysis: ", font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_mode_group = ctk.CTkLabel(master=self.analysis_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["label_mode_group"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=4,column=0)
         
-        self.label_pca = ctk.CTkLabel(master=self.analysis_frame,text="PCA dim: ", font=ctk.CTkFont(size=10))
+        self.label_pca = ctk.CTkLabel(master=self.analysis_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["label_pca"], font=ctk.CTkFont(size=10))
         self.label_pca.grid(row=5,column=0,sticky='w')
-        self.label_clusters = ctk.CTkLabel(master=self.analysis_frame,text="Clusters: ", font=ctk.CTkFont(size=10))
+        self.label_clusters = ctk.CTkLabel(master=self.analysis_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["label_clusters"], font=ctk.CTkFont(size=10))
         self.label_clusters.grid(row=5,column=0)
         self.entry_pca = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_pca.grid(row=6, column=0,padx=(0,120),pady=0)
         self.entry_clust = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_clust.grid(row=6, column=0,pady=0,sticky='')
-        self.clust_button = ctk.CTkButton(self.analysis_frame, text="Clustering",command=self.clustering)
+        self.clust_button = ctk.CTkButton(self.analysis_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["clust_button"],command=self.clustering)
         self.clust_button.grid(row=6, column=1,sticky='w')
         
-        self.label_boxcar = ctk.CTkLabel(master=self.analysis_frame,text="Boxcar width: ", font=ctk.CTkFont(size=9))
+        self.label_boxcar = ctk.CTkLabel(master=self.analysis_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["label_boxcar"], font=ctk.CTkFont(size=9))
         self.label_boxcar.grid(row=7,column=0,sticky='sw')
-        self.label_polyorder = ctk.CTkLabel(master=self.analysis_frame,text="Poly. order: ", font=ctk.CTkFont(size=9))
+        self.label_polyorder = ctk.CTkLabel(master=self.analysis_frame,text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["label_polyorder"], font=ctk.CTkFont(size=9))
         self.label_polyorder.grid(row=7,column=0,sticky='s')
         self.entry_boxcar = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_boxcar.grid(row=8, column=0,padx=(0,120),pady=5,sticky='n')
         self.entry_polyorder = ctk.CTkEntry(self.analysis_frame,width=45)
         self.entry_polyorder.grid(row=8, column=0,pady=5 ,sticky='n')
-        self.smooth_button = ctk.CTkButton(self.analysis_frame, text="Smoothing",command=self.smoothing)
+        self.smooth_button = ctk.CTkButton(self.analysis_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["smooth_button"],command=self.smoothing)
         self.smooth_button.grid(row=8, column=1,pady=5)
     
-        self.save_opt_button = ctk.CTkButton(self.analysis_frame, text="Save",width=65,command=self.save_analysis_opt)
+        self.save_opt_button = ctk.CTkButton(self.analysis_frame, text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["block 3"]["save_opt_button"],width=65,command=self.save_analysis_opt)
         self.save_opt_button.grid(row=9, column=0,pady=30,padx=(80,0),sticky='e')
         
         
@@ -377,7 +380,7 @@ class OPApp(ctk.CTk):
             ###############################################
 
     
-        self.VI=self.tabview.tab("VI analysis")
+        self.VI=self.tabview.tab(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["title"])
     
         self.IDXS = None
         self.shown_IDX = None
@@ -414,32 +417,32 @@ class OPApp(ctk.CTk):
         self.loadfiles_frame=ctk.CTkFrame(self.VI,width=window_width)
         self.loadfiles_frame.grid(row=0, column=0, padx=40, pady=10, rowspan =1, columnspan=3,sticky='nsew')
         
-        self.sat_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Path to satelite data .csv")
+        self.sat_desc = ctk.CTkLabel(self.loadfiles_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["sat_desc"])
         self.sat_desc.grid(column=0, row=0)
         
         self.shown_sat_path = ctk.StringVar()
-        self.shown_sat_path.set("Select a path")
+        self.shown_sat_path.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["shown_sat_path"])
         self.shown_data_path = ctk.StringVar()
-        self.shown_data_path.set("Select a path")
+        self.shown_data_path.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["shown_data_path"])
         
         self.sat_path = ''
         self.sat_path_label = ctk.CTkEntry(self.loadfiles_frame, textvariable = self.shown_sat_path,
                                            state = 'readonly',width=300,text_color='red')
         self.sat_path_label.grid(column=1, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='e')
         
-        self.sat_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Explore",
+        self.sat_bouton = ctk.CTkButton(self.loadfiles_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["explore_bouton"],
                                         command = lambda : self.get_path("sat"))
         self.sat_bouton.grid(column=2, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='w')
         
         
         self.data_path = ''
-        self.data_desc = ctk.CTkLabel(self.loadfiles_frame, text = "Path to ONE-PIX image :")
+        self.data_desc = ctk.CTkLabel(self.loadfiles_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["data_desc"])
         self.data_desc.grid(column=0, row=1,sticky='e')
         self.data_path_label = ctk.CTkEntry(self.loadfiles_frame, textvariable = self.shown_data_path,
                                             state = 'readonly',width=300,text_color='red')
         self.data_path_label.grid(column=1, row=1, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='e')
-        self.data_bouton = ctk.CTkButton(self.loadfiles_frame, text = "Explore"
-                                         , command = lambda : self.get_path("data"))
+        self.data_bouton = ctk.CTkButton(self.loadfiles_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["explore_bouton"],
+                                         command = lambda : self.get_path("data"))
         self.data_bouton.grid(column=2, row=1, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='w')
 
         
@@ -452,13 +455,13 @@ class OPApp(ctk.CTk):
         self.seldomain_frame = ctk.CTkFrame(self.VI)
         self.seldomain_frame.grid(row=0, column=3, pady=10, rowspan =1, sticky="w")
         
-        self.domain_desc = ctk.CTkLabel(self.seldomain_frame,text = "Application domain")
+        self.domain_desc = ctk.CTkLabel(self.seldomain_frame,text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 2"]["domain_desc"])
         self.domain_desc.grid(column=0, row=0, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
         test = ctk.CTkButton(self.seldomain_frame, text = "?",
                              font=(tk.font.nametofont("TkDefaultFont"),20),text_color='red', width =12)
         test.grid(column=1, row=0, padx=30, pady=(10,2.5), rowspan=1, columnspan=1)
         self.domain = ctk.CTkComboBox(self.seldomain_frame)
-        self.domain.configure(values= ("vegetation","snow","water"))
+        self.domain.configure(values=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 2"]["domain"])
         self.domain.set("vegetation") #index de l'élément sélectionné
         self.domain.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)  
         
@@ -501,28 +504,28 @@ class OPApp(ctk.CTk):
         self.commands_frame=ctk.CTkFrame(self.VI)
         self.commands_frame.grid(row=2, column=0, pady=10, rowspan =1)
 
-        self.sort_choice = ttk.Combobox(self.commands_frame, textvariable = ("keep all", "simple filter"),
+        self.sort_choice = ttk.Combobox(self.commands_frame, textvariable=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"],
                                    state = "readonly")
-        self.sort_choice['values']=["keep all", "simple filter"]
+        self.sort_choice['values']=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"]
         self.sort_choice.current(0) #index de l'élément sélectionné
         self.sort_choice.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)        
         self.sort_choice.bind("<<ComboboxSelected>>", lambda event=None:
                          self.get_mode_choice())
             
-        self.critere = ctk.CTkComboBox(self.commands_frame, values= ("Variance", "Entropy"), state = "readonly")
-        self.critere.set("Variance") #index de l'élément sélectionné
+        self.critere = ctk.CTkComboBox(self.commands_frame, values= self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"], state = "readonly")
+        self.critere.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"][0]) #index de l'élément sélectionné
         self.critere.configure(state = "disable")
         self.critere.grid(column=0, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
         
         self.nb_keep = ctk.CTkEntry(self.commands_frame, state = "disabled")
         self.nb_keep.grid(column=1, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
         
-        self.calc_bouton = ctk.CTkButton(self.commands_frame , text = "Plot indices", 
+        self.calc_bouton = ctk.CTkButton(self.commands_frame , text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["calc_bouton"], 
                             state = "disabled",command = self.calculation)
                            
         self.calc_bouton.grid(column=1, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
 
-        self.WIP = ctk.CTkLabel(self.commands_frame, text = "Waiting")
+        self.WIP = ctk.CTkLabel(self.commands_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["WIP"])
         self.WIP.grid(column=0, row=3, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
 
             
@@ -555,11 +558,11 @@ class OPApp(ctk.CTk):
                           command = self.plot_indices, var = self.shown_IDX)
         self.indices_scale.grid(column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=3)
         
-        self.save_options = ctk.CTkButton(self.indices_frame, text = 'Save options', state = "disabled",
+        self.save_options = ctk.CTkButton(self.indices_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 5"]["save_options"], state = "disabled",
                                        command = self.save_menu)
         self.save_options.grid(column=0, row=3, padx=50, pady=10,sticky='e')
         
-        self.save_confirm = ctk.CTkButton(self.indices_frame, text = 'Save',state = "disabled",
+        self.save_confirm = ctk.CTkButton(self.indices_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 5"]["save_confirm"],state = "disabled",
                                       command = self.save_data)
         
         self.save_confirm.grid(column=1, row=3, padx=(0,20), pady=10)
@@ -572,7 +575,10 @@ class OPApp(ctk.CTk):
        
     
     def change_appearance_mode_event(self, new_appearance_mode: str):
-        ctk.set_appearance_mode(new_appearance_mode)
+        List = ["Dark", "Light"]
+        trad_themes = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_optionemenu"]
+        print(self.appearance_mode_optionemenu.get())
+        ctk.set_appearance_mode(List[trad_themes.index(self.appearance_mode_optionemenu.get())])
        
     
     def clear_graph_tab1(self):
@@ -587,7 +593,9 @@ class OPApp(ctk.CTk):
         
   
     def close_window(self):
-        if messagebox.askokcancel("Quit", "Do you want to quit ?"):
+        
+        if messagebox.askokcancel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel"]["title"],
+                                  self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel"]["confirm"]):
             if self.acq_config.spec_lib.DeviceName != '':
                 self.acq_config.spec_lib.spec_close()
             plt.close('all')
@@ -634,10 +642,7 @@ class OPApp(ctk.CTk):
     def window_size_test(self):      
         self.proj = ctk.CTkToplevel()
         os_name = platform.system()
-        if os_name == 'Linux':
-            self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, 1024, 0))
-        else:
-            self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, self.winfo_screenwidth(), 0))
+        self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, screenWidth, 0))
         self.proj.update()
         y = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
         x = list(range(self.acq_config.width))  # vertical vector for the pattern creation
@@ -673,11 +678,11 @@ class OPApp(ctk.CTk):
         if self.switch_spat2im.get()==0:
             #display spectra
             self.a_acq.imshow(np.log10(abs(np.mean(self.acq_res.whole_spectrum,2))))
-            self.a_acq.set_title("Spectral mean frequency domain (log scale)",color='white')
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
         else:
             #display image
             self.a_acq.imshow(self.acq_res.rgb_image)
-            self.a_acq.set_title("False RGB color of the hyperspectral image",color='white')
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
        
             
     def spec_connection(self):
@@ -693,20 +698,21 @@ class OPApp(ctk.CTk):
                 self.switch_spectro.configure(text=spectro_name)
                 self.switch_spectro.select()
                 self.button_acquire_hyp.configure(state = "normal")
-                self.button_co.configure(text='Spectrometer disconnection',command=self.spec_disconnection)
+                self.button_co.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_connection"]["button_co"],command=self.spec_disconnection)
         except Exception:
-            showwarning('Spectrometer error',f"{self.acq_config.name_spectro} is not available")
+            error_text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_connection"]["warning"]
+            showwarning(error_text[0],f"{self.acq_config.name_spectro}{error_text[1]}")
 
 
     def spec_disconnection(self):
-        self.switch_spectro.configure(text='No spectrometer connected ')
+        self.switch_spectro.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_disconnection"]["switch_spectro"])
         self.switch_spectro.deselect()
         self.button_acquire_hyp.configure(state = "disabled")
  
         if self.acq_config.spec_lib.DeviceName != '':
             self.acq_config.spec_lib.spec_close()
             self.switch_spectro.configure(state= "normal")
-            self.button_co.configure(text='Spectrometer connection',command=self.spec_connection)
+            self.button_co.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_disconnection"]["switch_spectro"],command=self.spec_connection)
         else:
             pass
  
@@ -715,20 +721,21 @@ class OPApp(ctk.CTk):
         if (self.switch_spectro.get()==1):
             self.entries_actualisation()
             self.clear_graph_tab1()
-            self.a_acq.set_title("Acquired spectrum ",color='white')
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["title"],color='white')
  
             self.acq_config.integration_time_ms = float(self.entry_integration_time.get()) * 1e3
             self.acq_config.spec_lib.set_integration_time()
  
             self.a_acq.plot(self.acq_config.spec_lib.get_wavelengths(), self.acq_config.spec_lib.get_intensities())
-            self.a_acq.set_xlabel("Wavelengths (nm)",color='white')
+            self.a_acq.set_xlabel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["xlabel"],color='white')
             self.a_acq.set_ylabel("Intensity (counts)",color='white')
             self.a_acq.set_axis_on()
             self.a_acq.grid(True, linestyle='--')
             self.canvas.draw_idle()
             
         else:
-            showwarning("Warning", "Connect one spectrometer first")
+            warning_test = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["warning"]
+            showwarning(warning_test[0], warning_test[1])
  
  
     def json_actualisation(self):
@@ -790,11 +797,12 @@ class OPApp(ctk.CTk):
         self.progressbar.start()
         est_duration=round(1.5*self.acq_config.pattern_lib.nb_patterns*self.acq_config.periode_pattern/(60*1000),2)
         est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
-        self.est_time_label.configure(text=f"Estimated end: {est_end}")
+        est_end_label = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 5"]["est_time_label"]
+        self.est_time_label.configure(text=f"{est_end_label}{est_end}")
         self.button_acquire_hyp.configure(state='disabled')
         self.acq_config.thread_acquisition()
         self.progressbar.stop()
-        self.est_time_label.configure(text="Estimated end: ")
+        self.est_time_label.configure(text=est_end_label)
         self.progressbar.set(value=0)
         if (self.acq_config.pattern_method in self.acq_config.seq_basis or self.acq_config.pattern_method == 'Hadamard'):
             if len(self.acq_config.spectra) > 0:
@@ -810,13 +818,20 @@ class OPApp(ctk.CTk):
                 self.clear_graph_tab1()
 
                 self.a_acq.imshow(self.acq_res.rgb_image)
-                self.a_acq.set_title("False RGB color of the hyperspectral image",color='white')
+                self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
                 self.a_acq.set_axis_on()
                 self.canvas.draw_idle()
                 
                 self.switch_spat2im.configure(state='normal')
                 self.switch_spat2im.select()
-                
+        
+        # os.chdir(root_path)
+        # file = open(json_path, "r")
+        # json_object = json.load(file)
+        # file.close()
+        
+        
+        
         elif self.acq_config.pattern_method in self.acq_config.full_basis:
             pass
         self.button_acquire_hyp.configure(state='normal')
@@ -877,7 +892,7 @@ class OPApp(ctk.CTk):
     
             self.rgb_display(self.res["hyperspectral_image"],self.res["wavelengths"],title="RGB reconstructed image")
             self.a_rgb.set_axis_on
-            self.label_data_info.configure(text='Data loaded',text_color='white')
+            self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='white')
             self.normalisation_button.configure(state='normal')
             
             if self.res['pattern_method'] in ['FourierSplit','Fourier']:
@@ -887,7 +902,9 @@ class OPApp(ctk.CTk):
             elif self.res['pattern_method']=='Hadamard':
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
-                self.rgb_spectrum=0
+                dim=len(self.res['rgb_image'])
+                self.res['rgb_spectrum']=hadamard(dim)@np.mean(self.res['rgb_image'],2)@hadamard(dim)
+                
             else:
                 self.switch_spat2im_analysis.configure(state='disabled')
                 
@@ -898,13 +915,14 @@ class OPApp(ctk.CTk):
         self.clear_analysis_graph()
         self.clear_rgb_graph()
         self.res=0
-        self.label_data_info.configure(text='Load Data ',text_color='red')
+        self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='red')
         self.switch_spat2im_analysis.configure(state='disabled')
         
     def draw_spectra(self):
         plt.switch_backend('TkAgg')
         if self.res==0:
-            showwarning("DataError","Load data first")
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
+            showwarning(warning_text[0],warning_text[1])
         else:
             self.clear_analysis_graph()
             if self.res["current_data_level"]=="hyperspectral_image_clipped":
@@ -920,17 +938,20 @@ class OPApp(ctk.CTk):
             
     def rogn(self):
         if self.res==0:
-            showwarning("DataError","Load data first")
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
+            showwarning(warning_text[0],warning_text[1])
         else:
             user_wl=[round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get()))]
             if user_wl[0]<round(self.wl_limits[0]):
                 user_wl[0]=self.wl_limits[0]
-                showwarning("ValueError",f"This datacube does not contain images below {self.wl_limits[0]} nm")
+                warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["belowvalue"]
+                showwarning(warning_text[0],f"{warning_text[1]}{self.wl_limits[0]}{warning_text[2]}")
                 self.entry_wmin.delete(0,10)
                 self.entry_wmin.insert(0,user_wl[0])
             if user_wl[1]>round(self.wl_limits[1]):
                 user_wl[1]=self.wl_limits[1]
-                showwarning("ValueError",f"This datacube does not contain images beyond {self.wl_limits[1]} nm")
+                warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["outvalue"]
+                showwarning(warning_text[0],f"{warning_text[1]}{self.wl_limits[0]}{warning_text[2]}")
                 self.entry_wmax.delete(0,10)
                 self.entry_wmax.insert(0,user_wl[1])
             try:
@@ -940,7 +961,7 @@ class OPApp(ctk.CTk):
                 
             self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"] = hsa.clip_datacube(self.res[self.res["current_data_level"]], 
                                                     wl,user_wl[0],user_wl[1])
-            self.rgb_display(self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"],"RGB reconstructed image (spectral clip)")
+            self.rgb_display(self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"],self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["trim"])
             self.res["current_data_level"]="hyperspectral_image_clipped"
             self.a_analysis.set_xlim([round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get()))])
             self.analysis_canvas.draw_idle()
@@ -954,13 +975,14 @@ class OPApp(ctk.CTk):
 
     def clustering(self):
         if self.res==0:
-            showwarning("DataError","Load data first")
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
+            showwarning(warning_text[0],warning_text[1])
         else:
             self.res["image_seg"] = hsa.clustering(self.res[self.res["current_data_level"]], int(self.entry_pca.get()), int(self.entry_clust.get()))
             
             self.clear_analysis_graph()
             
-            self.a_analysis.set_title("Clustered image ",color='white')
+            self.a_analysis.set_title(self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["clustered"],color='white')
             self.a_analysis.imshow(self.res["image_seg"])
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
@@ -968,7 +990,8 @@ class OPApp(ctk.CTk):
         
     def smoothing(self):
         if self.res==0:
-            showwarning("DataError","Load data first")
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
+            showwarning(warning_text[0],warning_text[1])
         else:
             try:
                 self.res["hyperspectral_image_smoothed"] = hsa.smooth_datacube(self.res[self.res["current_data_level"]],
@@ -980,7 +1003,7 @@ class OPApp(ctk.CTk):
                     wl=self.res["wavelengths"]
                     spectra=self.res["spectra"]
                 
-                self.rgb_display(self.res["hyperspectral_image_smoothed"], wl,title="RGB reconstructed image (smoothed)")
+                self.rgb_display(self.res["hyperspectral_image_smoothed"], wl,title=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["smooth"])
                 spectra_smooth=hsa.smooth_datacube(spectra.reshape(1,spectra.shape[0],spectra.shape[1]),int(self.entry_boxcar.get()), int(self.entry_polyorder.get())).squeeze()
                 self.clear_analysis_graph()
                 self.a_analysis.plot(wl,spectra_smooth.T)
@@ -989,7 +1012,8 @@ class OPApp(ctk.CTk):
                 self.a_analysis.grid(True, linestyle='--')
                 self.res["current_data_level"]="hyperspectral_image_smoothed"
             except ValueError:
-                showwarning(title="ValueError",message="Polyorder must be less than window_length.")
+                warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["polyorder"]
+                showwarning(warning_text[0],warning_text[1])
             except KeyError :
                 pass
             
@@ -1019,7 +1043,7 @@ class OPApp(ctk.CTk):
         # Display spectral mean of the hypercube and select the reference area
         fig,ax=plt.subplots(1)
         ax.imshow(np.mean(raw_hypercube,axis=2))
-        plt.title('Select a reference area to normalise the data cube')
+        plt.title(self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["flux2ref"]["title"])
         x1,x2=plt.ginput(2) # Select two points to define reference area 
         x1=np.round(x1).astype(np.int32)
         x2=np.round(x2).astype(np.int32)
@@ -1041,7 +1065,8 @@ class OPApp(ctk.CTk):
     def refl_norm(self):
         plt.switch_backend('TkAgg')
         if self.res==0:
-            showwarning("DataError","Load data first")
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
+            showwarning(warning_text[0],warning_text[1])
         else:
             try:
                 wl=self.res["wavelengths_clipped"]
@@ -1055,7 +1080,7 @@ class OPApp(ctk.CTk):
             
             self.res["hyperspectral_image_norm"],norm_coeff = self.flux2ref(self.res[self.res["current_data_level"]], wl)
             self.rgb_display(self.res["hyperspectral_image_norm"],wl
-                             ,title="RGB reconstructed image (reflectance)")
+                             ,title=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["norm"])
             self.normalisation_button.configure(state='disabled')
             self.res["current_data_level"]="hyperspectral_image_norm"
             
@@ -1071,7 +1096,8 @@ class OPApp(ctk.CTk):
             
     def save_analysis_opt(self):
         if self.res==0:
-            showwarning("DataError","Load data first")
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
+            showwarning(warning_text[0],warning_text[1])
         else:   
             self.d = ctk.CTkToplevel(self)
             self.d.maxsize(500,400)
@@ -1116,13 +1142,13 @@ class OPApp(ctk.CTk):
             data_list.remove('current_data_level')
             path=self.analysis_save_path+'/'+today
             os.mkdir(path)
-                
+            choice_list=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["save_analysis_opt"]["data_choice"]
             try:
                 wl=self.res["wavelengths_clipped"]
             except KeyError:
                 wl=self.res["wavelengths"]
                 
-            if self.data_choice.get()=='All':
+            if choice_list.index(self.data_choice.get())==0: # if data_choice == 'All'
                 for datacube in data_list:
                     if datacube in ['rgb_image','image_seg']:
                         plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
@@ -1151,12 +1177,12 @@ class OPApp(ctk.CTk):
         self.d.attributes('-topmost', 'true')
         
         self.chkSave_id.set(1)
-        self.save_id_CB = ctk.CTkCheckBox(self.d, text = "Save indices", variable = self.chkSave_id)
+        self.save_id_CB = ctk.CTkCheckBox(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["save_id_CB"], variable = self.chkSave_id)
         self.save_id_CB.grid(column=0, row=0, padx=10, pady=2.5, rowspan =1, columnspan=1,
                                 sticky = "w")
         
         self.chkSave_bands.set(0)
-        self.save_bands_CB = ctk.CTkCheckBox(self.d, text = "Save bands", variable = self.chkSave_bands)
+        self.save_bands_CB = ctk.CTkCheckBox(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["save_bands_CB"], variable = self.chkSave_bands)
         self.save_bands_CB.grid(column=2, row=0, padx=10, pady=2.5, rowspan =1, columnspan=1,
                                 sticky = "w")
 
@@ -1176,21 +1202,21 @@ class OPApp(ctk.CTk):
                                 sticky = "w")
         
         
-        self.save_desc = ctk.CTkLabel(self.d, text = "Save directory :")
+        self.save_desc = ctk.CTkLabel(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["save_desc"])
         self.save_desc.grid(column=0, row=2, padx=10, pady=(10,2.5), rowspan =1, columnspan=1,
                             sticky="w")
         
         self.shown_save_path = ctk.StringVar()
-        self.shown_save_path.set("Select a path")
+        self.shown_save_path.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["shown_save_path"])
         self.save_path_label = ctk.CTkEntry(self.d, textvariable = self.shown_save_path,
                                            state = 'readonly',width=300,text_color='red')
         self.save_path_label.grid(column=0, row=3, padx=10, pady=(2.5,10), rowspan =1, columnspan=2)
 
-        self.explore_bouton = ctk.CTkButton(self.d, text = "Parcourir", 
+        self.explore_bouton = ctk.CTkButton(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["explore_bouton"], 
                                  command = lambda : self.get_dir())
         self.explore_bouton.grid(column=2, row=3, padx=10, pady=(2.5,10), rowspan =1, columnspan=1)
         
-        self.comment_label = ctk.CTkLabel(self.d, text = "Enter a comment : ")
+        self.comment_label = ctk.CTkLabel(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["comment_label"])
         self.comment_label.grid(column=0, row=4, padx=10, pady=10, rowspan =1, columnspan=1, sticky="w")
         
         self.save_comment.set("")
@@ -1201,12 +1227,12 @@ class OPApp(ctk.CTk):
         
         
         
-        self.CANCEL_save_bouton = ctk.CTkButton(self.d, text = "Cancel",
+        self.CANCEL_save_bouton = ctk.CTkButton(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["CANCEL_save_bouton"],
                                             state = "normal", command = lambda :[self.d.destroy(),
                                                                                            self.save_options.configure(state = "normal")])
         self.CANCEL_save_bouton.grid(column=0, row=5, padx=10, pady=10, rowspan =1, columnspan=1)
         
-        self.confirm_bouton = ctk.CTkButton(self.d, text = "Confirm", state = "disabled",
+        self.confirm_bouton = ctk.CTkButton(self.d, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["save_menu"]["confirm_bouton"], state = "disabled",
                                         command = self.check_path)
         self.confirm_bouton.grid(column=2, row=5, padx=10, pady=10, rowspan =1, columnspan=1)
         self.d.protocol("WM_DELETE_WINDOW", lambda :[self.d.destroy(),
@@ -1237,7 +1263,7 @@ class OPApp(ctk.CTk):
     def save_data(self):
         today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
         self.save_confirm.configure(state = "disabled")
-        self.WIP.configure(text = "Saving...")
+        self.WIP.configure(text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["WIP"]["WIP_saving"])
         foldername='ONE-PIX_VI_'+self.IM["folder_name"]
         path = self.save_path+"/"+foldername
         if not(os.path.exists(path)):
@@ -1328,14 +1354,16 @@ class OPApp(ctk.CTk):
                 self.shown_IDX = self.indice_list.get()
                 self.indices_scale.set(self.IDXS["names"].index(self.shown_IDX))
             except ValueError:
-                showwarning('Unknown VI','Select a VI from the list')
+                warning_text = self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["get_combobox_value"]["warning_VI"]
+                showwarning(warning_text[0],warning_text[1])
                 self.indice_scale.set(self.IDXS["names"][0])
         elif sel=="bands":
             try:
                 self.shown_band = self.bands_list.get()
                 self.bands_scale.set(self.IM["bands_names"].index(self.shown_band))
             except ValueError:
-                showwarning('Unknown band','Select a band from the list')
+                warning_text = self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["get_combobox_value"]["warning_bands"]
+                showwarning(warning_text[0],warning_text[1])
                 self.bands_scale.set(self.IM["bands_names"][0])
         self.update()
             
@@ -1345,11 +1373,11 @@ class OPApp(ctk.CTk):
     #     griser sur selection dans la combobox
     # =========================================================================
     def get_mode_choice(self):
-        sel = self.sort_choice.get()
-        if sel == "keep all":
+        filter_list = self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"]
+        if filter_list.index(self.sort_choice.get())==0: # if self.sort_choice.get()=="keep all"
             self.critere.configure(state = "disabled")
             self.nb_keep.configure(state = "disabled")
-        elif sel == "simple filter":
+        elif filter_list.index(self.sort_choice.get())==1: # if self.sort_choice.get()=="simple filter"
             self.critere.configure(state = "normal")
             self.nb_keep.configure(state = "normal")
             self.nb_keep.delete(0,tk.END)
@@ -1427,7 +1455,10 @@ class OPApp(ctk.CTk):
         self.save_options.configure(state = "disabled")
         self.WIP.configure(text = "Computing...")
 #         self.update()
-        id_names = [n for n in sp.indices if (sp.indices[n].application_domain==self.domain.get())]
+        trad_SIDomain=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 2"]["domain"]
+        domain_list=["vegetation","snow","water"]
+        domain = domain_list[trad_SIDomain.index(self.domain.get())]
+        id_names = [n for n in sp.indices if (sp.indices[n].application_domain==domain)]
         self.get_idx(id_names)
         # for i in range(len(id_names)):
         #     indice = self.IDXS["id"][i]
@@ -1478,13 +1509,17 @@ class OPApp(ctk.CTk):
         temp["id"] = np.asarray(temp["id"])
         self.IDXS = temp
         
-        if self.sort_choice.get() == "simple filter":
+        filters_list = self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"]
+        cur_filter = filters_list.index(self.sort_choice.get())
+        if cur_filter == 1: # if current filter is "simple filter"
             nb = int(self.nb_keep.get())
             if nb>len(self.IDXS["names"]):
                 nb = len(self.IDXS["names"])
                 
             # entropy of the image (without nans and outliers)
-            if self.critere.get() == "Entropy":
+            critere_list = self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"]
+            cur_critere = critere_list.index(self.critere.get())
+            if cur_critere == 1: # if current critere is "Entropy"
                 ENTR = []
                 for i in range(len(self.IDXS["names"])):
                     im = self.IDXS["id"][i]
@@ -1500,7 +1535,7 @@ class OPApp(ctk.CTk):
                         "names": names[:nb]}
                 
             # variance of the image (without nans and outliers)
-            elif self.critere.get() == "Variance":
+            if cur_critere == 0: # if current critere is "Variance"
                 VAR = []
                 for i in range(len(self.IDXS["names"])):
                     im = self.IDXS["id"][i]
@@ -1579,7 +1614,7 @@ class OPApp(ctk.CTk):
             )
         
         idx = sp.computeIndex(
-            index = idx_to_compute,
+            index = [f for f in idx_to_compute if not('G1' in sp.indices[f].bands)],
             A = da.sel(band = "Aerosols"),
             B = da.sel(band = "Blue"),
             G = da.sel(band = "Green"),
@@ -1615,6 +1650,19 @@ class OPApp(ctk.CTk):
             slb = slb
             )
         self.IDXS = {"id":np.asarray(idx),"names":list(np.asarray(idx.index))}
+
+    def open_languageConfig(self):
+        with open("languages/config.json", 'r') as f:
+            lang_conf = json.load(f)
+            f.close()
+        lang_list = lang_conf['installed_language']
+        jsonFile = list(lang_list)[list(lang_list.values()).index(lang_conf["last_choice"])]
+        print(jsonFile)
+        
+        with open(f"languages/{jsonFile}.json", 'r') as f:
+            self.widgets_text = json.load(f)
+            f.close()
+        # print(self.widgets_text)
 
 class Toolbar(NavigationToolbar2Tk):
     def set_message(self, s):
