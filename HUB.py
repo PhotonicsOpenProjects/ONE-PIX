@@ -94,7 +94,7 @@ class OPApp(ctk.CTk):
         self.Exit_button.grid(row=3, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
 
     def CompleteLaunching(self):
-        self.acquisition_method = 'FourierSplit'
+        self.acquisition_method = 'Complete'
         self.normalization_request()
 
     def AddressedLaunching(self):

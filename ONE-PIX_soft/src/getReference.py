@@ -49,6 +49,7 @@ f = open(jsonpath)
 acq_params = json.load(f)
 f.close()
 acq_params["spatial_res"] = 5
+acq_params["pattern_method"] = "FourierSplit"
 file = open(jsonpath, "w")
 json.dump(acq_params, file)
 file.close()
@@ -93,7 +94,8 @@ proj.update()
 define_params(test)
 proj.destroy()
 
-
+if not "Hypercubes" in os.listdir():
+    os.mkdir("Hypercubes")
 os.chdir('Hypercubes')
 fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
 actual_time = time.strftime("%H-%M-%S")  # get the current time

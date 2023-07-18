@@ -243,7 +243,7 @@ def coregistration_calibration(screen_resolution=(800,600)):
     Function allow to calibrate teh coregistration between video projector and the PI camera
     
     """
-    json_path='acquisition_param_ONEPIX.json'
+    json_path='../acquisition_param_ONEPIX.json'
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)
     # Delay execution a quarter of a second to make sure the image is displayed 
