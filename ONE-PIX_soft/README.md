@@ -117,12 +117,12 @@ To do so, go to this file with this command line:
 ```
 cd /etc/udev/rules.d
 ```
-and add text in the file with these lines: 
+and add text in the file ussing these commands: 
 
 ```
-sed -i '13 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0667", MODE="0666"' 99-com.rules
-sed -i '14 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0668", MODE="0666"' 99-com.rules
-sed -i '15 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0669", MODE="0666"' 99-com.rules 
+sudo sed -i '13 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0667", MODE="0666"' 99-com.rules
+sudo sed -i '14 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0668", MODE="0666"' 99-com.rules
+sudo sed -i '15 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0669", MODE="0666"' 99-com.rules 
 
 ```
 Finally, save and close the rules.d file.

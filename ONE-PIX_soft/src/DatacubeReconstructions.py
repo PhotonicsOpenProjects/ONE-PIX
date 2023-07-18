@@ -182,13 +182,13 @@ def load_hypercube(opt=None):
 
     """
    
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', 1)
+    # root = Tk()
+    # root.withdraw()
+    # root.attributes('-topmost', 1)
     res={"hyperspectral_image":[],"wavelengths":[]}
     
     if opt==None:
-        meas_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions")
+        meas_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions",initialdir=os.getcwd())
     elif opt=='last':
         root_path=os.getcwd()
         path=os.path.join(root_path,'Hypercubes')
@@ -198,10 +198,12 @@ def load_hypercube(opt=None):
         meas_path=opt
         
     hyp_filename=glob.glob(f'{meas_path}/*.hdr')[0]
+    info_filename=glob.glob(f'{meas_path}/*.txt')[0]
     data=envi.open(hyp_filename)
     res["hyperspectral_image"]=data.load()
     res["wavelengths"]=np.array(data.bands.centers)
     res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]   
+    res['pattern_method']=get_header_data(info_filename)['pattern_method']
     return res
 
 def load_analysed_data():

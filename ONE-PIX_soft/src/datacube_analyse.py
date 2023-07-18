@@ -117,7 +117,6 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
 
     """
     # Display Hypercube spectral mean to visualise an image
-    matplotlib.use('TkAgg')
     rgb_image=RGB_reconstruction(datacube,wavelengths)
     fig,ax=plt.subplots()
 #     plt.subplot(1,2,1)
@@ -165,7 +164,6 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
 
     plt.close()
     del fig,ax
-    plt.switch_backend('Agg')
     return spec
 
  

@@ -1,23 +1,20 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Oct  8 17:09:58 2021
-@author: mribes & grussias
-"""
+
 from src.AcquisitionConfig import *
 begin_script=time.time()
 
 """
-ONEPIX data initialisation
+ONE-PIX data initialisation
 """
 json_path="./acquisition_param_ONEPIX.json"
 acquisition_config = OPConfig(json_path)
-OP_init(acquisition_config)
+acquisition_config.OP_init()
 print(f"Estimated acquisition duration : {round(1.5*acquisition_config.pattern_lib.nb_patterns*acquisition_config.periode_pattern/(60*1000),2)} min ")
+
 """
-Start ONEPIX acquisition  
+Start ONE-PIX acquisition  
 """
 print("Start acquisition")
-acquisition_config=thread_acquisition(acquisition_config)
+acquisition_config.thread_acquisition()
 duree_script=time.time()-begin_script
-print(f"ONEPIX acquisition completed in {duree_script/60} min")
+print(f"ONE-PIX acquisition completed in {duree_script/60} min")
 

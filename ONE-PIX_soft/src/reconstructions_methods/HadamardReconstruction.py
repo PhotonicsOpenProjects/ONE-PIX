@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 14 10:22:17 2022
-
-@author: mribes
-"""
 import numpy as np
 from scipy.linalg import hadamard
 
@@ -72,6 +66,6 @@ class HadamardReconstruction:
         H=hadamard(dim)
         # H=np.dstack([H]*np.size(whole_spectrum,2))
         hyperspectral_image=np.zeros_like(whole_spectrum)
-        for wl in range(np.size(whole_spectrum,2)): hyperspectral_image[:,:,wl]=H@whole_spectrum[:,:,wl]@H
+        for wl in range(np.size(whole_spectrum,2)): hyperspectral_image[:,:,wl]=abs(H@whole_spectrum[:,:,wl]@H)
         
         return whole_spectrum,hyperspectral_image

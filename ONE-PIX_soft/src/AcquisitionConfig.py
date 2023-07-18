@@ -10,16 +10,29 @@ import sys
 import platform
 import datetime
 import gc
+import screeninfo
+import io
 
 from src.SpectrometerBridge import * 
 from src.PatternMethods import *
 from src.DatacubeReconstructions import *
 from src.datacube_analyse import *
+from src.coregistration_lib import *
 from pathlib import Path
 import json
 from tkinter import *
 from tkinter.messagebox import askquestion
 
+#root_path = '/'.join(os.getcwd().split('/')[:-1])
+#json_path = f"{root_path}/acquisition_param_ONEPIX.json"
+def is_raspberrypi():
+    try:
+        with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
+            if 'raspberry pi' in m.read().lower(): return True
+    except Exception: pass
+    return False
+
+screenWidth = screeninfo.get_monitors()[0].width
 
 class OPConfig:
     """ 
@@ -40,6 +53,7 @@ class OPConfig:
         self.height = acqui_dict['height']
         self.width = acqui_dict["width"]
         self.spatial_res = acqui_dict['spatial_res']
+        
         self.pattern_method = acqui_dict['pattern_method']
         self.name_spectro = acqui_dict["name_spectro"]
         self.integration_time_ms =acqui_dict["integration_time_ms"]
@@ -47,7 +61,7 @@ class OPConfig:
         
         self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
         self.seq_basis = ['FourierSplit','FourierShift']
-        self.full_basis = ['Custom','Hadamard']
+        self.full_basis = ['Adressing','Custom','Hadamard']
         self.nb_patterns = self.pattern_lib.nb_patterns
 
         self.chronograms = []
@@ -59,12 +73,10 @@ class OPConfig:
         self.wl_lim=acqui_dict["wl_lim"]
         self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms,self.wl_lim)
         self.wavelengths = []
-        
-
+        self.spectro_flag=False
         self.duration = 0
         self.periode_pattern = self.mes_ratio*self.integration_time_ms
-        if self.periode_pattern < 80: self.periode_pattern = 80
-        
+        if self.periode_pattern < 120: self.periode_pattern = 120
         self.display_time = []
         self.duree_dark = 2
         self.time_spectro = []
@@ -89,21 +101,23 @@ class OPConfig:
     
         """
         
-        max_counts = 45000
+        max_counts = 35000
         self.spec_lib.set_integration_time()
         
         flag = True
+        self.spectro_flag=True
         count=0
+        delta_wl=round(0.05*np.size(self.spec_lib.get_wavelengths()))
         while flag:
             #mes=self.spec_lib.get_intensities()[100:-100]
             mes = []
             for acq in range(10):
                 mes.append(self.spec_lib.get_intensities())
-            mes = np.mean(np.array(mes), 0)[100:-100]
+            mes = np.mean(np.array(mes), 0)[delta_wl:-delta_wl]
             delta = max(mes)-max_counts
             print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
     
-            if (abs(delta)<5000):
+            if (abs(delta)<2500):
                 flag = False
             elif self.spec_lib.integration_time_ms >= 10E3 or self.spec_lib.integration_time_ms==0:
                 flag = False
@@ -122,7 +136,7 @@ class OPConfig:
                 self.spec_lib.set_integration_time()
                 
             self.spec_lib.set_integration_time()
-            
+            self.spectro_flag=False
         print(f"Integration time (ms): {self.integration_time_ms}")
 
 
@@ -168,8 +182,8 @@ class OPConfig:
         
         self.periode_pattern = self.mes_ratio*self.integration_time_ms
     
-        if self.periode_pattern < 80:
-            self.periode_pattern = 80
+        if self.periode_pattern < 120:
+            self.periode_pattern = 120
         #self.spec_lib.set_integration_time()
         
 
@@ -244,10 +258,8 @@ class OPConfig:
         temps = []
     
         cv2.namedWindow('ImageWindow', cv2.WND_PROP_FULLSCREEN)
-        if os_name=='Windows':
-            cv2.moveWindow('ImageWindow', 1920, 0)
-        else:
-            cv2.moveWindow('ImageWindow', 1024, 0)
+        
+        cv2.moveWindow('ImageWindow', screenWidth, 0)
            
         cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
         for i in range(0, np.size(black_patterns, 2)):
@@ -311,7 +323,7 @@ class OPConfig:
         self.display_time = (np.asarray(temps)-begin)*1e3
 
 
-    def thread_acquisition(self):
+    def thread_acquisition(self, path=None, time_warning=True):
         """
         This funtion allows to run in parallel the projection of a sequence of 
         patterns and spectrometers' measurements in free running mode. 
@@ -340,10 +352,33 @@ class OPConfig:
             self.pattern_order,freq=self.pattern_lib.decorator.creation_patterns()
             self.pattern_lib.nb_patterns=self.pattern_lib.decorator.nb_patterns
         est_duration=round(1.5*self.pattern_lib.nb_patterns*self.periode_pattern/(60*1000),2)
-        ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
-        if ans=='yes':
+        if time_warning:
+            ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
+            if ans=='yes':
+                est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
+                # print("Estimated end of the acquisition: "+est_end)
+                self.q = Queue()
+                first_thread = threading.Thread(
+                    target=self.affichage_sequence)
+                second_thread = threading.Thread(
+                    target=self.spectrometer_acquisition)
+                first_thread.start()
+                second_thread.start()
+        
+                first_thread.join()
+                second_thread.join()
+        
+                self.duration = time.time()-begin_acq
+                if path!=None:
+                    self.save_acquisition_envi(path)
+                else:
+                    self.save_acquisition_envi()
+                gc.collect()
+            else:
+                pass
+        else:
             est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
-            print("Estimated end of the acquisition: "+est_end)
+            # print("Estimated end of the acquisition: "+est_end)
             self.q = Queue()
             first_thread = threading.Thread(
                 target=self.affichage_sequence)
@@ -356,14 +391,14 @@ class OPConfig:
             second_thread.join()
     
             self.duration = time.time()-begin_acq
-    
-            self.save_acquisition_envi()
+            if path!=None:
+                self.save_acquisition_envi(path)
+            else:
+                self.save_acquisition_envi()
             gc.collect()
-        else:
-            pass
        
 
-    def save_acquisition_envi(self):
+    def save_acquisition_envi(self, path = os.path.join(os.getcwd(), "Hypercubes")):
         """
         This function allow to save the resulting acquisitions from one 
         OPConfig object into the Hypercube folder.
@@ -384,10 +419,6 @@ class OPConfig:
             self.chronograms, self.time_spectro, self.display_time)
         self.spectra = calculate_pattern_spectrum(
             self.display_time, 0, self.time_spectro, self.chronograms, 0)
-        
-        res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
-        res.Selection()
-        
         root_path=os.getcwd()
         path=os.path.join(root_path,'Hypercubes')
         if(os.path.isdir(path)):
@@ -398,13 +429,27 @@ class OPConfig:
         
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time
-    
         folder_name = f"ONE-PIX_acquisition_{fdate}_{actual_time}"
         os.mkdir(folder_name)
         os.chdir(folder_name)
-        # saving the acquired spatial spectra hypercube
-        py2envi(folder_name,res.hyperspectral_image,self.wavelengths,os.getcwd())
-    
+        
+        if self.pattern_method not in ['Custom',"Adressing"]:
+            res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
+            res.Selection()
+            # saving the acquired spatial spectra hypercube
+            py2envi(folder_name,res.hyperspectral_image,self.wavelengths,os.getcwd())
+        else:
+            np.save(folder_name,self.spectra)
+            if self.pattern_method=="Adressing":
+                
+                title_acq = f"spectra_{fdate}_{actual_time}.npy"
+                title_wavelengths = f"wavelengths_{fdate}_{actual_time}.npy"
+                title_patterns = f"pattern_order_{fdate}_{actual_time}.npy"
+                title_mask= f"mask_{fdate}_{actual_time}.npy"
+                np.save(title_mask, self.pattern_lib.decorator.sequence)
+                np.save(title_acq, self.spectra)
+                np.save(title_wavelengths, self.wavelengths)  # saving wavelength
+                np.save(title_patterns, self.pattern_order)  # saving wavelength
         # Header
         title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
     
@@ -427,15 +472,15 @@ class OPConfig:
         
         
         os_name=platform.system()
-        if os_name=='Linux':
+        print('is_raspberrypi() : ',is_raspberrypi())
+        if is_raspberrypi():
+            root=Tk()
+            root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
+            root.wm_attributes('-fullscreen', 'True')
+            c=Canvas(root,width=800,height=600,bg='gray',highlightthickness=0)
+            c.pack()
+            root.update()
             try:
-                root=Tk()
-                root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
-                root.wm_attributes('-fullscreen', 'True')
-                c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
-                c.pack()
-                root.update()
-    
                 from picamera import PiCamera, PiCameraError
                 camera = PiCamera()
                 camera.resolution = (1024, 768)
@@ -447,108 +492,21 @@ class OPConfig:
                 time.sleep(2)
                 camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
                 camera.close()
-                root.destroy()
+                
+                if(self.pattern_method=='Adressing'):
+                    rgb_name=f"RGBCam_{fdate}_{actual_time}.jpg"
+                    RGB_img = cv2.imread(rgb_name)
+                    RGB_img= np.asarray(RGB_img)
+                    os.chdir(root_path)
+                    print('acq_conf_cor_path', os.path.abspath(os.curdir))
+                    RGB_img=apply_corregistration(RGB_img,'acquisition_param_ONEPIX.json')
+                    os.chdir(path)
+                    os.chdir(folder_name)
+                    print('corPath : ',os.getcwd())
+                    cv2.imwrite(f"RGB_cor_{fdate}_{actual_time}.jpg",RGB_img)
             except PiCameraError:
                 print("Warning; check a RPi camera is connected. No picture were stored !")
-                root.destroy()
-        os.chdir(root_path)
+            root.destroy()
+        # os.chdir(root_path)
         del self.chronograms,self.time_spectro, self.display_time # saves RAM for large acquisitions
         gc.collect()
-# def save_acquisition(config):
-#     """
-#     This function allow to save the resulting acquisitions from one 
-#     OPConfig object into the Hypercube folder.
-
-#     Parameters
-#     ----------
-#     config : class
-#         OPConfig class object.
-
-#     Returns
-#     -------
-#     None.
-
-#     """
-    
-#     #extract spectra from chronograms
-#     config.display_time = time_aff_corr(
-#         config.chronograms, config.time_spectro, config.display_time)
-#     config.spectra = calculate_pattern_spectrum(
-#         config.display_time, 0, config.time_spectro, config.chronograms, 0)
-    
-    
-    
-#     root_path=os.getcwd()
-#     path=os.path.join(root_path,'Hypercubes')
-#     if(os.path.isdir(path)):
-#         pass
-#     else:
-#         os.mkdir('Hypercubes')
-#     os.chdir(path)
-    
-#     fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
-#     actual_time = time.strftime("%H-%M-%S")  # get the current time
-    
-#     title_acq = f"spectra_{fdate}_{actual_time}.npy"
-#     title_wavelengths = f"wavelengths_{fdate}_{actual_time}.npy"
-#     title_patterns = f"pattern_order_{fdate}_{actual_time}.npy"
-
-#     folder_name = f"ONE-PIX_acquisition_{fdate}_{actual_time}"
-#     os.mkdir(folder_name)
-#     os.chdir(folder_name)
-#     # saving the acquired spatial spectra hypercube
-#     np.save(title_acq, config.spectra)
-#     np.save(title_wavelengths, config.wavelengths)  # saving wavelength
-#     np.save(title_patterns, config.pattern_order)  # saving wavelength
-
-#     # Header
-#     title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
-
-#     header = f"ONE-PIX acquisition_{fdate}_{actual_time}"+"\n"\
-#         + "--------------------------------------------------------"+"\n"\
-#         + "\n"\
-#         + f"Acquisition method : {config.pattern_method}"+"\n"\
-#         + "Acquisition duration : %f s" % config.duration+"\n" \
-#         + f"Spectrometer {config.name_spectro} : {config.spec_lib.DeviceName}"+"\n"\
-#         + "Pattern duration : %d ms" % config.periode_pattern+"\n" \
-#         + "Integration time : %d ms" % config.integration_time_ms+"\n"\
-#         + "Number of projected patterns : %d" % config.nb_patterns+"\n" \
-#         + "Height of pattern window : %d pixels" % config.height+"\n" \
-#         + "Width of pattern window : %d pixels" % config.width+"\n" 
-
-
-#     text_file = open(title_param, "w+")
-#     text_file.write(header)
-#     text_file.close()
-    
-    
-#     os_name=platform.system()
-#     if os_name=='Linux':
-#         try:
-#             root=Tk()
-#             root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
-#             root.wm_attributes('-fullscreen', 'True')
-#             c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
-#             c.pack()
-#             root.update()
-
-#             from picamera import PiCamera
-#             camera = PiCamera()
-#             camera.resolution = (1024, 768)
-#             camera.start_preview()
-#             camera.shutter_speed=7*1176
-#             camera.vflip=True
-#             camera.hflip=True
-#             # Camera warm-up time
-#             time.sleep(2)
-#             camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
-#             camera.close()
-#             time.sleep(1)
-#             root.destroy()
-#         except PiCamera.PiCameraError:
-#             print("Warning; check a RPi camera is connected. No picture were stored !")
-            
-#     os.chdir(root_path)
-#     del config.chronograms # saves RAM for large acquisitions
-
-    

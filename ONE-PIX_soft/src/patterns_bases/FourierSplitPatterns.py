@@ -70,19 +70,21 @@ class FourierSplitPatterns:
         #Real positive pattern creation
         pos_r=Preal.copy()
         pos_r[pos_r<0]=0
+        pos_r=np.uint8(255*pos_r)
               
         #Real negative pattern creation
         neg_r=Preal.copy()
         neg_r[neg_r>0]=0
-        neg_r=np.abs(neg_r)
+        neg_r=np.uint8(255*np.abs(neg_r))
         
         #Imaginary positive pattern creation
         pos_im=Pim.copy()
         pos_im[pos_im<0]=0
+        pos_im=np.uint8(255*pos_im)
         
         #Imaginary negative pattern creation
         neg_im=Pim.copy()
         neg_im[neg_im>0]=0
-        neg_im=np.abs(neg_im)
+        neg_im=np.uint8(255*np.abs(neg_im))
        
         return pos_r, neg_r, pos_im, neg_im

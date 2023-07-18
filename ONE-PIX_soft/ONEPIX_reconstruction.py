@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Dec  1 10:53:44 2021
-
-@author: mribes
-"""
-
 import numpy as np 
 import matplotlib.pyplot as plt 
 from src.DatacubeReconstructions import *
