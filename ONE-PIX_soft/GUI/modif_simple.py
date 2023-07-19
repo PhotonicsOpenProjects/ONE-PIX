@@ -75,8 +75,6 @@ class OPApp(ctk.CTk):
         self.tabview.add(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["title"])
         # self.tabview.add(self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["title"])
         self.tabview.add(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["title"])
-        self.integration_time=12
-        self.projection_time=120
 # =============================================================================
 #         Acquisition tab
 # =============================================================================
@@ -587,27 +585,6 @@ class OPApp(ctk.CTk):
             pass
  
  
-    # def draw_spectrum(self):
-    #     if (self.switch_spectro.get()==1):
-    #         self.entries_actualisation()
-    #         self.clear_graph_tab1()
-    #         self.a_acq.set_title("Acquired spectrum ",color='white')
- 
-    #         self.acq_config.integration_time_ms = float(self.entry_integration_time.get()) * 1e3
-    #         self.acq_config.spec_lib.set_integration_time()
- 
-    #         self.a_acq.plot(self.acq_config.spec_lib.get_wavelengths(), self.acq_config.spec_lib.get_intensities())
-    #         self.a_acq.set_xlabel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["xlabel"],color='white')
-    #         self.a_acq.set_ylabel("Intensity (counts)",color='white')
-    #         self.a_acq.set_axis_on()
-    #         self.a_acq.grid(True, linestyle='--')
-    #         self.canvas.draw_idle()
-            
-    #     else:
-    #         warning_test = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["warning"]
-    #         showwarning(warning_test[0], warning_test[1])
- 
- 
     def json_actualisation(self):
         os.chdir(root_path)
         file = open(json_path, "r")
@@ -616,7 +593,7 @@ class OPApp(ctk.CTk):
         json_object["name_spectro"] = self.acq_config.name_spectro
         json_object["pattern_method"] = self.methods_optionemenu.get()
         json_object["spatial_res"] = int(self.entry_img_res.get())
-        json_object["integration_time_ms"] = float(self.integration_time)
+        json_object["integration_time_ms"] = float(self.acq_config.integration_time_ms)
  
         file = open(json_path, "w")
         json.dump(json_object, file)
@@ -646,24 +623,13 @@ class OPApp(ctk.CTk):
         self.acq_res=[]
         self.window_size_test()
         self.acq_config.OP_init()
+        if self.acq_config.integration_time_ms<12:self.acq_config.periode_pattern=120
+        else:self.acq_config.periode_pattern = 10 * self.acq_config.integration_time_ms
+            
         while self.acq_config.spectro_flag:
             pass
         self.close_window_proj()
-        # self.entry_integration_time.configure(state = 'normal')
-        # self.entry_integration_time.delete(0,10)
-        # self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
-        # self.entry_integration_time.configure(state= 'disabled')
-        self.integration_time=self.acq_config.integration_time_ms
- 
-        # self.entry_pattern_duration.configure(state= 'normal')
-        # self.entry_pattern_duration.delete(0,10)
-        # self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-        # self.entry_pattern_duration.configure(state = 'disabled')
-        self.projection_time=120
         time.sleep(1)
-#         if (self.button_wind_test.cget("state") == "disabled"):
-#             self.close_window_proj()
- 
         # Start acquisition
         self.progressbar.start()
         est_duration=round(1.5*self.acq_config.pattern_lib.nb_patterns*self.acq_config.periode_pattern/(60*1000),2)

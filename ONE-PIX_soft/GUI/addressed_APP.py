@@ -226,7 +226,7 @@ class OPApp(ctk.CTk):
             json.dump(params, outfile)
             outfile.close()
         os.system("python ../ONEPIX_acquisition.py")
-        directory = '/'.join([os.getcwd(), 'Hypercubes'])
+        directory = '../Hypercubes'
         newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
         print(newest)
         self.plotMask(newest)

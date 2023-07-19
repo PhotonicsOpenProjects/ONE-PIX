@@ -8,10 +8,10 @@ import time
 from functools import partial
 import sys
 
-# sys.path.insert(0, os.path.abspath('../'))
-print('/'.join(os.getcwd().split('/')[:-1]))
-root_path = '/'.join(os.getcwd().split('/')[:-1])
-sys.path.insert(0, root_path)
+sys.path.insert(0, os.path.abspath('../'))
+#print('/'.join(os.getcwd().split('/')[:-1]))
+root_path = os.getcwd()
+#sys.path.insert(0, root_path)
 
 os.chdir(root_path)
 # json_path = "./acquisition_param_ONEPIX.json"
@@ -44,7 +44,7 @@ def define_params(test):
     json.dump(acq_params, file)
     file.close()
 
-jsonpath = '/'.join([root_path,'acquisition_param_ONEPIX.json'])
+jsonpath = '/'.join([root_path,'../acquisition_param_ONEPIX.json'])
 f = open(jsonpath)
 acq_params = json.load(f)
 f.close()
@@ -94,25 +94,25 @@ proj.update()
 define_params(test)
 proj.destroy()
 
-if not "Hypercubes" in os.listdir():
-    os.mkdir("Hypercubes")
-os.chdir('Hypercubes')
+if not "Hypercubes" in os.listdir("../"):
+    os.mkdir("../Hypercubes")
+#os.chdir('Hypercubes')
 fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
 actual_time = time.strftime("%H-%M-%S")  # get the current time
 folder_name = f"{fdate}_{actual_time}"
-os.mkdir(folder_name)
-os.chdir(folder_name)
-os.mkdir('reference')
+os.mkdir(f"../Hypercubes/{folder_name}")
+#os.chdir(folder_name)
+os.mkdir(f"../Hypercubes/{folder_name}/reference")
 
 f = open(jsonpath)
 acq_params = json.load(f)
 f.close()
-acq_params["data_path"] = ('/'.join(os.path.abspath(os.curdir).split('\\')))
+acq_params["data_path"] = ('/'.join(os.path.abspath(f"../Hypercubes/{folder_name}/reference").split('\\')))
 file = open(jsonpath, "w")
 json.dump(acq_params, file)
 file.close()
 
-test.thread_acquisition(path = "reference", time_warning = False)
+test.thread_acquisition(path = f"../Hypercubes/{folder_name}/reference", time_warning = False)
 
 
 # if not('spectral_ref' in os.listdir()):
