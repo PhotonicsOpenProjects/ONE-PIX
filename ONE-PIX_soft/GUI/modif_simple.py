@@ -316,10 +316,10 @@ class OPApp(ctk.CTk):
         
         
         # =====================================================================
-        #         Block 3
+        #         Block 4
         # =====================================================================
         self.preview_frame = ctk.CTkFrame(self.VI)
-        self.preview_frame.grid(row=1, column=0, pady=(5,5), rowspan =1)
+        self.preview_frame.grid(row=2, column=0, pady=(5,5), rowspan =1)
         
         self.canvas_b3 = FigureCanvasTkAgg(self.bands_graph, self.preview_frame)
         self.canvas_b3.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=5)
@@ -348,10 +348,10 @@ class OPApp(ctk.CTk):
 
 
         # =====================================================================
-        #         Block 4
+        #         Block 3
         # =====================================================================
         self.commands_frame=ctk.CTkFrame(self.VI)
-        self.commands_frame.grid(row=2, column=0, pady=10, rowspan =1)
+        self.commands_frame.grid(row=1, column=0, pady=10, rowspan =1)
 
         self.sort_choice = ttk.Combobox(self.commands_frame, textvariable=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"],
                                    state = "readonly")
@@ -1103,7 +1103,7 @@ class OPApp(ctk.CTk):
         for i in range(1,len(df2.columns)):
             f.append(interpolate.interp1d(df2['WL'], df2[df2.columns[i]])(self.IM["wl"]))
             bands.append((self.IM["IM"]*(f[i-1].reshape(-1,1,1))).sum(axis = 0))
-        bands = np.asarray(bands)
+        bands = np.asarray(bands).swapaxes(1,2)
         
         self.IM["bands"] = bands #ajout des bandes spectrales dans le dictionnaire
         self.IM["shown_bands"] = [np.uint8(255*(i-i.min())/(i.max()-i.min())) for i in self.IM["bands"]]

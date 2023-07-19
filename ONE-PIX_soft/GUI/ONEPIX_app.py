@@ -468,12 +468,43 @@ class OPApp(ctk.CTk):
         self.domain.set("vegetation") #index de l'élément sélectionné
         self.domain.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)  
         
-        
         # =====================================================================
         #         Block 3
         # =====================================================================
+        self.commands_frame=ctk.CTkFrame(self.VI)
+        self.commands_frame.grid(row=1, column=0, pady=10, rowspan =1)
+
+        self.sort_choice = ttk.Combobox(self.commands_frame, textvariable=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"],
+                                   state = "readonly")
+        self.sort_choice['values']=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"]
+        self.sort_choice.current(0) #index de l'élément sélectionné
+        self.sort_choice.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)        
+        self.sort_choice.bind("<<ComboboxSelected>>", lambda event=None:
+                         self.get_mode_choice())
+            
+        self.critere = ctk.CTkComboBox(self.commands_frame, values= self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"], state = "readonly")
+        self.critere.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"][0]) #index de l'élément sélectionné
+        self.critere.configure(state = "disable")
+        self.critere.grid(column=0, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+        
+        self.nb_keep = ctk.CTkEntry(self.commands_frame, state = "disabled")
+        self.nb_keep.grid(column=1, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+        
+        self.calc_bouton = ctk.CTkButton(self.commands_frame , text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["calc_bouton"], 
+                            state = "disabled",command = self.calculation)
+                           
+        self.calc_bouton.grid(column=1, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+
+        self.WIP = ctk.CTkLabel(self.commands_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["WIP"])
+        self.WIP.grid(column=0, row=3, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
+
+            
+        
+        # =====================================================================
+        #         Block 4
+        # =====================================================================
         self.preview_frame = ctk.CTkFrame(self.VI)
-        self.preview_frame.grid(row=1, column=0, pady=(5,5), rowspan =1)
+        self.preview_frame.grid(row=2, column=0, pady=(5,5), rowspan =1)
         
         self.canvas_b3 = FigureCanvasTkAgg(self.bands_graph, self.preview_frame)
         self.canvas_b3.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=5)
@@ -501,37 +532,7 @@ class OPApp(ctk.CTk):
 
 
 
-        # =====================================================================
-        #         Block 4
-        # =====================================================================
-        self.commands_frame=ctk.CTkFrame(self.VI)
-        self.commands_frame.grid(row=2, column=0, pady=10, rowspan =1)
-
-        self.sort_choice = ttk.Combobox(self.commands_frame, textvariable=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"],
-                                   state = "readonly")
-        self.sort_choice['values']=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["sort_choice"]
-        self.sort_choice.current(0) #index de l'élément sélectionné
-        self.sort_choice.grid(column=0, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)        
-        self.sort_choice.bind("<<ComboboxSelected>>", lambda event=None:
-                         self.get_mode_choice())
-            
-        self.critere = ctk.CTkComboBox(self.commands_frame, values= self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"], state = "readonly")
-        self.critere.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["critere"][0]) #index de l'élément sélectionné
-        self.critere.configure(state = "disable")
-        self.critere.grid(column=0, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
         
-        self.nb_keep = ctk.CTkEntry(self.commands_frame, state = "disabled")
-        self.nb_keep.grid(column=1, row=2, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
-        
-        self.calc_bouton = ctk.CTkButton(self.commands_frame , text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["calc_bouton"], 
-                            state = "disabled",command = self.calculation)
-                           
-        self.calc_bouton.grid(column=1, row=1, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
-
-        self.WIP = ctk.CTkLabel(self.commands_frame, text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 4"]["WIP"])
-        self.WIP.grid(column=0, row=3, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
-
-            
         # =====================================================================
         #         Block 5
         # =====================================================================
@@ -1597,7 +1598,7 @@ class OPApp(ctk.CTk):
         for i in range(1,len(df2.columns)):
             f.append(interpolate.interp1d(df2['WL'], df2[df2.columns[i]])(self.IM["wl"]))
             bands.append((self.IM["IM"]*(f[i-1].reshape(-1,1,1))).sum(axis = 0))
-        bands = np.asarray(bands)
+        bands = np.asarray(bands).swapaxes(1,2)
         
         self.IM["bands"] = bands #ajout des bandes spectrales dans le dictionnaire
         self.IM["shown_bands"] = [np.uint8(255*(i-i.min())/(i.max()-i.min())) for i in self.IM["bands"]]
