@@ -15,11 +15,12 @@ import json
 import glob
 import os
 import sys
-root_path = '/'.join(os.getcwd().split('/')[:-1])
-os.chdir(root_path)
 
 window_height = 575
 window_width = 825
+
+json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
+print(json_path)
 def find_rgb_label(nb_mask):
     """
     
@@ -54,6 +55,7 @@ class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.open_languageConfig()
+        self.open_GUIConfig()
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI")
@@ -195,7 +197,7 @@ class OPApp(ctk.CTk):
         self.calibrationButton.configure(state = 'normal', fg_color = "#9D0000",
                                          text=self.widgets_text["specific_GUI"]["Addressed"]["functions"]["calibrationButton_WIP"])
         self.update()
-        os.system("python coregistration_calibration.py")
+        os.system("python ../coregistration_calibration.py")
         self.manual_choice.configure(state = 'normal', fg_color = "#3B8ED0")
         self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0")
         if self.test_mode=="manual":
@@ -209,7 +211,7 @@ class OPApp(ctk.CTk):
         self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
                                      text=self.widgets_text["specific_GUI"]["Addressed"]["functions"]["acquireButton_WIP"])
         self.update()
-        f = open('acquisition_param_ONEPIX.json')
+        f = open(json_path)
         params = json.load(f)
         f.close()
         if self.test_mode=="manual":
@@ -220,10 +222,10 @@ class OPApp(ctk.CTk):
                 self.Sec_seg.insert(0,"6")
                 self.update()
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
-        with open('acquisition_param_ONEPIX.json', 'w') as outfile:
+        with open(json_path, 'w') as outfile:
             json.dump(params, outfile)
             outfile.close()
-        os.system("python ONEPIX_acquisition.py")
+        os.system("python ../ONEPIX_acquisition.py")
         directory = '/'.join([os.getcwd(), 'Hypercubes'])
         newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
         print(newest)
@@ -246,7 +248,7 @@ class OPApp(ctk.CTk):
         
     def load_data(self):
         path = filedialog.askdirectory(title=self.widgets_text["specific_GUI"]["Addressed"]["functions"]["askdirectory"],
-                                       initialdir = '/'.join([os.getcwd(),'Hypercubes']))
+                                       initialdir = '../Hypercubes')
         self.plotMask(path)
         
     def plotMask(self, path):
@@ -277,15 +279,27 @@ class OPApp(ctk.CTk):
         self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()
         
+    
+    def open_GUIConfig(self):
+        with open(json_path, 'r') as f:
+            GUI_conf = json.load(f)
+            f.close()
+        
+        GUI_conf["pattern_method"] = "FourierSplit"
+        
+        with open(json_path, 'w') as f:
+            json.dump(GUI_conf, f)
+            f.close()
+            
     def open_languageConfig(self):
-        with open("GUI/languages/config.json", 'r') as f:
+        with open("./languages/config.json", 'r') as f:
             lang_conf = json.load(f)
             f.close()
         lang_list = lang_conf['installed_language']
         jsonFile = list(lang_list)[list(lang_list.values()).index(lang_conf["last_choice"])]
         print(jsonFile)
         
-        with open(f"GUI/languages/{jsonFile}.json", 'r') as f:
+        with open(f"./languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
             f.close()
         # print(self.widgets_text)

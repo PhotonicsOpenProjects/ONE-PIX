@@ -7,6 +7,9 @@ import PIL
 import time
 from functools import partial
 import sys
+from src.AcquisitionConfig import *
+import json
+from datetime import date
 
 # sys.path.insert(0, os.path.abspath('../'))
 print('/'.join(os.getcwd().split('/')[:-1]))
@@ -15,12 +18,6 @@ sys.path.insert(0, root_path)
 
 os.chdir(root_path)
 # json_path = "./acquisition_param_ONEPIX.json"
-
-from src.AcquisitionConfig import *
-
- 
-
-
 
 
 def define_params(test):
@@ -49,6 +46,7 @@ f = open(jsonpath)
 acq_params = json.load(f)
 f.close()
 acq_params["spatial_res"] = 5
+acq_params["pattern_method"] = "FourierSplit"
 file = open(jsonpath, "w")
 json.dump(acq_params, file)
 file.close()
@@ -58,16 +56,16 @@ test = OPConfig(jsonpath)
  
 
 # getting screen's width in pixels using tkinter
-# test_win = Tk()
-# screen_width = test_win.winfo_screenwidth()
+test_win = Tk()
+screen_width = test_win.winfo_screenwidth()
 # print(screen_width)
-# test_win.destroy()
+test_win.destroy()
 
  
 
 # create static pattern to be displayed
 proj = tk.Tk()
-proj.geometry("{}x{}+{}+{}".format(test.width, test.height, screenWidth, 0))
+proj.geometry("{}x{}+{}+{}".format(test.width, test.height, screen_width, 0))
 # proj.update()
 y = list(range(test.height))  # horizontal vector for the pattern creation
 x = list(range(test.width))  # vertical vector for the pattern creation
@@ -93,7 +91,8 @@ proj.update()
 define_params(test)
 proj.destroy()
 
-
+if not "Hypercubes" in os.listdir():
+    os.mkdir("Hypercubes")
 os.chdir('Hypercubes')
 fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
 actual_time = time.strftime("%H-%M-%S")  # get the current time
