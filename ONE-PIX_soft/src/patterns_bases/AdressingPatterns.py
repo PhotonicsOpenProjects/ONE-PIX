@@ -157,7 +157,7 @@ class AdressingPatterns:
 
     
     def creation_patterns(self):
-        json_path="./acquisition_param_ONEPIX.json"
+        json_path="../acquisition_param_ONEPIX.json"
         f = open(json_path)
         acqui_dict = json.load(f)
         f.close()
@@ -181,7 +181,7 @@ class AdressingPatterns:
         get_picture(tag='Adressing',save_path=RGB_path)
         RGB_img = PIL.Image.open(RGB_path)
         RGB_img= np.asarray(RGB_img)
-        RGB_img=apply_corregistration(RGB_img,'acquisition_param_ONEPIX.json')
+        RGB_img=apply_corregistration(RGB_img,'../acquisition_param_ONEPIX.json')
         os.remove(RGB_path)
         
         # close black screen

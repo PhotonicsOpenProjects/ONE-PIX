@@ -1,0 +1,11 @@
+ONE-PIX acquisition_19_07_2023_12-00-43
+--------------------------------------------------------
+
+Acquisition method : Adressing
+Acquisition time : 18.970273 s
+Spectrometer OceanInsight : FLMS18749
+Number of projected patterns : 2
+Height of pattern window : 600 pixels
+Width of pattern window : 800 pixels
+Dark pattern duration : 2 ms
+Integration time : 2 ms

@@ -749,7 +749,7 @@ class OPApp(ctk.CTk):
         json_object["pattern_method"] = self.methods_optionemenu.get()
         json_object["spatial_res"] = int(self.entry_img_res.get())
         json_object["integration_time_ms"] = float(self.entry_integration_time.get())
- 
+        
         file = open(json_path, "w")
         json.dump(json_object, file)
         file.close()
@@ -779,6 +779,8 @@ class OPApp(ctk.CTk):
         if (self.simple_mode_button.cget("state") =="disabled"):
             self.window_size_test()
             self.acq_config.OP_init()
+            if self.acq_config.integration_time_ms<12:self.acq_config.periode_pattern=120
+            else:self.acq_config.periode_pattern = 10 * self.acq_config.integration_time_ms
             while self.acq_config.spectro_flag:
                 pass
             self.close_window_proj()
@@ -1659,7 +1661,7 @@ class OPApp(ctk.CTk):
             f.close()
         
         GUI_conf["pattern_method"] = "FourierSplit"
-        
+        GUI_conf["spatial_res"] = 31
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f)
             f.close()

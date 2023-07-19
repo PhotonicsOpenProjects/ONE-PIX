@@ -59,6 +59,7 @@ class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.open_languageConfig()
+        self.open_GUIConfig()
         self.acq_config=OPConfig(json_path)
         # configure window
         self.resizable(False, False)
@@ -1193,7 +1194,18 @@ class OPApp(ctk.CTk):
             slb = slb
             )
         self.IDXS = {"id":np.asarray(idx),"names":list(np.asarray(idx.index))}
-
+        
+    def open_GUIConfig(self):
+        with open(json_path, 'r') as f:
+            GUI_conf = json.load(f)
+            f.close()
+        
+        GUI_conf["pattern_method"] = "FourierSplit"
+        GUI_conf["spatial_res"] = 31
+        with open(json_path, 'w') as f:
+            json.dump(GUI_conf, f)
+            f.close()
+            
     def open_languageConfig(self):
         with open("languages/config.json", 'r') as f:
             lang_conf = json.load(f)
