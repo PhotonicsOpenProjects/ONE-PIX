@@ -49,9 +49,11 @@ ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 VERSION = '2.0.0'
-root_path = os.getcwd()
+#root_path = '/'.join(os.getcwd().split('/')[:-1])
+#os.chdir(root_path)
+#print("root_path : ", root_path)
 os_name=platform.system()
-json_path = "../acquisition_param_ONEPIX.json"
+json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
 
 window_height = 600
 window_width = 1020
@@ -61,6 +63,7 @@ class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.open_languageConfig()
+        self.open_GUIConfig()
         self.acq_config=OPConfig(json_path)
         # configure window
         self.resizable(False, False)
@@ -739,7 +742,6 @@ class OPApp(ctk.CTk):
  
  
     def json_actualisation(self):
-        os.chdir(root_path)
         file = open(json_path, "r")
         json_object = json.load(file)
         file.close()
@@ -1651,15 +1653,28 @@ class OPApp(ctk.CTk):
             )
         self.IDXS = {"id":np.asarray(idx),"names":list(np.asarray(idx.index))}
 
+    def open_GUIConfig(self):
+        with open(json_path, 'r') as f:
+            GUI_conf = json.load(f)
+            f.close()
+        
+        GUI_conf["pattern_method"] = "FourierSplit"
+        
+        with open(json_path, 'w') as f:
+            json.dump(GUI_conf, f)
+            f.close()
+  
+        
     def open_languageConfig(self):
-        with open("languages/config.json", 'r') as f:
+        print(os.path.abspath(os.curdir))
+        with open("./languages/config.json", 'r') as f:
             lang_conf = json.load(f)
             f.close()
         lang_list = lang_conf['installed_language']
         jsonFile = list(lang_list)[list(lang_list.values()).index(lang_conf["last_choice"])]
         print(jsonFile)
         
-        with open(f"languages/{jsonFile}.json", 'r') as f:
+        with open(f"./languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
             f.close()
         # print(self.widgets_text)
