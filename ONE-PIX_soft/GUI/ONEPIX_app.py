@@ -1,3 +1,9 @@
+"""
+@author:PhotonicsOpenProject
+Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
+
+"""
+
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog

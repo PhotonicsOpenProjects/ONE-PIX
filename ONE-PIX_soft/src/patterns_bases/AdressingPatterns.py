@@ -1,3 +1,10 @@
+"""
+@author:PhotonicsOpenProject
+Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
+
+"""
+
+
 #Import libraries (camera, ssh, scp...)
 
 import numpy as np

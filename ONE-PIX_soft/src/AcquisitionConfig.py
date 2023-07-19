@@ -1,3 +1,10 @@
+"""
+@author:PhotonicsOpenProject
+Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
+
+"""
+
+
 import numpy as np
 import cv2
 import time

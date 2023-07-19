@@ -1,3 +1,10 @@
+"""
+Created on Wed Jul 19 18:31:04 2023
+
+@author: leo
+"""
+
+
 import numpy as np
 import matplotlib.pyplot as plt
 import os
