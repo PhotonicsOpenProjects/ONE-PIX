@@ -9,7 +9,7 @@ import importlib
 import platform
 from sklearn import mixture
 import spectral.io.envi as envi
-
+import json
 #%% Raw data pre-treatment
 
 def time_aff_corr(chronograms,time_spectro,time_aff):
@@ -304,10 +304,12 @@ def calculate_pattern_spectrum(display_time,delay_proj,time_spectro,chronograms,
             
         else:
             spectre_pattern.append(np.mean(value,0))
-    
+    with open("../acquisition_param_ONEPIX.json","r") as f:
+        acq_params = json.load(f)
+        f.close()
     spectre_pattern=np.asarray(spectre_pattern)
     spectre_pattern=spectre_pattern-np.reshape(np.tile(np.mean(spectre_pattern[:,-100:],1),np.size(spectre_pattern,1)),np.shape(spectre_pattern))
-    spectre_pattern[0,:]=spectre_pattern[4,:]
+    if acq_params["pattern_method"]!="Adressing":spectre_pattern[0,:]=spectre_pattern[4,:]
     return spectre_pattern
 
 

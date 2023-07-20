@@ -1,3 +1,10 @@
+"""
+@author:PhotonicsOpenProject
+Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
+
+"""
+
+
 import numpy as np
 import cv2
 import time
@@ -352,7 +359,7 @@ class OPConfig:
             self.pattern_order,freq=self.pattern_lib.decorator.creation_patterns()
             self.pattern_lib.nb_patterns=self.pattern_lib.decorator.nb_patterns
         est_duration=round(1.5*self.pattern_lib.nb_patterns*self.periode_pattern/(60*1000),2)
-        if time_warning:
+        if time_warning and self.pattern_method!="Adressing":
             ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
             if ans=='yes':
                 est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
@@ -398,7 +405,7 @@ class OPConfig:
             gc.collect()
        
 
-    def save_acquisition_envi(self, path = os.path.join(os.getcwd(), "Hypercubes")):
+    def save_acquisition_envi(self, path = "../Hypercubes"):
         """
         This function allow to save the resulting acquisitions from one 
         OPConfig object into the Hypercube folder.
@@ -420,11 +427,11 @@ class OPConfig:
         self.spectra = calculate_pattern_spectrum(
             self.display_time, 0, self.time_spectro, self.chronograms, 0)
         root_path=os.getcwd()
-        path=os.path.join(root_path,'Hypercubes')
+        #path=os.path.join(root_path,'Hypercubes')
         if(os.path.isdir(path)):
             pass
         else:
-            os.mkdir('Hypercubes')
+            os.mkdir(path)
         os.chdir(path)
         
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
@@ -499,7 +506,7 @@ class OPConfig:
                     RGB_img= np.asarray(RGB_img)
                     os.chdir(root_path)
                     print('acq_conf_cor_path', os.path.abspath(os.curdir))
-                    RGB_img=apply_corregistration(RGB_img,'acquisition_param_ONEPIX.json')
+                    RGB_img=apply_corregistration(RGB_img,'../acquisition_param_ONEPIX.json')
                     os.chdir(path)
                     os.chdir(folder_name)
                     print('corPath : ',os.getcwd())

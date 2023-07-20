@@ -1,3 +1,10 @@
+"""
+Created on Wed Jul 19 18:32:47 2023
+
+@author: Leo Brechet
+"""
+
+
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import messagebox, ttk, filedialog
@@ -226,7 +233,7 @@ class OPApp(ctk.CTk):
             json.dump(params, outfile)
             outfile.close()
         os.system("python ../ONEPIX_acquisition.py")
-        directory = '/'.join([os.getcwd(), 'Hypercubes'])
+        directory = '../Hypercubes'
         newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
         print(newest)
         self.plotMask(newest)
@@ -285,7 +292,7 @@ class OPApp(ctk.CTk):
             GUI_conf = json.load(f)
             f.close()
         
-        GUI_conf["pattern_method"] = "FourierSplit"
+        GUI_conf["pattern_method"] = "Adressing"
         
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f)
