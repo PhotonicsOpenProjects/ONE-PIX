@@ -240,7 +240,7 @@ class OPApp(ctk.CTk):
                 if self.isNormalized:
                     self.destroy()
                     os.system("python ../src/getReference.py")
-                    os.system("python addressed_APP.py")
+                    os.system("python simple_addressed_APP.py.py")
                 else:
                     self.destroy()
                     os.system("python addressed_APP.py")
