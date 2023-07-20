@@ -187,12 +187,12 @@ class OPApp(ctk.CTk):
         self.a_acq= self.fig.add_subplot(111)
         self.a_acq.set_axis_off()
         
-        self.toolbar_frame=ctk.CTkFrame(self.display_frame)
-        self.toolbar_frame.grid(row=2, column=0)
-        self.acq_toolbar = NavigationToolbar2Tk(self.canvas, self.toolbar_frame)
-        self.acq_toolbar.config(background='#2D2D2D')
-        self.acq_toolbar._message_label.config(background='#2D2D2D')
-        self.acq_toolbar.update()
+        #self.toolbar_frame=ctk.CTkFrame(self.display_frame)
+        #self.toolbar_frame.grid(row=2, column=0)
+        #self.acq_toolbar = NavigationToolbar2Tk(self.canvas, self.toolbar_frame)
+        #self.acq_toolbar.config(background='#2D2D2D')
+        #self.acq_toolbar._message_label.config(background='#2D2D2D')
+        #self.acq_toolbar.update()
         
         self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_spat2im"],
                                             command=self.switch_spat2im_command,state='disabled')

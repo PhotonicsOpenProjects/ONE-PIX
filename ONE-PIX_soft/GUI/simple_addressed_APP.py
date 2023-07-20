@@ -108,20 +108,20 @@ class OPApp(ctk.CTk):
         self.Mode_frame = ctk.CTkFrame(self)
         self.Mode_frame.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, sticky="nw")
         
-        self.calibrationButton = ctk.CTkButton(self.Mode_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["calibrationButton"],
+        self.calibrationButton = ctk.CTkButton(self.Mode_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["calibrationButton"],
                                                fg_color = "#D70000", hover_color="#9D0000",
                                         command = self.do_calibration)
         
         self.calibrationButton.grid(column=0, row=0, padx=(2.5,2.5), pady=(2.5,2.5), rowspan =1, columnspan=2, sticky="we")
-        self.mode_desc = ctk.CTkLabel(self.Mode_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["mode_desc"], font=('Helvetica', 18, 'bold'))
+        self.mode_desc = ctk.CTkLabel(self.Mode_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["mode_desc"], font=('Helvetica', 18, 'bold'))
         self.mode_desc.grid(column=0, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='we')
         
 
         
-        self.manual_choice = ctk.CTkButton(self.Mode_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["manual_choice"], fg_color="gray",
+        self.manual_choice = ctk.CTkButton(self.Mode_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["manual_choice"], fg_color="gray",
                                            state = "disabled", command = self.manual_toogle)
         self.manual_choice.grid(column=1, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        self.auto_choice = ctk.CTkButton(self.Mode_frame, text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["auto_choice"], state = "disabled",
+        self.auto_choice = ctk.CTkButton(self.Mode_frame, text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["auto_choice"], state = "disabled",
                                          fg_color="gray", command = self.auto_toogle)
         self.auto_choice.grid(column=0, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
     
@@ -133,17 +133,17 @@ class OPApp(ctk.CTk):
         
         
         
-        self.KMeans_desc = ctk.CTkLabel(self.Params_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["KMeans_desc"], font=('Helvetica', 18, 'bold'))
+        self.KMeans_desc = ctk.CTkLabel(self.Params_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["KMeans_desc"], font=('Helvetica', 18, 'bold'))
         self.KMeans_desc.grid(column=0, row=0, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         
-        self.Prim_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["Prim_seg_label"])
+        self.Prim_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["Prim_seg_label"])
         self.Prim_seg_label.grid(column=0, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         self.Prim_seg = ctk.CTkEntry(self.Params_frame, state = "normal")
         self.Prim_seg.insert(0,"2")
         self.Prim_seg.configure(state = "disabled", fg_color="gray")
         self.Prim_seg.grid(column=1, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         
-        self.Sec_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["Sec_seg_label"])
+        self.Sec_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["Sec_seg_label"])
         self.Sec_seg_label.grid(column=0, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         self.Sec_seg = ctk.CTkEntry(self.Params_frame, state = "normal")
         self.Sec_seg.insert(0,"5")
@@ -158,7 +158,7 @@ class OPApp(ctk.CTk):
         
         self.Acquis_frame = ctk.CTkFrame(self)
         self.Acquis_frame.grid(row=1, column=0, pady=(2.5,2.5), rowspan =1, columnspan=2, padx = (2.5,2.5), sticky='')
-        self.acquireButton = ctk.CTkButton(self.Acquis_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["acquireButton"],
+        self.acquireButton = ctk.CTkButton(self.Acquis_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["acquireButton"],
                                            state = 'disabled', fg_color = 'gray',
                                         command = self.acquire)
         self.acquireButton.grid(column=0, row=0, padx=(2.5,2.5), pady=(2.5,2.5), rowspan =1, columnspan=2, sticky='')
@@ -188,7 +188,7 @@ class OPApp(ctk.CTk):
         self.Open_frame = ctk.CTkFrame(self)
         self.Open_frame.grid(row=2, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=2, sticky="nw")
         
-        self.loadButton = ctk.CTkButton(self.Open_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["loadButton"],
+        self.loadButton = ctk.CTkButton(self.Open_frame, text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["loadButton"],
                                         command = self.load_data)
                                         
         self.loadButton.grid(column=0, row=0, padx=(2.5,2.5), pady=(2.5,2.5),rowspan=1, columnspan=2)
@@ -202,7 +202,7 @@ class OPApp(ctk.CTk):
     
     def do_calibration(self):
         self.calibrationButton.configure(state = 'normal', fg_color = "#9D0000",
-                                         text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["calibrationButton_WIP"])
+                                         text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["calibrationButton_WIP"])
         self.update()
         os.system("python ../coregistration_calibration.py")
         self.manual_choice.configure(state = 'normal', fg_color = "#3B8ED0")
@@ -212,11 +212,11 @@ class OPApp(ctk.CTk):
         elif self.test_mode=="auto":
             self.auto_toogle()
         self.calibrationButton.configure(fg_color="#31D900", hover_color="#249F00",
-                                         text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["calibrationButton"])
+                                         text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["calibrationButton"])
 
     def acquire(self):
         self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
-                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["acquireButton_WIP"])
+                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["acquireButton_WIP"])
         self.update()
         f = open(json_path)
         params = json.load(f)
@@ -238,7 +238,7 @@ class OPApp(ctk.CTk):
         print(newest)
         self.plotMask(newest)
         self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
-                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["acquireButton"])
+                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["acquireButton"])
         
     def manual_toogle(self):
         self.manual_choice.configure(state = "disabled", fg_color="#3B8ED0")
@@ -254,7 +254,7 @@ class OPApp(ctk.CTk):
         self.test_mode = "auto"
         
     def load_data(self):
-        path = filedialog.askdirectory(title=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["askdirectory"],
+        path = filedialog.askdirectory(title=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["askdirectory"],
                                        initialdir = '../Hypercubes')
         self.plotMask(path)
         
@@ -282,8 +282,8 @@ class OPApp(ctk.CTk):
             curvColor = list(customColormap[i])
             curvColor.append(.5)
             self.a_vis.plot(wl, rawSpecs[i,:],color=curvColor)
-        self.a_vis.set_xlabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["xlabel"], fontsize = 10)
-        self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
+        self.a_vis.set_xlabel(self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["plotMask"]["xlabel"], fontsize = 10)
+        self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()
         
     

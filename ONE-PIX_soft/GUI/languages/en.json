@@ -13,7 +13,7 @@
 			"block 2":{
 				"title":"Acquisition's settings",
 				"label_integration_time":"Integration time (ms)",
-				"label_img_res":"Image resolution",
+				"label_img_res":"Image resolution (pixels)",
 				"label_pattern_duration":"Patterns duration (ms)",
 				"button_co":"Spectrometer connection",
 				"button_acquire_hyp":"Acquire hypercube",
@@ -163,23 +163,46 @@
 				}
 			}
 		},
+		
 	"Addressed":{
-		"calibrationButton":"Co-registration",
-		"KMeans_desc":"Segmentation mode choice",
-		"manual_choice":"Manual",
-		"auto_choice":"KMeans",
-		"KMeans_desc":"KMeans parametters",
-		"Prim_seg_label":"Primary segmentation : number of clusters",
-		"Sec_seg_label":"Secondary segmentation : number of clusters",
-		"acquireButton":"Begin acquisition",
-		"loadButton":"Load data",
-		"functions":{
-			"calibrationButton_WIP":"PLEASE WAIT",
-			"acquireButton_WIP":"PLEASE WAIT",
-			"askdirectory":"select the folder that contains your data",
-			"plotMask":{
-				"xlabel":"wavelength(nm)",
-				"ylabel":"reflected pseudo-flux (arb. unit)"
+		"Simple":{
+			"calibrationButton":"Co-registration (initialization)",
+			"mode_desc":"Segmentation mode choice",
+			"manual_choice":"Manual",
+			"auto_choice":"semi-automatic",
+			"KMeans_desc":"semi-automatic segmentation parametters",
+			"Prim_seg_label":"If the background is dark or gray, write 2.\nIf it is white try to find the optimal setup.",
+			"Sec_seg_label":"Number of colors in your scene",
+			"acquireButton":"Begin acquisition",
+			"loadButton":"Load data",
+			"functions":{
+				"calibrationButton_WIP":"PLEASE WAIT",
+				"acquireButton_WIP":"PLEASE WAIT",
+				"askdirectory":"select the folder that contains your data",
+				"plotMask":{
+					"xlabel":"wavelength(nm)",
+					"ylabel":"reflected pseudo-flux (arb. unit)"
+					}
+				}
+			},
+		"Advanced":{
+			"calibrationButton":"Co-registration",
+			"mode_desc":"Segmentation mode choice",
+			"manual_choice":"Manual",
+			"auto_choice":"KMeans",
+			"KMeans_desc":"KMeans parametters",
+			"Prim_seg_label":"pre-segmentation : number of clusters",
+			"Sec_seg_label":"Secondary segmentation : number of clusters",
+			"acquireButton":"Begin acquisition",
+			"loadButton":"Load data",
+			"functions":{
+				"calibrationButton_WIP":"PLEASE WAIT",
+				"acquireButton_WIP":"PLEASE WAIT",
+				"askdirectory":"select the folder that contains your data",
+				"plotMask":{
+					"xlabel":"wavelength(nm)",
+					"ylabel":"reflected pseudo-flux (arb. unit)"
+					}
 				}
 			}
 		}
