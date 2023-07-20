@@ -240,10 +240,10 @@ class OPApp(ctk.CTk):
                 if self.isNormalized:
                     self.destroy()
                     os.system("python ../src/getReference.py")
-                    os.system("python simple_addressed_APP.py.py")
+                    os.system("python simple_addressed_APP.py")
                 else:
                     self.destroy()
-                    os.system("python addressed_APP.py")
+                    os.system("python simple_addressed_APP.py")
                     
         elif self.GuiMode_choice.get()==self.GuiMode_choice_text[1]: # if advanced
             if self.acquisition_method=='Complete':
