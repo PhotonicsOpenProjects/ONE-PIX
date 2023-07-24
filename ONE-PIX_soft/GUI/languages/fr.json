@@ -13,7 +13,7 @@
 			"block 2":{
 				"title":"Paramètres d'acquisition",
 				"label_integration_time":" Temps d'intégration (ms)",
-				"label_img_res":" Résolution de l'image",
+				"label_img_res":" Résolution de l'image (pixels)",
 				"label_pattern_duration":" Durée des projection (ms)",
 				"button_co":"Connecter le specromètre",
 				"button_acquire_hyp":"Acquérir l'hypercube",
@@ -164,25 +164,46 @@
 			}
 		},
 	"Addressed":{
-		"calibrationButton":"Recalage",
-		"KMeans_desc":"Choix du mode d'acquisition",
-		"manual_choice":"Manuel",
-		"auto_choice":"K-moyennes",
-		"KMeans_desc":"Paramètres des K-moyennes",
-		"Prim_seg_label":"Segmentation primaire : nombre de clusters",
-		"Sec_seg_label":"Segmentation secondaire : nombre de clusters",
-		"acquireButton":"Début de l'acquisition",
-		"loadButton":"Chargement de données",
-		"functions":{
-			"calibrationButton_WIP":"PATIENTEZ SVP",
-			"acquireButton_WIP":"PATIENTEZ SVP",
-			"askdirectory":"sélectionner le dossier qui contient les données",
-			"plotMask":{
-				"xlabel":"longueur d'onde(nm)",
-				"ylabel":"pseudo-flux réfléchi(unité arb.)"
+		"Simple":{
+		"calibrationButton":"Recalage (initialisation)",
+			"mode_desc":"Choix du mode d'acquisition",
+			"manual_choice":"Manuel",
+			"auto_choice":"Semi-automatique",
+			"KMeans_desc":"Paramètres de la segmentation",
+			"Prim_seg_label":"Renseigner 2 si le font est gris ou noir.\nSur fond blanc, essayer plusieurs nombres",
+			"Sec_seg_label":"Nombre de couleurs de la scène",
+			"acquireButton":"Début de l'acquisition",
+			"loadButton":"Chargement de données",
+			"functions":{
+				"calibrationButton_WIP":"PATIENTEZ SVP",
+				"acquireButton_WIP":"PATIENTEZ SVP",
+				"askdirectory":"sélectionner le dossier qui contient les données",
+				"plotMask":{
+					"xlabel":"longueur d'onde(nm)",
+					"ylabel":"pseudo-flux réfléchi(unité arb.)"
+					}
 				}
-			}	
-		
+			},
+		"Advanced":{
+			"calibrationButton":"Recalage",
+			"mode_desc":"Choix du mode d'acquisition",
+			"manual_choice":"Manuel",
+			"auto_choice":"K-moyennes",
+			"KMeans_desc":"Paramètres des K-moyennes",
+			"Prim_seg_label":"Pré-segmentation : nombre de clusters",
+			"Sec_seg_label":"Segmentation secondaire : nombre de clusters",
+			"acquireButton":"Début de l'acquisition",
+			"loadButton":"Chargement de données",
+			"functions":{
+				"calibrationButton_WIP":"PATIENTEZ SVP",
+				"acquireButton_WIP":"PATIENTEZ SVP",
+				"askdirectory":"sélectionner le dossier qui contient les données",
+				"plotMask":{
+					"xlabel":"longueur d'onde(nm)",
+					"ylabel":"pseudo-flux réfléchi(unité arb.)"
+					}
+				}
+			}
 		}
 	},
 	
@@ -216,7 +237,7 @@
 				"title":"Simple mode",
 				"full":{
 					"title":"Acquisition complète",
-					"description":"  - tous les paramètres, sauf la résolution souhaitée, sont choisis automatiquement par la machine\n  - uniquement les données finales sont conservées\n - l'interface comprend un onglet pour l'acquisition et un onglet d'analyse d'indices de spectraux"
+					"description":"  - tous les paramètres, sauf la  souhaitée, sont choisis automatiquement par la machine\n  - uniquement les données finales sont conservées\n - l'interface comprend un onglet pour l'acquisition et un onglet d'analyse d'indices de spectraux"
 					},
 				"addressed":{
 					"title":"Acquisition adressée",

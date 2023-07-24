@@ -167,6 +167,7 @@ class OPApp(ctk.CTk):
         self.label_pattern_duration.grid(row=3, column=0, pady=(0,20), padx=(65,0))
         
         self.methods_list=self.acq_config.seq_basis+self.acq_config.full_basis
+        self.methods_list=[m for m in self.methods_list if m!="Adressing"]
         self.spectro_list=glob.glob(r"../src/spectrometer_bridges/*.py")
         self.spectro_list=[x[28:-9] for x in self.spectro_list]
         self.spectro_list.remove('__')
