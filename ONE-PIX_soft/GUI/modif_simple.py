@@ -73,6 +73,11 @@ class OPApp(ctk.CTk):
         y = (self.monitor_sz.height//2) - (window_height//2)-100
         if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
+        icon_path= './logo_ONE-PIX.png' 
+        icon_path=ImageTk.PhotoImage(file=icon_path)
+        self.wm_iconbitmap()
+        self.iconphoto(False,icon_path)
+
         
         # create tabviews
         self.tabview = ctk.CTkTabview(self, width=window_width,height=window_height)
