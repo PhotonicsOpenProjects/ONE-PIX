@@ -593,7 +593,6 @@ class OPApp(ctk.CTk):
         self.json_actualisation()
         self.acq_config.spec_lib.spec_close()
         del self.acq_config
-        gc.collect()
         self.acq_config = OPConfig(json_path)
         self.acq_config.spec_lib.spec_open()
         self.acq_config.spec_lib.integration_time_ms = self.acq_config.integration_time_ms
