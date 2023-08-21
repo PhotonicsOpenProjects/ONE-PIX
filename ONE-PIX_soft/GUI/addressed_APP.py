@@ -21,6 +21,7 @@ window_width = 825
 
 json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
 print(json_path)
+
 def find_rgb_label(nb_mask):
     """
     
