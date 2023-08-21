@@ -1,5 +1,5 @@
 """
-@author:PhotonicsOpenProject
+@author:PhotonicsOpenProjects
 Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
 
 """
@@ -19,6 +19,8 @@ import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
+import platform
+
 rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
 rcParams['xtick.color']='white'
@@ -48,7 +50,7 @@ from decimal import Decimal
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
 import threading
-
+import screeninfo
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -64,13 +66,16 @@ window_width = 1020
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
         self.acq_config=OPConfig(json_path)
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI {VERSION}")
-        self.geometry("{}x{}+{}+{}".format(window_width, window_height, 0, 0))
+        x = (self.monitor_sz.width//2) - (window_width//2)-100
+        y = (self.monitor_sz.height//2) - (window_height//2)-100
+        self.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
         icon_path= './ONE-PIX_logo.ico' if os_name=='Windows' else './ONE-PIX_logo.xbm'
    
 #         self.after(201, lambda :self.iconbitmap(icon_path))
@@ -117,32 +122,20 @@ class OPApp(ctk.CTk):
         
         # create acquisition settings frame
         self.acq_mode_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.acq_mode_frame.grid(row=0, column=0,rowspan=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        self.acq_mode_frame.grid(row=0, column=0,rowspan=1, padx=(10, 10), pady=(20, 0), sticky="nsew")
         self.label_acq_mode = ctk.CTkLabel(master=self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_acq_mode.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
         
-        # self.entry_integration_time = ctk.CTkEntry(self.acq_mode_frame,width=45)
-        # self.entry_integration_time.grid(row=1, column=0, pady=(0,20), padx=(0,140))
-        # self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
-        # self.entry_integration_time.configure(state = tk.DISABLED,text_color='gray')
-        # self.label_integration_time =ctk.CTkLabel(self.acq_mode_frame, text="Integration time (ms)")
-        # self.label_integration_time.grid(row=1, column=0, pady=(0,20), padx=(65,0))
-
         self.entry_img_res = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_img_res.insert(0,str(self.acq_config.spatial_res))
-        self.entry_img_res.grid(row=3, column=0, pady=(2.5,20), padx=(2.5,140), sticky="")
+        self.entry_img_res.grid(row=3, column=0, pady=0, padx=100)
         self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_img_res"])
-        self.label_img_res.grid(row=3, column=0, pady=(2.5,20), padx=(40,2.5))
+        self.label_img_res.grid(row=2, column=0, pady=0, padx=0)
         
-        # self.entry_pattern_duration = ctk.CTkEntry(self.acq_mode_frame,width=45)
-        # self.entry_pattern_duration.grid(row=2, column=0, pady=(0,20),padx=(0,140), sticky="")
-        # self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-        # self.entry_pattern_duration.configure(state = tk.DISABLED,text_color='gray')
-        # self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text="Patterns duration (ms) ")
-        # self.label_pattern_duration.grid(row=2, column=0, pady=(0,20), padx=(65,0))
-        
-        self.methods_list=self.acq_config.seq_basis+self.acq_config.full_basis
-        self.methods_list=[m for m in self.methods_list if m!="Adressing"]
+               
+        self.methods_list=glob.glob(r"../src/patterns_bases/*.py")
+        self.methods_list=[x[22:-11] for x in self.methods_list]
+        self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstr",""]]
         self.spectro_list=glob.glob(r"../src/spectrometer_bridges/*.py")
         self.spectro_list=[x[28:-9] for x in self.spectro_list]
         self.spectro_list.remove('__')
@@ -150,10 +143,7 @@ class OPApp(ctk.CTk):
         
         self.methods_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.methods_list)
         self.methods_optionemenu.grid(row=1, column=1, padx=(2.5,2.5), pady=(2.5,2.5))
-        
-        # self.spectro_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.spectro_list)
-        # self.spectro_optionemenu.grid(row=2, column=1)
-        
+                
         self.switch_spectro = ctk.CTkSwitch(master=self.acq_mode_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["switch_spectro"],
                                             text_color='red',command=self.switch_spectro_command)
         self.switch_spectro.deselect()
@@ -164,48 +154,18 @@ class OPApp(ctk.CTk):
         
         self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["button_acquire_hyp"],
                                                 state='disabled',height=40,command=self.thread_acquire_hyp)
-        self.button_acquire_hyp.grid(row=4, column=0, columnspan = 2, sticky = 'we', padx=(2.5,2.5), pady=(2.5,2.5))
+        self.button_acquire_hyp.grid(row=4, column=0, columnspan = 2, pady=(40,0))
         self.process=0
         self.process_alive=False
         self.spec_connection()
         self.update()
-        # =====================================================================
-        #         block 3
-        # =====================================================================
-        # create Display frame
-        self.display_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, pady=(20, 0), sticky="nsew")
-        self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["title"],
-                                            font=ctk.CTkFont(size=16, weight="bold"))
-        self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
-
-        self.fig = Figure(figsize=(5,4), dpi=100)
-        self.fig.patch.set_facecolor('#2D2D2D')
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
-        self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=1,column=0,padx=20,pady=5,sticky="")
-        self.a_acq= self.fig.add_subplot(111)
-        self.a_acq.set_axis_off()
-        
-        #self.toolbar_frame=ctk.CTkFrame(self.display_frame)
-        #self.toolbar_frame.grid(row=2, column=0)
-        #self.acq_toolbar = NavigationToolbar2Tk(self.canvas, self.toolbar_frame)
-        #self.acq_toolbar.config(background='#2D2D2D')
-        #self.acq_toolbar._message_label.config(background='#2D2D2D')
-        #self.acq_toolbar.update()
-        
-        self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_spat2im"],
-                                            command=self.switch_spat2im_command,state='disabled')
-        self.switch_spat2im.grid(row=0,column=0,sticky='w',padx=120)
-
-        
         
         # =====================================================================
         #         block 2
         # =====================================================================
         # create progressbar frame
         self.appearence_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.appearence_frame.grid(row=1, column=0, rowspan=1, padx=(20, 20), pady=(20, 0), sticky='we')
+        self.appearence_frame.grid(row=1, column=0, rowspan=1, padx=(10, 10), pady=(20, 0), sticky='we')
         self.appearance_mode_label = ctk.CTkLabel(self.appearence_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_label"], anchor="w")
         self.appearance_mode_label.grid(row=0, column=0, sticky = 'w')
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.appearence_frame, values=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_optionemenu"], 
@@ -219,6 +179,30 @@ class OPApp(ctk.CTk):
         self.progressbar.set(value=0)
         self.est_time_label=ctk.CTkLabel(self.appearence_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 5"]["est_time_label"],anchor='w', font=ctk.CTkFont( weight="bold"))
         self.est_time_label.grid(row=0, column=1,pady=(0,0), padx = (50,0))
+        
+        # =====================================================================
+        #         block 3
+        # =====================================================================
+        # create Display frame
+        self.display_frame = ctk.CTkFrame(self.acquisition_tab)
+        self.display_frame.grid(row=0, column=2,columnspan=2,rowspan=8, pady=(20, 0),padx=(0,0), sticky="nsew")
+        self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["title"],
+                                            font=ctk.CTkFont(size=16, weight="bold"))
+        self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
+
+        self.fig = Figure(figsize=(5,4), dpi=100)
+        self.fig.patch.set_facecolor('#2D2D2D')
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(row=1,column=0,padx=20,pady=5,sticky="")
+        self.a_acq= self.fig.add_subplot(111)
+        self.a_acq.set_axis_off()
+                
+        self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_spat2im"],
+                                            command=self.switch_spat2im_command,state='disabled')
+        self.switch_spat2im.grid(row=0,column=0,sticky='w',padx=120)
+
+        
         
 # =============================================================================
 #         VI Analysis tab

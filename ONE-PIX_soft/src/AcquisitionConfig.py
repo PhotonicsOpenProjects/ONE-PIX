@@ -1,38 +1,35 @@
 """
-@author:PhotonicsOpenProject
-Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
+@author:PhotonicsOpenProjects
+Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 
 """
-
-
-import numpy as np
 import cv2
+import io
+import os
+import json
 import time
 import threading
-import os
+import numpy as np
 from datetime import date
-import queue
-from queue import Queue
-import sys
 import platform
-import datetime
-import gc
 import screeninfo
-import io
-
-from src.SpectrometerBridge import * 
-from src.PatternMethods import *
-from src.DatacubeReconstructions import *
-from src.datacube_analyse import *
-from src.coregistration_lib import *
-from pathlib import Path
-import json
 from tkinter import *
 from tkinter.messagebox import askquestion
 
-#root_path = '/'.join(os.getcwd().split('/')[:-1])
-#json_path = f"{root_path}/acquisition_param_ONEPIX.json"
+
+from src.SpectrometerBridge import SpectrometerBridge 
+from src.PatternMethods import PatternMethodSelection
+from src.DatacubeReconstructions import *
+from src.datacube_analyse import *
+from src.coregistration_lib import *
+
+
+
 def is_raspberrypi():
+    """
+    is_raspberrypi return a boolean to determine if the current OS is a raspberrry
+
+    """
     try:
         with io.open('/sys/firmware/devicetree/base/model', 'r') as m:
             if 'raspberry pi' in m.read().lower(): return True
@@ -40,6 +37,11 @@ def is_raspberrypi():
     return False
 
 screenWidth = screeninfo.get_monitors()[0].width
+try:
+    proj_shape=screeninfo.get_monitors()[1]
+except IndexError:
+    print('Please use a projector to use ONE-PIX')
+    
 
 class OPConfig:
     """ 
@@ -54,42 +56,39 @@ class OPConfig:
     """
 
     def __init__(self,json_path,img=None,nb_patterns=0):
+        # Initialize the OPConfig object
+
+        #Get info from acquisition_param_ONE-PIX.json
         f = open(json_path)
         acqui_dict = json.load(f)
         f.close()
+
+        # Displaying infos
         self.height = acqui_dict['height']
         self.width = acqui_dict["width"]
-        self.spatial_res = acqui_dict['spatial_res']
-        
+        self.interp_method=None
+        self.periode_pattern=42
+
+        # Pattern method infos
         self.pattern_method = acqui_dict['pattern_method']
+        self.spatial_res = acqui_dict['spatial_res']
+        self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
+        self.nb_patterns = self.pattern_lib.nb_patterns
+        self.seq_basis = ['FourierSplit','FourierShift']
+        self.full_basis = ['Addressing','Custom','Hadamard','DFT','BlackAndWhite']
+        self.pattern_order = []
+
+        # Spectrometer infos
         self.name_spectro = acqui_dict["name_spectro"]
         self.integration_time_ms =acqui_dict["integration_time_ms"]
-        self.mes_ratio=acqui_dict["mes_ratio"]
-        
-        self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
-        self.seq_basis = ['FourierSplit','FourierShift']
-        self.full_basis = ['Adressing','Custom','Hadamard']
-        self.nb_patterns = self.pattern_lib.nb_patterns
-
-        self.chronograms = []
-        self.pattern_order = []
         self.spectra = []
-
-        
-        # spectrometer acquistion time in ms
         self.wl_lim=acqui_dict["wl_lim"]
         self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms,self.wl_lim)
         self.wavelengths = []
         self.spectro_flag=False
-        self.duration = 0
-        self.periode_pattern = self.mes_ratio*self.integration_time_ms
-        if self.periode_pattern < 120: self.periode_pattern = 120
-        self.display_time = []
-        self.duree_dark = 2
-        self.time_spectro = []
-        self.integ_time_flag=True
-        self.display=False
-
+        self.rep=acqui_dict["spectro_scans2avg"]
+        
+        self.duration = 0 #Initialise the duration of a measure
 
 
     def get_optimal_integration_time(self):
@@ -116,7 +115,6 @@ class OPConfig:
         count=0
         delta_wl=round(0.05*np.size(self.spec_lib.get_wavelengths()))
         while flag:
-            #mes=self.spec_lib.get_intensities()[100:-100]
             mes = []
             for acq in range(10):
                 mes.append(self.spec_lib.get_intensities())
@@ -162,24 +160,22 @@ class OPConfig:
         config : class
             actualised OPConfig class object.
     
-        """
-               
-            
+        """ 
         os_name = platform.system()
         if self.spec_lib.DeviceName=='':
             self.spec_lib.spec_open()
             self.spec_lib.DeviceName=self.spec_lib.decorator.DeviceName
     
         if os_name == 'Windows':
-            x=list(range(self.height)) # horizontal vector for the pattern creation 
-            y=list(range(self.width))# vertical vector for the pattern creation
+            x=np.arange(0,self.height) # horizontal vector for the pattern creation 
+            y=np.arange(0,self.width)# vertical vector for the pattern creation
             Y,X = np.meshgrid(x,y)# horizontal and vertical array for the pattern creation
             A=2*np.pi*X*1/self.height
             B=2*np.pi*Y*5/self.width
             pos_r=np.cos(A+B) #gray pattern creation
             
             cv2.namedWindow('Init', cv2.WINDOW_NORMAL)
-            cv2.moveWindow('Init', 1920, 0)
+            cv2.moveWindow('Init', screenWidth, 0)
             cv2.setWindowProperty("Init", cv2.WND_PROP_FULLSCREEN, 1)
             cv2.imshow('Init', pos_r)
             cv2.waitKey(300)
@@ -187,67 +183,53 @@ class OPConfig:
         self.get_optimal_integration_time()
         cv2.destroyAllWindows()
         
-        self.periode_pattern = self.mes_ratio*self.integration_time_ms
-    
-        if self.periode_pattern < 120:
-            self.periode_pattern = 120
-        #self.spec_lib.set_integration_time()
-        
+                    
 
-
-    def spectrometer_acquisition(self):
+    def spectrometer_acquisition(self,event):
         """
-        This function allows to use the spectrometer in free runing mode to record 
-        a chronogram of acquisitions.
+        spectrometer_acquisition allows to use the spectrometer so that it is synchronised with patterns displays.
     
         Parameters
         ----------
-        q : Queue 
-            queue to check when patterns display is over.
+        event : threading.Event 
+            event that notifies when pattern is displayed and allow display to continue when cleared.
         config : class
             OPConfig class object.
     
         Returns
         -------
-        None. chronograms are stored in config.
+        None. measured spectra are stored in config.
     
         """
         
-        begin = time.time()
-        # Spectrometer connection
-        if self.spec_lib.DeviceName=='':
-            self.spec_lib.spec_open()
-        self.spec_lib.set_integration_time()
-        self.wavelengths = self.spec_lib.get_wavelengths()
-        flag=True
-        while True:
-            flag=self.integ_time_flag
-            if flag:
-                self.chronograms.append(np.float32(self.spec_lib.get_intensities()))
-                self.time_spectro.append((time.time()-begin)*1e3)
-            else:
+        cnt=0
+        chronograms=np.zeros((self.rep,self.nb_patterns,len(self.wavelengths)))
+        
+        while cnt <self.nb_patterns:            
+            begin=time.time()
                 
-                self.chronograms.append(2*np.float32(self.spec_lib.get_intensities()))
-                self.time_spectro.append((time.time()-begin)*1e3)
-    
-            try:
-                self.q.get_nowait()
-                break
-    
-            except queue.Empty:
-                pass
-    
+            if event.is_set():
+                for k in range(self.rep):
+                    chronograms[k,cnt,:]=self.spec_lib.get_intensities()                
+                cnt+=1
+                event.clear()
+            else:
+                time.sleep(1e-6)
+            
+        self.spectra=np.mean(chronograms,0)       
+        #np.save('test',self.spectra)
         self.spec_lib.spec_close()
 
-
-    def affichage_sequence(self):
+    
+    
+    def display_sequence(self,event):
         """
         This function allows to display a sequence of patterns.
        
         Parameters
         ----------
-        q : Queue 
-            queue to check when patterns display is over.
+        event : threading Event 
+            Ensures the synchronisation between displays and measures
         config : class
             OPConfig class object.
     
@@ -255,81 +237,70 @@ class OPConfig:
         -------
         None.
     
-        """
-        
-        os_name = platform.system()
-    
+        """  
         begin = time.time()
-    
-        black_patterns = np.zeros((self.height, self.width,10))
-        temps = []
-    
-        cv2.namedWindow('ImageWindow', cv2.WND_PROP_FULLSCREEN)
-        
-        cv2.moveWindow('ImageWindow', screenWidth, 0)
-           
-        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
-        for i in range(0, np.size(black_patterns, 2)):
-    
-            cv2.imshow('ImageWindow', black_patterns[:, :, i])
-            cv2.waitKey(round(self.periode_pattern))
+        # Display each pattern from the sequence
+        for pattern in self.pattern_lib.decorator.sequence:         
+            cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
+            cv2.waitKey(42)
+            event.set()
+            time.sleep(1e-6)
+            while event.is_set():
+                time.sleep(1e-6)
             
+
+        cv2.destroyAllWindows()
+
+    def init_display(self):
+        """
+        This funtion allows to initialize the display window and the patterns to be displayed before the starts of threads.
     
-        if self.pattern_method in self.seq_basis:
+    
+        Parameters
+        ----------
+        config : class
+            OPConfig class object.
+    
+        Returns
+        -------
+        config : class
+        * actualised OPConfig class object.
+        * self.pattern_lib.decorator.sequence : sequence of patterns
+        """
+        if self.pattern_method in self.seq_basis: # Method used to create, display and measure sequentially patterns within a specific basis
+            pattern_reduction=[4,3]
             # horizontal vector for the pattern creation
-            x = list(range(self.width))
+            x = np.arange(0,self.width//pattern_reduction[0],dtype=np.uint8)
             # vertical vector for the pattern creation
-            y = list(range(self.height))
+            y = np.arange(0,self.height//pattern_reduction[1],dtype=np.uint8)
             # horizontal and vertical array for the pattern creation
             Y, X = np.meshgrid(x, y)
     
-            self.pattern_order, freqs = self.pattern_lib.decorator.sequence_order()
-    
+            self.pattern_order, freqs = self.pattern_lib.decorator.sequence_order() # Get spatial frequencies list to create patterns
+            self.interp_method=cv2.INTER_NEAREST
+            
             for freq in freqs:
-                patterns = self.pattern_lib.decorator.creation_patterns(X, Y, freq)  # patterns creations 
-                    
-                for pattern in patterns:
-                    if freq==(0,0):
-                        self.integ_time_flag=False
-                        self.spec_lib.integration_time_ms=self.spec_lib.integration_time_ms/2
-                        self.spec_lib.set_integration_time()
-                    
-                    temps.append(time.time())
-                    cv2.imshow('ImageWindow', pattern)
-                    cv2.waitKey(round(self.periode_pattern))
-                    temps.append(time.time())
-                    
-                    if freq==(0,0):
-                        self.integ_time_flag=True
-                        self.spec_lib.integration_time_ms=self.spec_lib.integration_time_ms*2
-                        self.spec_lib.set_integration_time()
-                del patterns
-                gc.collect()
-                    
-    
+                self.pattern_lib.decorator.sequence.extend(self.pattern_lib.decorator.creation_patterns(X, Y, freq))  # Patterns creations 
+            
         elif self.pattern_method in self.full_basis:
-            for pattern in self.pattern_lib.decorator.sequence:
-                if pattern.all()==self.pattern_lib.decorator.sequence[0].all() and self.pattern_method=='Hadamard':
-                    self.integ_time_flag=False
-                    self.spec_lib.integration_time_ms=self.spec_lib.integration_time_ms/2
-                    self.spec_lib.set_integration_time()
-                temps.append(time.time())
-                cv2.imshow('ImageWindow', cv2.resize(pattern,(800,600),interpolation=cv2.INTER_AREA))
-                cv2.waitKey(round(self.periode_pattern))
-                temps.append(time.time())
-                
-                if pattern.all()==self.pattern_lib.decorator.sequence[0].all() and self.pattern_method=='Hadamard':
-                    self.integ_time_flag=True
-                    self.spec_lib.integration_time_ms=self.spec_lib.integration_time_ms*2
-                    self.spec_lib.set_integration_time()
+            self.pattern_order,freq=self.pattern_lib.decorator.creation_patterns()
+            self.interp_method=cv2.INTER_AREA
+        self.nb_patterns=self.pattern_lib.nb_patterns=len(self.pattern_lib.decorator.sequence)
+        print(f"sequence of {self.pattern_lib.nb_patterns} is ready !")
         
-        time.sleep(0.1)
-        self.q.put(True)
-        gc.collect()
-        cv2.destroyAllWindows()
-        self.display_time = (np.asarray(temps)-begin)*1e3
+        # Spectrometer connection
+        if self.spec_lib.DeviceName=='':
+            self.spec_lib.spec_open()
+        self.spec_lib.set_integration_time()
+        self.wavelengths = self.spec_lib.get_wavelengths()
+        self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float64)
+        # Initialise cv2 display on the second monitor 
+        cv2.namedWindow('ImageWindow', cv2.WND_PROP_FULLSCREEN)
+        cv2.moveWindow('ImageWindow', screenWidth, 0)
+        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
 
-
+       
+        
     def thread_acquisition(self, path=None, time_warning=True):
         """
         This funtion allows to run in parallel the projection of a sequence of 
@@ -347,62 +318,36 @@ class OPConfig:
         -------
         config : class
         * actualised OPConfig class object.
-        * display_time : (array of floats) 1D array of time values of the beginning and the end of projection for each pattern. 
-        * time_spectro : (array of floats) 1D array of time values for each measured spectrum.
-        * chronograms : (array of floats) 3D array of spectra stored in chronological order.
+        * spectra : (array of floats) 2D array of spectra stored in chronological order.
         * wavelengths : (array of floats) 1D wavelengths sampled by the spectrometer.
     
         """
-        
-        begin_acq = time.time()
-        if self.pattern_method in self.full_basis:
-            self.pattern_order,freq=self.pattern_lib.decorator.creation_patterns()
-            self.pattern_lib.nb_patterns=self.pattern_lib.decorator.nb_patterns
-        est_duration=round(1.5*self.pattern_lib.nb_patterns*self.periode_pattern/(60*1000),2)
-        if time_warning and self.pattern_method!="Adressing":
+        est_duration=round((self.pattern_lib.nb_patterns*(self.periode_pattern+self.rep*(self.integration_time_ms+2))+2)/(60*1000),2)
+        if time_warning :
             ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
             if ans=='yes':
-                est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
-                # print("Estimated end of the acquisition: "+est_end)
-                self.q = Queue()
-                first_thread = threading.Thread(
-                    target=self.affichage_sequence)
-                second_thread = threading.Thread(
-                    target=self.spectrometer_acquisition)
-                first_thread.start()
-                second_thread.start()
-        
-                first_thread.join()
-                second_thread.join()
-        
+                begin_acq = time.time()
+                self.init_display()
+                #Threads initialisation
+                event=threading.Event()
+                patterns_thread = threading.Thread(target=self.display_sequence,args=(event,))
+                spectrometer_thread = threading.Thread(target=self.spectrometer_acquisition,args=(event,))
+                # Start both display and measure threads
+                patterns_thread.start()
+                spectrometer_thread.start()
+                patterns_thread.join()
+                spectrometer_thread.join()
+
                 self.duration = time.time()-begin_acq
+                 
                 if path!=None:
                     self.save_acquisition_envi(path)
                 else:
                     self.save_acquisition_envi()
-                gc.collect()
             else:
+                cv2.destroyAllWindows()
                 pass
-        else:
-            est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
-            # print("Estimated end of the acquisition: "+est_end)
-            self.q = Queue()
-            first_thread = threading.Thread(
-                target=self.affichage_sequence)
-            second_thread = threading.Thread(
-                target=self.spectrometer_acquisition)
-            first_thread.start()
-            second_thread.start()
-    
-            first_thread.join()
-            second_thread.join()
-    
-            self.duration = time.time()-begin_acq
-            if path!=None:
-                self.save_acquisition_envi(path)
-            else:
-                self.save_acquisition_envi()
-            gc.collect()
+            
        
 
     def save_acquisition_envi(self, path = "../Hypercubes"):
@@ -421,11 +366,6 @@ class OPConfig:
     
         """
         
-        #extract spectra from chronograms
-        self.display_time = time_aff_corr(
-            self.chronograms, self.time_spectro, self.display_time)
-        self.spectra = calculate_pattern_spectrum(
-            self.display_time, 0, self.time_spectro, self.chronograms, 0)
         root_path=os.getcwd()
         #path=os.path.join(root_path,'Hypercubes')
         if(os.path.isdir(path)):
@@ -440,15 +380,14 @@ class OPConfig:
         os.mkdir(folder_name)
         os.chdir(folder_name)
         
-        if self.pattern_method not in ['Custom',"Adressing"]:
+        if self.pattern_method not in ['Custom',"Addressing","BlackAndWhite"]:
             res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
             res.Selection()
             # saving the acquired spatial spectra hypercube
             py2envi(folder_name,res.hyperspectral_image,self.wavelengths,os.getcwd())
         else:
             np.save(folder_name,self.spectra)
-            if self.pattern_method=="Adressing":
-                
+            if self.pattern_method=="Addressing":
                 title_acq = f"spectra_{fdate}_{actual_time}.npy"
                 title_wavelengths = f"wavelengths_{fdate}_{actual_time}.npy"
                 title_patterns = f"pattern_order_{fdate}_{actual_time}.npy"
@@ -456,20 +395,18 @@ class OPConfig:
                 np.save(title_mask, self.pattern_lib.decorator.sequence)
                 np.save(title_acq, self.spectra)
                 np.save(title_wavelengths, self.wavelengths)  # saving wavelength
-                np.save(title_patterns, self.pattern_order)  # saving wavelength
+                np.save(title_patterns, self.pattern_order)  # saving patern order
         # Header
         title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
-    
         header = f"ONE-PIX acquisition_{fdate}_{actual_time}"+"\n"\
             + "--------------------------------------------------------"+"\n"\
             + "\n"\
             + f"Acquisition method : {self.pattern_method}"+"\n"\
-            + "Acquisition time : %f s" % self.duration+"\n" \
+            + "Acquisition duration : %f s" % self.duration+"\n" \
             + f"Spectrometer {self.name_spectro} : {self.spec_lib.DeviceName}"+"\n"\
             + "Number of projected patterns : %d" % self.nb_patterns+"\n" \
             + "Height of pattern window : %d pixels" % self.height+"\n" \
             + "Width of pattern window : %d pixels" % self.width+"\n" \
-            + "Dark pattern duration : %d ms" % self.duree_dark+"\n" \
             + "Integration time : %d ms" % self.integration_time_ms+"\n" 
     
     
@@ -478,7 +415,6 @@ class OPConfig:
         text_file.close()
         
         
-        os_name=platform.system()
         print('is_raspberrypi() : ',is_raspberrypi())
         if is_raspberrypi():
             root=Tk()
@@ -492,15 +428,15 @@ class OPConfig:
                 camera = PiCamera()
                 camera.resolution = (1024, 768)
                 camera.start_preview()
-                camera.shutter_speed=7*1176
+                camera.shutter_speed=3*1176
                 camera.vflip=True
                 camera.hflip=True
                 # Camera warm-up time
-                time.sleep(2)
+                time.sleep(1)
                 camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
                 camera.close()
                 
-                if(self.pattern_method=='Adressing'):
+                if(self.pattern_method=='Addressing'):
                     rgb_name=f"RGBCam_{fdate}_{actual_time}.jpg"
                     RGB_img = cv2.imread(rgb_name)
                     RGB_img= np.asarray(RGB_img)
@@ -514,6 +450,5 @@ class OPConfig:
             except PiCameraError:
                 print("Warning; check a RPi camera is connected. No picture were stored !")
             root.destroy()
-        # os.chdir(root_path)
-        del self.chronograms,self.time_spectro, self.display_time # saves RAM for large acquisitions
-        gc.collect()
+        os.chdir(root_path)
+        

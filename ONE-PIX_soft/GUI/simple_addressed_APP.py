@@ -4,24 +4,18 @@ Created on Wed Jul 19 18:32:47 2023
 @author: Leo Brechet
 """
 
-
-import tkinter as tk
 import customtkinter as ctk
-from tkinter import messagebox, ttk, filedialog
+from tkinter import filedialog
 from tkinter.messagebox import showwarning
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-from matplotlib import rcParams, ticker
-import matplotlib.cm as CM
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import json
-
-import glob
+import screeninfo
 import os
-import sys
 
 window_height = 575
 window_width = 825
@@ -61,24 +55,17 @@ def find_rgb_label(nb_mask):
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI")
-        self.geometry("{}x{}+{}+{}".format(window_width, window_height, 0, 0))
+        x = (self.monitor_sz.width -window_width)//2-100
+        y = (self.monitor_sz.height-window_height)//2-100
+        self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
    
-#         self.after(201, lambda :self.iconbitmap(icon_path))
-        
-#         self.fig_acq = Figure(figsize=(3.8,2.5), dpi=100)
-#         self.fig_acq.patch.set_facecolor('#2D2D2D')
-#         gs = self.fig_acq.add_gridspec(1,50)
-#         self.a_acq = self.fig_acq.add_subplot(gs[:,:-10], anchor='W')
-#         self.color = self.fig_acq.add_subplot(gs[:,-10], anchor='W')
-#         self.color.tick_params(labelsize=6)
-#         self.a_acq.axis('off')
-#         self.color.axis('off')
-        
+
         
         self.fig_vis = Figure(figsize=(8.1,3.45), dpi=100)
         self.fig_vis.patch.set_facecolor('#C4C4C4')
@@ -90,18 +77,8 @@ class OPApp(ctk.CTk):
         
         
         self.test_mode = "auto"
-        # create tabviews
-        # self.tabview = ctk.CTkTabview(self, width=window_width,height=window_height)
-        # self.tabview.grid(row=1, column=1)
 
-# =============================================================================
-#         
-# =============================================================================
-        # self.Calib_frame = ctk.CTkFrame(self.ACQ)
-        # self.Calib_frame.grid(row=0, column=0, pady=10, rowspan =1, sticky="we")
-        # self.calibrationButton = ctk.CTkButton(self.Calib_frame, text = "Co-registration",
-        #                                 command = None)
-        # self.calibrationButton.grid(column=0, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1, sticky="nesw")
+
 # =============================================================================
 # 
 # =============================================================================
@@ -163,28 +140,13 @@ class OPApp(ctk.CTk):
                                         command = self.acquire)
         self.acquireButton.grid(column=0, row=0, padx=(2.5,2.5), pady=(2.5,2.5), rowspan =1, columnspan=2, sticky='')
 
-        # self.Preview_frame = ctk.CTkFrame(self.ACQ)
-        # self.Preview_frame.grid(row=0, column=1, pady=10, padx=10, rowspan =2, sticky="w")
+ 
         
-        # self.canvas_b1 = FigureCanvasTkAgg(self.fig_acq, self.Preview_frame)
-        # self.canvas_b1.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=2)
+    
+# =============================================================================
+# =============================================================================
+# =============================================================================
 
-        # self.toolbarFrame = ctk.CTkFrame(master=self.Preview_frame, width=100, height=100)
-        # self.toolbarFrame.grid(column=0, row=1, padx=10, pady=10, rowspan=1, columnspan=2, sticky = "we")
-        # NavigationToolbar2Tk(self.canvas_b1, self.toolbarFrame)
-        
-        
-# =============================================================================
-# =============================================================================
-# =============================================================================
-# # #         
-# =============================================================================
-# =============================================================================
-# =============================================================================
-        
-        
-        
-        # self.Open_frame = ctk.CTkFrame(self.VIS)
         self.Open_frame = ctk.CTkFrame(self)
         self.Open_frame.grid(row=2, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=2, sticky="nw")
         

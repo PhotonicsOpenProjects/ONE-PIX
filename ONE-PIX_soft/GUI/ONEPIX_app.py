@@ -1,6 +1,6 @@
 """
-@author:PhotonicsOpenProject
-Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
+@author:PhotonicsOpenProjects
+Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 
 """
 
@@ -8,6 +8,7 @@ import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
 from tkinter.messagebox import showwarning,showinfo
+from PIL import ImageTk
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
@@ -44,10 +45,10 @@ import tifffile as tiff
 import cv2
 from scipy import interpolate
 import json
-from decimal import Decimal
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
 import threading
+import platform
 import screeninfo
 screenWidth = screeninfo.get_monitors()[0].width
 
@@ -68,16 +69,21 @@ window_width = 1020
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
         self.acq_config=OPConfig(json_path)
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI {VERSION}")
-        self.geometry("{}x{}+{}+{}".format(window_width, window_height, 0, 0))
-        icon_path= './ONE-PIX_logo.ico' if os_name=='Windows' else './ONE-PIX_logo.xbm'
-   
-#         self.after(201, lambda :self.iconbitmap(icon_path))
+        x = (self.monitor_sz.width -window_width)//2
+        y = (self.monitor_sz.height-window_height)//2
+        self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
+        icon_path= './logo_ONE-PIX.png' if os_name=='Windows' else './ONE-PIX_logo.xbm'
+        icon_path=ImageTk.PhotoImage(file=icon_path)
+        self.wm_iconbitmap()
+        self.iconphoto(False,icon_path)
+
         
         # create tabviews
         self.tabview = ctk.CTkTabview(self, width=window_width,height=window_height)
@@ -114,7 +120,7 @@ class OPApp(ctk.CTk):
         # =====================================================================
         # Create left side bar
         self.sidebar_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.sidebar_frame.grid(row=0, column=0, rowspan=1,padx=(20, 20), pady=(20, 0), sticky="nsew")
+        self.sidebar_frame.grid(row=0, column=0, rowspan=1,padx=(10, 10), pady=(20, 0), sticky="nsew")
         self.label_mode_group = ctk.CTkLabel(master=self.sidebar_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 1"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_mode_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
         
@@ -141,9 +147,9 @@ class OPApp(ctk.CTk):
         
         # create acquisition settings frame
         self.acq_mode_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.acq_mode_frame.grid(row=1, column=0,rowspan=1, padx=(20, 20), pady=(20, 0), sticky="nsew")
+        self.acq_mode_frame.grid(row=1, column=0,rowspan=1, padx=(10, 10), pady=(20, 0), sticky="nsew")
         self.label_acq_mode = ctk.CTkLabel(master=self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
-        self.label_acq_mode.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
+        self.label_acq_mode.grid(row=0, column=0, columnspan=1, padx=0, pady=10, sticky="")
         
         self.entry_integration_time = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_integration_time.grid(row=1, column=0, pady=(0,20), padx=(0,140))
@@ -154,20 +160,21 @@ class OPApp(ctk.CTk):
 
         self.entry_img_res = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_img_res.insert(0,str(self.acq_config.spatial_res))
-        self.entry_img_res.grid(row=2, column=0, pady=(0,20), padx=(0,140), sticky="")
+        self.entry_img_res.grid(row=2, column=0, pady=(0,20), padx=(0,140))
         self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_img_res"])
-        self.label_img_res.grid(row=2, column=0, pady=(0,20), padx=(40,0))
+        self.label_img_res.grid(row=2, column=0, pady=(0,20), padx=(90,0))
         
-        self.entry_pattern_duration = ctk.CTkEntry(self.acq_mode_frame,width=45)
-        self.entry_pattern_duration.grid(row=3, column=0, pady=(0,20),padx=(0,140), sticky="")
-        self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-        self.entry_pattern_duration.configure(state = tk.DISABLED,text_color='gray')
+#         self.entry_pattern_duration = ctk.CTkEntry(self.acq_mode_frame,width=45)
+#         self.entry_pattern_duration.grid(row=3, column=0, pady=(0,20),padx=(0,140))
+#         self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
+#         self.entry_pattern_duration.configure(state = tk.DISABLED,text_color='gray')
         
-        self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_pattern_duration"])
-        self.label_pattern_duration.grid(row=3, column=0, pady=(0,20), padx=(65,0))
+#         self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_pattern_duration"])
+#         self.label_pattern_duration.grid(row=3, column=0, pady=(0,20), padx=(70,0))
         
-        self.methods_list=self.acq_config.seq_basis+self.acq_config.full_basis
-        self.methods_list=[m for m in self.methods_list if m!="Adressing"]
+        self.methods_list=glob.glob(r"../src/patterns_bases/*.py")
+        self.methods_list=[x[22:-11] for x in self.methods_list]
+        self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstr",""]]
         self.spectro_list=glob.glob(r"../src/spectrometer_bridges/*.py")
         self.spectro_list=[x[28:-9] for x in self.spectro_list]
         self.spectro_list.remove('__')
@@ -199,7 +206,7 @@ class OPApp(ctk.CTk):
         self.label_disp_mode = ctk.CTkLabel(master=self.display_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
         self.label_disp_mode.grid(row=0, column=0,sticky='w',padx=(20,0),pady=10)
 
-        self.fig = Figure(figsize=(5,4), dpi=100)
+        self.fig = Figure(figsize=(4.5,4), dpi=100)
         self.fig.patch.set_facecolor('#2D2D2D')
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
         self.canvas.draw()
@@ -221,8 +228,8 @@ class OPApp(ctk.CTk):
         #         block 4
         # =====================================================================
         # create GUI apparence frame
-        self.appearence_frame = ctk.CTkFrame(self.acquisition_tab)
-        self.appearence_frame.grid(row=2, column=0,rowspan=1, padx=(20, 20), pady=(20, 0),sticky='w')
+        self.appearence_frame = ctk.CTkFrame(self.acquisition_tab,width=200)
+        self.appearence_frame.grid(row=2, column=0,rowspan=1, padx=(10, 20), pady=(20, 0),sticky='w')
         self.appearance_mode_label = ctk.CTkLabel(self.appearence_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_label"], anchor="w")
         self.appearance_mode_label.grid(row=0, column=0)
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.appearence_frame, values=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 4"]["appearance_mode_optionemenu"], 
@@ -619,7 +626,7 @@ class OPApp(ctk.CTk):
         self.expert_mode_button.configure(state= "normal")
         self.button_acquire_spec.configure(state="disabled")
         self.entry_integration_time.configure(state="disabled",text_color='gray')
-        self.entry_pattern_duration.configure(state="disabled",text_color='gray')
+        #self.entry_pattern_duration.configure(state="disabled",text_color='gray')
         self.button_wind_test.configure(state= "disabled")
  
  
@@ -628,11 +635,11 @@ class OPApp(ctk.CTk):
         self.simple_mode_button.configure(state= "normal")
         self.button_acquire_spec.configure(state= "normal")
         self.entry_integration_time.configure(state= "normal",text_color='white')
-        self.entry_pattern_duration.configure(state= "normal",text_color='white')
+        #self.entry_pattern_duration.configure(state= "normal",text_color='white')
         self.button_wind_test.configure(state= "normal")
-        self.entry_pattern_duration.delete(0,10)
+        #self.entry_pattern_duration.delete(0,10)
         self.entry_integration_time.delete(0,10)
-        self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
+        #self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
         self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
  
     def close_window_proj(self):
@@ -650,17 +657,18 @@ class OPApp(ctk.CTk):
         self.label_test_proj.image = img
  
  
-    def window_size_test(self):      
+    def window_size_test(self):
+        proj_width=screeninfo.get_monitors()[1].width
+        proj_height=screeninfo.get_monitors()[1].height      
         self.proj = ctk.CTkToplevel()
-        os_name = platform.system()
-        self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, screenWidth, 0))
+        self.proj.geometry("{}x{}+{}+{}".format(proj_width, proj_height, screenWidth-1, 0))
         self.proj.update()
-        y = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
-        x = list(range(self.acq_config.width))  # vertical vector for the pattern creation
+        y = list(range(proj_height))  # horizontal vector for the pattern creation
+        x = list(range(proj_width))  # vertical vector for the pattern creation
 
         Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
-        A = 2 * np.pi * X * 10 / self.acq_config.height
-        B = 2 * np.pi * Y * 10 / self.acq_config.width
+        A = 2 * np.pi * X * 10 / proj_height
+        B = 2 * np.pi * Y * 10 / proj_width
         pos_r = np.cos(A + B)  # gray pattern creation
         pos_r[pos_r < 0] = 0
  
@@ -767,13 +775,12 @@ class OPApp(ctk.CTk):
         self.json_actualisation()
         self.acq_config.spec_lib.spec_close()
         del self.acq_config
-        gc.collect()
         self.acq_config = OPConfig(json_path)
         self.acq_config.spec_lib.spec_open()
         if (self.simple_mode_button.cget("state") == "normal"):
             self.acq_config.spec_lib.integration_time_ms = self.acq_config.integration_time_ms
             self.acq_config.spec_lib.set_integration_time()
-            self.acq_config.periode_pattern = int(self.entry_pattern_duration.get())
+            #self.acq_config.periode_pattern = int(float(self.entry_pattern_duration.get()))
  
     def thread_acquire_hyp(self):
         self.close_window_proj()
@@ -797,10 +804,10 @@ class OPApp(ctk.CTk):
             self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
             self.entry_integration_time.configure(state= 'disabled')
  
-            self.entry_pattern_duration.configure(state= 'normal')
-            self.entry_pattern_duration.delete(0,10)
-            self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-            self.entry_pattern_duration.configure(state = 'disabled')
+            #self.entry_pattern_duration.configure(state= 'normal')
+            #self.entry_pattern_duration.delete(0,10)
+            #self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
+            #self.entry_pattern_duration.configure(state = 'disabled')
             time.sleep(1)
 #         if (self.button_wind_test.cget("state") == "disabled"):
 #             self.close_window_proj()
@@ -816,7 +823,7 @@ class OPApp(ctk.CTk):
         self.progressbar.stop()
         self.est_time_label.configure(text=est_end_label)
         self.progressbar.set(value=0)
-        if (self.acq_config.pattern_method in self.acq_config.seq_basis or self.acq_config.pattern_method == 'Hadamard'):
+        if (self.acq_config.pattern_method in self.acq_config.seq_basis+['Hadamard','DFT']):
             if len(self.acq_config.spectra) > 0:
                 self.acq_res=OPReconstruction(self.acq_config.pattern_method,
                                           self.acq_config.spectra,self.acq_config.pattern_order)
@@ -907,7 +914,7 @@ class OPApp(ctk.CTk):
             self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='white')
             self.normalisation_button.configure(state='normal')
             
-            if self.res['pattern_method'] in ['FourierSplit','Fourier']:
+            if self.res['pattern_method'] in ['FourierSplit','Fourier','DFT']:
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))

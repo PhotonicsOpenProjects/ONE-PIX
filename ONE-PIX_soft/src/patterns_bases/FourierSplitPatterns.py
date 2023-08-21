@@ -11,7 +11,7 @@ class FourierSplitPatterns:
             self.spatial_res=self.spatial_res+1
         self.spectrum_size=(self.spatial_res-1)//2
         self.nb_patterns=4*(self.spectrum_size+1)*(2*self.spectrum_size+1)
-    
+        self.sequence=[]
 
     def sequence_order(self):
         """

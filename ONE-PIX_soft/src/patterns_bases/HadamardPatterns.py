@@ -36,7 +36,7 @@ class HadamardPatterns:
             for k in range(self.dim): #line broom
                 pattern_order.append("Hpos(%d,%d)"%(j,k))
                 pattern_order.append("Hneg(%d,%d)"%(j,k))
-        freqs.append(1)
+        freqs.append((j,k))
                 
         return pattern_order,freqs
      

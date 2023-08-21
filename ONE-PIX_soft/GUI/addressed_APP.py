@@ -4,24 +4,17 @@ Created on Wed Jul 19 18:32:47 2023
 @author: Leo Brechet
 """
 
-
-import tkinter as tk
 import customtkinter as ctk
-from tkinter import messagebox, ttk, filedialog
-from tkinter.messagebox import showwarning
+from tkinter import filedialog
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
-from matplotlib import rcParams, ticker
-import matplotlib.cm as CM
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import json
-
-import glob
 import os
-import sys
+import screeninfo
 
 window_height = 575
 window_width = 825
@@ -61,24 +54,15 @@ def find_rgb_label(nb_mask):
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI")
-        self.geometry("{}x{}+{}+{}".format(window_width, window_height, 0, 0))
-   
-#         self.after(201, lambda :self.iconbitmap(icon_path))
-        
-#         self.fig_acq = Figure(figsize=(3.8,2.5), dpi=100)
-#         self.fig_acq.patch.set_facecolor('#2D2D2D')
-#         gs = self.fig_acq.add_gridspec(1,50)
-#         self.a_acq = self.fig_acq.add_subplot(gs[:,:-10], anchor='W')
-#         self.color = self.fig_acq.add_subplot(gs[:,-10], anchor='W')
-#         self.color.tick_params(labelsize=6)
-#         self.a_acq.axis('off')
-#         self.color.axis('off')
-        
+        x = (self.monitor_sz.width -window_width)//2-100
+        y = (self.monitor_sz.height-window_height)//2-100
+        self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
         
         self.fig_vis = Figure(figsize=(8.1,3.45), dpi=100)
         self.fig_vis.patch.set_facecolor('#C4C4C4')
@@ -292,7 +276,7 @@ class OPApp(ctk.CTk):
             GUI_conf = json.load(f)
             f.close()
         
-        GUI_conf["pattern_method"] = "Adressing"
+        GUI_conf["pattern_method"] = "Addressing"
         
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f)

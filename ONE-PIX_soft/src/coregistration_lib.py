@@ -1,17 +1,22 @@
-from picamera import PiCamera
+try:
+    from picamera import PiCamera
+except:
+    pass
+
 import time
 import numpy as np
 import imutils
 import cv2
-import matplotlib.pyplot as plt
-import tkinter as tk
-from functools import partial
 import json
 import os
-import math
 from tkinter.messagebox import showinfo
-
+import screeninfo
 print('coregistration_path', os.path.abspath(os.curdir))
+screenWidth = screeninfo.get_monitors()[0].width
+try:
+    proj_shape=screeninfo.get_monitors()[1]
+except IndexError:
+    showinfo(title=None,message='Please use a projector to use ONE-PIX')
 #%% Get and handle camera pictures       
 def get_picture(tag,save_path='./'):
     camera = PiCamera()
@@ -46,7 +51,7 @@ def order_corners(pts):
     rect[3] = pts[np.argmax(diff)]
     return rect
 
-def get_reference_image(img_resolution=(800, 600)):
+def get_reference_image(img_resolution=(proj_shape.width, proj_shape.height)):
     """
     Build the image we will be searching for.  In this case, we just want a
     large white box (full screen)
@@ -135,7 +140,7 @@ def show_full_frame(frame):
     """
     cv2.namedWindow('FullScreen', cv2.WND_PROP_FULLSCREEN)
     cv2.setWindowProperty('FullScreen', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    cv2.moveWindow('FullScreen', 1600, 0)
+    cv2.moveWindow('FullScreen', screenWidth, 0)
     cv2.imshow('FullScreen', frame)
 
 
@@ -147,7 +152,7 @@ def hide_full_frame(window='FullScreen'):
     cv2.destroyWindow(window)
     cv2.waitKey(1)
 
-def get_perspective_transform(tag,screen_resolution=(800,600), prop_file=None):
+def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape.height), prop_file=None):
     """
     Determine the perspective transform for the current physical layout
     return the perspective transform, max_width, and max_height for the
@@ -178,7 +183,7 @@ def get_perspective_transform(tag,screen_resolution=(800,600), prop_file=None):
         show_full_frame(reference_image)
         # Delay execution a quarter of a second to make sure the image is displayed 
         # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
-        cv2.waitKey(250)
+        cv2.waitKey(500)
         
 
         # Grab a photo of the frame
@@ -230,14 +235,14 @@ def get_perspective_transform(tag,screen_resolution=(800,600), prop_file=None):
            
         
     # Uncomment the lines below to see the transformed image
-    wrap = cv2.resize(cv2.warpPerspective(pict, m, (max_width, max_height)),(800,600))
+    wrap = cv2.resize(cv2.warpPerspective(pict, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
     cv2.imwrite(save_path,wrap)
 
 #     cv2.imshow('all better', wrap)
 #     cv2.waitKey(0)
 #     return wrap
 
-def coregistration_calibration(screen_resolution=(800,600)):
+def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.height)):
     
     """
     Function allow to calibrate teh coregistration between video projector and the PI camera
@@ -248,7 +253,7 @@ def coregistration_calibration(screen_resolution=(800,600)):
     show_full_frame(reference_image)
     # Delay execution a quarter of a second to make sure the image is displayed 
     # Don't use time.sleep() here, we want the IO loop to run.  Sleep doesn't do that
-    cv2.waitKey(250)
+    cv2.waitKey(500)
         
     # Grab a photo of the frame
     get_picture('calibration',"init.png")
@@ -300,5 +305,5 @@ def apply_corregistration(img,json_path):
     m=np.asarray(m)
     max_width=setup_dict["max_width"]
     max_height=setup_dict["max_height"]
-    wrap = cv2.resize(cv2.warpPerspective(img, m, (max_width, max_height)),(800,600))
+    wrap = cv2.resize(cv2.warpPerspective(img, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
     return wrap

@@ -119,8 +119,3 @@ file.close()
 test.thread_acquisition(path = f"../Hypercubes/{folder_name}/reference", time_warning = False)
 
 
-# if not('spectral_ref' in os.listdir()):
-#     os.mkdir('reference')
-    
-# if ('/'.join(os.path.abspath(os.curdir).split('\\'))).split('/')[-1]
-

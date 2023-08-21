@@ -9,89 +9,75 @@ HUB interfaces ONE-PIX
 
 import tkinter as tk
 import customtkinter as ctk
-from tkinter import messagebox, ttk, filedialog
+from tkinter import  ttk
 from tkinter.messagebox import showwarning
+from PIL import Image
 
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
-from matplotlib.figure import Figure
-from matplotlib import rcParams, ticker
-import matplotlib.cm as CM
-import matplotlib.pyplot as plt
-import numpy as np
-import cv2
+from matplotlib.backends.backend_tkagg import  NavigationToolbar2Tk
+
 import json
-from functools import partial
 
-import glob
 import os
-import sys
+import screeninfo
 path_to_GUI = '/'.join([os.getcwd(),'ONE-PIX_soft/GUI'])
 os.chdir(path_to_GUI)
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.update_trad()
         self.generate_GUI()
         self.isNormalized = False
         self.acquisition_method = None
+        
         # self.GUI_mode=None
         
     def generate_GUI(self):
-        self.Hub_frame = ctk.CTkFrame(self)
-        self.Hub_frame.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
+        self.title('ONE-PIX APP')
+        width=680
+        height=250
+        x = (self.monitor_sz.width/2) - (width/2)
+        y = (self.monitor_sz.height/2) - (height/2)
+        self.geometry('%dx%d+%d+%d' % (width, height, x, y))
+        self.logo_image = ctk.CTkImage(Image.open(path_to_GUI + "/logo_ONE-PIX.png"),
+                                               size=(200, 200))
+        self.logo_image_label = ctk.CTkLabel(self, image=self.logo_image,text="")
+        self.logo_image_label.grid(row=0, column=0,sticky='nsew',pady=20,padx=(10,10))    
+
+        
+        self.Hub_frame = ctk.CTkFrame(self,corner_radius=15)
+        self.Hub_frame.grid(row=0, column=1, pady=25, padx = (5,5), rowspan=1, columnspan=1, sticky="nsew")
         
         self.GuiMode_choice = ctk.CTkComboBox(self.Hub_frame, values = self.GuiMode_choice_text,
                                     state = "readonly")
         self.GuiMode_choice.set(self.GuiMode_choice_text[0]) #index de l'élément sélectionné
-        self.GuiMode_choice.grid(column=0, row=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=1,
-                                sticky = "w")
-        self.Gui_help = ctk.CTkButton(self.Hub_frame, text="?", font=('Helvetica', 18, 'bold'), width =12, command=self.open_Gui_help)
-        
-        # self.choseLanguage = ctk.CTkComboBox(self.Hub_frame, variable = self.lang_names,
-        #                             values = self.lang_values,
-        #                             state = "readonly")
-        # self.choseLanguage.set(self.curLanguage) #index de l'élément sélectionné
-        # self.choseLanguage.grid(column=1, row=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=1,
-        #                         sticky = "w")
-        
-        
+        self.GuiMode_choice.grid(column=0, row=0, pady=(10,2.5), padx = (0,0))
         
         self.choseLanguage = ttk.Combobox(self.Hub_frame, textvariable = self.lang_names,
-                                   state = "readonly", values = self.lang_values)
+                                   state = "readonly", values = self.lang_values,font=('Helvetica', 13),width=15)
         self.choseLanguage.current(self.lang_values.index(self.curLanguage)) #index de l'élément sélectionné
-        self.choseLanguage.grid(column=1, row=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=1,
-                                sticky = "w")
+        self.choseLanguage.grid(column=1, row=0, pady=(10,2.5), padx = (0,0))
         self.choseLanguage.bind("<<ComboboxSelected>>", lambda event=None:
                         self.change_language())
-        # self.bands_list["state"]= "disabled" # initialement grise
-        # self.bands_list.set_completion_list([''])
-        # self.bands_list.grid(column=0, row=0, padx=10, pady=10)
-        # for binds in [self.bands_list]:
-        #     self.bands_list.bind("<<ComboboxSelected>>", lambda event=None:
-        #                  self.get_combobox_value("bands"))
-        #     self.bands_list.bind("<Return>", lambda event=None:
-        #                  self.get_combobox_value("bands"))
+                
+        self.Gui_help = ctk.CTkButton(self.Hub_frame, text=" ?", font=('Helvetica', 15, 'bold'), width =12, command=self.open_Gui_help)
         
-        
-        self.Gui_help = ctk.CTkButton(self.Hub_frame, text="?", font=('Helvetica', 18, 'bold'), width =12, command=self.open_Gui_help)
-        
-        self.Gui_help.grid(column=2, row=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=1,
-                                sticky = "w")
+        self.Gui_help.grid(column=2, row=0, pady=(10,2.5), padx = (1,3))
         
         self.CompleteAcquisition_button = ctk.CTkButton(self.Hub_frame, text = self.CompleteAcquisition_button_text,
-                                                   fg_color = "#3B8ED0", hover_color="#36719F",
-                                                   command = self.CompleteLaunching)
-        self.CompleteAcquisition_button.grid(row=1, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
+                                                   fg_color = "#3B8ED0", hover_color="#36719F",height=40,
+                                                   command = self.CompleteLaunching, font=('Helvetica', 15, 'bold'))
+        self.CompleteAcquisition_button.grid(row=2, column=0, sticky="news",pady=(30,2.5), padx = (35,15))
         self.AddressedAcquisition_button = ctk.CTkButton(self.Hub_frame, text = self.AddressedAcquisition_button_text,
-                                                    fg_color = "#3B8ED0", hover_color="#36719F",
-                                                    command = self.AddressedLaunching)
-        self.AddressedAcquisition_button.grid(row=2, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
+                                                    fg_color = "#3B8ED0", hover_color="#36719F",height=40,
+                                                    command = self.AddressedLaunching, font=('Helvetica', 15, 'bold'))
+        self.AddressedAcquisition_button.grid(row=2, column=1, pady=(30,2.5), padx = (2.5,2.5),sticky="news")
         
         
         self.Exit_button = ctk.CTkButton(self.Hub_frame, text = self.Exit_button_text, fg_color = "#D70000", hover_color="#9D0000",
-                                    command = self.close_window)
-        self.Exit_button.grid(row=3, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
+                                    command = self.close_window,height=40)
+        self.Exit_button.grid(row=3, column=0, pady=(25,2.5), padx = (25,2.5),columnspan=2)
 
     def CompleteLaunching(self):
         self.acquisition_method = 'Complete'
@@ -103,6 +89,11 @@ class OPApp(ctk.CTk):
         
     def normalization_request(self):
         self.pop_up = ctk.CTkToplevel()
+        width=350
+        height=100
+        x = (self.monitor_sz.width/2) - (width/2)
+        y = (self.monitor_sz.height/2) - (height/2)
+        self.pop_up.geometry('%dx%d+%d+%d' % (width, height, x, y))
         self.pop_up.attributes('-topmost', 1)
         self.pop_upText = ctk.CTkLabel(self.pop_up, text = self.normalization_request_pop_upText, width=200,
                                height=25, corner_radius=10, wraplength=200, font=('Helvetica', 18, 'bold'))
@@ -116,10 +107,10 @@ class OPApp(ctk.CTk):
         self.normalizationHelp_button.grid(row=0, column = 2, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="")
     def normalisation_specifications(self):
         print(self.GuiMode_choice.get())
-        
         self.pop_upText.configure(text = self.normalisation_specifications_pop_upText)
         self.normalize_yesButton.configure(text = self.normalisation_specifications_normalize_yesButton, command = self.activate_normalisation)
         self.normalize_noButton.configure(text = self.normalisation_specifications_normalize_noButton, command = lambda:self.pop_up.destroy())
+    
     def deactivate_normalization(self):
         self.isNormalized = False
         self.launch_GUI()
@@ -132,26 +123,22 @@ class OPApp(ctk.CTk):
     def activate_normalisation(self):
         self.isNormalized = True
         self.launch_GUI()
-        # self.destroy()
-        # if self.acquisition_method=='Complete':
-        #     os.system("python ../src/getReference.py")
-        #     os.system("python ONEPIX_app.py")
-        # else:
-        #     os.system("python ../src/getReference.py")
-        #     os.system("python addressed_APP.py")
+
     def open_Gui_help(self):
         self.guiHelp_top = ctk.CTkToplevel()
         self.guiHelp_top.attributes('-topmost', 1)
+        width=425
+        height=425
+        x = (self.monitor_sz.width/2) - (width/2)
+        y = (self.monitor_sz.height/2) - (height/2)
+        self.guiHelp_top.geometry('%dx%d+%d+%d' % (width, height, x, y))
         self.guiHelp_frame = ctk.CTkScrollableFrame(self.guiHelp_top, width = 400, height = 400)
         self.guiHelp_frame.grid(row = 0, column=0)
-
-        
-        
+    
         self.acquisitionHelp_title = ctk.CTkLabel(self.guiHelp_frame, text = self.acquisitionHelp_title_text, font=('Helvetica', 18, 'bold'))
         self.acquisitionHelp_title.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='')
         self.acquisitionHelp = ctk.CTkLabel(self.guiHelp_frame, text = self.acquisitionHelp_text, wraplength = 395, justify = 'left')
         self.acquisitionHelp.grid(row=1, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        
         
         self.modeHelp_title = ctk.CTkLabel(self.guiHelp_frame, text = self.modeHelp_title_text, font=('Helvetica', 18, 'bold'))
         self.modeHelp_title.grid(row=2, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='')
@@ -201,7 +188,7 @@ class OPApp(ctk.CTk):
         self.normalizationHelp.grid(row=1, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='')
     
     def close_window(self):
-        plt.close('all')
+        #plt.close('all')
         self.quit()
         self.destroy()
         

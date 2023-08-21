@@ -128,7 +128,7 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
         tick=np.arange(n)+1
         # Select pixel(s)
         p=fig.ginput(n)
-        p=np.round(p).astype(np.int)
+        p=np.round(p).astype(np.int32)
         # Display results
         plt.plot(p[:,0],p[:,1],'x',color='red')
         for i, txt in enumerate(tick):
@@ -147,7 +147,7 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
     elif mode=='mean':
         # Select 2 corner pixels of rectangle area
         p=plt.ginput(2)
-        p=np.round(p).astype(np.int)
+        p=np.round(p).astype(np.int32)
         spec=datacube[p[0,1]:p[1,1],p[0,0]:p[1,0],:] # 2D spatial mean of the selected area
         
         # Display results

@@ -1,14 +1,40 @@
 import sys
+import os
+import inspect
 import ctypes
 import struct
-# from PyQt5.QtCore import *
-from enum import Enum
-import os
-# import debugpy
-if os.getcwd()[-12:]=='ONE-PIX_soft':
-    path='./src/DLL/'
-else:
-    path = '../src/DLL/'
+#from PyQt5.QtCore import *
+
+AVS_SERIAL_LEN = 10
+VERSION_LEN = 16
+DETECTOR_NAME_LEN = 20
+USER_ID_LEN = 64
+INVALID_AVS_HANDLE_VALUE = 1000
+ERR_ETHCONN_REUSE = -27
+SENS_HAMS9201 = 4
+SENS_TCD1304 = 5
+SENS_SU256LSB = 17
+SENS_SU512LDB = 18
+SENS_HAMS11639 = 22
+SENS_HAMG9208_512 = 24
+SENS_HAMS13496 = 26
+SENS_HAMS11155_2048_02_DIFF = 30
+SENSOR_OFFSET = 1
+NUMBER_OF_SENSOR_TYPES = 31
+NR_DEFECTIVE_PIXELS = 30
+MAX_NR_PIXELS = 4096
+CLIENT_ID_SIZE = 32
+
+DSTR_STATUS_DSS_MASK = 0x01   # DSTR Sequence Stop (DSS) bit of MEASUREMENT_DSTR_STATUS->DMS
+DSTR_STATUS_FOE_MASK = 0x02   # FIFO Overflow Error (FOE) bit of MEASUREMENT_DSTR_STATUS->DMS
+DSTR_STATUS_IERR_MASK = 0x04  # Internal Error (IERR) bit of MEASUREMENT_DSTR_STATUS->DMS
+root=os.getcwd().split('/')
+idx=root.index('ONE-PIX_soft')
+path=''
+for k in range(idx+1):
+    if root[k]!='':
+        path+=f"/{root[k]}"
+path+='/src/DLL/'
     
 if 'linux' in sys.platform: # Linux will have 'linux' or 'linux2'
     # this is the DLL for ubuntu
@@ -30,16 +56,38 @@ else: # Windows will have 'win32' or 'cygwin'
         WM_MEAS_READY = 0x0401
         lib = ctypes.WinDLL(path + "avaspec.dll")
         func = ctypes.WINFUNCTYPE
-
-AVS_SERIAL_LEN = 10
-VERSION_LEN = 16
-USER_ID_LEN = 64
+# if 'linux' in sys.platform: # Linux will have 'linux' or 'linux2'
+#     lib = ctypes.CDLL("/usr/local/lib/libavs.so.0")
+#     func = ctypes.CFUNCTYPE
+# elif 'darwin' in sys.platform: # macOS will have 'darwin'
+#     lib = ctypes.CDLL("/usr/local/lib/libavs.0.dylib")
+#     func = ctypes.CFUNCTYPE
+# else: # Windows will have 'win32' or 'cygwin'
+#     import ctypes.wintypes
+#     if (ctypes.sizeof(ctypes.c_voidp) == 8): # 64 bit
+#         WM_MEAS_READY = 0x8001
+#         lib = ctypes.WinDLL("./avaspecx64.dll")
+#         func = ctypes.WINFUNCTYPE
+#     else:
+#         WM_MEAS_READY = 0x0401
+#         lib = ctypes.WinDLL("./avaspec.dll")
+#         func = ctypes.WINFUNCTYPE
 
 class AvsIdentityType(ctypes.Structure):
   _pack_ = 1
   _fields_ = [("SerialNumber", ctypes.c_char * AVS_SERIAL_LEN),
               ("UserFriendlyName", ctypes.c_char * USER_ID_LEN),
               ("Status", ctypes.c_char)]
+
+class BroadcastAnswerType(ctypes.Structure):
+  _pack_ = 1
+  _fields_ = [("InterfaceType", ctypes.c_uint8),
+              ("serial", ctypes.c_char * AVS_SERIAL_LEN),
+              ("port", ctypes.c_uint16),
+              ("status", ctypes.c_uint8),
+              ("RemoteHostIp", ctypes.c_uint32),
+              ("LocalIp", ctypes.c_uint32),
+              ("reserved", ctypes.c_uint8 * 4)]
 
 class MeasConfigType(ctypes.Structure):
   _pack_ = 1
@@ -110,7 +158,7 @@ class DeviceConfigType(ctypes.Structure):
               ("m_StandAlone_m_Meas_m_Control_m_LaserWaveLength", ctypes.c_float),
               ("m_StandAlone_m_Meas_m_Control_m_StoreToRam", ctypes.c_uint16),
               ("m_StandAlone_m_Nmsr", ctypes.c_int16),
-              ("m_StandAlone_m_Reserved", ctypes.c_uint8 * 12), # SD Card, do not use
+              ("m_DynamicStorage", ctypes.c_uint8 * 12), # ex SD Card, do not use
               ("m_Temperature_1_m_aFit", ctypes.c_float * 5),
               ("m_Temperature_2_m_aFit", ctypes.c_float * 5),
               ("m_Temperature_3_m_aFit", ctypes.c_float * 5),
@@ -126,19 +174,22 @@ class DeviceConfigType(ctypes.Structure):
               ("m_EthernetSettings_m_Gateway", ctypes.c_uint32), 
               ("m_EthernetSettings_m_DhcpEnabled", ctypes.c_uint8), 
               ("m_EthernetSettings_m_TcpPort", ctypes.c_uint16),
-              ("m_EthernetSettings_m_LinkStatus", ctypes.c_uint8),  
-              ("m_Reserved", ctypes.c_uint8 * 9720),
+              ("m_EthernetSettings_m_LinkStatus", ctypes.c_uint8),
+              ("m_EthernetSettings_m_ClientIdType", ctypes.c_uint8),
+              ("m_EthernetSettings_m_ClientIdCustom", ctypes.c_char * 32),
+              ("m_EthernetSettings_m_Reserved", ctypes.c_uint8 * 79),
+              ("m_Reserved", ctypes.c_uint8 * 9608),
               ("m_OemData", ctypes.c_uint8 * 4096)]
 
-class DeviceStatus(Enum):
-    UNKNOWN = 0
-    USB_AVAILABLE = 1
-    USB_IN_USE_BY_APPLICATION = 2
-    USB_IN_USE_BY_OTHER = 3
-    ETH_AVAILABLE = 4
-    ETH_IN_USE_BY_APPLICATION = 5
-    ETH_IN_USE_BY_OTHER = 6
-    ETH_ALREADY_IN_USE_USB = 7              
+class DstrStatusType(ctypes.Structure):
+  _pack_ = 1
+  _fields_ = [("m_TotalScans", ctypes.c_uint32),
+              ("m_UsedScans", ctypes.c_uint32),
+              ("m_Flags", ctypes.c_uint32),
+              ("m_IsStopEvent", ctypes.c_uint8),
+              ("m_IsOverflowEvent", ctypes.c_uint8),
+              ("m_IsInternalErrorEvent", ctypes.c_uint8),
+              ("m_Reserved", ctypes.c_uint8)]
 
 def AVS_Init(a_Port = 0):
     """
@@ -160,12 +211,12 @@ def AVS_Done():
     """
     Closes the communication and releases internal storage.
     
-    :return: SUCCESS
+    :return: SUCCESS = 0
     """
     prototype = func(ctypes.c_int)
     AVS_Done = prototype(("AVS_Done",lib),)
     ret = AVS_Done()
-    return ret    
+    return ret  
 
 def AVS_GetNrOfDevices():
     """
@@ -192,22 +243,21 @@ def AVS_UpdateUSBDevices():
     ret = AVS_UpdateUSBDevices()
     return ret
 
-def AVS_UpdateETHDevices(listsize = 75):
+def AVS_UpdateETHDevices(spectrometers = 1):
     """
-    Internally checks the list of connected ETH devices and returns the number 
-    of devices attached. If AVS_Init() was called with a_Port=-1, the return 
-    value also includes the number of USB devices.
-    
-    :param listsize: Required size for list of returned devices. Default value 
-    is 75, the size of AvsIdentityType
-    :return: Tuple containing the required list size (position 0) and 
-    AvsIdentityType for each found device.
+    Returns a list containing info on all responding Ethernet spectrometers
+
+    :param spectrometers: number of spectrometers connected. function uses 
+    default value of 1, and automatically corrects.
+    :return: Tuple containing BroadcastAnswerType for each found device.
     """
-    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(AvsIdentityType))
-    paramflags = (1, "listsize",), (2, "requiredsize",), (2, "IDlist",),
-    AVS_UpdateETHDevices = prototype(("AVS_UpdateETHDevices", lib), paramflags)
-    ret = AVS_UpdateETHDevices(listsize)
-    return ret    
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(BroadcastAnswerType*spectrometers))
+    paramflags = (1, "listsize",), (2, "requiredsize",), (2, "ETHlist",),
+    PT_AVS_UpdateETHDevices = prototype(("AVS_UpdateETHDevices", lib), paramflags)
+    reqBufferSize, ETHlist = PT_AVS_UpdateETHDevices(spectrometers*26)
+    if reqBufferSize != spectrometers*26:
+        ETHlist = AVS_UpdateETHDevices(reqBufferSize//26)
+    return ETHlist   
 
 def AVS_GetList(spectrometers = 1):
     """
@@ -243,8 +293,7 @@ def AVS_GetHandleFromSerial(deviceSerial):
     if type(deviceSerial) is str:
         deviceSerial = deviceSerial.encode("utf-8")
     ret = AVS_Activate(deviceSerial)
-    return ret     
-
+    return ret 
 
 def AVS_Activate(deviceId):
     """
@@ -254,11 +303,37 @@ def AVS_Activate(deviceId):
     :type deviceId: AvsIdentityType
     :return: AvsHandle, handle to be used in subsequent function calls
     """
-    prototype = func(ctypes.c_int, ctypes.POINTER(AvsIdentityType))
+    datatype = ctypes.c_byte * 75
+    temp = datatype()
+    x = 0
+    while (x < 9): # 0 through 8
+        temp[x] = deviceId.SerialNumber[x]
+        x += 1
+    temp[9] = 0
+    x += 1    
+    while (x<74): # 10 through 73
+        temp[x] = 0
+        x += 1
+    temp[74] = int.from_bytes(deviceId.Status, byteorder='big')  #  cannot assign directly here
+    prototype = func(ctypes.c_int, ctypes.c_byte * 75)
     paramflags = (1, "deviceId",),
     AVS_Activate = prototype(("AVS_Activate", lib), paramflags)
-    ret = AVS_Activate(deviceId)
+    ret = AVS_Activate(temp)
     return ret
+
+def AVS_Deactivate(handle):
+    """
+    Deactivates spectrometer.
+    
+    :param handle: AvsHandle of the spectrometer
+    :return: True when device successfully closed, False when handle not found
+    """
+    prototype = func(ctypes.c_bool, ctypes.c_int)
+    prototype.restype = ctypes.c_bool
+    paramflags = (1, "handle",),
+    AVS_Deactivate = prototype(("AVS_Deactivate", lib), paramflags)
+    ret = AVS_Deactivate(handle)
+    return ret 
 
 def AVS_UseHighResAdc(handle, enable):
     """
@@ -267,6 +342,7 @@ def AVS_UseHighResAdc(handle, enable):
     :param handle: AvsHandle of the spectrometer
     :param enable: Boolean, True enables 16 bit resolution (65535 max value), 
     false uses 14 bit resolution (16383 max value)
+    :return: SUCCESS = 0 or FAILURE <> 0
     """
     prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_bool)
     paramflags = (1, "handle",), (1, "enable",),
@@ -274,57 +350,36 @@ def AVS_UseHighResAdc(handle, enable):
     ret = AVS_UseHighResAdc(handle, enable)
     return ret
 
-def AVS_GetVersionInfo(handle, FPGAversion, FWversion, DLLversion):
-
+def AVS_GetVersionInfo(handle):
+    """
+    Returns three version numbers of the used system. Note that the library does 
+    not check the size of the buffers allocated by the caller!
+    :param handle: AvsHandle returned by AVS_Activate or others
+    :return: tuple of the three requested versionstrings (FPGA, FW and Library), 
+    encoded in c_char
+    """       
     prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_char * VERSION_LEN, ctypes.c_char * VERSION_LEN, ctypes.c_char * VERSION_LEN)
     paramflags = (1, "handle",), (2, "FPGAversion",), (2, "FWversion",), (2, "DLLversion",),
-    AVS_GetVersionInfo =prototype(("AVS_GetVersionInfo", lib), paramflags) 
+    AVS_GetVersionInfo = prototype(("AVS_GetVersionInfo", lib), paramflags) 
     ret = AVS_GetVersionInfo(handle)
-    return ret
+    return ret    
 
 def AVS_PrepareMeasure(handle, measconf):
     """
     Prepares measurement on the spectrometer using the specificed configuration.
     :param handle: AvsHandle returned by AVS_Activate or others
     :param measconf: MeasConfigType containing measurement configuration.
+    :return: SUCCESS = 0 or FAILURE <> 0
     """    
-    datatype = ctypes.c_byte * 41
-    data = datatype()
-    temp = datatype()
-    temp = struct.pack("=HHfIIBBHBBBBBHIIfH", measconf.m_StartPixel,
-                                              measconf.m_StopPixel,
-                                              measconf.m_IntegrationTime,
-                                              measconf.m_IntegrationDelay,
-                                              measconf.m_NrAverages,
-                                              measconf.m_CorDynDark_m_Enable,
-                                              measconf.m_CorDynDark_m_ForgetPercentage,
-                                              measconf.m_Smoothing_m_SmoothPix,
-                                              measconf.m_Smoothing_m_SmoothModel,
-                                              measconf.m_SaturationDetection,
-                                              measconf.m_Trigger_m_Mode,
-                                              measconf.m_Trigger_m_Source,
-                                              measconf.m_Trigger_m_SourceType,
-                                              measconf.m_Control_m_StrobeControl,
-                                              measconf.m_Control_m_LaserDelay,
-                                              measconf.m_Control_m_LaserWidth,
-                                              measconf.m_Control_m_LaserWaveLength,
-                                              measconf.m_Control_m_StoreToRam )
-
-    # copy bytes from temp to data, otherwise you will get a typing error below
-    # why is this necessary?? they have the same type to start with ??
-    x = 0
-    while (x < 41): # 0 through 40
-        data[x] = temp[x]
-        x += 1
-    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_byte * 41)
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(MeasConfigType))
     paramflags = (1, "handle",), (1, "measconf",),  
     AVS_PrepareMeasure = prototype(("AVS_PrepareMeasure", lib), paramflags)
-    ret = AVS_PrepareMeasure(handle, data)
+    ret = AVS_PrepareMeasure(handle, measconf)
     return ret
 
 def AVS_Measure(handle, windowhandle, nummeas):
     """
-    Starts measurement on the spectrometer.
+    Starts measurement on the spectrometer, variant used for Windows messages or polling
     
     :param handle: AvsHandle of the spectrometer
     :param windowhandle: Window handle to notify application measurement result
@@ -334,6 +389,7 @@ def AVS_Measure(handle, windowhandle, nummeas):
     value. Use on Windows only, 0 to disable.
     :param nummeas: number of measurements to do. -1 is infinite, -2 is used to
     start Dynamic StoreToRam
+    :return: SUCCESS = 0 or FAILURE <> 0
     """
     if not (('linux' in sys.platform) or ('darwin' in sys.platform)):
         prototype = func(ctypes.c_int, ctypes.c_int, ctypes.wintypes.HWND, ctypes.c_uint16)
@@ -344,9 +400,69 @@ def AVS_Measure(handle, windowhandle, nummeas):
     ret = AVS_Measure(handle, windowhandle, nummeas) 
     return ret
 
+class AVS_MeasureCallbackFunc(object):
+    def __init__(self, function):
+        self.prototype = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
+        self.callback = self.prototype(function)    
 
+def AVS_MeasureCallback(handle, cb, nummeas):
+    """
+    Starts measurement on the spectrometer, variant used with callbacks
+    
+    :param handle: AvsHandle of the spectrometer
+    :param cb: address of the callback function that has to be defined in the user
+    program, and will be called by the library
+    :param nummeas: number of measurements to do. -1 is infinite, -2 is used to
+    start Dynamic StoreToRam
+    :return: SUCCESS = 0 or FAILURE <> 0
+    """    
+    prototype = func(ctypes.c_int, ctypes.c_int, cb.prototype, ctypes.c_uint16)
+    paramflags = (1, "handle",), (1, "adres",), (1, "nummeas"),
+    AVS_MeasureCallback = prototype(("AVS_MeasureCallback", lib), paramflags)
+    ret = AVS_MeasureCallback(handle, cb.callback, nummeas)
+    return ret
+
+class AVS_DstrCallbackFunc(object):
+    def __init__(self, function):
+        self.prototype = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_uint))
+        self.callback = self.prototype(function)
+
+def AVS_SetDstrStatusCallback(handle, cb):
+    """    
+    Sets the address of the callback function the library will call periodically when
+    using the DynamicStoreToRam feature
+    
+    :param handle: AvsHandle of the spectrometer
+    :param cb: address of the callback function that has to be defined in the user
+    program, and will be called by the library
+    :return: SUCCESS = 0 or FAILURE <> 0
+    """    
+    prototype = func(ctypes.c_int, ctypes.c_int, cb.prototype)
+    paramflags = (1, "handle",), (1, "adres",), 
+    AVS_SetDstrStatusCallback = prototype(("AVS_SetDstrStatusCallback", lib), paramflags)
+    ret = AVS_SetDstrStatusCallback(handle, cb.callback)
+    return ret
+
+def AVS_GetDstrStatus(handle):
+    """    
+    Get the status of the buffer used in the DynamicStoreToRam feature
+    
+    :param handle: AvsHandle of the spectrometer
+    :return: DstrStatusType
+    """      
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(DstrStatusType))
+    paramflags = (1, "handle",), (2, "dstrstatus",),
+    AVS_GetDstrStatus = prototype(("AVS_GetDstrStatus", lib), paramflags)
+    ret = AVS_GetDstrStatus(handle)
+    return ret
 
 def AVS_StopMeasure(handle):
+    """    
+    Stops a running measurement
+    
+    :param handle: AvsHandle of the spectrometer
+    :return: SUCCESS = 0 or FAILURE <> 0
+    """      
     prototype = func(ctypes.c_int, ctypes.c_int)
     paramflags = (1, "handle",),
     AVS_StopMeasure = prototype(("AVS_StopMeasure", lib), paramflags)
@@ -354,6 +470,12 @@ def AVS_StopMeasure(handle):
     return ret
 
 def AVS_PollScan(handle):
+    """    
+    Will show whether new measurement data are available
+    
+    :param handle: AvsHandle of the spectrometer
+    :return: 0 = no data available or 1 = data available
+    """  
     prototype = func(ctypes.c_bool, ctypes.c_int)
     paramflags = (1, "handle",),
     AVS_PollScan = prototype(("AVS_PollScan", lib), paramflags)
@@ -375,6 +497,20 @@ def AVS_GetScopeData(handle):
     AVS_GetScopeData = prototype(("AVS_GetScopeData", lib), paramflags)
     timestamp, spectrum = AVS_GetScopeData(handle)
     return timestamp, spectrum
+
+def AVS_GetSaturatedPixels(handle):
+    """
+    Returns the saturation values of the last performed measurement. Should be 
+    called after AVS_GetScopeData. 
+    
+    :param handle: the AvsHandle of the spectrometer
+    :return saturated: 4096 element array of bytes, 1 = saturated and 0 = not saturated
+    """
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_uint8 * 4096))    
+    paramflags = (1, "handle",), (2, "saturated",),
+    AVS_GetSaturatedPixels = prototype(("AVS_GetSaturatedPixels", lib), paramflags)
+    saturated = AVS_GetSaturatedPixels(handle)
+    return saturated 
 
 def AVS_GetLambda(handle):
     """
@@ -405,20 +541,79 @@ def AVS_GetNumPixels(handle):
     ret = AVS_GetNumPixels(handle)
     return ret    
 
+def AVS_GetDigIn(handle, portId):
+    """
+    Returns the status of the specified digital input.
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param portId: the identifier of the digital input 
+    :return: the value of the digital input, 0 = low and 1 = high
+    """    
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint8, ctypes.POINTER(ctypes.c_uint8))
+    paramflags = (1, "handle",), (1, "portId",), (2, "value",),
+    AVS_GetDigIn = prototype(("AVS_GetDigIn", lib), paramflags)
+    ret = AVS_GetDigIn(handle, portId) 
+    return ret
+
 def AVS_SetDigOut(handle, portId, value):
+    """
+    Sets the status of the specified digital output.
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param portId: the identifier of the digital output
+    :param value: the value of the digital output, 0 = low and 1 = high 
+    :return: SUCCESS = 0 or FAILURE <> 0 
+    """       
     prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint8, ctypes.c_uint8)
     paramflags = (1, "handle",), (1, "portId",), (1, "value",),
     AVS_SetDigOut = prototype(("AVS_SetDigOut", lib), paramflags)
     ret = AVS_SetDigOut(handle, portId, value)
     return ret
 
-def AVS_GetAnalogIn(handle, AnalogInId, AnalogIn):
+def AVS_SetPwmOut(handle, portId, frequency, dutycycle):
+    """
+    Selects the PWM functionality for the specified digital output.
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param portId: the identifier of the digital output
+    :param frequency: the desired PWM frequency (500 - 300000 Hz)
+    :param dutycycle: the percentage high time in one cycle (0-100)
+    :return: SUCCESS = 0 or FAILURE <> 0 
+    """       
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint8, ctypes.c_uint32, ctypes.c_uint8)
+    paramflags = (1, "handle",), (1, "portId",), (1, "frequency",), (1, "dutycycle",),
+    AVS_SetPwmOut = prototype(("AVS_SetPwmOut", lib), paramflags)
+    ret = AVS_SetPwmOut(handle, portId, frequency, dutycycle)
+    return ret    
+
+def AVS_GetAnalogIn(handle, portId):
+    """
+    Returns the status of the specified analog input.
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param portId: the identifier of the analog input 
+    :return: the value of the analog input, in Volts (or degrees Celsius)
+    """      
     prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint8, ctypes.POINTER(ctypes.c_float))
-    paramflags = (1, "handle",), (1, "AnalogInId",), (2, "AnalogIn",),
+    paramflags = (1, "handle",), (1, "portId",), (2, "value",),
     AVS_GetAnalogIn = prototype(("AVS_GetAnalogIn", lib), paramflags)
-    ret = AVS_GetAnalogIn(handle, AnalogInId)
+    ret = AVS_GetAnalogIn(handle, portId)
     return ret
 
+def AVS_SetAnalogOut(handle, portId, value):
+    """
+    Sets the analog output value for the specified analog output.
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param portId: the identifier of the analog output
+    :param value: the value of the analog output in Volts (0 - 5.0V) 
+    :return: SUCCESS = 0 or FAILURE <> 0 
+    """      
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint8, ctypes.c_float)
+    paramflags = (1, "handle",), (1, "portId",), (1, "value",),
+    AVS_SetAnalogOut = prototype(("AVS_SetAnalogOut", lib), paramflags)
+    ret = AVS_SetAnalogOut(handle, portId, value)
+    return ret
 
 def AVS_GetParameter(handle, size = 63484):
     """
@@ -426,7 +621,7 @@ def AVS_GetParameter(handle, size = 63484):
     
     :param handle: the AvsHandle of the spectrometer
     :param size: size in bytes allocated to store DeviceConfigType
-    :return: DeviceConfigType containing spectrometer configuration data
+    :return: DeviceConfigType structure containing spectrometer configuration data
     """
     prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint32, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(DeviceConfigType))
     paramflags = (1, "handle",), (1, "size",), (2, "reqsize",), (2, "deviceconfig",),
@@ -437,97 +632,34 @@ def AVS_GetParameter(handle, size = 63484):
     return ret[1]
 
 def AVS_SetParameter(handle, deviceconfig):
-    datatype = ctypes.c_byte * 63484
-    data = datatype()
-    temp = datatype()
-    temp = struct.pack("=HH64B" +
-                       "BH5f?8ddd2ff2ff30H" +      # Detector
-                       "HBf4096fBI" +              # Irradiance
-                       "HBf4096f" +                # Reflectance
-                       "4096f" +                   # SpectrumCorrect
-                       "?HHfIIBBHBBBBBHIIfHH12B" + # StandAlone 
-                       "5f5f5f" +                  # Temperature
-                       "?f2f" +                    # TecControl
-                       "2f2f10f10f " +             # ProcessControl
-                       "IIIBHB" +                  # EthernetSettings
-                       "9720B" +                   # Reserved
-                       "4096B",                    # OemData
-                       deviceconfig.m_Len,
-                       deviceconfig.m_ConfigVersion,
-                       deviceconfig.m_aUserFriendlyId,
-                       deviceconfig.m_Detector_m_SensorType,
-                       deviceconfig.m_Detector_m_NrPixels,
-                       deviceconfig.m_Detector_m_aFit,
-                       deviceconfig.m_Detector_m_NLEnable,
-                       deviceconfig.m_Detector_m_aNLCorrect,
-                       deviceconfig.m_Detector_m_aLowNLCounts,
-                       deviceconfig.m_Detector_m_aHighNLCounts,
-                       deviceconfig.m_Detector_m_Gain,
-                       deviceconfig.m_Detector_m_Reserved,
-                       deviceconfig.m_Detector_m_Offset,
-                       deviceconfig.m_Detector_m_ExtOffset,
-                       deviceconfig.m_Detector_m_DefectivePixels,
-                       deviceconfig.m_Irradiance_m_IntensityCalib_m_Smoothing_m_SmoothPix,
-                       deviceconfig.m_Irradiance_m_IntensityCalib_m_Smoothing_m_SmoothModel,
-                       deviceconfig.m_Irradiance_m_IntensityCalib_m_CalInttime,
-                       deviceconfig.m_Irradiance_m_IntensityCalib_m_aCalibConvers,
-                       deviceconfig.m_Irradiance_m_CalibrationType,
-                       deviceconfig.m_Irradiance_m_FiberDiameter,
-                       deviceconfig.m_Reflectance_m_Smoothing_m_SmoothPix,
-                       deviceconfig.m_Reflectance_m_Smoothing_m_SmoothModel,
-                       deviceconfig.m_Reflectance_m_CalInttime,
-                       deviceconfig.m_Reflectance_m_aCalibConvers,
-                       deviceconfig.m_SpectrumCorrect,
-                       deviceconfig.m_StandAlone_m_Enable,
-                       deviceconfig.m_StandAlone_m_Meas_m_StartPixel,
-                       deviceconfig.m_StandAlone_m_Meas_m_StopPixel,
-                       deviceconfig.m_StandAlone_m_Meas_m_IntegrationTime,
-                       deviceconfig.m_StandAlone_m_Meas_m_IntegrationDelay,
-                       deviceconfig.m_StandAlone_m_Meas_m_NrAverages,
-                       deviceconfig.m_StandAlone_m_Meas_m_CorDynDark_m_Enable, 
-                       deviceconfig.m_StandAlone_m_Meas_m_CorDynDark_m_ForgetPercentage,
-                       deviceconfig.m_StandAlone_m_Meas_m_Smoothing_m_SmoothPix,
-                       deviceconfig.m_StandAlone_m_Meas_m_Smoothing_m_SmoothModel,
-                       deviceconfig.m_StandAlone_m_Meas_m_SaturationDetection,
-                       deviceconfig.m_StandAlone_m_Meas_m_Trigger_m_Mode,
-                       deviceconfig.m_StandAlone_m_Meas_m_Trigger_m_Source,
-                       deviceconfig.m_StandAlone_m_Meas_m_Trigger_m_SourceType,
-                       deviceconfig.m_StandAlone_m_Meas_m_Control_m_StrobeControl,
-                       deviceconfig.m_StandAlone_m_Meas_m_Control_m_LaserDelay,
-                       deviceconfig.m_StandAlone_m_Meas_m_Control_m_LaserWidth,
-                       deviceconfig.m_StandAlone_m_Meas_m_Control_m_LaserWaveLength,
-                       deviceconfig.m_StandAlone_m_Meas_m_Control_m_StoreToRam,
-                       deviceconfig.m_StandAlone_m_Nmsr,
-                       deviceconfig.m_StandAlone_m_Reserved,
-                       deviceconfig.m_Temperature_1_m_aFit,
-                       deviceconfig.m_Temperature_2_m_aFit,
-                       deviceconfig.m_Temperature_3_m_aFit,
-                       deviceconfig.m_TecControl_m_Enable,
-                       deviceconfig.m_TecControl_m_Setpoint,
-                       deviceconfig.m_TecControl_m_aFit,
-                       deviceconfig.m_ProcessControl_m_AnalogLow,
-                       deviceconfig.m_ProcessControl_m_AnalogHigh,
-                       deviceconfig.m_ProcessControl_m_DigitalLow,
-                       deviceconfig.m_ProcessControl_m_DigitalHigh,
-                       deviceconfig.m_EthernetSettings_m_IpAddr,
-                       deviceconfig.m_EthernetSettings_m_NetMask,
-                       deviceconfig.m_EthernetSettings_m_Gateway,
-                       deviceconfig.m_EthernetSettings_m_DhcpEnabled,
-                       deviceconfig.m_EthernetSettings_m_TcpPort,
-                       deviceconfig.m_EthernetSettings_m_LinkStatus,
-                       deviceconfig.m_Reserved,
-                       deviceconfig.m_OemData)
-    x = 0
-    while (x < 63484): # 0 through 63483
-        data[x] = temp[x]
-        x += 1
-    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_byte * 63484)
+    """
+    Overwrites the device information of the spectrometer with the specified values.
+    The data is not checked. Use with care!
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param deviceconfig: the DeviceConfigType structure that will be sent to the spectrometer
+    :return: SUCCESS = 0 or FAILURE <> 0 
+    """   
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(DeviceConfigType))
     paramflags = (1, "handle",), (1, "deviceconfig",),  
     AVS_SetParameter = prototype(("AVS_SetParameter", lib), paramflags)
-    ret = AVS_SetParameter(handle, data)
+    ret = AVS_SetParameter(handle, deviceconfig)
     return ret
 
+def AVS_ResetParameter(handle):
+    """
+    Resets the device information of the spectrometer to the factory defaults.
+    This will result in the loss of all user changes made using AVS_SetParameter
     
+    :param handle: the AvsHandle of the spectrometer
+    :return: SUCCESS = 0 or FAILURE <> 0 
+    """       
+    prototype = func(ctypes.c_int, ctypes.c_int)
+    paramflags = (1, "handle",),
+    AVS_ResetParameter = prototype(("AVS_ResetParameter", lib), paramflags)
+    ret = AVS_ResetParameter(handle)
+    return ret 
+
 def AVS_SetSyncMode(handle, enable):
     """
     Disables/Enables support for synchronous measurement. Library takes care of 
@@ -537,10 +669,91 @@ def AVS_SetSyncMode(handle, enable):
     multiple spectrometers synchronized.
     
     :param handle: AvsHandle of the master device spectrometer.
-    :param enable: Boolean, 0 disables sync mode, 1 enables sync mode 
+    :param enable: Boolean, 0 disables sync mode, 1 enables sync mode
+    :return: SUCCESS = 0 or FAILURE <> 0 
     """
     prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_bool)
     paramflags = (1, "handle",), (1, "enable",),
     AVS_SetSyncMode = prototype(("AVS_SetSyncMode", lib), paramflags)
     ret = AVS_SetSyncMode(handle, enable)
     return ret
+
+def AVS_GetDeviceType(handle):
+    """
+    Returns the type of the spectrometer, defined by its PCB
+    
+    :param handle: the AvsHandle of the spectrometer
+    :return: integer value, 0=unknown, 1=AS5216, 2=ASMINI, 3=AS7010
+    """
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_byte))
+    paramflags = (1, "handle",), (2, "devicetype",),
+    AVS_GetDeviceType = prototype(("AVS_GetDeviceType",lib), paramflags)
+    ret = AVS_GetDeviceType(handle)
+    return ret 
+
+def AVS_GetDetectorName(handle, SensorType):
+    """
+    Returns the name of the detector inside the spectrometer.
+    
+    :param handle: the AvsHandle of the spectrometer
+    :param Sensortype: byte value that defines the detector type, part of the Device Configuration
+    :return: Detector name, encoded in c_char, a null terminated string
+    """
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_byte, ctypes.c_char * DETECTOR_NAME_LEN)
+    paramflags = (1, "handle",), (1, "SensorType",), (2, "SensorName",), 
+    AVS_GetDetectorName = prototype(("AVS_GetDetectorName", lib), paramflags) 
+    ret = AVS_GetDetectorName(handle, SensorType)
+    return ret 
+
+def AVS_SetSensitivityMode(handle, enable):
+    """
+    Selects between LowNoise and HighSensitivity mode for certain detectors.
+      
+    :param handle: AvsHandle of the spectrometer.
+    :param enable: unsigned integer, 0 sets LowNoise mode, 1 sets HighSensitivity mode 
+    """
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_uint32)
+    paramflags = (1, "handle",), (1, "enable",),
+    AVS_SetSensitivityMode = prototype(("AVS_SetSensitivityMode", lib), paramflags)
+    ret = AVS_SetSensitivityMode(handle, enable)
+    return ret
+
+def AVS_SetPrescanMode(handle, enable):
+    """
+    Selects between PreScan and ClearBuffer mode for the Toshiba 3648 detector.
+      
+    :param handle: AvsHandle of the spectrometer.
+    :param enable: boolean, 0 sets ClearBuffer mode, 1 sets PreScan mode (default mode)
+    """    
+    prototype = func(ctypes.c_int, ctypes.c_int, ctypes.c_bool)
+    paramflags = (1, "handle",), (1, "enable",),
+    AVS_SetPrescanMode = prototype(("AVS_SetPrescanMode", lib), paramflags)
+    ret = AVS_SetPrescanMode(handle, enable)
+    return ret
+
+def AVS_ResetDevice(handle):
+    """
+    Performs a hard reset on the given spectrometer.
+      
+    :param handle: AvsHandle of the spectrometer.
+    :return: SUCCESS = 0 or FAILURE <> 0
+    """     
+    prototype = func(ctypes.c_int, ctypes.c_int)
+    paramflags = (1, "handle",),
+    AVS_ResetDevice = prototype(("AVS_ResetDevice", lib), paramflags)
+    ret = AVS_ResetDevice(handle)
+    return ret
+
+def AVS_EnableLogging(enable):
+    """
+    Enables or disables writing debug information to a log file, called "avaspec.dll.log", located in your user directory.
+    Implemented for Windows only.
+    
+    :param enable: Boolean, True enables logging, False disables logging
+    :return: True = 1
+    """    
+    prototype = func(ctypes.c_int, ctypes.c_bool)
+    paramflags = (1, "enable",),
+    AVS_EnableLogging = prototype(("AVS_EnableLogging", lib), paramflags)
+    ret = AVS_EnableLogging(enable)    
+    return ret    

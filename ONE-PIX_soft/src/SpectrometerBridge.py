@@ -26,8 +26,7 @@ class SpectrometerBridge:
             self.idx_wl_lim=wl_lim
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + spectro_name + "\" implementation has not been found.")
-#         if not isinstance(self.decorator, AbstractBridge):
-#             raise Exception("Concrete bridge \"" + spectro_name + "\" must implement class bridges.AbstractBridge.")
+
  		# Misc
         self.DeviceName = ''
         self.integration_time_ms=integration_time_ms
