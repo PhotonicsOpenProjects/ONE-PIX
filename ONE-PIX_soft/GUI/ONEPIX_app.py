@@ -183,6 +183,7 @@ class OPApp(ctk.CTk):
         
         self.methods_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.methods_list)
         self.methods_optionemenu.grid(row=1, column=1)
+        self.methods_optionemenu.set('FourierSplit')
         
         self.spectro_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.spectro_list)
         self.spectro_optionemenu.grid(row=2, column=1)
