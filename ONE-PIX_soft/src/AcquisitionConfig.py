@@ -428,7 +428,7 @@ class OPConfig:
                 camera = PiCamera()
                 camera.resolution = (1024, 768)
                 camera.start_preview()
-                camera.shutter_speed=3*1176
+                camera.shutter_speed=7*1176
                 camera.vflip=True
                 camera.hflip=True
                 # Camera warm-up time
