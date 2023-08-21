@@ -242,7 +242,7 @@ class OPConfig:
         # Display each pattern from the sequence
         for pattern in self.pattern_lib.decorator.sequence:         
             cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
-            cv2.waitKey(42)
+            cv2.waitKey(self.periode_pattern)
             event.set()
             time.sleep(1e-6)
             while event.is_set():

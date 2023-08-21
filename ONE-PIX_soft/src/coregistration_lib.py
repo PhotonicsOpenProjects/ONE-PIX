@@ -11,12 +11,15 @@ import json
 import os
 from tkinter.messagebox import showinfo
 import screeninfo
+import sys
 print('coregistration_path', os.path.abspath(os.curdir))
 screenWidth = screeninfo.get_monitors()[0].width
 try:
     proj_shape=screeninfo.get_monitors()[1]
 except IndexError:
     showinfo(title=None,message='Please use a projector to use ONE-PIX')
+    sys.exit()
+
 #%% Get and handle camera pictures       
 def get_picture(tag,save_path='./'):
     camera = PiCamera()

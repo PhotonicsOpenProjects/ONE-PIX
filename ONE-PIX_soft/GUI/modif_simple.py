@@ -7,7 +7,7 @@ Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
-from tkinter.messagebox import showwarning,showinfo
+from tkinter.messagebox import showwarning
 
 from functools import partial
 import PIL.Image, PIL.ImageTk
@@ -15,7 +15,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.cm as CM
-import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
@@ -36,7 +35,6 @@ sys.path.insert(0, os.path.abspath('../'))
 from src.AcquisitionConfig import *
 from src.DatacubeReconstructions import *
 import src.datacube_analyse as hsa
-from scipy.linalg import hadamard
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -46,9 +44,7 @@ import tifffile as tiff
 import cv2
 from scipy import interpolate
 import json
-from decimal import Decimal
 import customtkinter as ctk
-from skimage.measure import shannon_entropy as entropy
 import threading
 import screeninfo
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
@@ -75,10 +71,8 @@ class OPApp(ctk.CTk):
         self.title(f"ONEPIX GUI {VERSION}")
         x = (self.monitor_sz.width//2) - (window_width//2)-100
         y = (self.monitor_sz.height//2) - (window_height//2)-100
+        if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
-        icon_path= './ONE-PIX_logo.ico' if os_name=='Windows' else './ONE-PIX_logo.xbm'
-   
-#         self.after(201, lambda :self.iconbitmap(icon_path))
         
         # create tabviews
         self.tabview = ctk.CTkTabview(self, width=window_width,height=window_height)

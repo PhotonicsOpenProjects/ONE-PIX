@@ -62,6 +62,7 @@ class OPApp(ctk.CTk):
         self.title(f"ONEPIX GUI")
         x = (self.monitor_sz.width -window_width)//2-100
         y = (self.monitor_sz.height-window_height)//2-100
+        if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
         
         self.fig_vis = Figure(figsize=(8.1,3.45), dpi=100)

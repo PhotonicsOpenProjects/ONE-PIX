@@ -76,8 +76,9 @@ class OPApp(ctk.CTk):
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI {VERSION}")
-        x = (self.monitor_sz.width -window_width)//2
-        y = (self.monitor_sz.height-window_height)//2
+        x = (self.monitor_sz.width -window_width)//2-100
+        y = (self.monitor_sz.height-window_height)//2-100
+        if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
         icon_path= './logo_ONE-PIX.png' if os_name=='Windows' else './ONE-PIX_logo.xbm'
         icon_path=ImageTk.PhotoImage(file=icon_path)
