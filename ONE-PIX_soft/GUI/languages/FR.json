@@ -14,10 +14,10 @@
 				"title":"Param\u00e8tres d'acquisition",
 				"label_integration_time":" Temps d'int\u00e9gration (ms)",
 				"label_img_res":" R\u00e9solution de l'image (pixels)",
-				"label_pattern_duration":" Dur\u00e9e des projection (ms)",
+				"label_pattern_duration":" Dur\u00e9e des projections (ms)",
 				"button_co":"Connecter le specrom\u00e8tre",
 				"button_acquire_hyp":"Acqu\u00e9rir l'hypercube",
-				"switch_spectro":"Pas de spectrom\u00e8tre connect\u00e9"
+				"switch_spectro":"Connecter le spectrom\u00e8tre"
 				},
 			"block 3":{
 				"title":"Affichage:",
@@ -26,7 +26,7 @@
 				},
 			"block 4":{
 				"appearance_mode_label":"Apparence :",
-				"appearance_mode_optionemenu":["Sombre", "Claire"]
+				"appearance_mode_optionemenu":["Sombre", "Clair"]
 				},
 			"block 5":{
 				"est_time_label":"Fin estim\u00e9e : "
@@ -51,7 +51,7 @@
 				"draw_spectrum":{
 					"title":"Spectres acquis",
 					"xlabel":"Longueurs d'onde (nm)",
-					"ylabel":"Intensit\u00e9 (C.N.)",
+					"ylabel":"Intensit\u00e9 (U.A.)",
 					"warning":["Attention","Connecter un spectrom\u00e8tre d'abord"]
 					}
 				}			
@@ -94,9 +94,9 @@
 				"rgb_display":{
 					"clustered":"Image clusteris\u00e9e ",
 					"raw":"Image RVG reconstruite ",
-					"smooth":"Image RVG reconstruite (liss\u00e9es)",
-					"trim":"Image RVG reconstruite (rognage speral)",
-					"norm":"Image RVG reconstruite (r\u00e9flectance)"
+					"smooth":"Image RVB reconstruite (liss\u00e9es)",
+					"trim":"Image RVB reconstruite (rognage speral)",
+					"norm":"Image RVB reconstruite (r\u00e9flectance)"
 					},
 				"flux2ref":{
 					"title":"S\u00e9lectionner une surface de r\u00e9f\u00e9rence pour normaliser l'hypercube"
@@ -105,7 +105,7 @@
 					"label_radio_group":"Choisir les donn\u00e9es à sauvegarder : ",
 					"data_choice":["Toutes","Donn\u00e9es brutes"],
 					"save_desc":"Choisir un chemin : ",
-					"explore_bouton":"Parcourie",
+					"explore_bouton":"Parcourir",
 					"CANCEL_save_bouton":"Annuler",
 					"confirm_bouton":"Confirmer"
 					},
@@ -260,7 +260,7 @@
 
 		"acquisition":{
 			"title":"Informations sur l'acquisition",
-			"corpse":"  Il y a actuellement deux m\u00e9thodes pour acqu\u00e9rir des images avec le ONE-PIX : l'acquisition compl\u00e8te et l'acquisition adress\u00e9e.\n\n  ACQUISITION COMPL\u00e8TE : ce mode mesure les r\u00e9ponses à des motifs \u00e9l\u00e9mentaires d'une base compl\u00e8te sp\u00e9cifique pour reconstruire un hypercube de donn\u00e9es (une image dont chaque pixel est un spectre). Par exemple, des motifs de Fourier peuvent \u00eatre utilis\u00e9s, de telle sorte qu'une simple FFT (Transform\u00e9e de Fourier rapide) puisse reconstruire l'aspect spatial de la sc\u00e8ne.\n\n  ACQUISITION ADRESS\u00e9E : cette m\u00e9thode utilise la cam\u00e9ra RVB du ONE-PIX pour trouver des r\u00e9gions d'int\u00e9r\u00eat afin que le projecteur les illumine une à une tandis que le spectrom\u00e8tre enregistre leur spectre. La segmentation qui sert à isoler les r\u00e9gions d'int\u00e9r\u00eats peut \u00eatre r\u00e9alis\u00e9e manuellement ou semi-automatiquement par la m\u00e9thode des k-means."},
+			"corpse":"  Deux m\u00e9thodes sont disponibles pour acqu\u00e9rir des images avec le kit ONE-PIX : l'acquisition compl\u00e8te et l'acquisition adress\u00e9e.\n\n  ACQUISITION COMPL\u00e8TE : ce mode mesure les r\u00e9ponses à des motifs \u00e9l\u00e9mentaires d'une base compl\u00e8te sp\u00e9cifique pour reconstruire un hypercube de donn\u00e9es (une image dont chaque pixel est un spectre). Par exemple, des motifs de Fourier peuvent \u00eatre utilis\u00e9s, de telle sorte qu'une simple FFT (Transform\u00e9e de Fourier rapide) puisse reconstruire l'aspect spatial de la sc\u00e8ne.\n\n  ACQUISITION ADRESS\u00e9E : cette m\u00e9thode utilise la cam\u00e9ra RVB du ONE-PIX pour trouver des r\u00e9gions d'int\u00e9r\u00eat afin que le projecteur les illumine une à une tandis que le spectrom\u00e8tre enregistre leur spectre. La segmentation qui sert à isoler les r\u00e9gions d'int\u00e9r\u00eats peut \u00eatre r\u00e9alis\u00e9e manuellement ou semi-automatiquement par la m\u00e9thode des k-means."},
 		"normalization":{
 			"title":"Informations sur la normalisation",
 			"corpse":"  Le processus de normalisation est là pour corriger à la fois le vignettage du syst\u00e8me et les d\u00e9pendances l'impact de la source sur les donn\u00e9es pour g\u00e9n\u00e9rer des r\u00e9flectances vraies. Puisque la majorit\u00e9 du vignettage est dûe à la collection de la fibre, il est n\u00e9cessaire d'effectuer une acquisition compl\u00e8te de la surface de r\u00e9f\u00e9rence pour que le vignettage soit mod\u00e9lis\u00e9 et corrig\u00e9. Une telle r\u00e9f\u00e9rence doit \u00eatre spectralement homog\u00e8ne, lambertienne et doit avoir une BRDF calibr\u00e9e.\nSi vous souhaitez normaliser vos donn\u00e9es, veuillez :\n  - placer une r\u00e9f\u00e9rence dans le champ du projecteur\n  - appuyer sur <FAIT>\n  - patientez jusqu'à l'ouverture de l'interface utilisateur."
