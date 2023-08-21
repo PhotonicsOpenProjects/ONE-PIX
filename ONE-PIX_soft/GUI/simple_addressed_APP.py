@@ -254,7 +254,7 @@ class OPApp(ctk.CTk):
             GUI_conf = json.load(f)
             f.close()
         
-        GUI_conf["pattern_method"] = "Adressing"
+        GUI_conf["pattern_method"] = "Addressing"
         
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f)
