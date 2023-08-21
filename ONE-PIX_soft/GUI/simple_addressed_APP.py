@@ -6,16 +6,19 @@ Created on Wed Jul 19 18:32:47 2023
 
 import customtkinter as ctk
 from tkinter import filedialog
-from tkinter.messagebox import showwarning
-
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+import sys
+import os
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import json
 import screeninfo
-import os
+import PIL.ImageTk
+
+sys.path.insert(0, os.path.abspath('../'))
+from src.AcquisitionConfig import is_raspberrypi
 
 window_height = 575
 window_width = 825
@@ -67,7 +70,7 @@ class OPApp(ctk.CTk):
         if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
         icon_path= './logo_ONE-PIX.png' 
-        icon_path=ImageTk.PhotoImage(file=icon_path)
+        icon_path=PIL.ImageTk.PhotoImage(file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
 

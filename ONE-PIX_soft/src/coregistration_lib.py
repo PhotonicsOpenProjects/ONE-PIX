@@ -18,7 +18,8 @@ try:
     proj_shape=screeninfo.get_monitors()[1]
 except IndexError:
     showinfo(title=None,message='Please use a projector to use ONE-PIX')
-    sys.exit()
+    proj_shape=screeninfo.get_monitors()[0]
+    #sys.exit()
 
 #%% Get and handle camera pictures       
 def get_picture(tag,save_path='./'):
@@ -251,6 +252,11 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     Function allow to calibrate teh coregistration between video projector and the PI camera
     
     """
+    try:
+        proj_shape=screeninfo.get_monitors()[1]
+    except IndexError:
+        showinfo(title=None,message='Please use a projector to use ONE-PIX')
+        sys.exit()
     json_path='../acquisition_param_ONEPIX.json'
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)

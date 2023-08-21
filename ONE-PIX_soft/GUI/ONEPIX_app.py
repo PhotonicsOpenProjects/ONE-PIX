@@ -7,9 +7,7 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
-from tkinter.messagebox import showwarning,showinfo
-from PIL import ImageTk
-
+from tkinter.messagebox import showwarning
 from functools import partial
 import PIL.Image, PIL.ImageTk
 import matplotlib
@@ -17,7 +15,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.cm as CM
 import matplotlib.patches as patches
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
 rcParams.update({'figure.autolayout': True})
@@ -81,7 +79,7 @@ class OPApp(ctk.CTk):
         if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
         icon_path= './logo_ONE-PIX.png' 
-        icon_path=ImageTk.PhotoImage(file=icon_path)
+        icon_path=PIL.ImageTk.PhotoImage(file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
 

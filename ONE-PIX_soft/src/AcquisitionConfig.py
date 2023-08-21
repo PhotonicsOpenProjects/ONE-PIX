@@ -6,6 +6,7 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 import cv2
 import io
 import os
+import sys
 import json
 import time
 import threading
@@ -41,7 +42,7 @@ try:
     proj_shape=screeninfo.get_monitors()[1]
 except IndexError:
     print('Please use a projector to use ONE-PIX')
-    
+    #sys.exit()
 
 class OPConfig:
     """ 

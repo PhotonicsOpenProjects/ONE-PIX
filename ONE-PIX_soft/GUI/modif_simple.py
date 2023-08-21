@@ -74,7 +74,7 @@ class OPApp(ctk.CTk):
         if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
         icon_path= './logo_ONE-PIX.png' 
-        icon_path=ImageTk.PhotoImage(file=icon_path)
+        icon_path=PIL.ImageTk.PhotoImage(file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
 
@@ -123,7 +123,7 @@ class OPApp(ctk.CTk):
         self.acq_mode_frame = ctk.CTkFrame(self.acquisition_tab)
         self.acq_mode_frame.grid(row=0, column=0,rowspan=1, padx=(10, 10), pady=(20, 0), sticky="nsew")
         self.label_acq_mode = ctk.CTkLabel(master=self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["title"], font=ctk.CTkFont(size=16, weight="bold"))
-        self.label_acq_mode.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
+        self.label_acq_mode.grid(row=0, column=0, columnspan=1, padx=10, pady=10)
         
         self.entry_img_res = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_img_res.insert(0,str(self.acq_config.spatial_res))
@@ -142,6 +142,7 @@ class OPApp(ctk.CTk):
         
         self.methods_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.methods_list)
         self.methods_optionemenu.grid(row=1, column=1, padx=(2.5,2.5), pady=(2.5,2.5))
+        self.methods_optionemenu.set('FourierSplit')
                 
         self.switch_spectro = ctk.CTkSwitch(master=self.acq_mode_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["switch_spectro"],
                                             text_color='red',command=self.switch_spectro_command)
