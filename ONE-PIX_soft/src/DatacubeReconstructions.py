@@ -126,28 +126,7 @@ def load_hypercube(opt=None):
     res['pattern_method']=get_header_data(info_filename)['pattern_method']
     return res
 
-def load_analysed_data():
-    """
-    This function allows to reload already reconstructed data cubes.
 
-    Returns
-    -------
-    data_cube : array of floats
-        3D array of spectra constituting an image data cube.
-    wavelengths : array of floats
-         wavelengths sampled by the spectrometer.
-
-    """
-    chemin_script = os.getcwd()
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', 1)
-    chemin_mesure = filedialog.askopenfilename(title = "Select the file containing the analsed data", initialdir = chemin_script)
-    #os.chdir(chemin_mesure)
-    data=np.load(chemin_mesure,allow_pickle=True)
-    data_cube=data.item().get('data_cube')
-    wavelengths=data.item().get('wavelengths')
-    return data_cube,wavelengths
 
     
 def snr_filt(self,spectre_desplit,noise_level=500):

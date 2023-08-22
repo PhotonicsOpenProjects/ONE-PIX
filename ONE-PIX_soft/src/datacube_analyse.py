@@ -269,7 +269,7 @@ def clustering(datacube,components,n_cluster):
     pca = PCA(components) 
     principalComponents = pca.fit_transform(image_reshape)
     
-    kmeans = KMeans(n_cluster,random_state=0).fit(principalComponents)
+    kmeans = KMeans(n_cluster,n_init='auto',random_state=0).fit(principalComponents)
     image_seg=np.reshape(kmeans.labels_,(np.size(datacube,0),np.size(datacube,1))) 
     
     return image_seg  

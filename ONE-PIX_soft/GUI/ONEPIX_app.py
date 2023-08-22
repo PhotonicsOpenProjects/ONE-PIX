@@ -1125,10 +1125,10 @@ class OPApp(ctk.CTk):
             self.label_radio_group = ctk.CTkLabel(master=self.d, text="Select data to be saved:")
             self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="w")
             
-            self.data_choice = ctk.CTkComboBox(self.d, variable = ("All", "Raw data"),
-                                        values = [self.res["current_data_level"],"All"],
+            self.data_choice = ctk.CTkComboBox(self.d, 
+                                        values = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["save_analysis_opt"]["data_choice"],
                                         state = "readonly")
-            self.data_choice.set(self.res["current_data_level"]) #index de l'élément sélectionné
+            self.data_choice.set(self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["save_analysis_opt"]["data_choice"][0]) #index de l'élément sélectionné
             self.data_choice.grid(column=1, row=0, padx=10, pady=10, rowspan =1, columnspan=2)
                     
             self.save_desc = ctk.CTkLabel(self.d, text = "Select save path :",text_color='red')
@@ -1155,23 +1155,22 @@ class OPApp(ctk.CTk):
             # self.analysis_save_format = self.format_choice.get()
     
     def save_analysis_data(self):
-            today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
+            today = datetime.datetime.now().strftime('%d_%m_%Y_%H-%M-%S')
             data_list=list(self.res.keys())
             data_list.remove('wavelengths')
             data_list.remove('current_data_level')
-            path=self.analysis_save_path+'/'+today
+            path=self.analysis_save_path+'/'+'ONE-PIX_analysis_'+today
             os.mkdir(path)
             choice_list=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["save_analysis_opt"]["data_choice"]
             try:
                 wl=self.res["wavelengths_clipped"]
             except KeyError:
                 wl=self.res["wavelengths"]
-                
             if choice_list.index(self.data_choice.get())==0: # if data_choice == 'All'
                 for datacube in data_list:
                     if datacube in ['rgb_image','image_seg']:
                         plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
-                    elif datacube in ['wavelengths','current_data_level','spectra']:
+                    elif datacube in ['wavelengths','current_data_level','spectra','infos','pattern_method']:
                         pass
                     elif datacube=='hyperspectral_image':
                         py2envi(datacube,self.res[datacube],self.res["wavelengths"],path)
@@ -1280,7 +1279,7 @@ class OPApp(ctk.CTk):
         
 
     def save_data(self):
-        today = datetime.datetime.now().strftime('%d_%m_%Y_%H:%M:%S')
+        today = datetime.datetime.now().strftime('%d_%m_%Y_%H-%M-%S')
         self.save_confirm.configure(state = "disabled")
         self.WIP.configure(text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["functions"]["WIP"]["WIP_saving"])
         foldername='ONE-PIX_VI_'+self.IM["folder_name"]
