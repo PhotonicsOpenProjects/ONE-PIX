@@ -196,7 +196,6 @@ class OPApp(ctk.CTk):
         self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["button_acquire_hyp"],state='disabled',height=40,command=self.thread_acquire_hyp)
         self.button_acquire_hyp.grid(row=4, column=1)
         self.process=0
-        self.process_alive=False
         # =====================================================================
         #         block 3
         # =====================================================================

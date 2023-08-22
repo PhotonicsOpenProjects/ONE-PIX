@@ -17,7 +17,7 @@
 				"label_pattern_duration":" Dur\u00e9e des projections (ms)",
 				"button_co":"Connecter le specrom\u00e8tre",
 				"button_acquire_hyp":"Acqu\u00e9rir l'hypercube",
-				"switch_spectro":"Connecter le spectrom\u00e8tre"
+				"switch_spectro":"Spectrom\u00e8tre d\u00e9connect\u00e9       "
 				},
 			"block 3":{
 				"title":"Affichage:",

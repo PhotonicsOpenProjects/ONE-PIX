@@ -29,13 +29,15 @@ DSTR_STATUS_DSS_MASK = 0x01   # DSTR Sequence Stop (DSS) bit of MEASUREMENT_DSTR
 DSTR_STATUS_FOE_MASK = 0x02   # FIFO Overflow Error (FOE) bit of MEASUREMENT_DSTR_STATUS->DMS
 DSTR_STATUS_IERR_MASK = 0x04  # Internal Error (IERR) bit of MEASUREMENT_DSTR_STATUS->DMS
 root=os.getcwd().split('/')
+if 'win' in sys.platform: root=os.getcwd().split('\\')
 idx=root.index('ONE-PIX_soft')
 path=''
+
 for k in range(idx+1):
     if root[k]!='':
         path+=f"/{root[k]}"
-path+='/src/DLL/'
-    
+path=os.path.abspath(path+'/src/DLL/')
+if 'win' in sys.platform:path=path[3:]+'\\'
 if 'linux' in sys.platform: # Linux will have 'linux' or 'linux2'
     # this is the DLL for ubuntu
     #lib = ctypes.CDLL("/home/mark/field_kit/DLL/libavs.so.0.9.9")

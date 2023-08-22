@@ -17,7 +17,7 @@
 				"label_pattern_duration":"Patterns duration (ms)",
 				"button_co":"Spectrometer connection",
 				"button_acquire_hyp":"Acquire hypercube",
-				"switch_spectro":"No spectrometer connected"
+				"switch_spectro":"Spectrometer disconnected"
 				},
 			"block 3":{
 				"title":"Display:",
