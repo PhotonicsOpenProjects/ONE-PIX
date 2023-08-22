@@ -141,7 +141,7 @@ class OPApp(ctk.CTk):
         self.spectro_list.remove('Abstract')
         
         self.methods_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.methods_list)
-        self.methods_optionemenu.grid(row=1, column=1, padx=(2.5,2.5), pady=(2.5,2.5))
+        self.methods_optionemenu.grid(row=2, column=1, padx=(2.5,2.5), pady=(2.5,2.5))
         self.methods_optionemenu.set('FourierSplit')
                 
         self.switch_spectro = ctk.CTkSwitch(master=self.acq_mode_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["switch_spectro"],
@@ -150,7 +150,7 @@ class OPApp(ctk.CTk):
         self.switch_spectro.grid(row=0,column=1, padx=(2.5,2.5), pady=(2.5,2.5))
         
         self.button_co = ctk.CTkButton(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["button_co"],state='normal',height=40,command=self.spec_connection)
-        self.button_co.grid(row=2, column=1, columnspan = 1, rowspan = 2)
+        self.button_co.grid(row=3, column=1,sticky='n')
         
         self.button_acquire_hyp = ctk.CTkButton(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["button_acquire_hyp"],
                                                 state='disabled',height=40,command=self.thread_acquire_hyp)
