@@ -296,10 +296,11 @@ class OPConfig:
         self.wavelengths = self.spec_lib.get_wavelengths()
         self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float64)
         # Initialise cv2 display on the second monitor 
-        cv2.namedWindow('ImageWindow', cv2.WND_PROP_FULLSCREEN)
+        cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
         cv2.moveWindow('ImageWindow', screenWidth, 0)
         cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
-
+        cv2.imshow('ImageWindow',cv2.resize(self.pattern_lib.decorator.sequence[0],(self.width,self.height),interpolation=self.interp_method))
+        cv2.waitKey(1000)          
        
         
     def thread_acquisition(self, path=None, time_warning=True):
