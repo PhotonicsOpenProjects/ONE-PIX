@@ -1,4 +1,14 @@
 <p align="center">
+<img src="imgs/savethedate_img.png" alt="logos" width="1080"/>
+</p>
+
+# Free webinar inscription [HERE](https://forms.office.com/e/0shLt2vXGZ) #
+
+
+
+
+
+<p align="center">
 <img src="imgs/logos.png" alt="logos" width="500"/>
 </p>
 
