@@ -45,7 +45,7 @@
 					"warning":["Spectrometer error"," is not available"]
 					},
 				"spec_disconnection":{
-					"switch_spectro":"No spectrometer connected ",
+					"switch_spectro":"Spectrometer disconnected",
 					"button_co":"Spectrometer connection"
 					},
 				"draw_spectrum":{
