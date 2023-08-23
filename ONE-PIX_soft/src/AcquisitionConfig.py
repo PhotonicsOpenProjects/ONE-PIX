@@ -325,30 +325,31 @@ class OPConfig:
     
         """
         est_duration=round((self.pattern_lib.nb_patterns*(self.periode_pattern+self.rep*(self.integration_time_ms+2))+2)/(60*1000),2)
+        ans='no'
         if time_warning :
             ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
-            if ans=='yes':
-                begin_acq = time.time()
-                self.init_display()
-                #Threads initialisation
-                event=threading.Event()
-                patterns_thread = threading.Thread(target=self.display_sequence,args=(event,))
-                spectrometer_thread = threading.Thread(target=self.spectrometer_acquisition,args=(event,))
-                # Start both display and measure threads
-                patterns_thread.start()
-                spectrometer_thread.start()
-                patterns_thread.join()
-                spectrometer_thread.join()
+        if np.logical_or(ans=='yes',time_warning==False):
+            begin_acq = time.time()
+            self.init_display()
+            #Threads initialisation
+            event=threading.Event()
+            patterns_thread = threading.Thread(target=self.display_sequence,args=(event,))
+            spectrometer_thread = threading.Thread(target=self.spectrometer_acquisition,args=(event,))
+            # Start both display and measure threads
+            patterns_thread.start()
+            spectrometer_thread.start()
+            patterns_thread.join()
+            spectrometer_thread.join()
 
-                self.duration = time.time()-begin_acq
-                 
-                if path!=None:
-                    self.save_acquisition_envi(path)
-                else:
-                    self.save_acquisition_envi()
+            self.duration = time.time()-begin_acq
+                
+            if path!=None:
+                self.save_acquisition_envi(path)
             else:
-                cv2.destroyAllWindows()
-                pass
+                self.save_acquisition_envi()
+        else:
+            cv2.destroyAllWindows()
+            pass
             
        
 
