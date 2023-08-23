@@ -68,7 +68,7 @@ class OPConfig:
         self.height = acqui_dict['height']
         self.width = acqui_dict["width"]
         self.interp_method=None
-        self.periode_pattern=42
+        self.periode_pattern=25
 
         # Pattern method infos
         self.pattern_method = acqui_dict['pattern_method']
@@ -300,7 +300,7 @@ class OPConfig:
         cv2.moveWindow('ImageWindow', screenWidth, 0)
         cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
         cv2.imshow('ImageWindow',cv2.resize(self.pattern_lib.decorator.sequence[0],(self.width,self.height),interpolation=self.interp_method))
-        cv2.waitKey(1000)          
+        cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white          
        
         
     def thread_acquisition(self, path=None, time_warning=True):
