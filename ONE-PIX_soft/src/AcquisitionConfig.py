@@ -16,7 +16,7 @@ import platform
 import screeninfo
 from tkinter import *
 from tkinter.messagebox import askquestion
-
+import PIL
 
 from src.SpectrometerBridge import SpectrometerBridge 
 from src.PatternMethods import PatternMethodSelection
@@ -162,27 +162,34 @@ class OPConfig:
             actualised OPConfig class object.
     
         """ 
-        os_name = platform.system()
         if self.spec_lib.DeviceName=='':
             self.spec_lib.spec_open()
             self.spec_lib.DeviceName=self.spec_lib.decorator.DeviceName
     
-        if os_name == 'Windows':
-            x=np.arange(0,self.height) # horizontal vector for the pattern creation 
-            y=np.arange(0,self.width)# vertical vector for the pattern creation
-            Y,X = np.meshgrid(x,y)# horizontal and vertical array for the pattern creation
-            A=2*np.pi*X*1/self.height
-            B=2*np.pi*Y*5/self.width
-            pos_r=np.cos(A+B) #gray pattern creation
-            
-            cv2.namedWindow('Init', cv2.WINDOW_NORMAL)
-            cv2.moveWindow('Init', screenWidth, 0)
-            cv2.setWindowProperty("Init", cv2.WND_PROP_FULLSCREEN, 1)
-            cv2.imshow('Init', pos_r)
-            cv2.waitKey(300)
+        # create static pattern to be displayed
+        proj = Tk()
+        proj.geometry("{}x{}+{}+{}".format(self.width, self.height, screenWidth, 0))
+        y = list(range(self.height))  # horizontal vector for the pattern creation
+        x = list(range(self.width))  # vertical vector for the pattern creation
+        Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
+        A = 2 * np.pi * X * 10 / self.height
+        B = 2 * np.pi * Y * 10 / self.width
+        pos_r = np.cos(A + B)  # gray pattern creation
+        pos_r[pos_r < 0] = 0
+
+        pil_img = PIL.Image.fromarray(255 * pos_r)
+
+        img = PIL.ImageTk.PhotoImage(master=proj, image=pil_img)
+        label_test_proj = Label(proj, image=img)
+        label_test_proj.image = img
+        label_test_proj.pack()
+
+        # test.r
+        proj.update()
+        
         print('Finding the optimal integration time (ms):')
         self.get_optimal_integration_time()
-        cv2.destroyAllWindows()
+        proj.destroy()
         
                     
 
@@ -418,9 +425,9 @@ class OPConfig:
         print('is_raspberrypi() : ',is_raspberrypi())
         if is_raspberrypi():
             root=Tk()
-            root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
+            root.geometry("{}x{}+{}+{}".format(self.width, self.height,screenWidth,0))
             root.wm_attributes('-fullscreen', 'True')
-            c=Canvas(root,width=800,height=600,bg='gray',highlightthickness=0)
+            c=Canvas(root,width=self.width,height=self.height,bg='gray',highlightthickness=0)
             c.pack()
             root.update()
             try:
@@ -451,4 +458,3 @@ class OPConfig:
                 print("Warning; check a RPi camera is connected. No picture were stored !")
             root.destroy()
         os.chdir(root_path)
-        
