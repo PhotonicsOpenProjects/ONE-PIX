@@ -64,15 +64,6 @@ class OPConfig:
         acqui_dict = json.load(f)
         f.close()
 
-        # Pattern method infos
-        self.pattern_method = acqui_dict['pattern_method']
-        self.spatial_res = acqui_dict['spatial_res']
-        self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
-        self.nb_patterns = self.pattern_lib.nb_patterns
-        self.seq_basis = ['FourierSplit','FourierShift']
-        self.full_basis = ['Addressing','Custom','Hadamard','BlackAndWhite']
-        self.pattern_order = []
-
         # Spectrometer infos
         self.name_spectro = acqui_dict["name_spectro"]
         self.integration_time_ms =acqui_dict["integration_time_ms"]
@@ -89,6 +80,15 @@ class OPConfig:
         self.interp_method=None
         self.periode_pattern=self.rep*self.integration_time_ms
         
+        # Pattern method infos
+        self.pattern_method = acqui_dict['pattern_method']
+        self.spatial_res = acqui_dict['spatial_res']
+        self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
+        self.nb_patterns = self.pattern_lib.nb_patterns
+        self.seq_basis = ['FourierSplit','FourierShift']
+        self.full_basis = ['Addressing','Custom','Hadamard','BlackAndWhite']
+        self.pattern_order = []
+
         self.duration = 0 #Initialise the duration of a measure
 
 

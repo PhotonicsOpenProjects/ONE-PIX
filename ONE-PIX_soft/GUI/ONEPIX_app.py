@@ -54,10 +54,6 @@ ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 VERSION = '2.0.0'
-#root_path = '/'.join(os.getcwd().split('/')[:-1])
-#os.chdir(root_path)
-#print("root_path : ", root_path)
-os_name=platform.system()
 json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
 
 window_height = 600
