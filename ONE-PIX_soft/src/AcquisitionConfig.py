@@ -342,11 +342,8 @@ class OPConfig:
             spectrometer_thread.join()
 
             self.duration = time.time()-begin_acq
-                
-            if path!=None:
-                self.save_acquisition_envi(path)
-            else:
-                self.save_acquisition_envi()
+            self.save_acquisition_envi(path)
+            
         else:
             cv2.destroyAllWindows()
             pass
@@ -368,7 +365,7 @@ class OPConfig:
         None.
     
         """
-        
+        if path==None: path="../Hypercubes"
         root_path=os.getcwd()
         #path=os.path.join(root_path,'Hypercubes')
         if(os.path.isdir(path)):
