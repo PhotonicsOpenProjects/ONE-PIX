@@ -68,7 +68,7 @@ class OPConfig:
         self.height = acqui_dict['height']
         self.width = acqui_dict["width"]
         self.interp_method=None
-        self.periode_pattern=25
+        self.periode_pattern=40
 
         # Pattern method infos
         self.pattern_method = acqui_dict['pattern_method']
