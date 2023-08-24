@@ -76,7 +76,7 @@ class OPConfig:
         self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
         self.nb_patterns = self.pattern_lib.nb_patterns
         self.seq_basis = ['FourierSplit','FourierShift']
-        self.full_basis = ['Addressing','Custom','Hadamard','DFT','BlackAndWhite']
+        self.full_basis = ['Addressing','Custom','Hadamard','BlackAndWhite']
         self.pattern_order = []
 
         # Spectrometer infos

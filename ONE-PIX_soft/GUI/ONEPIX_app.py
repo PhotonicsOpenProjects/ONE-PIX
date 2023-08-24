@@ -822,7 +822,7 @@ class OPApp(ctk.CTk):
         self.progressbar.stop()
         self.est_time_label.configure(text=est_end_label)
         self.progressbar.set(value=0)
-        if (self.acq_config.pattern_method in self.acq_config.seq_basis+['Hadamard','DFT']):
+        if (self.acq_config.pattern_method in self.acq_config.seq_basis+['Hadamard']):
             if len(self.acq_config.spectra) > 0:
                 self.acq_res=OPReconstruction(self.acq_config.pattern_method,
                                           self.acq_config.spectra,self.acq_config.pattern_order)
@@ -913,7 +913,7 @@ class OPApp(ctk.CTk):
             self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='white')
             self.normalisation_button.configure(state='normal')
             
-            if self.res['pattern_method'] in ['FourierSplit','Fourier','DFT']:
+            if self.res['pattern_method'] in ['FourierSplit','Fourier']:
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))
