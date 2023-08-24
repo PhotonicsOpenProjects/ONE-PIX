@@ -90,7 +90,7 @@ class OPApp(ctk.CTk):
     def normalization_request(self):
         self.pop_up = ctk.CTkToplevel()
         width=350
-        height=100
+        height=200
         x = (self.monitor_sz.width/2) - (width/2)
         y = (self.monitor_sz.height/2) - (height/2)
         self.pop_up.geometry('%dx%d+%d+%d' % (width, height, x, y))
