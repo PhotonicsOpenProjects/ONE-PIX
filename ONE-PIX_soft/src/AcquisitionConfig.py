@@ -78,7 +78,7 @@ class OPConfig:
         self.height = acqui_dict['height']
         self.width = acqui_dict["width"]
         self.interp_method=None
-        self.periode_pattern=self.rep*self.integration_time_ms
+        self.periode_pattern=int(self.rep*self.integration_time_ms)
         
         # Pattern method infos
         self.pattern_method = acqui_dict['pattern_method']
