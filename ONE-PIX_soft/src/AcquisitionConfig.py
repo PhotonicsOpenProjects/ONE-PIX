@@ -64,12 +64,6 @@ class OPConfig:
         acqui_dict = json.load(f)
         f.close()
 
-        # Displaying infos
-        self.height = acqui_dict['height']
-        self.width = acqui_dict["width"]
-        self.interp_method=None
-        self.periode_pattern=self.rep*self.integration_time_ms
-
         # Pattern method infos
         self.pattern_method = acqui_dict['pattern_method']
         self.spatial_res = acqui_dict['spatial_res']
@@ -88,6 +82,12 @@ class OPConfig:
         self.wavelengths = []
         self.spectro_flag=False
         self.rep=acqui_dict["spectro_scans2avg"]
+
+         # Displaying infos
+        self.height = acqui_dict['height']
+        self.width = acqui_dict["width"]
+        self.interp_method=None
+        self.periode_pattern=self.rep*self.integration_time_ms
         
         self.duration = 0 #Initialise the duration of a measure
 
