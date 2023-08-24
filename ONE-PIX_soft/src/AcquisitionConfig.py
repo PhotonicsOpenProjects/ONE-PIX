@@ -254,7 +254,7 @@ class OPConfig:
 
     def init_display(self):
         """
-        This funtion allows to initialize the display window and the patterns to be displayed before the starts of threads.
+        This function allows to initialize the display window and the patterns to be displayed before the starts of threads.
     
     
         Parameters

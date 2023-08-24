@@ -27,13 +27,11 @@ class FourierSplitReconstruction:
 
         """
          
-        spectre_desplit=[]
         coord=[]  
         x=[]
         y=[]
-                
+        spectre_desplit=self.spectra[0::4,:]-self.spectra[1::4,:]-1j*(self.spectra[2::4,:]-self.spectra[3::4,:])        
         for i in range(0,np.size(self.spectra,0),4):
-            spectre_desplit.append((self.spectra[i,:]-self.spectra[i+1,:])-1j*(self.spectra[i+2,:]-self.spectra[i+3,:]))
             deb=self.pattern_order[i].find('(')
             coord.append(self.pattern_order[i][deb:])
             coord_split=str.split(coord[-1][1:-1],',')
@@ -44,7 +42,7 @@ class FourierSplitReconstruction:
         y=np.asarray(y)     
         spectre_desplit=np.asarray(spectre_desplit)
         #spectre_desplit=self.snr_filt(spectre_desplit)
-        half_spectrum=np.zeros((np.max(x)+1,np.max(y)+1,np.size(spectre_desplit,1)),dtype=np.complex64)
+        half_spectrum=np.zeros((np.max(x)+1,np.max(y)+1,np.size(spectre_desplit,1)),dtype=np.complex128)
         
         for i in range(0,np.size(x)):
             half_spectrum[x[i],y[i]]=spectre_desplit[i,:]
