@@ -90,13 +90,13 @@ class OPApp(ctk.CTk):
     def normalization_request(self):
         self.pop_up = ctk.CTkToplevel()
         width=350
-        height=200
+        height=150
         x = (self.monitor_sz.width/2) - (width/2)
         y = (self.monitor_sz.height/2) - (height/2)
         self.pop_up.geometry('%dx%d+%d+%d' % (width, height, x, y))
         self.pop_up.attributes('-topmost', 1)
-        self.pop_upText = ctk.CTkLabel(self.pop_up, text = self.normalization_request_pop_upText, width=200,
-                               height=25, corner_radius=10, wraplength=200, font=('Helvetica', 18, 'bold'))
+        self.pop_upText = ctk.CTkLabel(self.pop_up, text = self.normalization_request_pop_upText, width=300,
+                               height=100, corner_radius=10, wraplength=300, font=('Helvetica', 18, 'bold'))
         self.pop_upText.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=2, sticky="news")
         self.normalize_yesButton = ctk.CTkButton(self.pop_up, text = self.normalization_request_normalize_yesButton, fg_color = '#31D900', hover_color="#249F00", command = self.normalisation_specifications)
         self.normalize_yesButton.grid(row=1, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
