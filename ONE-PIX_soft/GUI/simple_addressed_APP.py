@@ -204,13 +204,16 @@ class OPApp(ctk.CTk):
         with open(json_path, 'w') as outfile:
             json.dump(params, outfile)
             outfile.close()
-        os.system("python ../ONEPIX_acquisition.py")
-        directory = '../Hypercubes'
-        newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
-        print(newest)
-        self.plotMask(newest)
-        self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
-                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["acquireButton"])
+        try:
+            os.system("python ../ONEPIX_acquisition.py")
+            directory = '../Hypercubes'
+            newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
+            print(newest)
+            self.plotMask(newest)
+            self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
+                                        text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["acquireButton"])
+        except:
+            pass 
         
     def manual_toogle(self):
         self.manual_choice.configure(state = "disabled", fg_color="#3B8ED0")

@@ -3,44 +3,26 @@
 Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
 
 """
-
-
 #Import libraries (camera, ssh, scp...)
-
 import numpy as np
-#from picamera import PiCamera
 import time
 import os
 from tkinter import *
 import json
-#import glob
 from datetime import datetime
-#import pickle
 import sys
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from src.coregistration_lib import *
-#import asyncio
-
-#import matplotlib.pyplot as plt
-#from PIL import Image
 import cv2
-
-#import argparse
 import sys
-
-#import imgviz
-
 from labelme.label_file import LabelFile
 import labelme.utils
 import os
-
 from datetime import date
-
-
 import PIL.Image
+
 def kmeans_LAB(img,nb_clust):
-
-
+    
     Z = img.reshape((-1,3))
     Z = np.float32(Z)
     
