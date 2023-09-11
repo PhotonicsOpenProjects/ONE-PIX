@@ -6,13 +6,17 @@ HUB interfaces ONE-PIX
 
 @author: brechl
 """
+import sys
+import os
+sys.path.append(os.path.abspath('./ONE-PIX_soft/src'))
+sys.path.append(os.path.abspath('./ONE-PIX_soft'))
 
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import  ttk
 from tkinter.messagebox import showwarning
 from PIL import Image
-
+from AcquisitionConfig import is_raspberrypi
 from matplotlib.backends.backend_tkagg import  NavigationToolbar2Tk
 
 import json
@@ -37,8 +41,9 @@ class OPApp(ctk.CTk):
         self.title('ONE-PIX APP')
         width=680
         height=250
-        x = (self.monitor_sz.width/2) - (width/2)
-        y = (self.monitor_sz.height/2) - (height/2)
+        x = (self.monitor_sz.width -width)//2-100
+        y = (self.monitor_sz.height-height)//2-100
+        if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
         self.logo_image = ctk.CTkImage(Image.open(path_to_GUI + "/logo_ONE-PIX.png"),
                                                size=(200, 200))
