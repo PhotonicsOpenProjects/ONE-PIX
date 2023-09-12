@@ -226,15 +226,18 @@ class OPApp(ctk.CTk):
         with open(json_path, 'w') as outfile:
             json.dump(params, outfile)
             outfile.close()
-        try :
-            config=OPConfig(json_path)
+        
+        config=OPConfig(json_path)
+        
+        try :   
             config.thread_acquisition(time_warning=False)
+            self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
+                                    text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["acquireButton"])
             directory = '../Hypercubes'
             newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
             print(newest)
             self.plotMask(newest)
-            self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
-                                        text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["acquireButton"])
+            
         except:
             pass
         

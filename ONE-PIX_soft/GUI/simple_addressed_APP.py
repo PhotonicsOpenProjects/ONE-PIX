@@ -204,8 +204,9 @@ class OPApp(ctk.CTk):
         with open(json_path, 'w') as outfile:
             json.dump(params, outfile)
             outfile.close()
+        
+        config=OPConfig(json_path)
         try:
-            config=OPConfig(json_path)
             config.thread_acquisition(time_warning=False)
             directory = '../Hypercubes'
             newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
