@@ -428,15 +428,19 @@ class OPConfig:
             root=Tk()
             root.geometry("{}x{}+{}+{}".format(self.width, self.height,screenWidth,0))
             root.wm_attributes('-fullscreen', 'True')
-            c=Canvas(root,width=self.width,height=self.height,bg='gray',highlightthickness=0)
+            c=Canvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
             c.pack()
             root.update()
             try:
                 from picamera import PiCamera, PiCameraError
-                camera = PiCamera()
-                camera.resolution = (1024, 768)
-                camera.start_preview()
-                camera.shutter_speed=7*1176
+                camera = PiCamera(resolution = (1024, 768))
+                camera.iso=300
+                time.sleep(2)
+                camera.shutter_speed = camera.exposure_speed
+                camera.exposure_mode = 'off'
+                g = camera.awb_gains
+                camera.awb_mode = 'off'
+                camera.awb_gains = g
                 camera.vflip=True
                 camera.hflip=True
                 # Camera warm-up time
