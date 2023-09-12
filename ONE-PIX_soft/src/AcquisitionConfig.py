@@ -17,6 +17,7 @@ import screeninfo
 from tkinter import *
 from tkinter.messagebox import askquestion
 import PIL
+import PIL.ImageTk
 
 from src.SpectrometerBridge import SpectrometerBridge 
 from src.PatternMethods import PatternMethodSelection
