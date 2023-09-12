@@ -18,7 +18,7 @@ import screeninfo
 import PIL.ImageTk
 
 sys.path.insert(0, os.path.abspath('../'))
-from src.AcquisitionConfig import is_raspberrypi
+from src.AcquisitionConfig import *
 
 window_height = 575
 window_width = 825
