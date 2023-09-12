@@ -162,7 +162,7 @@ class AddressingPatterns:
         root=Tk()
         root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
         root.wm_attributes('-fullscreen', 'True')
-        c=Canvas(root,width=800,height=600,bg='gray',highlightthickness=0)
+        c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
         c.pack()
         root.update()
         

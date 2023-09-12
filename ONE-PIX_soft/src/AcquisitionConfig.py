@@ -443,8 +443,7 @@ class OPConfig:
                 camera.awb_gains = g
                 camera.vflip=True
                 camera.hflip=True
-                # Camera warm-up time
-                time.sleep(1)
+
                 camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
                 camera.close()
                 

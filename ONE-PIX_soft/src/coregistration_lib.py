@@ -23,14 +23,19 @@ except IndexError:
 
 #%% Get and handle camera pictures       
 def get_picture(tag,save_path='./'):
-    camera = PiCamera()
-    camera.resolution = (1024, 768)
+    camera = PiCamera(resolution = (1024, 768))
+    camera.iso=300
+    time.sleep(2)
+    camera.shutter_speed = camera.exposure_speed
+    camera.exposure_mode = 'off'
+    g = camera.awb_gains
+    camera.awb_mode = 'off'
+    camera.awb_gains = g
+    camera.vflip=True
+    camera.hflip=True
     camera.hflip = True
     camera.vflip = True 
-    camera.start_preview()
-    camera.shutter_speed=7*1176
-    # Camera warm-up time
-    time.sleep(2)
+
     if tag=='init': save_path=f"./{tag}.png"
     
     camera.capture(save_path)
@@ -62,7 +67,7 @@ def get_reference_image(img_resolution=(proj_shape.width, proj_shape.height)):
     :param img_resolution: this is our screen/projector resolution
     """
     width, height = img_resolution
-    img = np.ones((height, width, 1), np.uint8) * 255
+    img = np.zeros((height, width, 1), np.uint8)
     return img
 
 
