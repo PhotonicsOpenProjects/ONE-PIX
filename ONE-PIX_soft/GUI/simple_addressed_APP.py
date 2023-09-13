@@ -20,6 +20,7 @@ import PIL.ImageTk
 sys.path.insert(0, os.path.abspath('../'))
 from src.AcquisitionConfig import *
 
+
 window_height = 575
 window_width = 825
 
@@ -207,6 +208,7 @@ class OPApp(ctk.CTk):
         
         config=OPConfig(json_path)
         try:
+            config.OP_init()
             config.thread_acquisition(time_warning=False)
             directory = '../Hypercubes'
             newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)

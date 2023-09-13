@@ -80,6 +80,7 @@ class OPConfig:
         self.width = acqui_dict["width"]
         self.interp_method=None
         self.periode_pattern=int(self.rep*self.integration_time_ms)
+        if self.periode_pattern<60 :self.periode_pattern=60
         
         # Pattern method infos
         self.pattern_method = acqui_dict['pattern_method']
