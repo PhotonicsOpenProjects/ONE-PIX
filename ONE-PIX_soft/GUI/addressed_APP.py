@@ -218,10 +218,6 @@ class OPApp(ctk.CTk):
         if self.test_mode=="manual":
             params['spatial_res']='manual_segmentation'
         elif self.test_mode=="auto":
-            if int(self.Sec_seg.get())>6:
-                self.Sec_seg.delete(0,len(self.Sec_seg.get()))
-                self.Sec_seg.insert(0,"6")
-                self.update()
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
         with open(json_path, 'w') as outfile:
             json.dump(params, outfile)
