@@ -77,20 +77,21 @@ def spikes_correction(res):
     """
     
     fig,ax=plt.subplots()
-    plt.imshow(np.log10(abs(np.mean(res.whole_spectrum,2))))
-    plt.title('Spectral frequencies spikes correction. Press escape key to end')
+    whole_spectrum=np.fft.fftshift(np.fft.fft2(res["hyperspectral_image"],axes=(0,1)))
+    plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
+    plt.title('Spectral frequencies spikes correction. Pacq_datas escape key to end')
     p=plt.ginput(-1)
     p=np.round(p).astype(np.int32)
     plt.clf()
-    
+
     for pixel in p:
-        if pixel[0]==np.size(res.whole_spectrum,1)-1:
-            res.whole_spectrum[pixel[1],pixel[0],:]=res.whole_spectrum[pixel[1],pixel[0]-2,:]
+        if pixel[0]==np.size(whole_spectrum,1)-1:
+            whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]-2,:]
         else:
-            res.whole_spectrum[pixel[1],pixel[0],:]=res.whole_spectrum[pixel[1],pixel[0]+1,:]
-    plt.imshow(np.log10(abs(np.mean(res.whole_spectrum,2))))
+            whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]+1,:]
+    plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
     plt.show()
-    res.image_reconstruction()
+    res["hyperspectral_image"]=abs(np.fft.ifft2(whole_spectrum,axes=(0,1)))
     return res
 
 
