@@ -65,26 +65,22 @@ class FourierSplitPatterns:
 
         """
         #Create shifted patterns to split them
-        Preal,Pim=FourierShiftPatterns.creation_patterns(self,X,Y,freq)
+        preal,pim=FourierShiftPatterns.creation_patterns(self,X,Y,freq)
         
+        # Splitting patterns to display positive images
+
         #Real positive pattern creation
-        pos_r=Preal.copy()
-        pos_r[pos_r<0]=0
-        pos_r=np.uint8(255*pos_r)
+        pos_r=np.uint8(255*np.where(preal> 0, preal, 0))
               
         #Real negative pattern creation
-        neg_r=Preal.copy()
-        neg_r[neg_r>0]=0
-        neg_r=np.uint8(255*np.abs(neg_r))
+        neg_r=np.uint8(255*np.where(preal< 0, abs(preal), 0))
+        
         
         #Imaginary positive pattern creation
-        pos_im=Pim.copy()
-        pos_im[pos_im<0]=0
-        pos_im=np.uint8(255*pos_im)
+        pos_im= np.uint8(255*np.where(pim> 0, pim, 0))
         
         #Imaginary negative pattern creation
-        neg_im=Pim.copy()
-        neg_im[neg_im>0]=0
-        neg_im=np.uint8(255*np.abs(neg_im))
+        neg_im=np.uint8(255*np.where(pim< 0, abs(pim), 0))
+       
        
         return pos_r, neg_r, pos_im, neg_im
