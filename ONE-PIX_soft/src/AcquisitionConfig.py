@@ -303,7 +303,7 @@ class OPConfig:
             self.spec_lib.spec_open()
         self.spec_lib.set_integration_time()
         self.wavelengths = self.spec_lib.get_wavelengths()
-        self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float64)
+        self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float32)
         # Initialise cv2 display on the second monitor 
         cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
         cv2.moveWindow('ImageWindow', screenWidth, 0)
