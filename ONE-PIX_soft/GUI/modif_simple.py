@@ -902,7 +902,7 @@ class OPApp(ctk.CTk):
                 self.calc_bouton.configure(state = "disabled")
             
         else: #if name == "data"
-            folder_path=filedialog.askdirectory(initialdir=os.getcwd())
+            folder_path=filedialog.askdirectory(initialdir='../Hypercubes')
             data_list=glob.glob(folder_path+'/*.hdr')+glob.glob(folder_path+'/*.tif')
             if data_list[0].endswith((".tif",".hdr")):
                 self.data_path_label.configure(text_color='white')
