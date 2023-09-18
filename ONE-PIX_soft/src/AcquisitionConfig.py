@@ -399,7 +399,7 @@ class OPConfig:
             if self.pattern_method=="Addressing":
                 # dark pattern correction
                 self.spectra-=self.spectra[-1,:]
-                self.spectra=self.spectra[:-2,:]
+                self.spectra=self.spectra[:-1,:]
                 title_acq = f"spectra_{fdate}_{actual_time}.npy"
                 title_wavelengths = f"wavelengths_{fdate}_{actual_time}.npy"
                 title_patterns = f"pattern_order_{fdate}_{actual_time}.npy"
