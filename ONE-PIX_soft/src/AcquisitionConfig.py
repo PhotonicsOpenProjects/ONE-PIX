@@ -93,7 +93,7 @@ class OPConfig:
 
         self.duration = 0 #Initialise the duration of a measure
 
-
+    
     def get_optimal_integration_time(self):
         """
         This function allows to automatically set the right integration time for 
