@@ -184,7 +184,7 @@ class AddressingPatterns:
             masks = realtime_labelme(RGB_img)
         
         #Add dark pattern
-        masks.append(np.zeros_like(masks[-1],dtype=np.uint8))
+        masks=np.append(masks,np.zeros_like(masks[0,:,:][np.newaxis,:,:],dtype=np.uint8),axis=0)
 
         self.nb_patterns=np.size(masks,0)
 
