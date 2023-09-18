@@ -20,6 +20,13 @@ import labelme.utils
 import os
 from datetime import date
 import PIL.Image
+import screeninfo
+
+screenWidth = screeninfo.get_monitors()[0].width
+try:
+    proj_shape=screeninfo.get_monitors()[1]
+except IndexError:
+    print('Please use a projector to use ONE-PIX')
 
 def kmeans_LAB(img,nb_clust):
     
@@ -160,9 +167,9 @@ class AddressingPatterns:
 
         #adjust the luminosity to correctly capture RGB image
         root=Tk()
-        root.geometry("{}x{}+{}+{}".format(800, 600,1024,0))
+        root.geometry("{}x{}+{}+{}".format(proj_shape.width, proj_shape.height,screenWidth,0))
         root.wm_attributes('-fullscreen', 'True')
-        c=Canvas(root,width=800,height=600,bg='black',highlightthickness=0)
+        c=Canvas(root,width=proj_shape.width,height=proj_shape.height,bg='black',highlightthickness=0)
         c.pack()
         root.update()
         
