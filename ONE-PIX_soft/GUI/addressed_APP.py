@@ -62,7 +62,7 @@ class OPApp(ctk.CTk):
         self.open_languageConfig()
         self.open_GUIConfig()
         # configure window
-        self.resizable(False, False)
+        #self.resizable(False, False)
         self.title(f"ONEPIX GUI")
         x = (self.monitor_sz.width -window_width)//2-100
         y = (self.monitor_sz.height-window_height)//2-100
@@ -81,21 +81,8 @@ class OPApp(ctk.CTk):
         self.b_vis = self.fig_vis.add_subplot(gs[:,22:], anchor='W')
         self.a_vis.axis('off')
         self.b_vis.axis('off')
-        
-        
         self.test_mode = "auto"
-        # create tabviews
-        # self.tabview = ctk.CTkTabview(self, width=window_width,height=window_height)
-        # self.tabview.grid(row=1, column=1)
 
-# =============================================================================
-#         
-# =============================================================================
-        # self.Calib_frame = ctk.CTkFrame(self.ACQ)
-        # self.Calib_frame.grid(row=0, column=0, pady=10, rowspan =1, sticky="we")
-        # self.calibrationButton = ctk.CTkButton(self.Calib_frame, text = "Co-registration",
-        #                                 command = None)
-        # self.calibrationButton.grid(column=0, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1, sticky="nesw")
 # =============================================================================
 # 
 # =============================================================================
@@ -144,8 +131,6 @@ class OPApp(ctk.CTk):
         self.Sec_seg.configure(state = "disabled", fg_color="gray")
         self.Sec_seg.grid(column=1, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         
-        
-        
 # =============================================Secondary segmentation : number of clusters================================
 #         
 # =============================================================================
@@ -157,28 +142,6 @@ class OPApp(ctk.CTk):
                                         command = self.acquire)
         self.acquireButton.grid(column=0, row=0, padx=(2.5,2.5), pady=(2.5,2.5), rowspan =1, columnspan=2, sticky='')
 
-        # self.Preview_frame = ctk.CTkFrame(self.ACQ)
-        # self.Preview_frame.grid(row=0, column=1, pady=10, padx=10, rowspan =2, sticky="w")
-        
-        # self.canvas_b1 = FigureCanvasTkAgg(self.fig_acq, self.Preview_frame)
-        # self.canvas_b1.get_tk_widget().grid(column=0, row=2, padx=10, pady=10,rowspan=1, columnspan=2)
-
-        # self.toolbarFrame = ctk.CTkFrame(master=self.Preview_frame, width=100, height=100)
-        # self.toolbarFrame.grid(column=0, row=1, padx=10, pady=10, rowspan=1, columnspan=2, sticky = "we")
-        # NavigationToolbar2Tk(self.canvas_b1, self.toolbarFrame)
-        
-        
-# =============================================================================
-# =============================================================================
-# =============================================================================
-# # #         
-# =============================================================================
-# =============================================================================
-# =============================================================================
-        
-        
-        
-        # self.Open_frame = ctk.CTkFrame(self.VIS)
         self.Open_frame = ctk.CTkFrame(self)
         self.Open_frame.grid(row=2, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan =1, columnspan=2, sticky="nw")
         

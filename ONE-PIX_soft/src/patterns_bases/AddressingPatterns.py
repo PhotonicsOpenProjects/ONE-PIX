@@ -183,7 +183,8 @@ class AddressingPatterns:
         elif acqui_dict['spatial_res']=='manual_segmentation':
             masks = realtime_labelme(RGB_img)
         
-            
+        #Add dark pattern
+        masks.append(np.zeros_like(masks[-1],dtype=np.uint8))
 
         self.nb_patterns=np.size(masks,0)
 
