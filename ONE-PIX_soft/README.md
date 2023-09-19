@@ -47,7 +47,7 @@ A folder ONE-PIX _soft was created on the desktop.
 with the terminal go in this folder 
 
 ```
-cd Desktop/ONE-PIX/ONE-PIX_soft
+cd ONE-PIX/ONE-PIX_soft
 ```
 
 You need to install Python packages to run ONE-PIX_soft. 
