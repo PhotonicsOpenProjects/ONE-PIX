@@ -149,7 +149,7 @@ You need to supress your existing boot/config.txt and replace it by  preconfigur
 For that use these command lines : 
 ```
 sudo rm /boot/config.txt
-sudo cp Desktop/ONE-PIX/ONE-PIX_soft/config.txt /boot
+sudo cp ~/Desktop/ONE-PIX/ONE-PIX_soft/src/DLL/config.txt /boot
 ```
 # Finalisation and checking of the installation
 
