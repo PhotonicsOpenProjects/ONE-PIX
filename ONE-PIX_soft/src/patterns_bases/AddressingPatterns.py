@@ -86,7 +86,7 @@ def Niagara_means(IMG, segm_settings = [2,2]):
             temp_mask += [labels == k for k in np.unique(labels) if k!=0]
         masks = temp_mask
     masks = fond + masks
-    return [np.uint8(255*masks[m]).reshape(L,l) for m in range(len(masks))]
+    return np.asarray([np.uint8(255*masks[m]).reshape(L,l) for m in range(len(masks))])
 
 def label2mask(json_file):
     
