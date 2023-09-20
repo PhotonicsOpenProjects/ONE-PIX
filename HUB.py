@@ -119,11 +119,6 @@ class OPApp(ctk.CTk):
     def deactivate_normalization(self):
         self.isNormalized = False
         self.launch_GUI()
-        # self.destroy()
-        # if self.acquisition_method=='Complete':
-        #     os.system("python ONEPIX_app.py")
-        # else:
-        #     os.system("python addressed_APP.py")
             
     def activate_normalisation(self):
         self.isNormalized = True

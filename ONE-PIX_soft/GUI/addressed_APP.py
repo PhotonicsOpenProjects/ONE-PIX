@@ -10,6 +10,8 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath('../'))
 from src.AcquisitionConfig import *
+from src.coregistration_lib import *
+
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -161,7 +163,7 @@ class OPApp(ctk.CTk):
         self.calibrationButton.configure(state = 'normal', fg_color = "#9D0000",
                                          text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["calibrationButton_WIP"])
         self.update()
-        os.system("python ../coregistration_calibration.py")
+        coregistration_calibration()
         self.manual_choice.configure(state = 'normal', fg_color = "#3B8ED0")
         self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0")
         if self.test_mode=="manual":
