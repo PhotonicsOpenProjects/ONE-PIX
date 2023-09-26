@@ -21,7 +21,8 @@
 				},
 			"block 3":{
 				"title":"Display:",
-				"switch_spat2im":"Spatial domain <----> Image",
+				"switch_spat2im":"Image domain <--> Frequency",
+				"switch_raw2norm":"Raw data <--> Normalised",
 				"fig":{}
 				},
 			"block 4":{
@@ -40,6 +41,10 @@
 					"freq":"Spectral mean frequency domain (log scale)",
 					"spat":"False RGB color of the hyperspectral image"
 					},
+				"switch_raw2norm_command":{
+					"raw": "Raw data",
+					"norm": "Normalised data"
+				    },
 				"spec_connection":{
 					"button_co":"Spectrometer disconnection",
 					"warning":["Spectrometer error"," is not available"]
@@ -219,6 +224,7 @@
 	"functions":{
 		"normalization_request":{
 			"pop_upText":"Do you want your data to be normalized ?",
+			"existing_normalisation":"Use an available reference ?",
 			"normalize_noButton":"NO",
 			"normalize_yesButton":"YES"
 			},

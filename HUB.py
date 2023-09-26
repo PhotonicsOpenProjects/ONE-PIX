@@ -103,13 +103,33 @@ class OPApp(ctk.CTk):
         self.pop_upText = ctk.CTkLabel(self.pop_up, text = self.normalization_request_pop_upText, width=300,
                                height=100, corner_radius=10, wraplength=300, font=('Helvetica', 18, 'bold'))
         self.pop_upText.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=2, sticky="news")
-        self.normalize_yesButton = ctk.CTkButton(self.pop_up, text = self.normalization_request_normalize_yesButton, fg_color = '#31D900', hover_color="#249F00", command = self.normalisation_specifications)
+        self.normalize_yesButton = ctk.CTkButton(self.pop_up, text = self.normalization_request_normalize_yesButton, fg_color = '#31D900', hover_color="#249F00", command = self.use_existing_normalization)
         self.normalize_yesButton.grid(row=1, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
         
         self.normalize_noButton = ctk.CTkButton(self.pop_up, text = self.normalization_request_normalize_noButton, fg_color = '#D70000', hover_color="#9D0000", command = self.deactivate_normalization)
         self.normalize_noButton.grid(row=1, column=1, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
         self.normalizationHelp_button = ctk.CTkButton(self.pop_up, text="?", font=('Helvetica', 18, 'bold'), width =12, command=self.open_normalizeation_help)
         self.normalizationHelp_button.grid(row=0, column = 2, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="")
+    
+    def get_normalisation_path(self):
+        self.pop_up.destroy()
+        path_to_json = '/'.join(['/'.join(path_to_GUI.split('/')[:-1]), 'acquisition_param_ONEPIX.json'])
+        norm_path=tk.filedialog.askdirectory(initialdir='../Hypercubes')
+        f = open(path_to_json)
+        acq_params = json.load(f)
+        f.close()
+        acq_params["normalisation_path"] = norm_path
+        file = open(path_to_json, "w")
+        json.dump(acq_params, file)
+        file.close()
+        self.isNormalized = False
+        self.launch_GUI()
+
+    def use_existing_normalization(self):
+        self.pop_upText.configure(text = self.normalization_use_existing)
+        self.normalize_yesButton.configure(text = self.normalization_request_normalize_yesButton, command = self.get_normalisation_path)
+        self.normalize_noButton.configure(text = self.normalization_request_normalize_noButton, command =self.normalisation_specifications)
+    
     def normalisation_specifications(self):
         print(self.GuiMode_choice.get())
         self.pop_upText.configure(text = self.normalisation_specifications_pop_upText)
@@ -181,14 +201,10 @@ class OPApp(ctk.CTk):
         self.normalizationHelp_frame.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='')
         self.normalizationHelp_title = ctk.CTkLabel(self.normalizationHelp_frame, text = self.normalizationHelp_title_text, font=('Helvetica', 18, 'bold'))
         self.normalizationHelp_title.grid(row=0, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='')
-        # f = open('help_texts.json')
-        # text_dict = json.load(f)
-        # f.close()
         self.normalizationHelp = ctk.CTkLabel(self.normalizationHelp_frame, text = self.normalizationHelp_text, wraplength = 395, justify = 'left')
         self.normalizationHelp.grid(row=1, column=0, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky='')
     
     def close_window(self):
-        #plt.close('all')
         self.quit()
         self.destroy()
         
@@ -218,37 +234,33 @@ class OPApp(ctk.CTk):
                 if self.isNormalized:
                     self.destroy()
                     os.system("python ../src/getReference.py")
-                    os.system("python modif_simple.py")
                 else:
                     self.destroy()
-                    os.system("python modif_simple.py")
+                os.system("python modif_simple.py")
                     
             elif self.acquisition_method=='Addressed':
                 if self.isNormalized:
                     self.destroy()
                     os.system("python ../src/getReference.py")
-                    os.system("python simple_addressed_APP.py")
                 else:
                     self.destroy()
-                    os.system("python simple_addressed_APP.py")
+                os.system("python simple_addressed_APP.py")
                     
         elif self.GuiMode_choice.get()==self.GuiMode_choice_text[1]: # if advanced
             if self.acquisition_method=='Complete':
                 if self.isNormalized:
                     self.destroy()
                     os.system("python ../src/getReference.py")
-                    os.system("python ONEPIX_app.py")
                 else:
                     self.destroy()
-                    os.system("python ONEPIX_app.py")
+                os.system("python ONEPIX_app.py")
             elif self.acquisition_method=='Addressed':
                 if self.isNormalized:
                     self.destroy()
                     os.system("python ../src/getReference.py")
-                    os.system("python addressed_APP.py")
                 else:
                     self.destroy()
-                    os.system("python addressed_APP.py")
+                os.system("python addressed_APP.py")
     
     def open_languageConfig(self):
         f = open('./languages/config.json')
@@ -287,6 +299,7 @@ class OPApp(ctk.CTk):
 #         functions
 # =============================================================================
         self.normalization_request_pop_upText = text["HUB"]["functions"]["normalization_request"]["pop_upText"]
+        self.normalization_use_existing = text["HUB"]["functions"]["normalization_request"]["existing_normalisation"]
         self.normalization_request_normalize_noButton = text["HUB"]["functions"]["normalization_request"]["normalize_noButton"]
         self.normalization_request_normalize_yesButton = text["HUB"]["functions"]["normalization_request"]["normalize_yesButton"]
         

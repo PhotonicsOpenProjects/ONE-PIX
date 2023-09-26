@@ -443,27 +443,6 @@ class OPApp(ctk.CTk):
             self.destroy()
  
  
-    # def simple_acq_mode(self):
-    #     self.simple_mode_button.configure(state="disabled")
-    #     self.expert_mode_button.configure(state= "normal")
-    #     self.button_acquire_spec.configure(state="disabled")
-    #     self.entry_integration_time.configure(state="disabled",text_color='gray')
-    #     self.entry_pattern_duration.configure(state="disabled",text_color='gray')
-    #     self.button_wind_test.configure(state= "disabled")
- 
- 
-    # def expert_acq_mode(self):
-    #     self.expert_mode_button.configure(state="disabled")
-    #     self.simple_mode_button.configure(state= "normal")
-    #     self.button_acquire_spec.configure(state= "normal")
-    #     self.entry_integration_time.configure(state= "normal",text_color='white')
-    #     self.entry_pattern_duration.configure(state= "normal",text_color='white')
-    #     self.button_wind_test.configure(state= "normal")
-    #     self.entry_pattern_duration.delete(0,10)
-    #     self.entry_integration_time.delete(0,10)
-    #     self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-    #     self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
- 
     def close_window_proj(self):
         try:
             self.proj.destroy()
@@ -613,8 +592,7 @@ class OPApp(ctk.CTk):
         self.acq_res=[]
         self.window_size_test()
         self.acq_config.OP_init()
-        if self.acq_config.integration_time_ms<12:self.acq_config.periode_pattern=120
-        else:self.acq_config.periode_pattern = 10 * self.acq_config.integration_time_ms
+        if self.acq_config.periode_pattern<60 :self.acq_config.periode_pattern=60
             
         while self.acq_config.spectro_flag:
             pass
@@ -636,7 +614,7 @@ class OPApp(ctk.CTk):
                 self.acq_res=OPReconstruction(self.acq_config.pattern_method,
                                           self.acq_config.spectra,self.acq_config.pattern_order)
                 self.acq_res.Selection()
-                
+                if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
                 if self.acq_config.pattern_method == 'FourierShift':
                     self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
                 # Reconstruct a RGB preview of the acquisition

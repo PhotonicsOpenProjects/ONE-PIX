@@ -59,7 +59,7 @@ class OPConfig:
 
     def __init__(self,json_path,img=None,nb_patterns=0):
         # Initialize the OPConfig object
-
+        self.json_path=json_path
         #Get info from acquisition_param_ONE-PIX.json
         f = open(json_path)
         acqui_dict = json.load(f)
@@ -69,6 +69,8 @@ class OPConfig:
         self.name_spectro = acqui_dict["name_spectro"]
         self.integration_time_ms =acqui_dict["integration_time_ms"]
         self.spectra = []
+        self.res=[]
+        self.normalised_datacube=[]
         self.wl_lim=acqui_dict["wl_lim"]
         self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms,self.wl_lim)
         self.wavelengths = []
@@ -92,8 +94,8 @@ class OPConfig:
         self.pattern_order = []
 
         self.duration = 0 #Initialise the duration of a measure
-
-    
+        self.normalisation_path=acqui_dict["normalisation_path"]
+        self.save_path=''
     def get_optimal_integration_time(self):
         """
         This function allows to automatically set the right integration time for 
@@ -192,7 +194,8 @@ class OPConfig:
         print('Finding the optimal integration time (ms):')
         self.get_optimal_integration_time()
         proj.destroy()
-        
+        self.periode_pattern=int(self.rep*self.integration_time_ms)
+        if self.periode_pattern<60 :self.periode_pattern=60
                     
 
     def spectrometer_acquisition(self,event):
@@ -252,7 +255,7 @@ class OPConfig:
         # Display each pattern from the sequence
         for pattern in self.pattern_lib.decorator.sequence:         
             cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
-            cv2.waitKey(self.periode_pattern)
+            cv2.waitKey(int(self.periode_pattern))
             event.set()
             time.sleep(1e-6)
             while event.is_set():
@@ -287,7 +290,7 @@ class OPConfig:
             Y, X = np.meshgrid(x, y)
     
             self.pattern_order, freqs = self.pattern_lib.decorator.sequence_order() # Get spatial frequencies list to create patterns
-            self.interp_method=cv2.INTER_NEAREST
+            self.interp_method=cv2.INTER_LINEAR_EXACT
             
             for freq in freqs:
                 self.pattern_lib.decorator.sequence.extend(self.pattern_lib.decorator.creation_patterns(X, Y, freq))  # Patterns creations 
@@ -388,26 +391,59 @@ class OPConfig:
         folder_name = f"ONE-PIX_acquisition_{fdate}_{actual_time}"
         os.mkdir(folder_name)
         os.chdir(folder_name)
-        
+        self.save_path=folder_name
         if self.pattern_method not in ['Custom',"Addressing","BlackAndWhite"]:
-            res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
-            res.Selection()
+            self.res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
+            self.res.Selection()
             # saving the acquired spatial spectra hypercube
-            py2envi(folder_name,res.hyperspectral_image,self.wavelengths,os.getcwd())
-        else:
-            np.save(folder_name,self.spectra)
+            if self.normalisation_path !='':
+                # Load raw data
+                acq_data=load_hypercube(self.normalisation_path)
+                ref_datacube=acq_data['hyperspectral_image']
+                if(np.shape(ref_datacube)!=np.shape(self.res.hyperspectral_image)):
+                    ref=np.zeros_like(self.res.hyperspectral_image)
+                    for wl in range(np.size(ref,2)):
+                        ref[:,:,wl]=cv2.resize(ref_datacube[:,:,wl],(np.shape(ref)[:2]))
+                else: ref=ref_datacube
+                
+                self.normalised_datacube=self.res.hyperspectral_image/ref
+                
+                py2envi(folder_name+'_normalised',self.normalised_datacube,self.wavelengths,os.getcwd())
+            py2envi(folder_name,self.res.hyperspectral_image,self.wavelengths,os.getcwd())
+            
+        else:              
             if self.pattern_method=="Addressing":
                 # dark pattern correction
                 self.spectra-=self.spectra[-1,:]
                 self.spectra=self.spectra[:-1,:]
+
+                if self.normalisation_path !='':
+                    # Load raw data
+                    acq_data=load_hypercube(self.normalisation_path)
+                    ref_datacube=acq_data['hyperspectral_image']
+                    if(np.shape(ref_datacube)!=np.shape(self.res.hyperspectral_image)):
+                        ref=np.zeros_like(ref_datacube)
+                        for wl in range(np.size(ref,2)):
+                            ref[:,:,wl]=cv2.resize(ref_datacube[:,:,wl],(np.shape(ref)[:2]))
+                    else: ref=ref_datacube
+                    
+                    ref_spec=[]
+                    for mask in np.asarray(self.pattern_lib.decorator.sequence)[:,:,:-1]:
+                        data_norm=(mask/255)*ref_datacube.T
+                        ref_spec.append(np.nanmean(np.where((data_norm)!=0,data_norm,np.nan),(1,2)))
+                    ref_spec=np.asarray(ref_spec)
+                    self.normalised_datacube=self.spectra/ref_spec
+                    np.save(folder_name+'_normalised',self.normalised_datacube)
+
+
                 title_acq = f"spectra_{fdate}_{actual_time}.npy"
                 title_wavelengths = f"wavelengths_{fdate}_{actual_time}.npy"
-                title_patterns = f"pattern_order_{fdate}_{actual_time}.npy"
+                #title_patterns = f"pattern_order_{fdate}_{actual_time}.npy"
                 title_mask= f"mask_{fdate}_{actual_time}.npy"
                 np.save(title_mask, self.pattern_lib.decorator.sequence)
                 np.save(title_acq, self.spectra)
                 np.save(title_wavelengths, self.wavelengths)  # saving wavelength
-                np.save(title_patterns, self.pattern_order)  # saving patern order
+                #np.save(title_patterns, self.pattern_order)  # saving patern order
         # Header
         title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
         header = f"ONE-PIX acquisition_{fdate}_{actual_time}"+"\n"\
@@ -466,3 +502,10 @@ class OPConfig:
                 print("Warning; check a RPi camera is connected. No picture were stored !")
             root.destroy()
         os.chdir(root_path)
+        f = open(self.json_path)
+        acq_params = json.load(f)
+        f.close()
+        acq_params["normalisation_path"] = ""
+        file = open(self.json_path, "w")
+        json.dump(acq_params, file)
+        file.close()

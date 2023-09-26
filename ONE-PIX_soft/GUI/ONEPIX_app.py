@@ -158,15 +158,7 @@ class OPApp(ctk.CTk):
         self.entry_img_res.grid(row=2, column=0, pady=(0,20), padx=(0,140))
         self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_img_res"])
         self.label_img_res.grid(row=2, column=0, pady=(0,20), padx=(90,0))
-        
-#         self.entry_pattern_duration = ctk.CTkEntry(self.acq_mode_frame,width=45)
-#         self.entry_pattern_duration.grid(row=3, column=0, pady=(0,20),padx=(0,140))
-#         self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-#         self.entry_pattern_duration.configure(state = tk.DISABLED,text_color='gray')
-        
-#         self.label_pattern_duration =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_pattern_duration"])
-#         self.label_pattern_duration.grid(row=3, column=0, pady=(0,20), padx=(70,0))
-        
+               
         self.methods_list=glob.glob(r"../src/patterns_bases/*.py")
         self.methods_list=[x[22:-11] for x in self.methods_list]
         self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstr",""]]
@@ -205,12 +197,12 @@ class OPApp(ctk.CTk):
         self.fig.patch.set_facecolor('#2D2D2D')
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
         self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=1,column=0,padx=20,pady=5,sticky="")
+        self.canvas.get_tk_widget().grid(row=2,column=0,padx=20,pady=5,sticky="")
         self.a_acq= self.fig.add_subplot(111)
         self.a_acq.set_axis_off()
         
         self.toolbar_frame=ctk.CTkFrame(self.display_frame)
-        self.toolbar_frame.grid(row=2, column=0)
+        self.toolbar_frame.grid(row=3, column=0)
         self.acq_toolbar = NavigationToolbar2Tk(self.canvas, self.toolbar_frame)
         self.acq_toolbar.config(background='#2D2D2D')
         self.acq_toolbar._message_label.config(background='#2D2D2D')
@@ -218,6 +210,9 @@ class OPApp(ctk.CTk):
         
         self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_spat2im"],command=self.switch_spat2im_command,state='disabled')
         self.switch_spat2im.grid(row=0,column=0,sticky='w',padx=120)
+        
+        self.switch_raw2norm = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_raw2norm"],command=self.switch_raw2norm_command,state='disabled')
+        self.switch_raw2norm.grid(row=1,column=0,sticky='w',padx=120)
 
         # =====================================================================
         #         block 4
@@ -603,7 +598,7 @@ class OPApp(ctk.CTk):
         self.a_acq.set_axis_off()
         self.canvas.draw_idle()
         self.switch_spat2im.configure(state='disabled')
-        
+        self.switch_spat2im.configure(state='disabled')
   
     def close_window(self):
         
@@ -689,7 +684,7 @@ class OPApp(ctk.CTk):
         self.clear_graph_tab1()
         self.switch_spat2im.configure(state='normal')
         
-        if self.switch_spat2im.get()==0:
+        if self.switch_spat2im.get()==1:
             #display spectra
             self.a_acq.imshow(np.log10(abs(np.mean(self.acq_res.whole_spectrum,2))))
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
@@ -697,7 +692,32 @@ class OPApp(ctk.CTk):
             #display image
             self.a_acq.imshow(self.acq_res.rgb_image)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
-       
+    
+    def switch_raw2norm_command(self):
+        self.clear_graph_tab1()
+        self.switch_spat2im.configure(state='normal')
+        self.switch_spat2im.deselect()
+        self.switch_raw2norm.configure(state='normal')
+        if self.switch_raw2norm.get()==0:#Normalised hypercube
+            # Reconstruct a RGB preview of the acquisition
+            self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_config.normalised_datacube, self.acq_config.wavelengths)
+            # Display RGB image
+
+            self.a_acq.imshow(self.acq_res.rgb_image)
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_raw2norm_command"]["norm"],color='white')
+            self.a_acq.set_axis_on()
+            self.canvas.draw_idle()
+            
+        else:#raw hypercube
+
+            # Reconstruct a RGB preview of the acquisition
+            self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.hyperspectral_image, self.acq_config.wavelengths)
+            # Display RGB image
+
+            self.a_acq.imshow(self.acq_res.rgb_image)
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_raw2norm_command"]["raw"],color='white')
+            self.a_acq.set_axis_on()
+            self.canvas.draw_idle()
             
     def spec_connection(self):
         try:
@@ -789,8 +809,8 @@ class OPApp(ctk.CTk):
         if (self.simple_mode_button.cget("state") =="disabled"):
             self.window_size_test()
             self.acq_config.OP_init()
-            if self.acq_config.integration_time_ms<12:self.acq_config.periode_pattern=120
-            else:self.acq_config.periode_pattern = 10 * self.acq_config.integration_time_ms
+            if self.acq_config.periode_pattern<60 :self.acq_config.periode_pattern=60
+            
             while self.acq_config.spectro_flag:
                 pass
             self.close_window_proj()
@@ -798,14 +818,9 @@ class OPApp(ctk.CTk):
             self.entry_integration_time.delete(0,10)
             self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
             self.entry_integration_time.configure(state= 'disabled')
- 
-            #self.entry_pattern_duration.configure(state= 'normal')
-            #self.entry_pattern_duration.delete(0,10)
-            #self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-            #self.entry_pattern_duration.configure(state = 'disabled')
+
             time.sleep(1)
-#         if (self.button_wind_test.cget("state") == "disabled"):
-#             self.close_window_proj()
+
  
         # Start acquisition
         self.progressbar.start()
@@ -824,8 +839,14 @@ class OPApp(ctk.CTk):
                                           self.acq_config.spectra,self.acq_config.pattern_order)
                 self.acq_res.Selection()
                 
+                if len(self.acq_config.normalised_datacube)!=0:
+                    self.switch_raw2norm.configure(state='normal')
+                    self.switch_raw2norm.select()
+                    
+                    
                 if self.acq_config.pattern_method == 'FourierShift':
                     self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
+                
                 # Reconstruct a RGB preview of the acquisition
                 self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.hyperspectral_image, self.acq_config.wavelengths)
                 # Display RGB image
@@ -838,6 +859,9 @@ class OPApp(ctk.CTk):
                 
                 self.switch_spat2im.configure(state='normal')
                 self.switch_spat2im.select()
+                 
+                
+                
         
         # os.chdir(root_path)
         # file = open(json_path, "r")
@@ -1142,7 +1166,7 @@ class OPApp(ctk.CTk):
             self.confirm_bouton.grid(column=1, row=4, padx=10, pady=10, rowspan =1, columnspan=1)
     
     def get_dir_analysis(self):
-        path = filedialog.askdirectory(title="Select save path :",parent=self.d,initialdir=os.getcwd())
+        path = filedialog.askdirectory(title="Select save path :",parent=self.d,initialdir='../Hypercubes')
         if path != "":
             self.save_desc.configure(text_color='white')
             self.confirm_bouton.configure(state = "normal")
@@ -1161,19 +1185,21 @@ class OPApp(ctk.CTk):
                 wl=self.res["wavelengths_clipped"]
             except KeyError:
                 wl=self.res["wavelengths"]
-            if choice_list.index(self.data_choice.get())==0: # if data_choice == 'All'
-                for datacube in data_list:
-                    if datacube in ['rgb_image','image_seg']:
-                        plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
-                    elif datacube in ['wavelengths','current_data_level','spectra','infos','pattern_method']:
-                        pass
-                    elif datacube=='hyperspectral_image':
-                        py2envi(datacube,self.res[datacube],self.res["wavelengths"],path)
-                    else:
-                        py2envi(datacube,self.res[datacube],wl,path)
-            else:
-                py2envi(self.res["current_data_level"],self.res[self.res["current_data_level"]],wl,path)
-            
+            try:
+                if choice_list.index(self.data_choice.get())==0: # if data_choice == 'All'
+                    for datacube in data_list:
+                        if datacube in ['rgb_image','image_seg']:
+                            plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
+                        elif datacube in ['wavelengths','current_data_level','spectra','infos','pattern_method']:
+                            pass
+                        elif datacube=='hyperspectral_image':
+                            py2envi(datacube,self.res[datacube],self.res["wavelengths"],path)
+                        else:
+                            py2envi(datacube,self.res[datacube],wl,path)
+                else:
+                    py2envi(self.res["current_data_level"],self.res[self.res["current_data_level"]],wl,path)
+            except:
+                print(f"error:{datacube}")
             self.d.destroy()
             
 # =============================================================================

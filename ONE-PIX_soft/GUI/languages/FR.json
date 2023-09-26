@@ -21,7 +21,8 @@
 				},
 			"block 3":{
 				"title":"Affichage:",
-				"switch_spat2im":"Domaine spatial <----> fr\u00e9quentiel",
+				"switch_spat2im":"Domaine spatial <--> Fr\u00e9quentiel",
+				"switch_raw2norm":"Donn\u00e9es brutes  <--> Normalis\u00e9es",
 				"fig":{}
 				},
 			"block 4":{
@@ -40,6 +41,12 @@
 					"freq":"Moyenne spectrale dans le domaine fr\u00e9quentiel (\u00e9chelle logarithmique)",
 					"spat":"Faux RVB de l'image hyperspectrale"
 					},
+					
+				"switch_raw2norm_command":{
+					"raw": "Donn\u00e9es brutes",
+					"norm": "Donn\u00e9es normalis\u00e9es"
+				    },
+				
 				"spec_connection":{
 					"button_co":"D\u00e9connecter le spectrom\u00e8tre",
 					"warning":["Erreur de spectrom\u00e8tre"," Non disponible"]
@@ -218,6 +225,7 @@
 	"functions":{
 		"normalization_request":{
 			"pop_upText":"Souhaitez-vous que vos donn\u00e9es soient normalis\u00e9es ?",
+			"existing_normalisation":"Utiliser une r\u00e9f\u00e9rence existante ?",
 			"normalize_noButton":"NON",
 			"normalize_yesButton":"OUI"
 			},
