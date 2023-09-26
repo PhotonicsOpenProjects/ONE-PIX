@@ -8,6 +8,7 @@ import customtkinter as ctk
 from tkinter import filedialog
 import sys
 import os
+import glob
 sys.path.insert(0, os.path.abspath('../'))
 from src.AcquisitionConfig import *
 from src.coregistration_lib import *
@@ -225,7 +226,12 @@ class OPApp(ctk.CTk):
         self.b_vis.clear()
         print("maskPath : ", path)
         rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('mask')][0]))
-        rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
+        
+        if len(self.acq_config.normalised_datacube)!=0: #Load Normalised data
+            rawSpecs = np.load(glob.glob('spectra*normalised*')[0]) 
+        else:
+            rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
+
         wl = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('wavelengths')][0])
         customColormap = find_rgb_label(rawMasks.shape[0])
         im = np.zeros((rawMasks.shape[1],rawMasks.shape[2],3),dtype = np.uint8)
