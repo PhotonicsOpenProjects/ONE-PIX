@@ -416,24 +416,32 @@ class OPConfig:
                 # dark pattern correction
                 self.spectra-=self.spectra[-1,:]
                 self.spectra=self.spectra[:-1,:]
-
+                
                 if self.normalisation_path !='':
-                    # Load raw data
-                    acq_data=load_hypercube(self.normalisation_path)
-                    ref_datacube=acq_data['hyperspectral_image']
-                    if(np.shape(ref_datacube)!=np.shape(self.res.hyperspectral_image)):
-                        ref=np.zeros_like(ref_datacube)
-                        for wl in range(np.size(ref,2)):
-                            ref[:,:,wl]=cv2.resize(ref_datacube[:,:,wl],(np.shape(ref)[:2]))
-                    else: ref=ref_datacube
-                    
-                    ref_spec=[]
-                    for mask in np.asarray(self.pattern_lib.decorator.sequence)[:,:,:-1]:
-                        data_norm=(mask/255)*ref_datacube.T
-                        ref_spec.append(np.nanmean(np.where((data_norm)!=0,data_norm,np.nan),(1,2)))
-                    ref_spec=np.asarray(ref_spec)
-                    self.normalised_datacube=self.spectra/ref_spec
-                    np.save(folder_name+'_normalised',self.normalised_datacube)
+                    try:
+                        # Load raw data
+                        acq_data=load_hypercube(self.normalisation_path)
+                        ref_datacube=acq_data['hyperspectral_image']
+                        masks=np.asarray(self.pattern_lib.decorator.sequence)[:-1,:,:]
+                        print(f"{np.shape(masks)=}")
+           
+                        res_mask=np.zeros((np.size(masks,0),np.size(ref_datacube,0),np.size(ref_datacube,1)))
+                        for idx in range(np.size(res_mask,0)):
+                            res_mask[idx,:,:]=cv2.resize(masks[idx,:,:]/255,(np.shape(ref_datacube)[:2]))
+                        print(f"{np.shape(res_mask)=}")
+                        ref_spec=[]
+                        
+                        for idx in range(np.size(res_mask,0)):
+                            data_norm=np.reshape(res_mask[idx,:,:]*ref_datacube.T,np.shape(ref_datacube))
+                            print(f'{np.shape(data_norm)=}')
+                            ref_spec.append(np.nanmean(np.where((data_norm)!=0,data_norm,np.nan),(0,1)))
+                        
+                        ref_spec=np.asarray(ref_spec)
+                        self.normalised_datacube=self.spectra/ref_spec
+                        title_acq = f"spectra_normalised_{fdate}_{actual_time}.npy"
+                        np.save(title_acq,self.normalised_datacube)
+                    except Exception as e:
+                        print(e)
 
 
                 title_acq = f"spectra_{fdate}_{actual_time}.npy"

@@ -64,7 +64,7 @@ class OPApp(ctk.CTk):
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
-        slf.config=0
+        self.config=0
         # configure window
         #self.resizable(False, False)
         self.title(f"ONEPIX GUI")
@@ -193,7 +193,7 @@ class OPApp(ctk.CTk):
         self.config=OPConfig(json_path)
         
         try :   
-            config.thread_acquisition(time_warning=False)
+            self.config.thread_acquisition(time_warning=False)
             self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["acquireButton"])
             directory = '../Hypercubes'
@@ -225,14 +225,12 @@ class OPApp(ctk.CTk):
     def plotMask(self, path):
         self.a_vis.clear()
         self.b_vis.clear()
-        print("maskPath : ", path)
         rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('mask')][0]))
-        
         if len(self.config.normalised_datacube)!=0: #Load Normalised data
-            rawSpecs = np.load(glob.glob('spectra*normalised*')[0]) 
+            rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 
         else:
             rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
-
+            
         wl = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('wavelengths')][0])
         customColormap = find_rgb_label(rawMasks.shape[0])
         im = np.zeros((rawMasks.shape[1],rawMasks.shape[2],3),dtype = np.uint8)
@@ -240,7 +238,6 @@ class OPApp(ctk.CTk):
             mask = rawMasks[i,:,:].reshape(rawMasks.shape[1],rawMasks.shape[2],-1)
             mask = mask * customColormap[i].reshape(1,1,-1)
             im+=mask
-        
         image = cv2.imread(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('RGB_cor')][0])
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         customColormap = customColormap/255
@@ -254,6 +251,7 @@ class OPApp(ctk.CTk):
         self.a_vis.set_xlabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["xlabel"], fontsize = 10)
         self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()
+
         
     
     def open_GUIConfig(self):

@@ -63,7 +63,6 @@ class OPApp(ctk.CTk):
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
-        self.config=0
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI")
@@ -204,7 +203,7 @@ class OPApp(ctk.CTk):
             json.dump(params, outfile)
             outfile.close()
         
-        self.config=OPConfig(json_path)
+        config=OPConfig(json_path)
         try:
             config.OP_init()
             config.thread_acquisition(time_warning=False)
@@ -240,7 +239,7 @@ class OPApp(ctk.CTk):
         self.b_vis.clear()
         print("maskPath : ", path)
         rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('mask')][0]))
-        if len(self.config.normalised_datacube)!=0: #Load Normalised data
+        if len(self.acq_config.normalised_datacube)!=0: #Load Normalised data
                 rawSpecs = np.load(glob.glob('spectra*normalised*')[0]) 
         else:
             rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
