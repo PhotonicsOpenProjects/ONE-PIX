@@ -112,7 +112,7 @@ class OPConfig:
     
         """
         
-        max_counts = 30000
+        max_counts = 40000
         self.spec_lib.set_integration_time()
         
         flag = True
@@ -173,15 +173,15 @@ class OPConfig:
         # create static pattern to be displayed
         proj = Tk()
         proj.geometry("{}x{}+{}+{}".format(self.width, self.height, screenWidth, 0))
-        y = list(range(self.height))  # horizontal vector for the pattern creation
-        x = list(range(self.width))  # vertical vector for the pattern creation
-        Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
-        A = 2 * np.pi * X * 10 / self.height
-        B = 2 * np.pi * Y * 10 / self.width
-        pos_r = np.cos(A + B)  # gray pattern creation
-        pos_r[pos_r < 0] = 0
-
-        pil_img = PIL.Image.fromarray(255 * pos_r)
+        #y = list(range(self.height))  # horizontal vector for the pattern creation
+        #x = list(range(self.width))  # vertical vector for the pattern creation
+        #Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
+        #A = 2 * np.pi * X * 10 / self.height
+        #B = 2 * np.pi * Y * 10 / self.width
+        #test_pattern = np.cos(A + B)  # gray pattern creation
+        #test_pattern[test_pattern < 0] = 0
+        test_pattern=np.ones((self.height,self.width),dtype=np.uint8)
+        pil_img = PIL.Image.fromarray(255 * test_pattern)
 
         img = PIL.ImageTk.PhotoImage(master=proj, image=pil_img)
         label_test_proj = Label(proj, image=img)
@@ -423,20 +423,21 @@ class OPConfig:
                         acq_data=load_hypercube(self.normalisation_path)
                         ref_datacube=acq_data['hyperspectral_image']
                         masks=np.asarray(self.pattern_lib.decorator.sequence)[:-1,:,:]
-                        print(f"{np.shape(masks)=}")
-           
-                        res_mask=np.zeros((np.size(masks,0),np.size(ref_datacube,0),np.size(ref_datacube,1)))
-                        for idx in range(np.size(res_mask,0)):
-                            res_mask[idx,:,:]=cv2.resize(masks[idx,:,:]/255,(np.shape(ref_datacube)[:2]))
-                        print(f"{np.shape(res_mask)=}")
-                        ref_spec=[]
+                        nb_masks=np.size(masks,0)
+                        print(f"{nb_masks=}")
+                        new_masks=np.zeros((nb_masks,np.size(ref_datacube,0),np.size(ref_datacube,1)))
+                        for idx in range(nb_masks):
+                            new_masks[idx,:,:]=cv2.resize(masks[idx,:,:],np.shape(new_masks[idx,:,:]),interpolation=cv2.INTER_AREA)
+
+
+                        ref_spec=np.zeros((nb_masks,np.size(ref_datacube,2)))
+                        for idx in range(nb_masks):
+                            mask=np.where(new_masks[idx,:,:],new_masks[idx,:,:],np.nan)/255
+                            for wl in range(np.size(ref_datacube,2)):
+                                ref_spec[idx,wl]=np.nanmean(ref_datacube[:,:,wl].squeeze()*mask,axis=(0,1))
+
+                        ref_spec-=np.repeat(np.nanmean(ref_spec[:,:10],axis=1)[:,np.newaxis],np.size(ref_datacube,2),axis=1)
                         
-                        for idx in range(np.size(res_mask,0)):
-                            data_norm=np.reshape(res_mask[idx,:,:]*ref_datacube.T,np.shape(ref_datacube))
-                            print(f'{np.shape(data_norm)=}')
-                            ref_spec.append(np.nanmean(np.where((data_norm)!=0,data_norm,np.nan),(0,1)))
-                        
-                        ref_spec=np.asarray(ref_spec)
                         self.normalised_datacube=self.spectra/ref_spec
                         title_acq = f"spectra_normalised_{fdate}_{actual_time}.npy"
                         np.save(title_acq,self.normalised_datacube)

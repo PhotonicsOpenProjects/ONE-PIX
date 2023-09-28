@@ -226,11 +226,15 @@ class OPApp(ctk.CTk):
         self.a_vis.clear()
         self.b_vis.clear()
         rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('mask')][0]))
-        if len(self.config.normalised_datacube)!=0: #Load Normalised data
-            rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 
-        else:
+        try:
+            if len(self.config.normalised_datacube)!=0: #Load Normalised data
+                rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 
+            else:
+                rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
+        except Exception as e:
+            print(e)
             rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
-            
+       
         wl = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('wavelengths')][0])
         customColormap = find_rgb_label(rawMasks.shape[0])
         im = np.zeros((rawMasks.shape[1],rawMasks.shape[2],3),dtype = np.uint8)
