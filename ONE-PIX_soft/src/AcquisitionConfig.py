@@ -482,6 +482,7 @@ class OPConfig:
             + "Number of projected patterns : %d" % self.nb_patterns+"\n" \
             + "Height of pattern window : %d pixels" % self.height+"\n" \
             + "Width of pattern window : %d pixels" % self.width+"\n" \
+            + "Number of spectral measures per pattern: %d  " %self.rep+"\n" \
             + "Integration time : %d ms" % self.integration_time_ms+"\n" 
     
     
