@@ -12,6 +12,7 @@ class HadamardPatterns:
         self.nb_patterns=2*self.dim**2
         self.sequence=[]
         self.pattern_order=[]
+        self.white_pattern_idx=0
         
         if self.dim != spatial_res:
             print(f'Warning: Hadamard sampling request for powers of 2 dimensions. The nearest eligible size is {self.dim}. ')
