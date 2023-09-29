@@ -189,6 +189,9 @@
 					"xlabel":"longueur d'onde(nm)",
 					"ylabel":"pseudo-flux r\u00e9fl\u00e9chi(unit\u00e9 arb.)"
 					}
+			},
+			"errors":{
+				"load_data_error":"Le dossier s\u00e9lectionn\u00e9 ne contient pas des donn\u00e9es au bon format."
 				}
 			},
 		"Advanced":{
@@ -209,6 +212,9 @@
 					"xlabel":"longueur d'onde(nm)",
 					"ylabel":"pseudo-flux r\u00e9fl\u00e9chi(unit\u00e9 arb.)"
 					}
+				},
+			"errors":{
+				"load_data_error":"Le dossier s\u00e9lectionn\u00e9 ne contient pas des donn\u00e9es au bon format."
 				}
 			}
 		}

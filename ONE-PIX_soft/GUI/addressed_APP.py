@@ -6,6 +6,7 @@ Created on Wed Jul 19 18:32:47 2023
 
 import customtkinter as ctk
 from tkinter import filedialog
+from tkinter.messagebox import showerror
 import sys
 import os
 import glob
@@ -220,7 +221,12 @@ class OPApp(ctk.CTk):
     def load_data(self):
         path = filedialog.askdirectory(title=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["askdirectory"],
                                        initialdir = '../Hypercubes')
-        self.plotMask(path)
+        if path!='':
+            try:
+                self.plotMask(path)
+            except Exception as e:
+                showerror(title='Loading data error',message=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["errors"]["load_data_error"])
+
         
     def plotMask(self, path):
         self.a_vis.clear()

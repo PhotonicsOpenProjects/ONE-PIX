@@ -188,6 +188,9 @@
 					"xlabel":"wavelength(nm)",
 					"ylabel":"reflected pseudo-flux (arb. unit)"
 					}
+				},
+			"errors":{
+				"load_data_error":"The selected folder does not contain data in the correct format."
 				}
 			},
 		"Advanced":{
@@ -208,6 +211,9 @@
 					"xlabel":"wavelength(nm)",
 					"ylabel":"reflected pseudo-flux (arb. unit)"
 					}
+				},
+			"errors":{
+				"load_data_error":"The selected folder does not contain data in the correct format."
 				}
 			}
 		}
