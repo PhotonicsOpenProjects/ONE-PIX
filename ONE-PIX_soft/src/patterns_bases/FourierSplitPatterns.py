@@ -13,7 +13,6 @@ class FourierSplitPatterns:
         self.nb_patterns=4*(self.spectrum_size+1)*(2*self.spectrum_size+1)
         self.sequence=[]
         self.white_pattern_idx=4*self.spectrum_size
-        print(self.white_pattern_idx)
 
     def sequence_order(self):
         """

@@ -219,19 +219,18 @@ class OPConfig:
         chronograms=np.zeros((self.rep,self.nb_patterns,len(self.wavelengths)))
         coeff=1
         while cnt <self.nb_patterns:            
-            begin=time.time()
-            if self.spectro_flag:
+            if self.spectro_flag: # check to adjust integration time for white pattern
                self.spec_lib.decorator.integration_time_ms=self.integration_time_ms//2
-               self.spec_lib.set_integration_time()
+               self.spec_lib.decorator.set_integration_time()
                coeff=self.integration_time_ms/self.spec_lib.decorator.integration_time_ms
             
-            if event.is_set():
+            if event.is_set():# event set when pattern is displayed
                 for k in range(self.rep):
                     chronograms[k,cnt,:]=coeff*self.spec_lib.get_intensities()
                 
-                if self.spectro_flag:
+                if self.spectro_flag: #
                     self.spec_lib.decorator.integration_time_ms=self.integration_time_ms
-                    self.spec_lib.set_integration_time()
+                    self.spec_lib.decorator.set_integration_time()
                     coeff=1
                     self.spectro_flag=False
 
@@ -262,14 +261,16 @@ class OPConfig:
         None.
     
         """  
-        begin = time.time()
+        try:
+            white_idx=self.pattern_lib.decorator.white_pattern_idx
+        except:
+            white_idx=-100
+        delta_idx=4 if self.pattern_method=='FourierSplit' else 2
         # Display each pattern from the sequence
-        for pattern in self.pattern_lib.decorator.sequence:
-            try:
-                if self.pattern_lib.decorator.white_pattern_idx in np.arange(self.pattern_lib.decorator.sequence.index(pattern),self.pattern_lib.decorator.sequence.index(pattern)+4):
-                    self.spectro_flag=True
-            except:
-                pass
+        for count,pattern in enumerate(self.pattern_lib.decorator.sequence):
+            if  count in np.arange(white_idx,white_idx+delta_idx):
+                self.spectro_flag=True
+           
 
             cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
             cv2.waitKey(int(self.periode_pattern))

@@ -811,8 +811,6 @@ class OPApp(ctk.CTk):
             self.acq_config.OP_init()
             if self.acq_config.periode_pattern<60 :self.acq_config.periode_pattern=60
             
-            while self.acq_config.spectro_flag:
-                pass
             self.close_window_proj()
             self.entry_integration_time.configure(state = 'normal')
             self.entry_integration_time.delete(0,10)
