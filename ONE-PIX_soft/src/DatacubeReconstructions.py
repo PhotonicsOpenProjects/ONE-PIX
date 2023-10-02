@@ -118,12 +118,17 @@ def load_hypercube(opt=None):
         meas_path=opt
         
     hyp_filename=glob.glob(f'{meas_path}/*.hdr')[0]
-    info_filename=glob.glob(f'{meas_path}/*.txt')[0]
+    try:
+        info_filename=glob.glob(f'{meas_path}/*.txt')[0]
+        res['pattern_method']=get_header_data(info_filename)['pattern_method']
+    except:
+        pass
+    res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]
     data=envi.open(hyp_filename)
     res["hyperspectral_image"]=data.load()
     res["wavelengths"]=np.array(data.bands.centers)
-    res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]   
-    res['pattern_method']=get_header_data(info_filename)['pattern_method']
+       
+    
     return res
 
 

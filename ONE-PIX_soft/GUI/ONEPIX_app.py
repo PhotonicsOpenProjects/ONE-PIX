@@ -1185,19 +1185,25 @@ class OPApp(ctk.CTk):
                 wl=self.res["wavelengths"]
             try:
                 if choice_list.index(self.data_choice.get())==0: # if data_choice == 'All'
+                    print(data_list)
                     for datacube in data_list:
-                        if datacube in ['rgb_image','image_seg']:
+                        if datacube in ['rgb_image','image_seg','rgb_spectrum']:
                             plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
-                        elif datacube in ['wavelengths','current_data_level','spectra','infos','pattern_method']:
+                        elif datacube in ['wavelengths','wavelengths_clipped','current_data_level','spectra','infos','pattern_method']:
                             pass
                         elif datacube=='hyperspectral_image':
-                            py2envi(datacube,self.res[datacube],self.res["wavelengths"],path)
+                            hyp_path=path+'/hyperspectral_image_'+today
+                            os.mkdir(hyp_path)
+                            py2envi(datacube,self.res[datacube],self.res["wavelengths"],hyp_path)
                         else:
-                            py2envi(datacube,self.res[datacube],wl,path)
+                            data_path=path+'/'+datacube+'_'+today
+                            os.mkdir(data_path)
+                            py2envi(datacube,self.res[datacube],wl,data_path)
                 else:
                     py2envi(self.res["current_data_level"],self.res[self.res["current_data_level"]],wl,path)
-            except:
+            except Exception as e:
                 print(f"error:{datacube}")
+                print(e)
             self.d.destroy()
             
 # =============================================================================
