@@ -893,7 +893,6 @@ class OPApp(ctk.CTk):
        
     def rgb_display(self,hyperspectral_image,wavelengths,title):
         self.res["rgb_image"] = hsa.RGB_reconstruction(hyperspectral_image,wavelengths)
-        
         self.clear_rgb_graph()
         self.a_rgb.imshow(self.res["rgb_image"])
         self.a_rgb.set_title(title,color='white')
@@ -917,7 +916,7 @@ class OPApp(ctk.CTk):
         try:
             self.res=load_hypercube()
             self.res["current_data_level"]="hyperspectral_image"
-            
+            self.res["hyperspectral_image"]=self.res["hyperspectral_image"][1:,1:,:] if self.res["pattern_method"]=='FourierShift' else self.res["hyperspectral_image"]
             self.entry_wmin.configure(state='normal')
             self.entry_wmax.configure(state='normal')
             self.wl_limits=[round(self.res["wavelengths"][0],2),round(self.res["wavelengths"][-1],2)]
@@ -931,10 +930,11 @@ class OPApp(ctk.CTk):
             self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='white')
             self.normalisation_button.configure(state='normal')
             
-            if self.res['pattern_method'] in ['FourierSplit','Fourier']:
+            if self.res['pattern_method'] in ['FourierSplit','FourierShift']:
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))
+
             elif self.res['pattern_method']=='Hadamard':
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
