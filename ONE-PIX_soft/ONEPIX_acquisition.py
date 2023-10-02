@@ -6,6 +6,7 @@ begin_script=time.time()
 ONE-PIX data initialisation
 """
 json_path="./acquisition_param_ONEPIX.json"
+print(json_path)
 acquisition_config = OPConfig(json_path)
 acquisition_config.OP_init()
 print(f"Estimated acquisition duration : {round(1.5*acquisition_config.pattern_lib.nb_patterns*acquisition_config.periode_pattern/(60*1000),2)} min ")
@@ -18,3 +19,9 @@ acquisition_config.thread_acquisition()
 duree_script=time.time()-begin_script
 print(f"ONE-PIX acquisition completed in {duree_script/60} min")
 
+x=np.arange(0,600)
+y=np.arange(0,800)
+X,Y=np.meshgrid(x,y)
+a=[]
+for freq in b:
+    a.extend(acquisition_config.pattern_lib.decorator.creation_patterns(X,Y,freq))

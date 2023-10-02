@@ -1,0 +1,284 @@
+{
+"specific_GUI":{
+	"complete":{
+		"Acquisition_tab":{
+			"title":"Acquisition",
+			"block 1":{
+				"title":"Acquisition mode",
+				"simple_mode_button":"Simple",
+				"expert_mode_button":"Expert",
+				"button_wind_test":"Display test pattern",
+				"button_acquire_spec":"Acquire spectrum"
+				},
+			"block 2":{
+				"title":"Acquisition's settings",
+				"label_integration_time":"Integration time (ms)",
+				"label_img_res":"Image resolution (pixels)",
+				"label_pattern_duration":"Patterns duration (ms)",
+				"button_co":"Spectrometer connection",
+				"button_acquire_hyp":"Acquire hypercube",
+				"switch_spectro":"Spectrometer disconnected"
+				},
+			"block 3":{
+				"title":"Display:",
+				"switch_spat2im":"Image domain <--> Frequency",
+				"switch_raw2norm":"Raw data <--> Normalised",
+				"fig":{}
+				},
+			"block 4":{
+				"appearance_mode_label":"Appearance Mode:",
+				"appearance_mode_optionemenu":["Dark", "Light"]
+				},
+			"block 5":{
+				"est_time_label":"Estimated end: "
+				},
+			"functions":{
+				"askokcancel":{
+					"title":"Quit",
+					"confirm":"Do you want to quit ?"
+					},
+				"switch_spat2im_command":{
+					"freq":"Spectral mean frequency domain (log scale)",
+					"spat":"False RGB color of the hyperspectral image"
+					},
+				"switch_raw2norm_command":{
+					"raw": "Raw data",
+					"norm": "Normalised data"
+				    },
+				"spec_connection":{
+					"button_co":"Spectrometer disconnection",
+					"warning":["Spectrometer error"," is not available"]
+					},
+				"spec_disconnection":{
+					"switch_spectro":"Spectrometer disconnected",
+					"button_co":"Spectrometer connection"
+					},
+				"draw_spectrum":{
+					"title":"Acquired spectrum ",
+					"xlabel":"Wavelengths (nm)",
+					"ylabel":"Intensity (counts)",
+					"warning":["Warning","Connect one spectrometer first"]
+					}
+				}			
+			},
+		"Analysis_tab":{
+			"title":"Hypercube analysis",
+			"block 1":{
+				"load_button":"Load data",
+				"clear_button":"Clear all",
+				"label_data_info":"Load data: ",
+				"switch_spat2im_analysis":"Spatial domain <----> frequencies"
+				},
+			"block 2":{
+				"label_mode_group":"RGB preview: "
+				},
+			"block 3":{
+				"label_mode_group":"Basic analysis:",
+				 "draw_button":"Draw spectrum",
+				 "trim_button":"Trim spectra",
+				 "normalisation_button":"Normalization",
+				 "label_mode_group":"Advanced analysis: ",
+				 "label_pca":"PCA dim: ",
+				 "label_clusters":"Clusters: ",
+				 "clust_button":"Clustering",
+				 "label_boxcar":"Boxcar width: ",
+				 "label_polyorder":"Poly. order: ",
+				 "smooth_button":"Smoothing",
+				 "save_opt_button":"Save"
+				},
+			"functions":{
+				"load_data":{
+					"label_data_info":"Data loaded"
+					},
+				"warning":{
+					"noData":["DataError","Load data first"],
+					"polyorder":["ValueError","Polyorder must be less than window_length."],
+					"outvalue":["ValueError","This datacube does not contain images beyond ", " nm"],
+					"belowvalue":["ValueError","This datacube does not contain images below ", " nm"]
+					},
+				"rgb_display":{
+					"clustered":"Clustered image ",
+					"raw":"RGB reconstructed image",
+					"smooth":"RGB reconstructed image (smoothed)",
+					"trim":"RGB reconstructed image (spectral clip)",
+					"norm":"RGB reconstructed image (reflectance)"
+					},
+				"flux2ref":{
+					"title":"Select a reference area to normalise the data cube"
+					},
+				"save_analysis_opt":{
+					"label_radio_group":"Select data to be saved:",
+					"data_choice":["All","Raw data"],
+					"save_desc":"Select save path: ",
+					"explore_bouton":"Explore",
+					"CANCEL_save_bouton":"Cancel",
+					"confirm_bouton":"Confirm"
+					},
+				"get_dir_analysis":{
+					"path":"Select save path: "
+					}	
+				}
+			},
+
+
+		"VI_tab":{
+			"title":"VI analysis",
+			"block 1":{
+				"sat_desc":"Path to satelite data .csv",
+				"shown_sat_path":"Select a path",
+				"shown_data_path":"Select a path",
+				"data_desc":"Path to ONE-PIX image: ",
+				"explore_bouton":"Explore"
+				},
+			"block 2":{
+				"domain_desc":"Application domain",
+				"domain":["vegetation","snow","water"]
+				},
+			"block 3":{},
+			"block 4":{
+				"sort_choice":["keep all", "simple filter"],
+				"critere":["Variance", "Entropy"],
+				"calc_bouton":"Plot indices",
+				"WIP":"Waiting"
+				},
+			"block 5":{
+				"save_options":"Save options",
+				"save_confirm":"Save"
+				},
+			"functions":{
+				"save_menu":{
+					"save_id_CB":"Save indices",
+					"save_bands_CB":"Save bands",
+					"save_desc":"Save directory: ",
+					"shown_save_path":"Select a path",
+					"explore_bouton":"Explore",
+					"comment_label":"Enter a comment: ",
+					"CANCEL_save_bouton":"Cancel",
+					"confirm_bouton":"Confirm"
+					},
+				"WIP":{
+					"WIP_saving":"Saving...",
+					"WIP_computing":"computing...",
+					"WIP_done":"Done"
+					},
+				"get_combobox_value":{
+					"warning_VI":["Unknown VI","Select a VI from the list"],
+					"warning_bands":["Unknown band","Select a band from the list"]
+					}
+				}
+			}
+		},
+		
+	"Addressed":{
+		"Simple":{
+			"calibrationButton":"Co-registration (initialization)",
+			"mode_desc":"Segmentation mode choice",
+			"manual_choice":"Manual",
+			"auto_choice":"semi-automatic",
+			"KMeans_desc":"semi-automatic segmentation parametters",
+			"Prim_seg_label":"If the background is dark or gray, write 2.\nIf it is white try to find the optimal setup.",
+			"Sec_seg_label":"Number of colors in your scene",
+			"acquireButton":"Begin acquisition",
+			"loadButton":"Load data",
+			"functions":{
+				"calibrationButton_WIP":"PLEASE WAIT",
+				"acquireButton_WIP":"PLEASE WAIT",
+				"askdirectory":"select the folder that contains your data",
+				"plotMask":{
+					"xlabel":"wavelength(nm)",
+					"ylabel":"reflected pseudo-flux (arb. unit)"
+					}
+				},
+			"errors":{
+				"load_data_error":"The selected folder does not contain data in the correct format."
+				}
+			},
+		"Advanced":{
+			"calibrationButton":"Co-registration",
+			"mode_desc":"Segmentation mode choice",
+			"manual_choice":"Manual",
+			"auto_choice":"KMeans",
+			"KMeans_desc":"KMeans parametters",
+			"Prim_seg_label":"pre-segmentation : number of clusters",
+			"Sec_seg_label":"Secondary segmentation : number of clusters",
+			"acquireButton":"Begin acquisition",
+			"loadButton":"Load data",
+			"functions":{
+				"calibrationButton_WIP":"PLEASE WAIT",
+				"acquireButton_WIP":"PLEASE WAIT",
+				"askdirectory":"select the folder that contains your data",
+				"plotMask":{
+					"xlabel":"wavelength(nm)",
+					"ylabel":"reflected pseudo-flux (arb. unit)"
+					}
+				},
+			"errors":{
+				"load_data_error":"The selected folder does not contain data in the correct format."
+				}
+			}
+		}
+	},
+	
+"HUB":{
+	"buttons":{
+		"GuiMode_choice":["Simple", "Advanced"],
+		"CompleteAcquisition_button":"Complete acquisition",
+		"AddressedAcquisition_button":"Addressed acquisition",
+		"Exit_button":"EXIT"
+		},
+		
+	"functions":{
+		"normalization_request":{
+			"pop_upText":"Do you want your data to be normalized ?",
+			"existing_normalisation":"Use an available reference ?",
+			"normalize_noButton":"NO",
+			"normalize_yesButton":"YES"
+			},
+		"normalisation_specifications":{
+			"pop_upText":"Ensure that the calibration reference cover all the field of view during all the normalization process. It can take a few minutes",
+			"normalize_yesButton":"DONE",
+			"normalize_noButton":"CANCEL"
+			}
+		},
+
+	"help":{
+		"mode":{
+			"title":"Mode help",
+			"description":"  There are two modes for the interface. The first one is the 'simple mode', which is made for those who want to discover the ONE-PIX and the hyperspectral imaging field. In this mode, the parameter that are allowed to be changed are verry limitted, so it provides a quick and efficient way to acquiere images.",
+
+			"simple_mode":{
+				"title":"Simple mode",
+				"full":{
+					"title":"Complete strategy",
+					"description":"  - all the setting from the complete mode are automatically chosen\n  - only the last layer of data is to be stored\n  - the interface contains one acquisition tab and one tab for the calculation of spectral indices"
+					},
+				"addressed":{
+					"title":"Addressed strategy",
+					"description":"  - only the last layer of data is to be stored"
+					}
+				},
+
+			"advanced_mode":{ 
+				"title":"Advanced mode",
+				"full":{
+					"title":"Complete strategy",
+					"description":"  - The settings can be modified manually\n  - There is one more tab that provides quick data analasis"
+					},
+				"addressed":{
+					"title":"Addressed strategy",
+					"description":"  - All the layers of data are kept"
+					}
+				}
+			},
+
+		"acquisition":{
+			"title":"Acquisition help",
+			"corpse":"  There are currently two strategies to acquire images with the ONE-PIX: the full acquisition and the addressed acquisition.\n\n  FULL ACQUISITION: this mode measures the responses to patterns from a complete base to reconstitute an hypercube of data (an image in which each pixel is a spectrum). For example, Fourier patterns can be projected, so that a simple FFT (Fast Fourier Transform) can reconstruct the spatial aspect of the scene.\n\n  ADDRESSED ACQUISITION: This strategy uses the RGB camera of the ONE-PIX to find the region of interest so that the projector illuminates them one by one while the spectrometer sample their mean spectra. There are two fonction to perform the segmentation into masks : a half-automatic k-means labeling, and a manual labeling."
+			},
+		"normalization":{
+			"title":"Normalization help",
+			"corpse":"  The normalization process is here to fix both the system vignetting and the light dependencies to provide a true reflectance output. Since its main origin is the fiber collection, it is needed to perform a full acquisition of a well known referennce, so that the vignetting can be modelled and corrected. Such a reference must be spectrally homogeneous, lambertian and must have a calibrated BRDF.\nIf you want to normalize your data, please:\n  - put your spectral reference in the field of view of the projector\n  - press <DONE>\n  - wait until the graphical user interface opens."
+			}
+		}
+	}
+}

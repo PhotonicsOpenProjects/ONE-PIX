@@ -1,4 +1,10 @@
-from src.DLL.avaspec import *
+import sys
+import os
+sys.path.insert(0, os.path.abspath('../DLL/'))
+try:
+    from src.DLL.avaspec import *
+except ModuleNotFoundError:
+    from avaspec import *
 import time
 import numpy as np
 
@@ -11,7 +17,7 @@ class AvantesBridge:
         self.handle=0
         self.config=0
         self.pixels=0
-        self.measconfig=MeasConfigType
+        self.measconfig=MeasConfigType()
         self.DeviceName=''
 
     def spec_open(self):
@@ -26,7 +32,7 @@ class AvantesBridge:
         AVS_Init(0)
         NbDev = AVS_GetNrOfDevices() 
         if (NbDev==1):
-            mylist = AvsIdentityType()                                                                          # pretty sure these do the same thing but whatever you know it works
+            mylist = AvsIdentityType * 1
             mylist = AVS_GetList(1)
             self.DeviceName= str(mylist[0].SerialNumber.decode("utf-8"))
             
@@ -69,7 +75,7 @@ class AvantesBridge:
         None.
 
         """
-        self.measconfig.m_IntegrationTime = self.integration_time_ms
+        self.measconfig.m_IntegrationTime = float(self.integration_time_ms)
         ret = AVS_PrepareMeasure(self.handle,self.measconfig)
         
     def get_wavelengths(self):

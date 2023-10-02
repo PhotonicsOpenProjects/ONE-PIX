@@ -9,7 +9,6 @@ acq_data=load_hypercube()
 wl=acq_data['wavelengths']
 datacube=acq_data['hyperspectral_image']
 
-
 # Display spectral mean of the datacube
 plt.figure()
 plt.imshow(np.mean(datacube,2))

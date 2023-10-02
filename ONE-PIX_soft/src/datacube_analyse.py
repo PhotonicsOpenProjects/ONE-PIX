@@ -77,20 +77,21 @@ def spikes_correction(res):
     """
     
     fig,ax=plt.subplots()
-    plt.imshow(np.log10(abs(np.mean(res.whole_spectrum,2))))
-    plt.title('Spectral frequencies spikes correction. Press escape key to end')
+    whole_spectrum=np.fft.fftshift(np.fft.fft2(res["hyperspectral_image"],axes=(0,1)))
+    plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
+    plt.title('Spectral frequencies spikes correction. Pacq_datas escape key to end')
     p=plt.ginput(-1)
     p=np.round(p).astype(np.int32)
     plt.clf()
-    
+
     for pixel in p:
-        if pixel[0]==np.size(res.whole_spectrum,1)-1:
-            res.whole_spectrum[pixel[1],pixel[0],:]=res.whole_spectrum[pixel[1],pixel[0]-2,:]
+        if pixel[0]==np.size(whole_spectrum,1)-1:
+            whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]-2,:]
         else:
-            res.whole_spectrum[pixel[1],pixel[0],:]=res.whole_spectrum[pixel[1],pixel[0]+1,:]
-    plt.imshow(np.log10(abs(np.mean(res.whole_spectrum,2))))
+            whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]+1,:]
+    plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
     plt.show()
-    res.image_reconstruction()
+    res["hyperspectral_image"]=abs(np.fft.ifft2(whole_spectrum,axes=(0,1)))
     return res
 
 
@@ -128,7 +129,7 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
         tick=np.arange(n)+1
         # Select pixel(s)
         p=fig.ginput(n)
-        p=np.round(p).astype(np.int)
+        p=np.round(p).astype(np.int32)
         # Display results
         plt.plot(p[:,0],p[:,1],'x',color='red')
         for i, txt in enumerate(tick):
@@ -147,7 +148,7 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
     elif mode=='mean':
         # Select 2 corner pixels of rectangle area
         p=plt.ginput(2)
-        p=np.round(p).astype(np.int)
+        p=np.round(p).astype(np.int32)
         spec=datacube[p[0,1]:p[1,1],p[0,0]:p[1,0],:] # 2D spatial mean of the selected area
         
         # Display results
@@ -269,7 +270,7 @@ def clustering(datacube,components,n_cluster):
     pca = PCA(components) 
     principalComponents = pca.fit_transform(image_reshape)
     
-    kmeans = KMeans(n_cluster,random_state=0).fit(principalComponents)
+    kmeans = KMeans(n_cluster,n_init=10,random_state=0).fit(principalComponents)
     image_seg=np.reshape(kmeans.labels_,(np.size(datacube,0),np.size(datacube,1))) 
     
     return image_seg  

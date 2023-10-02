@@ -12,6 +12,7 @@ class HadamardPatterns:
         self.nb_patterns=2*self.dim**2
         self.sequence=[]
         self.pattern_order=[]
+        self.white_pattern_idx=0
         
         if self.dim != spatial_res:
             print(f'Warning: Hadamard sampling request for powers of 2 dimensions. The nearest eligible size is {self.dim}. ')
@@ -36,7 +37,7 @@ class HadamardPatterns:
             for k in range(self.dim): #line broom
                 pattern_order.append("Hpos(%d,%d)"%(j,k))
                 pattern_order.append("Hneg(%d,%d)"%(j,k))
-        freqs.append(1)
+        freqs.append((j,k))
                 
         return pattern_order,freqs
      
