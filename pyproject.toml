@@ -1,0 +1,12 @@
+# https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
+
+[tool.black]
+line-length = 127
+target-version = ['py310']
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "ONE-PIX_soft/tests",
+]

@@ -4,13 +4,11 @@ matplotlib==3.5.1
 numpy==1.22.3
 pandas==2.0.3
 picamera==1.13
-Pillow==10.0.0
 scikit-image==0.19.3
 scikit-learn==1.0.2
 scipy==1.8.0
 screeninfo==0.8.1
 seabreeze==2.0.2
-Pillow==9.3.0
 spectral==0.22.4
 spyndex==0.3.0
 tifffile==2023.1.23.1
