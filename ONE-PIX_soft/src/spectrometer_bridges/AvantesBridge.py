@@ -110,7 +110,7 @@ class AvantesBridge:
             dataready = (AVS_PollScan(self.handle) == True)                    # get the status of data
             time.sleep(0.0001)
      
-        spectrum = AVS_GetScopeData(self.handle)[1][:self.pixels]
+        spectrum = np.array(AVS_GetScopeData(self.handle)[1][:self.pixels])
 
         return spectrum
     
