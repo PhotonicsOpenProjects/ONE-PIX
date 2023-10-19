@@ -108,9 +108,18 @@ class OPApp(ctk.CTk):
                                            state = "disabled", command = self.manual_toogle)
         self.manual_choice.grid(column=1, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         self.auto_choice = ctk.CTkButton(self.Mode_frame, text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["auto_choice"], state = "disabled",
-                                         fg_color="gray", command = self.auto_toogle)
+                                             fg_color="gray", command = self.auto_toogle)
         self.auto_choice.grid(column=0, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-    
+        
+        self.integration_time_label = ctk.CTkLabel(self.Mode_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["integration_time_label"])
+        self.integration_time_label.grid(column=0, row=3, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
+        self.integration_time_entry = ctk.CTkEntry(self.Mode_frame, state = "normal")
+        self.integration_time_entry.grid(column=1, row=3, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
+        f = open(json_path)
+        params = json.load(f)
+        f.close()
+        self.integration_time_entry.insert(0,str(params["integration_time_ms"]))
+        
 # =============================================================================
 #         
 # =============================================================================
@@ -183,10 +192,12 @@ class OPApp(ctk.CTk):
         f = open(json_path)
         params = json.load(f)
         f.close()
+        params['integration_time_ms']=int(float(self.integration_time_entry.get()))
         if self.test_mode=="manual":
             params['spatial_res']='manual_segmentation'
         elif self.test_mode=="auto":
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
+                                     
         with open(json_path, 'w') as outfile:
             json.dump(params, outfile)
             outfile.close()

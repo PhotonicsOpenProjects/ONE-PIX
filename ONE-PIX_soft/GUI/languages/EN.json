@@ -199,6 +199,7 @@
 			"manual_choice":"Manual",
 			"auto_choice":"KMeans",
 			"KMeans_desc":"KMeans parametters",
+			"integration_time_label":"Spectrometer integration time (ms)",
 			"Prim_seg_label":"pre-segmentation : number of clusters",
 			"Sec_seg_label":"Secondary segmentation : number of clusters",
 			"acquireButton":"Begin acquisition",
