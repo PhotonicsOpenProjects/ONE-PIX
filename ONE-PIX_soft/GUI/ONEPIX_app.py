@@ -856,7 +856,7 @@ class OPApp(ctk.CTk):
                 self.canvas.draw_idle()
                 
                 self.switch_spat2im.configure(state='normal')
-                self.switch_spat2im.select()
+                self.switch_spat2im.deselect()
                  
                 
                 
