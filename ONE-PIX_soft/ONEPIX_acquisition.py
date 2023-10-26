@@ -1,3 +1,7 @@
+"""
+ONEPIX_acquisition allows to launch ONE-PIX measures according to the json parameters file.
+
+"""
 
 from src.AcquisitionConfig import *
 begin_script=time.time()
@@ -7,21 +11,18 @@ ONE-PIX data initialisation
 """
 json_path="./acquisition_param_ONEPIX.json"
 print(json_path)
-acquisition_config = OPConfig(json_path)
-acquisition_config.OP_init()
-print(f"Estimated acquisition duration : {round(1.5*acquisition_config.pattern_lib.nb_patterns*acquisition_config.periode_pattern/(60*1000),2)} min ")
+config = OPConfig(json_path)
+
+# Automatic integration time setting comment to keep json's file value
+config.OP_init() 
+est_dur=round(1.5*config.pattern_lib.nb_patterns*config.periode_pattern/(60*1000),2)
+print(f"Estimated acquisition duration : {est_dur} min ")
 
 """
 Start ONE-PIX acquisition  
 """
 print("Start acquisition")
-acquisition_config.thread_acquisition()
+config.thread_acquisition()
 duree_script=time.time()-begin_script
 print(f"ONE-PIX acquisition completed in {duree_script/60} min")
 
-x=np.arange(0,600)
-y=np.arange(0,800)
-X,Y=np.meshgrid(x,y)
-a=[]
-for freq in b:
-    a.extend(acquisition_config.pattern_lib.decorator.creation_patterns(X,Y,freq))
