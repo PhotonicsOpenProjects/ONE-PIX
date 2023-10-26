@@ -22,5 +22,5 @@ Start ONE-PIX acquisition
 """
 print("Start acquisition")
 config.thread_acquisition()
-duree_script=time.time()-begin_script
-print(f"ONE-PIX acquisition completed in {duree_script/60} min")
+duration=time.time()-begin_script
+print(f"ONE-PIX acquisition completed in {duration/60} min")
