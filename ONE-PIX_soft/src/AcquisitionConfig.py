@@ -112,7 +112,7 @@ class OPConfig:
     
         """
         
-        max_counts = 40000
+        max_counts = 30000
         self.spec_lib.set_integration_time()
         
         flag = True
@@ -121,13 +121,13 @@ class OPConfig:
         delta_wl=round(0.05*np.size(self.spec_lib.get_wavelengths()))
         while flag:
             mes = []
-            for acq in range(10):
+            for acq in range(self.rep):
                 mes.append(self.spec_lib.get_intensities())
             mes = np.mean(np.array(mes), 0)[delta_wl:-delta_wl]
             delta = max(mes)-max_counts
             print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
     
-            if (abs(delta)<2500):
+            if (abs(delta)<5000):
                 flag = False
             elif self.spec_lib.integration_time_ms >= 10E3 or self.spec_lib.integration_time_ms==0:
                 flag = False
@@ -188,8 +188,8 @@ class OPConfig:
         label_test_proj.image = img
         label_test_proj.pack()
 
-        # test.r
         proj.update()
+        time.sleep(0.5)
         
         print('Finding the optimal integration time (ms):')
         self.get_optimal_integration_time()
@@ -240,7 +240,6 @@ class OPConfig:
                 time.sleep(1e-6)
             
         self.spectra=np.mean(chronograms,0)       
-        #np.save('test',self.spectra)
         self.spec_lib.spec_close()
 
     
