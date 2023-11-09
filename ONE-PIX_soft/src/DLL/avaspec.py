@@ -43,7 +43,7 @@ if 'linux' in sys.platform: # Linux will have 'linux' or 'linux2'
     #lib = ctypes.CDLL("/home/mark/field_kit/DLL/libavs.so.0.9.9")
 
     # this is the DLL for raspbian
-    lib = ctypes.CDLL(path + "/libavs.so.0.2.0")
+    lib = ctypes.CDLL(path + "/libavs.so")
     func = ctypes.CFUNCTYPE
 elif 'darwin' in sys.platform: # macOS will have 'darwin'
     lib = ctypes.CDLL(path + "/libavs.0.dylib")
