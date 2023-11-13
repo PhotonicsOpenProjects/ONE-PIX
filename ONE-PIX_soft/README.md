@@ -96,16 +96,10 @@ Else, the spectrometer used is not in this list, you need to see [adding a new s
 
 To configure Ocean Insight USB rules you need to copy the file the 10-oceanoptics.rules file stored in the [DLL folder](../ONE-PIX_soft/src/DLL) and paste it in the /etc/udev/rules.d folder of the Rapsberry pi.
 
-For that go to the DLL folder
+For that copy/paste the 10-oceanoptics.rules in /etc/udev/rules.d folder with this command line:
 
 ```
-cd src/DLL
-```
-
-and copy/paste the 10-oceanoptics.rules in /etc/udev/rules.d folder with this command line:
-
-```
-sudo cp 10-oceanoptics.rules   /etc/udev/rules.d
+sudo cp ~/Desktop/ONE-PIX/ONE-PIX_soft/src/DLL/10-oceanoptics.rules   /etc/udev/rules.d
 ```
 
 ### Avantes spectrometers
@@ -122,7 +116,8 @@ and add text in the file ussing these commands:
 ```
 sudo sed -i '13 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0667", MODE="0666"' 99-com.rules
 sudo sed -i '14 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0668", MODE="0666"' 99-com.rules
-sudo sed -i '15 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0669", MODE="0666"' 99-com.rules 
+sudo sed -i '15 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0669", MODE="0666"' 99-com.rules
+sudo sed -i '16 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0670", MODE="0666"' 99-com.rules 
 
 ```
 Finally, save and close the rules.d file.
