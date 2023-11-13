@@ -171,7 +171,7 @@ class OPConfig:
             self.spec_lib.DeviceName=self.spec_lib.decorator.DeviceName
     
         # create static pattern to be displayed
-        proj = Tk()
+        proj = Toplevel()
         proj.geometry("{}x{}+{}+{}".format(self.width, self.height, screenWidth, 0))
         y = list(range(self.height))  # horizontal vector for the pattern creation
         x = list(range(self.width))  # vertical vector for the pattern creation
