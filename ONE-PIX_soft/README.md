@@ -43,18 +43,13 @@ sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
 
 ## Requirements installation
 
-A folder ONE-PIX _soft was created on the desktop.
-with the terminal go in this folder 
-
-```
-cd ONE-PIX/ONE-PIX_soft
-```
+A ONE-PIX folder was created on the desktop.
 
 You need to install Python packages to run ONE-PIX_soft. 
 For that, just run the following command:
 
 ```
-pip install -r requirements.txt
+pip install -r ./ONE-PIX/ONE-PIX_soft/requirements.txt
 ```
 
 ## Dependencies installation
