@@ -492,7 +492,7 @@ class OPConfig:
         
         print('is_raspberrypi() : ',is_raspberrypi())
         if is_raspberrypi():
-            root=Tk()
+            root=Toplevel()
             root.geometry("{}x{}+{}+{}".format(self.width, self.height,screenWidth,0))
             root.wm_attributes('-fullscreen', 'True')
             c=Canvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
