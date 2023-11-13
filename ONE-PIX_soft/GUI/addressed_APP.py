@@ -73,8 +73,8 @@ class OPApp(ctk.CTk):
         y = (self.monitor_sz.height-window_height)//2-100
         if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
-        icon_path= './logo_ONE-PIX.png' 
-        icon_path=PIL.ImageTk.PhotoImage(file=icon_path)
+        icon_path='./logo_ONE-PIX.png' if is_raspberrypi() else './logo_ONE-PIX.ico'
+        icon_path=PIL.ImageTk.PhotoImage(master=self,file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
 
