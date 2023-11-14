@@ -18,6 +18,7 @@ from tkinter import *
 from tkinter.messagebox import askquestion
 import PIL
 import PIL.ImageTk
+import customtkinter as ctk
 
 from src.SpectrometerBridge import SpectrometerBridge 
 from src.PatternMethods import PatternMethodSelection
@@ -96,6 +97,7 @@ class OPConfig:
         self.duration = 0 #Initialise the duration of a measure
         self.normalisation_path=acqui_dict["normalisation_path"]
         self.save_path=''
+        
     def get_optimal_integration_time(self):
         """
         This function allows to automatically set the right integration time for 
@@ -127,7 +129,7 @@ class OPConfig:
             delta = max(mes)-max_counts
             print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
     
-            if (abs(delta)<5000):
+            if (abs(delta)<2500):
                 flag = False
             elif self.spec_lib.integration_time_ms >= 10E3 or self.spec_lib.integration_time_ms==0:
                 flag = False
@@ -171,7 +173,7 @@ class OPConfig:
             self.spec_lib.DeviceName=self.spec_lib.decorator.DeviceName
     
         # create static pattern to be displayed
-        proj = Toplevel()
+        proj = ctk.CTkToplevel()
         proj.geometry("{}x{}+{}+{}".format(self.width, self.height, screenWidth, 0))
         y = list(range(self.height))  # horizontal vector for the pattern creation
         x = list(range(self.width))  # vertical vector for the pattern creation
@@ -489,13 +491,12 @@ class OPConfig:
         text_file.write(header)
         text_file.close()
         
-        
         print('is_raspberrypi() : ',is_raspberrypi())
         if is_raspberrypi():
-            root=Toplevel()
+            root=ctk.CTkToplevel()
             root.geometry("{}x{}+{}+{}".format(self.width, self.height,screenWidth,0))
             root.wm_attributes('-fullscreen', 'True')
-            c=Canvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
+            c=ctk.CTkCanvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
             c.pack()
             root.update()
             try:
