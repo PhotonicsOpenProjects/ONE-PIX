@@ -18,7 +18,7 @@ from tkinter import *
 from tkinter.messagebox import askquestion
 import PIL
 import PIL.ImageTk
-
+import customtkinter as ctk
 from src.SpectrometerBridge import SpectrometerBridge 
 from src.PatternMethods import PatternMethodSelection
 from src.DatacubeReconstructions import *
