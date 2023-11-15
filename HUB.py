@@ -45,7 +45,8 @@ class OPApp(ctk.CTk):
         y = (self.monitor_sz.height-height)//2-100
         if is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
-        self.logo_image = ctk.CTkImage(Image.open(path_to_GUI + "/logo_ONE-PIX.png"),
+        ext='png' if is_raspberrypi() else '.ico'
+        self.logo_image = ctk.CTkImage(Image.open(path_to_GUI + f"/../imgs/logo_ONE-PIX.{ext}"),
                                                size=(200, 200))
         self.logo_image_label = ctk.CTkLabel(self, image=self.logo_image,text="")
         self.logo_image_label.grid(row=0, column=0,sticky='nsew',pady=20,padx=(10,10))    
