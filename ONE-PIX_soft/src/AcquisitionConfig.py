@@ -18,7 +18,6 @@ from tkinter import *
 from tkinter.messagebox import askquestion
 import PIL
 import PIL.ImageTk
-import customtkinter as ctk
 
 from src.SpectrometerBridge import SpectrometerBridge 
 from src.PatternMethods import PatternMethodSelection
@@ -493,10 +492,10 @@ class OPConfig:
         
         print('is_raspberrypi() : ',is_raspberrypi())
         if is_raspberrypi():
-            root=ctk.CTkToplevel()
+            rootTk()
             root.geometry("{}x{}+{}+{}".format(self.width, self.height,screenWidth,0))
             root.wm_attributes('-fullscreen', 'True')
-            c=ctk.CTkCanvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
+            c=Canvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
             c.pack()
             root.update()
             try:
