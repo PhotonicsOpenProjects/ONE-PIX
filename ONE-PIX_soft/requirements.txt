@@ -3,7 +3,6 @@ imutils==0.5.4
 matplotlib==3.5.1
 numpy==1.22.3
 pandas==2.0.3
-picamera==1.13
 scikit-image==0.19.3
 scikit-learn==1.0.2
 scipy==1.8.0
