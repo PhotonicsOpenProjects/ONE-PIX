@@ -261,6 +261,13 @@ class OPConfig:
         None.
     
         """  
+        # Initialise cv2 display on the second monitor 
+        cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('ImageWindow', screenWidth, 0)
+        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
+        cv2.imshow('ImageWindow',cv2.resize(self.pattern_lib.decorator.sequence[0],(self.width,self.height),interpolation=self.interp_method))
+        cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white          
+        
         try:
             white_idx=self.pattern_lib.decorator.white_pattern_idx
         except:
@@ -325,12 +332,7 @@ class OPConfig:
         self.spec_lib.set_integration_time()
         self.wavelengths = self.spec_lib.get_wavelengths()
         self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float32)
-        # Initialise cv2 display on the second monitor 
-        cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
-        cv2.moveWindow('ImageWindow', screenWidth, 0)
-        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
-        cv2.imshow('ImageWindow',cv2.resize(self.pattern_lib.decorator.sequence[0],(self.width,self.height),interpolation=self.interp_method))
-        cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white          
+        
        
         
     def thread_acquisition(self, path=None, time_warning=True):
