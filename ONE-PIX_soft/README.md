@@ -5,6 +5,15 @@ The installation of the ONE-PIX software is achievable as the hardware installat
 To do so, you can follow the [hardware building tutorial](/hardware_build/hardware_building_tutorial.pdf) .
 You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/)
 
+the ONE-PIX kit has been tested and is functional in the following environments: 
+|Tested OS| Tested python version|remark
+|---|---|---|
+|[Rasbian bullseye version 11 (32-Bit)](https://www.raspberrypi.com/software/operating-systems/) |3.9|tested on raspberry pi 4B + with 8 Go RAM|
+|Windows 11|3.11.6| impossible to carry out [HAS measurements](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/3.-ONE%E2%80%90PIX-measures-principles#has-method) and no RGB capture at all |
+
+Here we assume that The ONE-PIX soft was developed to use a raspberry pi with Raspberry Pi OS.
+However it possible use directly your PC with python for more advanced performance. 
+
 This tutorial details all the steps required to install the ONE-PIX software on a Raspberry Pi 4 board. 
 
 # Installing the Raspberry Pi OS on the SD card and remote control
@@ -16,8 +25,7 @@ We recommend to use The ONE-PIX with a remote control Desktop.It allow you to ru
 </p>
  
 
-Here we assume that The ONE-PIX soft was developed to use a raspberry pi with Raspbian OS.
-However it possible use directly your PC with python for more advanced performance. 
+
 
 To install the Raspbian OS on the SD card you can follow steps on this link [here](https://www.raspberrypi.org/documentation/installation/installing-images/ )
 
