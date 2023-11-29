@@ -1,5 +1,5 @@
 <p align="center">
-<img src="imgs/logos.png" alt="logos" width="500"/>
+<img src="imgs/logo.png" alt="logo" width="200"/>
 </p>
 
 # ONE-PIX kit project   #
