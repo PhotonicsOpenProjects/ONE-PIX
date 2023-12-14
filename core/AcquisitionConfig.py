@@ -5,8 +5,6 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 """
 import cv2
 import io
-import os
-import sys
 import json
 import time
 import threading
@@ -18,12 +16,6 @@ from tkinter import *
 from tkinter.messagebox import askquestion
 import PIL
 import PIL.ImageTk
-import customtkinter as ctk
-from src.SpectrometerBridge import SpectrometerBridge 
-from src.PatternMethods import PatternMethodSelection
-from src.DatacubeReconstructions import *
-from src.datacube_analyse import *
-from src.coregistration_lib import *
 
 
 def is_raspberrypi():
@@ -44,7 +36,7 @@ except IndexError:
     print('Please use a projector to use ONE-PIX')
     #sys.exit()
 
-class OPConfig:
+class Acquisition:
     """ 
     Class OPConfig is used to set up ONE-PIX acquisitions
     
@@ -56,45 +48,66 @@ class OPConfig:
            
     """
 
-    def __init__(self,json_path,img=None,nb_patterns=0):
-        # Initialize the OPConfig object
-        self.json_path=json_path
-        #Get info from acquisition_param_ONE-PIX.json
-        f = open(json_path)
-        acqui_dict = json.load(f)
+    def __init__(self):
+
+        
+        # laoding hardware_config
+        self.harware_config_path="./conf/hardware_config.json"
+        self.acquisition_parameter_path="./conf/acquisition_parameter.json"
+        self.software_config_path="./conf/software_config.json"
+        
+        #Get info from conf json files
+
+        ## get hardware configuration
+        f = open(self.harware_config_path)
+        hardware_dict = json.load(f)
         f.close()
 
+        self.name_spectro = hardware_dict["name_spectro"]
+        self.name_camera=hardware_dict["name_spectro"]
+
+        ## get software configuration
+        f = open(self.software_config_path)
+        software_dict = json.load(f)
+        f.close()
+
+        self.imaging_method=software_dict["imaging_method"]
+        self.normalisation_bool=software_dict["Normalisation"]
+        self.normalisation_path=software_dict["normalisation_path"]
+
+        ## get acquisition params 
+
+        f = open(self.acquisition_parameter_path)
+        param_dict = json.load(f)
+        f.close()
+
+        self.integration_time_ms =param_dict["integration_time_ms"]
+        self.wl_lim=param_dict["wl_lim"]
+        self.rep=param_dict["spectro_scans2avg"]
+        self.height = param_dict['height']
+        self.width = param_dict["width"]
+        self.spatial_res = param_dict['spatial_res']
+
         # Spectrometer infos
-        self.name_spectro = acqui_dict["name_spectro"]
-        self.integration_time_ms =acqui_dict["integration_time_ms"]
+        
         self.spectra = []
         self.res=[]
         self.normalised_datacube=[]
-        self.wl_lim=acqui_dict["wl_lim"]
         self.spec_lib = SpectrometerBridge(self.name_spectro, self.integration_time_ms,self.wl_lim)
         self.wavelengths = []
         self.spectro_flag=False
-        self.rep=acqui_dict["spectro_scans2avg"]
 
-         # Displaying infos
-        self.height = acqui_dict['height']
-        self.width = acqui_dict["width"]
+        # Displaying infos
         self.interp_method=None
         self.periode_pattern=int(self.rep*self.integration_time_ms)
         if self.periode_pattern<60 :self.periode_pattern=60
         
         # Pattern method infos
-        self.pattern_method = acqui_dict['pattern_method']
-        self.spatial_res = acqui_dict['spatial_res']
         self.pattern_lib = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
         self.nb_patterns = self.pattern_lib.nb_patterns
-        self.seq_basis = ['FourierSplit','FourierShift']
-        self.full_basis = ['Addressing','Custom','Hadamard','BlackAndWhite']
         self.pattern_order = []
 
         self.duration = 0 #Initialise the duration of a measure
-        self.normalisation_path=acqui_dict["normalisation_path"]
-        self.save_path=''
         
     
 
@@ -144,7 +157,7 @@ class OPConfig:
     
                     
 
-    def spectrometer_acquisition(self,event):
+    def thread_capteur(self,event):
         """
         spectrometer_acquisition allows to use the spectrometer so that it is synchronised with patterns displays.
     
@@ -190,7 +203,7 @@ class OPConfig:
 
     
     
-    def display_sequence(self,event):
+    def thread_projection(self,event):
         """
         This function allows to display a sequence of patterns.
        
@@ -267,8 +280,8 @@ class OPConfig:
             self.init_display()
             #Threads initialisation
             event=threading.Event()
-            patterns_thread = threading.Thread(target=self.display_sequence,args=(event,))
-            spectrometer_thread = threading.Thread(target=self.spectrometer_acquisition,args=(event,))
+            patterns_thread = threading.Thread(target=self.thread_projection,args=(event,))
+            spectrometer_thread = threading.Thread(target=self.thread_capteur,args=(event,))
             # Start both display and measure threads
             patterns_thread.start()
             spectrometer_thread.start()
