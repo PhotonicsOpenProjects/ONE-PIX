@@ -1,0 +1,287 @@
+{
+"specific_GUI":{
+	"complete":{
+		"Acquisition_tab":{
+			"title":"Acquisition",
+			"block 1":{
+				"title":"Mode d'acquisition",
+				"simple_mode_button":"Simple",
+				"expert_mode_button":"Expert",
+				"button_wind_test":"Afficher un motif test",
+				"button_acquire_spec":"Acqu\u00e9rir le spectre"
+				},
+			"block 2":{
+				"title":"Param\u00e8tres d'acquisition",
+				"label_integration_time":" Temps d'int\u00e9gration (ms)",
+				"label_img_res":" R\u00e9solution de l'image (pixels)",
+				"label_pattern_duration":" Dur\u00e9e des projections (ms)",
+				"button_co":"Connecter le spectrom\u00e8tre",
+				"button_acquire_hyp":"Acqu\u00e9rir l'hypercube",
+				"switch_spectro":"Spectrom\u00e8tre d\u00e9connect\u00e9       "
+				},
+			"block 3":{
+				"title":"Affichage:",
+				"switch_spat2im":"Domaine spatial <--> Fr\u00e9quentiel",
+				"switch_raw2norm":"Donn\u00e9es brutes  <--> Normalis\u00e9es",
+				"fig":{}
+				},
+			"block 4":{
+				"appearance_mode_label":"Apparence :",
+				"appearance_mode_optionemenu":["Sombre", "Clair"]
+				},
+			"block 5":{
+				"est_time_label":"Fin estim\u00e9e : "
+				},
+			"functions":{
+				"askokcancel":{
+					"title":"Quitter",
+					"confirm":"Voulez vous vraiment quitter ?"
+					},
+				"switch_spat2im_command":{
+					"freq":"Moyenne spectrale dans le domaine fr\u00e9quentiel (\u00e9chelle logarithmique)",
+					"spat":"Faux RVB de l'image hyperspectrale"
+					},
+					
+				"switch_raw2norm_command":{
+					"raw": "Donn\u00e9es brutes",
+					"norm": "Donn\u00e9es normalis\u00e9es"
+				    },
+				
+				"spec_connection":{
+					"button_co":"D\u00e9connecter le spectrom\u00e8tre",
+					"warning":["Erreur de spectrom\u00e8tre"," Non disponible"]
+					},
+				"spec_disconnection":{
+					"switch_spectro":"Spectrom\u00e8tre d\u00e9connect\u00e9",
+					"button_co":"Connecter le spectrom\u00e8tre"
+					},
+				"draw_spectrum":{
+					"title":"Spectres acquis",
+					"xlabel":"Longueurs d'onde (nm)",
+					"ylabel":"Intensit\u00e9 (U.A.)",
+					"warning":["Attention","Connecter un spectrom\u00e8tre d'abord"]
+					}
+				}			
+			},
+		"Analysis_tab":{
+			"title":"Analyse d'hypercube",
+			"block 1":{
+				"load_button":"Charger des\ndonn\u00e9es",
+				"clear_button":"Tout effacer",
+				"label_data_info":"Charger des donn\u00e9es : ",
+				"switch_spat2im_analysis":"Domaine spatial <----> fr\u00e9quentiel"
+				},
+			"block 2":{
+				"label_mode_group":"Aperçu RVB: "
+				},
+			"block 3":{
+				"label_mode_group":"Analyse basique : ",
+				 "draw_button":"Tracer le(s) spectre(s)",
+				 "trim_button":"Rogner le(s) spectre(s)",
+				 "normalisation_button":"Normalisation",
+				 "label_mode_group":"Analyse avanc\u00e9e : ",
+				 "label_pca":"dim. ACP : ",
+				 "label_clusters":"nb. classes : ",
+				 "clust_button":"Segmentation",
+				 "label_boxcar":"largeur de fen\u00eatre : ",
+				 "label_polyorder":"ordre polynome : ",
+				 "smooth_button":"Lissage",
+				 "save_opt_button":"Sauvegarder"
+				},
+			"functions":{
+				"load_data":{
+					"label_data_info":"Donn\u00e9es charg\u00e9es"
+					},
+				"warning":{
+					"noData":["Erreur de donn\u00e9es","Charger d'abord des donn\u00e9es"],
+					"polyorder":["Erreur de donn\u00e9es","L'ordre du polynôme doit \u00eatre inf\u00e9rieur à la taille de la fen\u00eatre."],
+					"outvalue":["Erreur de valeur","Cet hypercube ne contient pas de donn\u00e9 au delà de ", " nm"],
+					"belowvalue":["Erreur de valeur","Cet hypercube ne contient pas de donn\u00e9 sous ", " nm"]
+					},
+				"rgb_display":{
+					"clustered":"Image clusteris\u00e9e ",
+					"raw":"Image RVG reconstruite ",
+					"smooth":"Image RVB reconstruite (liss\u00e9es)",
+					"trim":"Image RVB reconstruite (rognage speral)",
+					"norm":"Image RVB reconstruite (r\u00e9flectance)"
+					},
+				"flux2ref":{
+					"title":"S\u00e9lectionner une surface de r\u00e9f\u00e9rence pour normaliser l'hypercube"
+					},
+				"save_analysis_opt":{
+					"label_radio_group":"Choisir les donn\u00e9es à sauvegarder : ",
+					"data_choice":["Toutes","Donn\u00e9es brutes"],
+					"save_desc":"Choisir un chemin : ",
+					"explore_bouton":"Parcourir",
+					"CANCEL_save_bouton":"Annuler",
+					"confirm_bouton":"Confirmer"
+					},
+				"get_dir_analysis":{
+					"path":"Choisir un chemin : "
+					}	
+				}
+			},
+
+
+		"VI_tab":{
+			"title":"Analyse de VI",
+			"block 1":{
+				"sat_desc":"Chemin du '.csv' de donn\u00e9es de satellite",
+				"shown_sat_path":"Choisir un chemin",
+				"shown_data_path":"Choisir un chemin",
+				"data_desc":"Chemin vers l'image ONE-PIX : ",
+				"explore_bouton":"Parcourir"
+				},
+			"block 2":{
+				"domain_desc":"Domaine d'application",
+				"domain":["vegetation","neige","eau"]
+				},
+			"block 3":{},
+			"block 4":{
+				"sort_choice":["Tout conserver", "tri rapide"],
+				"critere":["Variance", "Entropie"],
+				"calc_bouton":"Afficher les indices",
+				"WIP":"En attente..."
+				},
+			"block 5":{
+				"save_options":"Options de sauvegarde",
+				"save_confirm":"Sauvegarder"
+				},
+			"functions":{
+				"save_menu":{
+					"save_id_CB":"Sauvegarder les VI",
+					"save_bands_CB":"Sauvegarder les bandes",
+					"save_desc":"Dossier de sauvegarde :",
+					"shown_save_path":"Choisir un chemin",
+					"explore_bouton":"Parcourir",
+					"comment_label":"Saisir un commentaire : ",
+					"CANCEL_save_bouton":"Annuler",
+					"confirm_bouton":"Confirmer"
+					},
+				"WIP":{
+					"WIP_saving":"Sauvegarde en cours...",
+					"WIP_computing":"Calcul en cours...",
+					"WIP_done":"Fini"
+					},
+				"get_combobox_value":{
+					"warning_VI":["VI inconnu","S\u00e9lectionner un VI de la liste"],
+					"warning_bands":["Bande inconnue","S\u00e9lectionnez une bande de la liste"]
+					}
+				}
+			}
+		},
+	"Addressed":{
+		"Simple":{
+		"calibrationButton":"Recalage (initialisation)",
+			"mode_desc":"Choix du mode d'acquisition",
+			"manual_choice":"Manuel",
+			"auto_choice":"Semi-automatique",
+			"KMeans_desc":"Param\u00e8tres de la segmentation",
+			"Prim_seg_label":"Renseigner 2 si le font est gris ou noir.\nSur fond blanc, essayer plusieurs nombres",
+			"Sec_seg_label":"Nombre de couleurs de la sc\u00e8ne",
+			"acquireButton":"D\u00e9but de l'acquisition",
+			"loadButton":"Chargement de donn\u00e9es",
+			"functions":{
+				"calibrationButton_WIP":"PATIENTEZ SVP",
+				"acquireButton_WIP":"PATIENTEZ SVP",
+				"askdirectory":"s\u00e9lectionner le dossier qui contient les donn\u00e9es",
+				"plotMask":{
+					"xlabel":"longueur d'onde(nm)",
+					"ylabel":"pseudo-flux r\u00e9fl\u00e9chi(unit\u00e9 arb.)"
+					}
+			},
+			"errors":{
+				"load_data_error":"Le dossier s\u00e9lectionn\u00e9 ne contient pas des donn\u00e9es au bon format."
+				}
+			},
+		"Advanced":{
+			"calibrationButton":"Recalage",
+			"mode_desc":"Choix du mode d'acquisition",
+			"manual_choice":"Manuel",
+			"auto_choice":"K-moyennes",
+			"KMeans_desc":"Param\u00e8tres des K-moyennes",
+			"integration_time_label":"Temps d'int\u00e9gration spectrom\u00e8tre (ms)",
+			"Prim_seg_label":"Pr\u00e9-segmentation : nombre de clusters",
+			"Sec_seg_label":"Segmentation secondaire : nombre de clusters",
+			"acquireButton":"D\u00e9but de l'acquisition",
+			"loadButton":"Chargement de donn\u00e9es",
+			"functions":{
+				"calibrationButton_WIP":"PATIENTEZ SVP",
+				"acquireButton_WIP":"PATIENTEZ SVP",
+				"askdirectory":"s\u00e9lectionner le dossier qui contient les donn\u00e9es",
+				"plotMask":{
+					"xlabel":"longueur d'onde(nm)",
+					"ylabel":"pseudo-flux r\u00e9fl\u00e9chi(unit\u00e9 arb.)"
+					}
+				},
+			"errors":{
+				"load_data_error":"Le dossier s\u00e9lectionn\u00e9 ne contient pas des donn\u00e9es au bon format."
+				}
+			}
+		}
+	},
+	
+"HUB":{
+	"buttons":{
+		"GuiMode_choice":["Simple", "Avanc\u00e9"],
+		"CompleteAcquisition_button":"Acquisition compl\u00e8te",
+		"AddressedAcquisition_button":"Acquisition adress\u00e9e",
+		"Exit_button":"Quitter"
+		},
+		
+	"functions":{
+		"normalization_request":{
+			"pop_upText":"Souhaitez-vous que vos donn\u00e9es soient normalis\u00e9es ?",
+			"existing_normalisation":"Utiliser une r\u00e9f\u00e9rence existante ?",
+			"normalize_noButton":"NON",
+			"normalize_yesButton":"OUI"
+			},
+		"normalisation_specifications":{
+			"pop_upText":"Assurez vous que la surface de r\u00e9f\u00e9rence couvre bien toute la fen\u00eatre de projection durant l'acquisition. Le processus peut durer quelques minutes.",
+			"normalize_yesButton":"FAIT",
+			"normalize_noButton":"ANNULER"
+			}
+		},
+
+	"help":{
+		"mode":{
+			"title":"Informations sur le mode",
+			"description":"  Cette interface compte deux modes d'utilisation. Le premier, qui se nomme 'mode simple', est adapt\u00e9 pour des utilisateurs qui d\u00e9couvrent le ONE-PIX et l'imagerie hyperspectrale. Dans ce mode, Les param\u00e8tres accessibles sont r\u00e9duit pour ne conserver que le strict n\u00e9cessaire au fonctionnement d'une acquisition. C'est une mani\u00e8re efficace et rapide pour acqu\u00e9rir des hypercubes. Le deuxi\u00e8me mode est le mode 'avanc\u00e9'. Il permet une plus grande libert\u00e9 sur la modification des param\u00e8tres du ONE-PIX. L'interface graphique est plus complexe dans ce mode, et des outils d'analyse sont ajout\u00e9s.",
+
+			"simple_mode":{
+				"title":"Simple mode",
+				"full":{
+					"title":"Acquisition compl\u00e8te",
+					"description":"  - tous les param\u00e8tres, sauf la  souhait\u00e9e, sont choisis automatiquement par la machine\n  - uniquement les donn\u00e9es finales sont conserv\u00e9es\n - l'interface comprend un onglet pour l'acquisition et un onglet d'analyse d'indices de spectraux"
+					},
+				"addressed":{
+					"title":"Acquisition adress\u00e9e",
+					"description":"  - seul le dernier niveau de donn\u00e9e est conserv\u00e9"
+					}
+				},
+
+			"advanced_mode":{ 
+				"title":"Advanced mode",
+				"full":{
+					"title":"Acquisition compl\u00e8te",
+					"description":"  - les param\u00e8tres peuvent \u00eatre modifi\u00e9s manuellement\n  - un ongl\u00e8t suppl\u00e9mentaire permet l'analyse rapide des donn\u00e9es"
+					},
+				"addressed":{
+					"title":"Acquisition adress\u00e9e",
+					"description":"  - tous les niveaux de donn\u00e9es sont conserv\u00e9s"
+					}
+				}
+			},
+
+		"acquisition":{
+			"title":"Informations sur l'acquisition",
+			"corpse":"  Deux m\u00e9thodes sont disponibles pour acqu\u00e9rir des images avec le kit ONE-PIX : l'acquisition compl\u00e8te et l'acquisition adress\u00e9e.\n\n  ACQUISITION COMPL\u00e8TE : ce mode mesure les r\u00e9ponses à des motifs \u00e9l\u00e9mentaires d'une base compl\u00e8te sp\u00e9cifique pour reconstruire un hypercube de donn\u00e9es (une image dont chaque pixel est un spectre). Par exemple, des motifs de Fourier peuvent \u00eatre utilis\u00e9s, de telle sorte qu'une simple FFT (Transform\u00e9e de Fourier rapide) puisse reconstruire l'aspect spatial de la sc\u00e8ne.\n\n  ACQUISITION ADRESS\u00e9E : cette m\u00e9thode utilise la cam\u00e9ra RVB du ONE-PIX pour trouver des r\u00e9gions d'int\u00e9r\u00eat afin que le projecteur les illumine une à une tandis que le spectrom\u00e8tre enregistre leur spectre. La segmentation qui sert à isoler les r\u00e9gions d'int\u00e9r\u00eats peut \u00eatre r\u00e9alis\u00e9e manuellement ou semi-automatiquement par la m\u00e9thode des k-means."},
+		"normalization":{
+			"title":"Informations sur la normalisation",
+			"corpse":"  Le processus de normalisation est là pour corriger à la fois le vignettage du syst\u00e8me et les d\u00e9pendances l'impact de la source sur les donn\u00e9es pour g\u00e9n\u00e9rer des r\u00e9flectances vraies. Puisque la majorit\u00e9 du vignettage est dûe à la collection de la fibre, il est n\u00e9cessaire d'effectuer une acquisition compl\u00e8te de la surface de r\u00e9f\u00e9rence pour que le vignettage soit mod\u00e9lis\u00e9 et corrig\u00e9. Une telle r\u00e9f\u00e9rence doit \u00eatre spectralement homog\u00e8ne, lambertienne et doit avoir une BRDF calibr\u00e9e.\nSi vous souhaitez normaliser vos donn\u00e9es, veuillez :\n  - placer une r\u00e9f\u00e9rence dans le champ du projecteur\n  - appuyer sur <FAIT>\n  - patientez jusqu'à l'ouverture de l'interface utilisateur."
+			}
+		}
+	}
+}
+
+

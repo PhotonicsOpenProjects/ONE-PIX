@@ -127,7 +127,4 @@ class Acquisition:
             pass
 
     def save_raw_data(self):
-
-        
-
-            
+        return 

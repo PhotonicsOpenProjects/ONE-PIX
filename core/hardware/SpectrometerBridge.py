@@ -52,6 +52,62 @@ class SpectrometerBridge:
     def spec_close(self):
         self.decorator.spec_close()
 
+    
+
+    def get_optimal_integration_time(self):
+            """
+            This function allows to automatically set the right integration time for 
+            ONE-PIX acqusitions depending on the mesurable optical flux. 
+        
+            Parameters
+            ----------
+            config : class
+                OPConfig class object.
+        
+            Returns
+            -------
+            None. Actualisation of the integration_time_ms parameter of config
+        
+            """
+            
+            max_counts = 30000
+            self.spec_lib.set_integration_time()
+            
+            flag = True
+            self.spectro_flag=True
+            count=0
+            delta_wl=round(0.05*np.size(self.spec_lib.get_wavelengths()))
+            while flag:
+                mes = []
+                for acq in range(self.rep):
+                    mes.append(self.spec_lib.get_intensities())
+                mes = np.mean(np.array(mes), 0)[delta_wl:-delta_wl]
+                delta = max(mes)-max_counts
+                print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
+        
+                if (abs(delta)<2500):
+                    flag = False
+                elif self.spec_lib.integration_time_ms >= 10E3 or self.spec_lib.integration_time_ms==0:
+                    flag = False
+                    self.spec_lib.spec_close()
+                    raise Exception(f"Integration time: {self.spec_lib.integration_time_ms} ms, if you want to continue set the parameter by hand")
+                    
+                elif (count>=10):
+                    flag=False
+                    print(f"Measures stopped after {count} iterations. Integration time= {self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
+                else:
+                    count+=1
+                    flag = True
+                    coeff = (max_counts/max(mes))
+                    self.integration_time_ms = int(self.integration_time_ms*coeff)
+                    self.spec_lib.integration_time_ms = self.integration_time_ms
+                    self.spec_lib.set_integration_time()
+                    
+                self.spec_lib.set_integration_time()
+                self.spectro_flag=False
+            print(f"Integration time (ms): {self.integration_time_ms}")
+
+
     def thread_singlepixel_measure(self,event):
         """
         spectrometer_acquisition allows to use the spectrometer so that it is synchronised with patterns displays.
@@ -74,9 +130,9 @@ class SpectrometerBridge:
         coeff=1
         while cnt <self.nb_patterns:            
             if self.spectro_flag: # check to adjust integration time for white pattern
-               self.hardware.spectrometer.integration_time_ms=self.integration_time_ms//2
-               self.hardware.spectrometer.set_integration_time()
-               coeff=self.integration_time_ms/self.spec_lib.decorator.integration_time_ms
+            self.hardware.spectrometer.integration_time_ms=self.integration_time_ms//2
+            self.hardware.spectrometer.set_integration_time()
+            coeff=self.integration_time_ms/self.spec_lib.decorator.integration_time_ms
             
             if event.is_set():# event set when pattern is displayed
                 for k in range(self.hardware.repetition):
