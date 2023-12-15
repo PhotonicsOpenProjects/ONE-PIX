@@ -1,14 +1,14 @@
 
 import json  
-from  plugins.spectrometer.SpectrometerBridge  import *
-from  plugins.camera.cameraBridge  import *
-from core.hardware.Projection  import *
+from core.hardware.SpectrometerBridge import *
+from core.hardware.CameraBridge import *
+from core.hardware.Projection import *
 
 class Hardware :
 
     def __init__(self): 
 
-        self.harware_config_path="./conf/hardware_config.json"
+        self.harware_config_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/hardware_config.json"
         f = open(self.harware_config_path)
         hardware_dict = json.load(f)
         f.close()
@@ -16,7 +16,7 @@ class Hardware :
         self.name_spectro = hardware_dict["name_spectro"]
         self.name_camera=hardware_dict["name_camera"]
 
-        self.acquisition_parameter_path="./conf/acquisition_parameter.json"
+        self.acquisition_parameter_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/acquisition_parameter.json"
 
         f = open(self.acquisition_parameter_path)
         param_dict = json.load(f)
@@ -38,6 +38,11 @@ class Hardware :
         integration_time_ms =param_dict["integration_time_ms"]
         wl_lim=param_dict["wl_lim"]
         self.spectrometer= SpectrometerBridge(self.name_spectro,integration_time_ms,wl_lim)
+
+                # Displaying infos
+        self.interp_method=None
+        self.periode_pattern=int(self.repetition*self.integration_time_ms)
+        if self.periode_pattern<60 :self.periode_pattern=60
 
         self.camera=CameraBridge()
         self.projection=Projection()

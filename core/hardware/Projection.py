@@ -1,6 +1,6 @@
 import importlib
 import cv2
-
+import screeninfo 
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
@@ -105,39 +105,39 @@ class Projection:
         cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white     
 
         def thread_projection(self,event):
-        """
-        This function allows to display a sequence of patterns.
-       
-        Parameters
-        ----------
-        event : threading Event 
-            Ensures the synchronisation between displays and measures
-        config : class
-            OPConfig class object.
-    
-        Returns
-        -------
-        None.
-    
-        """  
-        hardware.projection.init_projection_windows()         
-        try:
-            white_idx=self.pattern_lib.decorator.white_pattern_idx
-        except:           
-            white_idx=-100
-        delta_idx=4 if self.pattern_method=='FourierSplit' else 2
-        # Display each pattern from the sequence
-        for count,pattern in enumerate(self.pattern_lib.decorator.sequence):
-            if  count in np.arange(white_idx,white_idx+delta_idx):
-                self.spectro_flag=True
-           
-
-            cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
-            cv2.waitKey(int(self.periode_pattern))
-            event.set()
-            time.sleep(1e-6)
-            while event.is_set():
-                time.sleep(1e-6)
+            """
+            This function allows to display a sequence of patterns.
+        
+            Parameters
+            ----------
+            event : threading Event 
+                Ensures the synchronisation between displays and measures
+            config : class
+                OPConfig class object.
+        
+            Returns
+            -------
+            None.
+        
+            """  
+            hardware.projection.init_projection_windows()         
+            try:
+                white_idx=self.pattern_lib.decorator.white_pattern_idx
+            except:           
+                white_idx=-100
+            delta_idx=4 if self.pattern_method=='FourierSplit' else 2
+            # Display each pattern from the sequence
+            for count,pattern in enumerate(self.pattern_lib.decorator.sequence):
+                if  count in np.arange(white_idx,white_idx+delta_idx):
+                    self.spectro_flag=True
             
 
-        cv2.destroyAllWindows()
+                cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
+                cv2.waitKey(int(self.periode_pattern))
+                event.set()
+                time.sleep(1e-6)
+                while event.is_set():
+                    time.sleep(1e-6)
+                
+
+            cv2.destroyAllWindows()

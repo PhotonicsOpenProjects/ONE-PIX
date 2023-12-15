@@ -1,5 +1,5 @@
 import importlib
-from src.spectrometer_bridges.AbstractBridge import AbstractBridge
+from plugins.camera.AbstractBridge import AbstractBridge
 import numpy as np
 
 class CameraBridge:
@@ -16,13 +16,16 @@ class CameraBridge:
     """
     
     def __init__(self,spectro_name,integration_time_ms,wl_lim):
-		# Concrete spectrum implementation dynamic instanciation
+		# Concrete spectrum implementation dynamic instanciation1
+        return
        
  		
     def camera_open(self):
+        return
        
     
     def get_image(self):
+        return
      
     
     

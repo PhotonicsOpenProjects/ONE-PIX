@@ -3,7 +3,7 @@
 Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 
 """
-
+from core.hardware.HardwareConfig import *
 import io
 import json
 import time
@@ -16,7 +16,7 @@ from tkinter import *
 from tkinter.messagebox import askquestion
 import PIL
 import PIL.ImageTk
-from hardware.HardwareConfig import *
+
 
 
 class Acquisition:
@@ -33,8 +33,8 @@ class Acquisition:
 
     def __init__(self):
 
-          
-        self.software_config_path="./conf/software_config.json"
+    
+        self.software_config_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/software_config.json"
         
         ## get software configuration
         f = open(self.software_config_path)
@@ -42,21 +42,7 @@ class Acquisition:
         f.close()
 
         self.imaging_method=software_dict["imaging_method"]
-        self.normalisation_bool=software_dict["Normalisation"]
-        self.normalisation_path=software_dict["normalisation_path"]
-
-
-        # Displaying infos
-        self.interp_method=None
-        self.periode_pattern=int(self.rep*self.integration_time_ms)
-        if self.periode_pattern<60 :self.periode_pattern=60
-        
-        # Pattern method infos
-        #self.imaging_method = PatternMethodSelection(self.pattern_method, self.spatial_res, self.height, self.width)
-
         self.hardware=Hardware()
-        
-    
 
     def init_measure(self):
         """
