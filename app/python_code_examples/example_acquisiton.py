@@ -1,5 +1,7 @@
+
 import sys
 import os 
+
 actual_path=os.getcwd()
 os.chdir("..")
 os.chdir("..")
@@ -8,6 +10,8 @@ os.chdir(actual_path)
 
 sys.path.insert(0, root_path)
 from core import Acquisition
+
 acq=Acquisition.Acquisition()
+acq.init_measure()
 acq.thread_acquisition()
 acq.save_raw_data()

@@ -4,6 +4,7 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 
 """
 from core.hardware.HardwareConfig import *
+from core.ImagingMethodBridge import *
 import io
 import json
 import time
@@ -41,8 +42,9 @@ class Acquisition:
         software_dict = json.load(f)
         f.close()
 
-        self.imaging_method=software_dict["imaging_method"]
+        self.imaging_method_name=software_dict["imaging_method"]
         self.hardware=Hardware()
+        self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
 
     def init_measure(self):
         """

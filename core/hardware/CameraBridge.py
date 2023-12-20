@@ -15,8 +15,15 @@ class CameraBridge:
     		spectrometer integration time in milliseconds.
     """
     
-    def __init__(self,spectro_name,integration_time_ms,wl_lim):
+    def __init__(self,camera_name):
 		# Concrete spectrum implementation dynamic instanciation1
+        try:
+            className=camera_name+'Bridge'
+            module=importlib.import_module('plugins.camera.'+className)
+            classObj = getattr(module, className)
+            #self.decorator = classObj(integration_time_ms)            
+        except ModuleNotFoundError:
+            raise Exception("Concrete bridge \"" + camera_name + "\" implementation has not been found.")
         return
        
  		

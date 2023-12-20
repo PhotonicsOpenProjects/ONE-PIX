@@ -1,5 +1,6 @@
 
 import json  
+import os
 from core.hardware.SpectrometerBridge import *
 from core.hardware.CameraBridge import *
 from core.hardware.Projection import *
@@ -7,7 +8,8 @@ from core.hardware.Projection import *
 class Hardware :
 
     def __init__(self): 
-
+        self.root_path=os.getcwd()
+        print(self.root_path)
         self.harware_config_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/hardware_config.json"
         f = open(self.harware_config_path)
         hardware_dict = json.load(f)
@@ -22,8 +24,7 @@ class Hardware :
         param_dict = json.load(f)
         f.close()
 
-        integration_time_ms =param_dict["integration_time_ms"]
-       
+        self.integration_time_ms =param_dict["integration_time_ms"]    
         self.repetition=param_dict["spectro_scans2avg"]
         self.height = param_dict['height']
         self.width = param_dict["width"]
@@ -35,16 +36,16 @@ class Hardware :
         self.wavelengths = []
         self.spectro_flag=False
 
-        integration_time_ms =param_dict["integration_time_ms"]
         wl_lim=param_dict["wl_lim"]
-        self.spectrometer= SpectrometerBridge(self.name_spectro,integration_time_ms,wl_lim)
+        
 
                 # Displaying infos
         self.interp_method=None
         self.periode_pattern=int(self.repetition*self.integration_time_ms)
         if self.periode_pattern<60 :self.periode_pattern=60
 
-        self.camera=CameraBridge()
+        self.spectrometer= SpectrometerBridge(self.name_spectro,self.integration_time_ms,wl_lim)
+        self.camera=CameraBridge(self.name_camera)
         self.projection=Projection()
 
     def is_raspberrypi():

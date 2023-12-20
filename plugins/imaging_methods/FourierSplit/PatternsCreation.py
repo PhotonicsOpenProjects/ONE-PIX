@@ -1,7 +1,7 @@
 import numpy as np
 from src.patterns_bases.FourierShiftPatterns import FourierShiftPatterns
 
-class FourierSplitPatterns:
+class CreationPatterns:
     """ Class FourierSplitPatterns allows to create a sequence of 
         Fourier split patterns and their order list
     """

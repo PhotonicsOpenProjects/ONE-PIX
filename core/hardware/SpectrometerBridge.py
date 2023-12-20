@@ -18,9 +18,9 @@ class SpectrometerBridge:
     def __init__(self,spectro_name,integration_time_ms,wl_lim):
         # Concrete spectrum implementation dynamic instanciation
         try:
-            module='core.spectrometer_bridges'
+            module='plugins.spectrometer'
             className=spectro_name+'Bridge'
-            module=importlib.import_module('plugins.spectrometer.spectrometer_bridges.'+className)
+            module=importlib.import_module('plugins.spectrometer.'+className)
             classObj = getattr(module, className)
             self.decorator = classObj(integration_time_ms)
             self.idx_wl_lim=wl_lim
