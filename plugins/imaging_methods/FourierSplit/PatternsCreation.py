@@ -1,11 +1,14 @@
 import numpy as np
-#from src.patterns_bases.FourierShiftPatterns import FourierShiftPatterns
+import os
+import sys
+sys.path.append(f'..{os.sep}')
+from plugins.imaging_methods.FourierShift import PatternsCreation as shift
 
 class CreationPatterns:
     """ Class FourierSplitPatterns allows to create a sequence of 
         Fourier split patterns and their order list
     """
-    def __init__(self,spatial_res,height,width,):
+    def __init__(self,spatial_res,height,width):
         self.spatial_res=spatial_res
         self.height=height
         self.width=width
@@ -15,10 +18,8 @@ class CreationPatterns:
         self.nb_patterns=4*(self.spectrum_size+1)*(2*self.spectrum_size+1)
         self.sequence=[]
         self.white_pattern_idx=4*self.spectrum_size
-        y = list(range(self.height))  # horizontal vector for the pattern creation
-        x = list(range(self.width))  # vertical vector for the pattern creation
-        self.Y, self.X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
-
+        
+        self.fourier_shift=shift.CreationPatterns(self.spatial_res,self.height,self.width)
 
     def sequence_order(self):
         """
@@ -46,9 +47,9 @@ class CreationPatterns:
         return pattern_order,freqs
     
 
-    def creation_patterns(self,freq):
+    def creation_freq_patterns(self,freq):
         """
-        Function for the creation of Fourrier patterns with the splitting method
+        Function for the creation of split Fourrier patterns with the splitting method for one given frequency
 
         Parameters
         ----------
@@ -72,7 +73,7 @@ class CreationPatterns:
 
         """
         #Create shifted patterns to split them
-        preal,pim=FourierShiftPatterns.creation_patterns(self,X,Y,freq)
+        preal,pim=self.fourier_shift.creation_freq_patterns(freq)
         
         # Splitting patterns to display positive images
 
@@ -91,3 +92,14 @@ class CreationPatterns:
        
        
         return pos_r, neg_r, pos_im, neg_im
+
+    def creation_patterns(self):
+        self.patterns_order, freqs = self.sequence_order()
+        patterns = []
+
+        for freq in freqs:
+            patterns.extend(self.creation_freq_patterns(freq))
+
+        return patterns
+
+        

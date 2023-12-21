@@ -1,14 +1,7 @@
 
-import sys
 import os 
-
-actual_path=os.getcwd()
-os.chdir("..")
-os.chdir("..")
-root_path=os.getcwd()
-os.chdir(actual_path)
-
-sys.path.insert(0, root_path)
+import sys
+sys.path.append(f'..{os.sep}..')
 from core import Acquisition
 
 acq=Acquisition.Acquisition()

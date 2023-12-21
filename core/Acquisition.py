@@ -49,8 +49,10 @@ class Acquisition:
 
         self.imaging_method_name=software_dict["imaging_method"]
         self.spatial_res=acquisition_dict["spatial_res"]
+        self.width=acquisition_dict["width"]
+        self.height=acquisition_dict["height"]
         self.hardware=Hardware()
-        self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
+        self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
 
     def init_measure(self):
         """
@@ -68,8 +70,8 @@ class Acquisition:
         * actualised OPConfig class object.
         * self.pattern_lib.decorator.sequence : sequence of patterns
         """
-        self.imaging_method.creation_patterns(self.spatial_res)
-        self.nb_patterns = len(self.imaging_method.pattern_order)
+        self.imaging_method.creation_patterns()
+        self.nb_patterns = len(self.imaging_method.patterns_order)
         self.hardware.hardware_initialisation()
         self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float32)
 

@@ -1,6 +1,7 @@
 
 import json  
 import os
+import io
 from core.hardware.SpectrometerBridge import *
 from core.hardware.CameraBridge import *
 from core.hardware.Projection import *
@@ -28,7 +29,7 @@ class Hardware :
         self.height = param_dict['height']
         self.width = param_dict["width"]
         self.spatial_res = param_dict['spatial_res']
-        
+        print(self.height)
         self.spectra = []
         self.res=[]
         self.normalised_datacube=[]
@@ -67,7 +68,7 @@ class Hardware :
         self.spectrometer.wavelengths = self.spectrometer.get_wavelengths()
         
 
-        projection.reshape_patterns(self,patterns)
+        self.projection.reshape_patterns(self,patterns)
     
     
 

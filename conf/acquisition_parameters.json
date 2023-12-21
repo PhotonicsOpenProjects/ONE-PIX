@@ -1,13 +1,2 @@
-{ 
-    "wl_lim": [350, 800], 
-    "spatial_res": 31, 
-    "integration_time_ms": 15.0,
-     "height": 600,
-     "width": 800,
-     "spectro_scans2avg": 5,
-     "m": [],
-     "max_height": 352,
-     "max_width": 469,
-     "mode_choice": "Avanc\u00e9"
-    
-}
+{ "wl_lim": [350, 800], "spatial_res": 11,"integration_time_ms": 15.0,"height": 600,"width": 800,"spectro_scans2avg": 5,"m": [],"max_height": 352,"max_width": 469,"mode_choice": "Avanc\u00e9"}
+     
