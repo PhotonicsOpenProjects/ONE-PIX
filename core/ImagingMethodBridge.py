@@ -28,7 +28,6 @@ class ImagingMethodBridge:
         self.pattern_creation_method = self.pattern_creation_classObj(self.spatial_res,self.height,self.width)
         self.pattern_creation_method.creation_patterns()
         self.patterns=self.pattern_creation_method.creation_patterns()
-        print(self.patterns)
         self.patterns_order=self.pattern_creation_method.patterns_order
 
 

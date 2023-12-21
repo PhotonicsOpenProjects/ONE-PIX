@@ -29,7 +29,6 @@ class Hardware :
         self.height = param_dict['height']
         self.width = param_dict["width"]
         self.spatial_res = param_dict['spatial_res']
-        print(self.height)
         self.spectra = []
         self.res=[]
         self.normalised_datacube=[]
