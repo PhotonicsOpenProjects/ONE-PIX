@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 14 10:28:24 2022
-
-@author: mribes
-"""
 import numpy as np
 
-class Reconstruction:
+class Analysis:
     """ Class to reconstruct a data cube from Fourier splitting ONE-PIX method."""
     
     def __init__(self,spectra,pattern_order):

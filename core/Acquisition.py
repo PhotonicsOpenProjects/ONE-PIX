@@ -6,6 +6,7 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 from core.hardware.HardwareConfig import *
 from core.ImagingMethodBridge import *
 import io
+import os
 import json
 import time
 import threading
@@ -34,15 +35,20 @@ class Acquisition:
 
     def __init__(self):
 
-    
-        self.software_config_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/software_config.json"
-        
+        self.software_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'software_config.json')
         ## get software configuration
         f = open(self.software_config_path)
         software_dict = json.load(f)
         f.close()
 
+        self.acquisition_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'acquisition_parameters.json')
+        ## get software configuration
+        f = open(self.acquisition_config_path)
+        acquisition_dict = json.load(f)
+        f.close()
+
         self.imaging_method_name=software_dict["imaging_method"]
+        self.spatial_res=acquisition_dict["spatial_res"]
         self.hardware=Hardware()
         self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
 
@@ -62,7 +68,7 @@ class Acquisition:
         * actualised OPConfig class object.
         * self.pattern_lib.decorator.sequence : sequence of patterns
         """
-        self.imaging_method.creation_patterns()
+        self.imaging_method.creation_patterns(self.spatial_res)
         self.nb_patterns = len(self.imaging_method.pattern_order)
         self.hardware.hardware_initialisation()
         self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float32)

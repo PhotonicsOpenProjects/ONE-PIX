@@ -9,8 +9,8 @@ class Hardware :
 
     def __init__(self): 
         self.root_path=os.getcwd()
-        print(self.root_path)
-        self.harware_config_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/hardware_config.json"
+        conf_path=f'..{os.sep}..{os.sep}conf'
+        self.harware_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),conf_path , 'hardware_config.json')
         f = open(self.harware_config_path)
         hardware_dict = json.load(f)
         f.close()
@@ -18,8 +18,7 @@ class Hardware :
         self.name_spectro = hardware_dict["name_spectro"]
         self.name_camera=hardware_dict["name_camera"]
 
-        self.acquisition_parameter_path=r"C:/Users/grussias/Desktop/repo git/POP/ONEPIX_dev_refactoring/conf/acquisition_parameter.json"
-
+        self.acquisition_parameter_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),conf_path ,'acquisition_parameters.json')
         f = open(self.acquisition_parameter_path)
         param_dict = json.load(f)
         f.close()
@@ -39,7 +38,7 @@ class Hardware :
         wl_lim=param_dict["wl_lim"]
         
 
-                # Displaying infos
+        # Displaying infos
         self.interp_method=None
         self.periode_pattern=int(self.repetition*self.integration_time_ms)
         if self.periode_pattern<60 :self.periode_pattern=60

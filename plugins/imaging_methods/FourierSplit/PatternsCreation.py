@@ -1,18 +1,24 @@
 import numpy as np
-from src.patterns_bases.FourierShiftPatterns import FourierShiftPatterns
+#from src.patterns_bases.FourierShiftPatterns import FourierShiftPatterns
 
 class CreationPatterns:
     """ Class FourierSplitPatterns allows to create a sequence of 
         Fourier split patterns and their order list
     """
-    def __init__(self,spatial_res):
+    def __init__(self,spatial_res,height,width,):
         self.spatial_res=spatial_res
+        self.height=height
+        self.width=width
         if (self.spatial_res%2==0):
             self.spatial_res=self.spatial_res+1
         self.spectrum_size=(self.spatial_res-1)//2
         self.nb_patterns=4*(self.spectrum_size+1)*(2*self.spectrum_size+1)
         self.sequence=[]
         self.white_pattern_idx=4*self.spectrum_size
+        y = list(range(self.height))  # horizontal vector for the pattern creation
+        x = list(range(self.width))  # vertical vector for the pattern creation
+        self.Y, self.X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
+
 
     def sequence_order(self):
         """
@@ -40,7 +46,7 @@ class CreationPatterns:
         return pattern_order,freqs
     
 
-    def creation_patterns(self,X,Y,freq):
+    def creation_patterns(self,freq):
         """
         Function for the creation of Fourrier patterns with the splitting method
 
