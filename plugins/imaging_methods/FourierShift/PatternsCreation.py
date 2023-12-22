@@ -1,23 +1,30 @@
 import numpy as np
+import cv2
 
 class CreationPatterns:
     """ Class FourierShiftPatterns allows to create a sequence of 
         Fourier shifted patterns and their order list
     """
     def __init__(self,spatial_res,height,width):
+
         self.spatial_res=spatial_res
-        if (self.spatial_res%2==0):
-            self.spatial_res=self.spatial_res+1
-        self.spectrum_size=(self.spatial_res-1)//2
-        self.nb_patterns=2*(self.spectrum_size+1)*(2*self.spectrum_size+1)
-        self.white_pattern_idx=2*self.spectrum_size
-        self.sequence=[]
         self.width=width
         self.height=height
+
+        if (self.spatial_res%2==0):
+            self.spatial_res=self.spatial_res+1
+        
+        self.spectrum_size=(self.spatial_res-1)//2
+        self.nb_patterns=2*(self.spectrum_size+1)*(2*self.spectrum_size+1)
+        
+        self.white_pattern_idx=2*self.spectrum_size
+        
         y = list(range(self.height))  # horizontal vector for the pattern creation
         x = list(range(self.width))  # vertical vector for the pattern creation
         self.Y, self.X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
-
+        
+        self.interp_method=cv2.INTER_LINEAR_EXACT
+    
 
     def sequence_order(self):
         """

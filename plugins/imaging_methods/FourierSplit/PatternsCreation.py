@@ -3,23 +3,29 @@ import os
 import sys
 sys.path.append(f'..{os.sep}')
 from plugins.imaging_methods.FourierShift import PatternsCreation as shift
+import cv2
 
 class CreationPatterns:
     """ Class FourierSplitPatterns allows to create a sequence of 
         Fourier split patterns and their order list
     """
     def __init__(self,spatial_res,height,width):
+        # import users defined spatial infos
         self.spatial_res=spatial_res
         self.height=height
         self.width=width
+
+        # check if spatial res is an odd number
         if (self.spatial_res%2==0):
             self.spatial_res=self.spatial_res+1
+        # half spectrum size definition
         self.spectrum_size=(self.spatial_res-1)//2
         self.nb_patterns=4*(self.spectrum_size+1)*(2*self.spectrum_size+1)
-        self.sequence=[]
+        # define white pattern index for display 
         self.white_pattern_idx=4*self.spectrum_size
         
         self.fourier_shift=shift.CreationPatterns(self.spatial_res,self.height,self.width)
+        self.interp_method=cv2.INTER_LINEAR_EXACT
 
     def sequence_order(self):
         """

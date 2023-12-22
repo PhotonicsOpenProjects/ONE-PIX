@@ -5,19 +5,13 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 """
 from core.hardware.HardwareConfig import *
 from core.ImagingMethodBridge import *
-import io
 import os
 import json
 import time
 import threading
 import numpy as np
-from datetime import date
-import platform
-import screeninfo
 from tkinter import *
 from tkinter.messagebox import askquestion
-import PIL
-import PIL.ImageTk
 
 
 

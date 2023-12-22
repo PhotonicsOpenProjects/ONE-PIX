@@ -1,6 +1,8 @@
-import importlib
 import cv2
 import screeninfo 
+import numpy as np
+import time
+from tkinter import *
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
@@ -24,30 +26,9 @@ class Projection:
     """
     
     def __init__(self):
+        
         return
     
-    def reshape_patterns(self,patterns):
-
-        if self.pattern_method in self.seq_basis: # Method used to create, display and measure sequentially patterns within a specific basis
-            pattern_reduction=[4,3]
-            # horizontal vector for the pattern creation
-            x = np.arange(0,self.width//pattern_reduction[0],dtype=np.uint8)
-            # vertical vector for the pattern creation
-            y = np.arange(0,self.height//pattern_reduction[1],dtype=np.uint8)
-            # horizontal and vertical array for the pattern creation
-            Y, X = np.meshgrid(x, y)
-    
-            self.pattern_order, freqs = self.pattern_lib.decorator.sequence_order() # Get spatial frequencies list to create patterns
-            self.interp_method=cv2.INTER_LINEAR_EXACT
-            
-            for freq in freqs:
-                self.pattern_lib.decorator.sequence.extend(self.pattern_lib.decorator.creation_patterns(X, Y, freq))  # Patterns creations 
-            
-        elif self.pattern_method in self.full_basis:
-            self.pattern_order,freq=self.pattern_lib.decorator.creation_patterns()
-            self.interp_method=cv2.INTER_AREA
-        self.nb_patterns=self.pattern_lib.nb_patterns=len(self.pattern_lib.decorator.sequence)
-        print(f"sequence of {self.pattern_lib.nb_patterns} is ready !")
 
     def OP_init(self):
         """
@@ -70,7 +51,7 @@ class Projection:
             self.spec_lib.DeviceName=self.spec_lib.decorator.DeviceName
     
         # create static pattern to be displayed
-        proj = ctk.CTkToplevel()
+        proj = Toplevel()
         proj.geometry("{}x{}+{}+{}".format(self.width, self.height, screenWidth, 0))
         y = list(range(self.height))  # horizontal vector for the pattern creation
         x = list(range(self.width))  # vertical vector for the pattern creation
@@ -97,47 +78,47 @@ class Projection:
         if self.periode_pattern<60 :self.periode_pattern=60
 
     def init_projection_windows(self):
-                # Initialise cv2 display on the second monitor 
+        # Initialise cv2 display on the second monitor 
         cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
         cv2.moveWindow('ImageWindow', screenWidth, 0)
         cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
         cv2.imshow('ImageWindow',cv2.resize(self.pattern_lib.decorator.sequence[0],(self.width,self.height),interpolation=self.interp_method))
         cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white     
 
-        def thread_projection(self,event):
-            """
-            This function allows to display a sequence of patterns.
+    def thread_projection(self,event):
+        """
+        This function allows to display a sequence of patterns.
+    
+        Parameters
+        ----------
+        event : threading Event 
+            Ensures the synchronisation between displays and measures
+        config : class
+            OPConfig class object.
+    
+        Returns
+        -------
+        None.
+    
+        """  
+        self.init_projection_windows()         
+        try:
+            white_idx=self.pattern_lib.decorator.white_pattern_idx
+        except:           
+            white_idx=-100
+        delta_idx=4 if self.pattern_method=='FourierSplit' else 2
+        # Display each pattern from the sequence
+        for count,pattern in enumerate(self.pattern_lib.decorator.sequence):
+            if  count in np.arange(white_idx,white_idx+delta_idx):
+                self.spectro_flag=True
         
-            Parameters
-            ----------
-            event : threading Event 
-                Ensures the synchronisation between displays and measures
-            config : class
-                OPConfig class object.
-        
-            Returns
-            -------
-            None.
-        
-            """  
-            hardware.projection.init_projection_windows()         
-            try:
-                white_idx=self.pattern_lib.decorator.white_pattern_idx
-            except:           
-                white_idx=-100
-            delta_idx=4 if self.pattern_method=='FourierSplit' else 2
-            # Display each pattern from the sequence
-            for count,pattern in enumerate(self.pattern_lib.decorator.sequence):
-                if  count in np.arange(white_idx,white_idx+delta_idx):
-                    self.spectro_flag=True
+
+            cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
+            cv2.waitKey(int(self.periode_pattern))
+            event.set()
+            time.sleep(1e-6)
+            while event.is_set():
+                time.sleep(1e-6)
             
 
-                cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
-                cv2.waitKey(int(self.periode_pattern))
-                event.set()
-                time.sleep(1e-6)
-                while event.is_set():
-                    time.sleep(1e-6)
-                
-
-            cv2.destroyAllWindows()
+        cv2.destroyAllWindows()

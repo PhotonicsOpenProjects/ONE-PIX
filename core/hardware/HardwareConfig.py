@@ -60,14 +60,14 @@ class Hardware :
     
     def hardware_initialisation(self):
 
-                # Spectrometer connection
+        # Spectrometer connection
         if self.spectrometer.DeviceName=='':
             self.spectrometer.spec_open()
         self.spectrometer.set_integration_time()
         self.spectrometer.wavelengths = self.spectrometer.get_wavelengths()
         
 
-        self.projection.reshape_patterns(self,patterns)
+        #self.projection.reshape_patterns(self,patterns)
     
     
 
