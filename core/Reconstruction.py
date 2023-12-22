@@ -45,10 +45,6 @@ def get_header_data(path):
     return acq_data
 
 
-
-
-
-
 #%% method Selection
 
 class OPReconstruction:
@@ -56,7 +52,7 @@ class OPReconstruction:
     def __init__(self,acq=acq):
 
         if acq:
-            self.imgaging_method=acq.imaging_method
+            self.imaging_method=acq.imaging_method
             self.spectra=acq.spectra
             self.pattern_order=acq.pattern_order
         else :

@@ -4,6 +4,7 @@ import sys
 sys.path.append(f'..{os.sep}')
 from plugins.imaging_methods.FourierShift import PatternsCreation as shift
 import cv2
+import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
 
 class CreationPatterns:
     """ Class FourierSplitPatterns allows to create a sequence of 
@@ -108,4 +109,6 @@ class CreationPatterns:
 
         return patterns
 
-        
+    def save_raw_data(self,acquisition_class,path=None):
+        saver=FIS.FisCommonAcquisition(acquisition_class)
+        saver.save_raw_data(path=None)

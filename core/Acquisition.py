@@ -13,7 +13,7 @@ import threading
 import numpy as np
 from tkinter import *
 from tkinter.messagebox import askquestion
-
+from datetime import date
 
 
 class Acquisition:
@@ -111,13 +111,35 @@ class Acquisition:
             spectrometer_thread.start()
             patterns_thread.join()
             spectrometer_thread.join()
+
             self.spectra=self.hardware.spectrometer.spectra
+            self.camera_image=self.hardware.camera.get_image() 
             self.duration = time.time()-begin_acq
-            #self.save_acquisition_envi(path)
+            self.create_acquisition_header()
+            
             
         else:
             cv2.destroyAllWindows()
             pass
 
-    def save_raw_data(self):
-        return 
+    def create_acquisition_header(self):
+        fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time    
+        # Header
+        self.title_param = f"Raw_acquisition_parameters_{fdate}_{actual_time}.txt"
+        self.header = f"ONE-PIX_raw_acquisition_{fdate}_{actual_time}"+"\n"\
+            + "--------------------------------------------------------"+"\n"\
+            + "\n"\
+            + f"Imaging method: {self.imaging_method_name}"+"\n"\
+            + "Acquisition duration: %f s" % self.duration+"\n" \
+            + f"Spectrometer {self.hardware.name_spectro} : {self.hardware.spectrometer.DeviceName}"+"\n"\
+            + f"Camera: {self.hardware.name_camera}" +"\n"\
+            + "Number of projected patterns: %d" % self.nb_patterns+"\n" \
+            + "Height of pattern window: %d pixels" % self.height+"\n" \
+            + "Width of pattern window: %d pixels" % self.width+"\n" \
+            + "Number of spectral measures per pattern: %d  " %self.hardware.repetition+"\n" \
+            + "Integration time: %d ms" % self.hardware.spectrometer.integration_time_ms+"\n" 
+    
+    
+    def save_raw_data(self,path=None):
+        self.imaging_method.pattern_creation_method.save_raw_data(self)

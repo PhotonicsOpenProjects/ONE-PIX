@@ -10,7 +10,6 @@ class StubBridge:
 
     def image_capture(self):
         self.image=255*np.random.rand(1920,1080)
-        
 
     def close(self):
         print("stub camera disconnected")

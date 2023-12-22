@@ -30,12 +30,14 @@ class CameraBridge:
  		
     def camera_open(self):
         self.camera.init_camera()
-        return
+        
        
     
     def get_image(self):
-        image=self.camera.image_capture()
-        return image
+        self.image=self.camera.image_capture()
+        
+    
+        
      
     
     

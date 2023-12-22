@@ -32,7 +32,6 @@ class ImagingMethodBridge:
         self.patterns=self.pattern_creation_method.creation_patterns()
         self.patterns_order=self.pattern_creation_method.patterns_order
 
-
     def reconstruction(self,spectra,pattern_order):
         self.image_reconstruction_method = self.image_reconstruction_classObj(spectra,pattern_order)
         self.reconstructed_image=self.image_reconstruction_method.reconstruct_image()
