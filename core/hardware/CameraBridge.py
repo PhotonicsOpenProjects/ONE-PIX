@@ -21,18 +21,20 @@ class CameraBridge:
             className=camera_name+'Bridge'
             module=importlib.import_module('plugins.camera.'+className)
             classObj = getattr(module, className)
-            #self.decorator = classObj(integration_time_ms)            
+            self.camera = classObj()            
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + camera_name + "\" implementation has not been found.")
         return
        
  		
     def camera_open(self):
+        self.camera.init_camera()
         return
        
     
     def get_image(self):
-        return
+        image=self.camera.get_image()
+        return image
      
     
     
