@@ -19,7 +19,8 @@ class CameraBridge:
 		# Concrete spectrum implementation dynamic instanciation1
         try:
             className=camera_name+'Bridge'
-            module=importlib.import_module('plugins.camera.'+className)
+            module_name=f'plugins.camera.{camera_name}.'
+            module=importlib.import_module(module_name+className)
             classObj = getattr(module, className)
             self.camera = classObj()            
         except ModuleNotFoundError:
@@ -33,7 +34,7 @@ class CameraBridge:
        
     
     def get_image(self):
-        image=self.camera.get_image()
+        image=self.camera.image_capture()
         return image
      
     

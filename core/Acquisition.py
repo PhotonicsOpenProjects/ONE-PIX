@@ -5,6 +5,7 @@ Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
 """
 from core.hardware.HardwareConfig import *
 from core.ImagingMethodBridge import *
+import cv2
 import os
 import json
 import time
@@ -45,8 +46,9 @@ class Acquisition:
         self.spatial_res=acquisition_dict["spatial_res"]
         self.width=acquisition_dict["width"]
         self.height=acquisition_dict["height"]
-        self.hardware=Hardware()
         self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
+        self.hardware=Hardware()
+        
 
     def init_measure(self):
         """
@@ -64,10 +66,11 @@ class Acquisition:
         * actualised OPConfig class object.
         * self.pattern_lib.decorator.sequence : sequence of patterns
         """
+        #self.wavelengths=self.hardware.spectrometer.wavelengths
         self.imaging_method.creation_patterns()
         self.nb_patterns = len(self.imaging_method.patterns_order)
         self.hardware.hardware_initialisation()
-        self.spectra=np.zeros((self.nb_patterns,len(self.wavelengths)),dtype=np.float32)
+        self.spectra=np.zeros((self.nb_patterns,len(self.hardware.spectrometer.wavelengths)),dtype=np.float32)
 
      
         
@@ -92,7 +95,7 @@ class Acquisition:
         * wavelengths : (array of floats) 1D wavelengths sampled by the spectrometer.
     
         """
-        est_duration=round((self.pattern_lib.nb_patterns*(self.periode_pattern+self.rep*(self.integration_time_ms+2))+2)/(60*1000),2)
+        est_duration=round((self.nb_patterns*(self.hardware.periode_pattern+self.hardware.repetition*(self.hardware.integration_time_ms+2))+2)/(60*1000),2)
         ans='no'
         if time_warning :
             ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
@@ -101,8 +104,8 @@ class Acquisition:
             self.init_measure()
             #Threads initialisation
             event=threading.Event()
-            patterns_thread = threading.Thread(target=self.hardware.projection.thread_projection,args=(event,))
-            spectrometer_thread = threading.Thread(target=self.hardware.spectrometer.thread_singlepixel_measure,args=(event,))
+            patterns_thread = threading.Thread(target=self.hardware.projection.thread_projection,args=(event,self.imaging_method.patterns,self.imaging_method.patterns_order,self.imaging_method.pattern_creation_method.interp_method))
+            spectrometer_thread = threading.Thread(target=self.hardware.spectrometer.thread_singlepixel_measure,args=(event,self.nb_patterns))
             # Start both display and measure threads
             patterns_thread.start()
             spectrometer_thread.start()

@@ -1,6 +1,7 @@
 import importlib
-from plugins.spectrometer.AbstractBridge import AbstractBridge
+#from plugins.spectrometer.AbstractBridge import AbstractBridge
 import numpy as np
+import time
 
 class SpectrometerBridge:
     """
@@ -15,15 +16,16 @@ class SpectrometerBridge:
     		spectrometer integration time in milliseconds.
     """
     
-    def __init__(self,spectro_name,integration_time_ms,wl_lim):
+    def __init__(self,spectro_name,integration_time_ms,wl_lim,repetition):
         # Concrete spectrum implementation dynamic instanciation
         try:
-            module='plugins.spectrometer'
+            module_name=f'plugins.spectrometer.{spectro_name}.'
             className=spectro_name+'Bridge'
-            module=importlib.import_module('plugins.spectrometer.'+className)
+            module=importlib.import_module(module_name+className)
             classObj = getattr(module, className)
-            self.decorator = classObj(integration_time_ms)
-            self.idx_wl_lim=wl_lim
+            self.spectrometer = classObj(integration_time_ms)
+            self.wl_lim=wl_lim
+            self.repetition=repetition
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + spectro_name + "\" implementation has not been found.")
 
@@ -32,25 +34,25 @@ class SpectrometerBridge:
         self.integration_time_ms=integration_time_ms
 
     def spec_open(self):
-        self.decorator.spec_open()
-        self.DeviceName =self.decorator.DeviceName
-        wl=self.decorator.get_wavelengths()
-        self.idx_wl_lim=[np.abs(wl-self.idx_wl_lim[0]).argmin(),np.abs(wl-self.idx_wl_lim[1]).argmin()]
+        self.spectrometer.spec_open()
+        self.DeviceName =self.spectrometer.DeviceName
+        wavelengths=self.spectrometer.get_wavelengths()
+        self.idx_wl_lim=[np.abs(wavelengths-self.wl_lim[0]).argmin(),np.abs(wavelengths-self.wl_lim[1]).argmin()]
             
     def set_integration_time(self):
-        self.decorator.integration_time_ms=self.integration_time_ms
-        self.decorator.set_integration_time()
+        self.spectrometer.integration_time_ms=self.integration_time_ms
+        self.spectrometer.set_integration_time()
 
     def get_wavelengths(self):
-        wl=self.decorator.get_wavelengths()[self.idx_wl_lim[0]:self.idx_wl_lim[1]]
-        return wl
+        self.wavelengths=self.spectrometer.get_wavelengths()[self.idx_wl_lim[0]:self.idx_wl_lim[1]]
+        
 
     def get_intensities(self):
-        spectrum=self.decorator.get_intensities()[self.idx_wl_lim[0]:self.idx_wl_lim[1]]
+        spectrum=self.spectrometer.get_intensities()[self.idx_wl_lim[0]:self.idx_wl_lim[1]]
         return spectrum
 
     def spec_close(self):
-        self.decorator.spec_close()
+        self.spectrometer.spec_close()
 
     def get_optimal_integration_time(self):
             """
@@ -105,7 +107,7 @@ class SpectrometerBridge:
                 self.spectro_flag=False
             print(f"Integration time (ms): {self.integration_time_ms}")
 
-    def thread_singlepixel_measure(self,event):
+    def thread_singlepixel_measure(self,event,nb_patterns):
         """
         spectrometer_acquisition allows to use the spectrometer so that it is synchronised with patterns displays.
     
@@ -123,28 +125,36 @@ class SpectrometerBridge:
         """
         
         cnt=0
-        chronograms=np.zeros((self.hardware.repetition,self.nb_patterns,len(self.wavelengths)))
+        
         coeff=1
-        while cnt <self.nb_patterns:            
+        while cnt <nb_patterns:
+            """            
             if self.spectro_flag: # check to adjust integration time for white pattern
-                self.hardware.spectrometer.integration_time_ms=self.integration_time_ms//2
-                self.hardware.spectrometer.set_integration_time()
-                coeff=self.integration_time_ms/self.spec_lib.decorator.integration_time_ms
-            
+                self.spectrometer.integration_time_ms=self.integration_time_ms//2
+                self.set_integration_time()
+                coeff=self.integration_time_ms/self.spectrometer.integration_time_ms
+            """
+            chronograms=[]
+            self.spectra=[]
             if event.is_set():# event set when pattern is displayed
-                for k in range(self.hardware.repetition):
-                    chronograms[k,cnt,:]=coeff*self.spec_lib.get_intensities()
+                for k in range(self.repetition):
+                    chronograms.append(coeff*self.get_intensities())
+                self.spectra.append(np.mean(chronograms,0))     
                 
-                if self.hardware.spectro_flag: #
-                    self.hardware.spectrometer.integration_time_ms=self.integration_time_ms
-                    self.hardware.spectrometer.set_integration_time()
+                """
+                if spectro_flag: #
+                    self.spectrometer.integration_time_ms=self.integration_time_ms
+                    self.spectrometer.set_integration_time()
                     coeff=1
-                    self.hardware.spectro_flag=False
+                    spectro_flag=False
+                """
 
                 cnt+=1
                 event.clear()
             else:
                 time.sleep(1e-6)
             
-        self.spectra=np.mean(chronograms,0)       
-        self.hardware.spectrometer.spec_close()
+        #spectra=np.mean(chronograms,0)       
+        self.spec_close()
+
+        

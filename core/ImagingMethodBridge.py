@@ -9,8 +9,8 @@ class ImagingMethodBridge:
     def __init__(self,imaging_method,spatial_res,height,width):
         # Define width and height pixels numbers with a reduction coefficient to save memory
         self.pattern_reduction=[4,3]
-        self.height=height/self.pattern_reduction[0]
-        self.width=width/self.pattern_reduction[1]
+        self.height=height//self.pattern_reduction[0]
+        self.width=width//self.pattern_reduction[1]
         self.spatial_res=spatial_res
 
         try:

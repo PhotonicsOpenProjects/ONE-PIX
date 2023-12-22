@@ -34,13 +34,10 @@ class StubBridge:
         None.
 
         """
-        
         self.integration_time_ms=int(self.integration_time_ms)
-        if self.integration_time_ms*1e3<self.spec.integration_time_micros_limits[0]:
-            raise Exception('Spectrometer saturation at lower integration time. Adapt your acquisition configuration to reduce the optical intensity collected')
-            
-        else:
-            print("new integration time :%d"%self.integration_time_ms)
+
+        return
+        
     
     
     def get_wavelengths(self):
@@ -53,7 +50,7 @@ class StubBridge:
             1D array of the sampled wavelengths.
 
         """
-        wl=np.arange(400,700,3)
+        wl=np.arange(200,1000,3)
         return wl
     
     def get_intensities(self):

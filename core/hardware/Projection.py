@@ -25,9 +25,14 @@ class Projection:
     		spectrometer integration time in milliseconds.
     """
     
-    def __init__(self):
+    def __init__(self,height,width,periode_pattern):
+        self.height=height
+        self.width=width
+        self.periode_pattern=periode_pattern
+
         
-        return
+
+    
     
 
     def OP_init(self):
@@ -77,15 +82,16 @@ class Projection:
         self.periode_pattern=int(self.rep*self.integration_time_ms)
         if self.periode_pattern<60 :self.periode_pattern=60
 
-    def init_projection_windows(self):
+    def init_projection(self,patterns,patterns_order,interp_method):
+        
         # Initialise cv2 display on the second monitor 
         cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
         cv2.moveWindow('ImageWindow', screenWidth, 0)
         cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
-        cv2.imshow('ImageWindow',cv2.resize(self.pattern_lib.decorator.sequence[0],(self.width,self.height),interpolation=self.interp_method))
+        cv2.imshow('ImageWindow',cv2.resize(patterns[0],(self.width,self.height),interpolation=interp_method))
         cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white     
 
-    def thread_projection(self,event):
+    def thread_projection(self,event,patterns,patterns_order,interp_method):
         """
         This function allows to display a sequence of patterns.
     
@@ -101,19 +107,22 @@ class Projection:
         None.
     
         """  
-        self.init_projection_windows()         
+        self.init_projection(patterns,patterns_order,interp_method)         
+        """
         try:
             white_idx=self.pattern_lib.decorator.white_pattern_idx
         except:           
             white_idx=-100
         delta_idx=4 if self.pattern_method=='FourierSplit' else 2
+        """
         # Display each pattern from the sequence
-        for count,pattern in enumerate(self.pattern_lib.decorator.sequence):
+        for count,pattern in enumerate(patterns):
+            """""
             if  count in np.arange(white_idx,white_idx+delta_idx):
                 self.spectro_flag=True
         
-
-            cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=self.interp_method))
+            """
+            cv2.imshow('ImageWindow',cv2.resize(pattern,(self.width,self.height),interpolation=interp_method))
             cv2.waitKey(int(self.periode_pattern))
             event.set()
             time.sleep(1e-6)

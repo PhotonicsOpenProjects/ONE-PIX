@@ -2,6 +2,7 @@
 import json  
 import os
 import io
+import numpy as np
 from core.hardware.SpectrometerBridge import *
 from core.hardware.CameraBridge import *
 from core.hardware.Projection import *
@@ -32,7 +33,6 @@ class Hardware :
         self.spectra = []
         self.res=[]
         self.normalised_datacube=[]
-        self.wavelengths = []
         self.spectro_flag=False
 
         wl_lim=param_dict["wl_lim"]
@@ -43,9 +43,9 @@ class Hardware :
         self.periode_pattern=int(self.repetition*self.integration_time_ms)
         if self.periode_pattern<60 :self.periode_pattern=60
 
-        self.spectrometer= SpectrometerBridge(self.name_spectro,self.integration_time_ms,wl_lim)
+        self.spectrometer= SpectrometerBridge(self.name_spectro,self.integration_time_ms,wl_lim,self.repetition)
         self.camera=CameraBridge(self.name_camera)
-        self.projection=Projection()
+        self.projection=Projection(self.height,self.width,self.periode_pattern)
 
     def is_raspberrypi():
         """
@@ -63,10 +63,13 @@ class Hardware :
         # Spectrometer connection
         if self.spectrometer.DeviceName=='':
             self.spectrometer.spec_open()
-        self.spectrometer.set_integration_time()
-        self.spectrometer.wavelengths = self.spectrometer.get_wavelengths()
         
-
+        self.spectrometer.set_integration_time()
+        self.spectrometer.get_wavelengths() 
+        
+        # Camera connection
+        self.camera.camera_open()
+        
         #self.projection.reshape_patterns(self,patterns)
     
     
