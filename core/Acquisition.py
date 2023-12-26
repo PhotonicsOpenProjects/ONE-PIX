@@ -105,7 +105,7 @@ class Acquisition:
             #Threads initialisation
             event=threading.Event()
             patterns_thread = threading.Thread(target=self.hardware.projection.thread_projection,args=(event,self.imaging_method.patterns,self.imaging_method.patterns_order,self.imaging_method.pattern_creation_method.interp_method))
-            spectrometer_thread = threading.Thread(target=self.hardware.spectrometer.thread_singlepixel_measure,args=(event,self.nb_patterns))
+            spectrometer_thread = threading.Thread(target=self.hardware.spectrometer.thread_singlepixel_measure,args=(event,self.spectra))
             # Start both display and measure threads
             patterns_thread.start()
             spectrometer_thread.start()

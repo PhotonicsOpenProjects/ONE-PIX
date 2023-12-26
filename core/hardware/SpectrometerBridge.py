@@ -106,7 +106,7 @@ class SpectrometerBridge:
                 self.spectro_flag=False
             print(f"Integration time (ms): {self.integration_time_ms}")
 
-    def thread_singlepixel_measure(self,event,nb_patterns):
+    def thread_singlepixel_measure(self,event,spectra):
         """
         spectrometer_acquisition allows to use the spectrometer so that it is synchronised with patterns displays.
     
@@ -124,7 +124,8 @@ class SpectrometerBridge:
         """
         
         cnt=0
-        
+        self.spectra=spectra
+        nb_patterns=np.size(spectra,0)
         coeff=1
         while cnt <nb_patterns:
             """            
@@ -133,12 +134,13 @@ class SpectrometerBridge:
                 self.set_integration_time()
                 coeff=self.integration_time_ms/self.spectrometer.integration_time_ms
             """
-            chronograms=[]
-            self.spectra=[]
+            
+            
             if event.is_set():# event set when pattern is displayed
-                for k in range(self.repetition):
+                chronograms=[]
+                for _ in range(self.repetition):
                     chronograms.append(coeff*self.get_intensities())
-                self.spectra.append(np.mean(chronograms,0))     
+                self.spectra[cnt,:]=np.mean(chronograms,0)
                 
                 """
                 if spectro_flag: #
@@ -147,13 +149,13 @@ class SpectrometerBridge:
                     coeff=1
                     spectro_flag=False
                 """
-
                 cnt+=1
                 event.clear()
             else:
                 time.sleep(1e-6)
             
-        #spectra=np.mean(chronograms,0)       
+        #spectra=np.mean(chronograms,0)
+               
         self.spec_close()
 
         

@@ -139,5 +139,5 @@ class Reconstruction:
 
 
     def save_reconstructed_image(self):
-        self.imgaging_method.reconstructionMethod.save()
+        self.imaging_method.reconstructionMethod.save()
         

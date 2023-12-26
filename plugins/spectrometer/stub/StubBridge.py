@@ -8,6 +8,9 @@ class StubBridge:
         self.integration_time_ms=integration_time_ms
         self.spec=[]
         self.DeviceName='stub_spectrometer'
+        self.nb_wl=200
+        self.wl_lim=[400,1000]
+        self.step=(self.wl_lim[1]-self.wl_lim[0])//self.nb_wl
        
         
     def spec_open(self):
@@ -50,7 +53,8 @@ class StubBridge:
             1D array of the sampled wavelengths.
 
         """
-        wl=np.arange(200,1000,3)
+        
+        wl=np.arange(400,1000,self.step)
         return wl
     
     def get_intensities(self):
@@ -63,7 +67,7 @@ class StubBridge:
             1D array of spectral measurements.
 
         """
-        spectrum=40000*np.random.rand(100,1)
+        spectrum=40000*np.random.rand(self.nb_wl)
         return spectrum
     
     def spec_close(self):
