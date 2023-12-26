@@ -1,5 +1,4 @@
 import importlib
-import numpy as np
 
 
 class ImagingMethodBridge:
@@ -12,31 +11,39 @@ class ImagingMethodBridge:
         self.height=height//self.pattern_reduction[0]
         self.width=width//self.pattern_reduction[1]
         self.spatial_res=spatial_res
+        self.imaging_method=imaging_method
 
-        try:
-            #Import patterns creation, reconstruction and analysis modules specifics to the chosen imaging method
-            patterns_module=importlib.import_module(f'plugins.imaging_methods.{imaging_method}.'+'PatternsCreation')
-            reconstruction_module=importlib.import_module(f'plugins.imaging_methods.{imaging_method}.'+'ImageReconstruction')
-            analysis_module=importlib.import_module(f'plugins.imaging_methods.{imaging_method}.'+'ImageAnalysis')
-            #Get the class the specific modules
-            self.pattern_creation_classObj = getattr(patterns_module,'CreationPatterns')
-            self.image_reconstruction_classObj = getattr(reconstruction_module, 'Reconstruction')
-            self.image_analysis_classObj = getattr(analysis_module, 'Analysis')
 
-        except ModuleNotFoundError:
-            raise Exception("Concrete bridge \"" + imaging_method + "\" implementation has not been found.")
 
     def creation_patterns(self):
-        self.pattern_creation_method = self.pattern_creation_classObj(self.spatial_res,self.height,self.width)
-        self.pattern_creation_method.creation_patterns()
-        self.patterns=self.pattern_creation_method.creation_patterns()
-        self.patterns_order=self.pattern_creation_method.patterns_order
+        try:
+            #Import patterns creation module specific to the chosen imaging method
+            patterns_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'PatternsCreation')
+            self.pattern_creation_classObj = getattr(patterns_module,'CreationPatterns')
+            self.pattern_creation_method = self.pattern_creation_classObj(self.spatial_res,self.height,self.width)
+            self.pattern_creation_method.creation_patterns()
+            self.patterns=self.pattern_creation_method.creation_patterns()
+            self.patterns_order=self.pattern_creation_method.patterns_order
+
+        except ModuleNotFoundError:
+            raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
 
     def reconstruction(self,spectra,pattern_order):
-        self.image_reconstruction_method = self.image_reconstruction_classObj(spectra,pattern_order)
-        self.reconstructed_image=self.image_reconstruction_method.reconstruct_image()
+        try:
+            #Import reconstruction module specific to the chosen imaging method
+            reconstruction_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'ImageReconstruction')
+            self.image_reconstruction_classObj = getattr(reconstruction_module, 'Reconstruction')
+            self.image_reconstruction_method = self.image_reconstruction_classObj(spectra,pattern_order)
+            self.reconstructed_image=self.image_reconstruction_method.reconstruct_image()
+        except ModuleNotFoundError:
+            raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
     
     def analysis(self):
-        self.image_analysis_method = self.image_analysis_classObj(self.reconstructed_image)
-
+        try:
+            #Import analysis modules specifics to the chosen imaging method
+            analysis_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'ImageAnalysis')
+            self.image_analysis_classObj = getattr(analysis_module, 'Analysis')
+            self.image_analysis_method = self.image_analysis_classObj(self.reconstructed_image)
+        except ModuleNotFoundError:
+            raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
     

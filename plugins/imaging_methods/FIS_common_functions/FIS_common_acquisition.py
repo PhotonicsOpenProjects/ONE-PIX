@@ -22,8 +22,9 @@ class FisCommonAcquisition:
         actual_time = time.strftime("%H-%M-%S")  # get the current time
         folder_name = f"ONE-PIX_raw_acquisition_{fdate}_{actual_time}"
         acquisition_filename = f"spectra_{fdate}_{actual_time}.npy"
-        wavelengths_filename = f"wavelenths_{fdate}_{actual_time}.npy"
+        wavelengths_filename = f"wavelengths_{fdate}_{actual_time}.npy"
         camera_image_filename=f"camera_image_{fdate}_{actual_time}.npy"
+        patterns_order_filename=f"patterns_order_{fdate}_{actual_time}.npy"
         os.mkdir(folder_name)
         os.chdir(folder_name)
         self.save_path=folder_name
@@ -35,7 +36,7 @@ class FisCommonAcquisition:
         np.save(camera_image_filename,self.acquisition_class.camera_image) #RGB image from camera
         np.save(acquisition_filename,self.acquisition_class.spectra) # measured spectra 
         np.save(wavelengths_filename,self.acquisition_class.hardware.spectrometer.wavelengths) # associated wavelengths
-        
+        np.save(patterns_order_filename,self.acquisition_class.imaging_method.patterns_order)
          
 
 

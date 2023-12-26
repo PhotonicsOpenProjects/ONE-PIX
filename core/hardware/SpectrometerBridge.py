@@ -1,5 +1,4 @@
 import importlib
-#from plugins.spectrometer.AbstractBridge import AbstractBridge
 import numpy as np
 import time
 

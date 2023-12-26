@@ -9,8 +9,7 @@ import importlib
 from sklearn import mixture
 import spectral.io.envi as envi
 import time
-#%% Raw data pre-treatment
-
+from core.ImagingMethodBridge import *
 
 def get_header_data(path):
     """
@@ -36,8 +35,8 @@ def get_header_data(path):
     acq_data=dict()
     acq_data['Acquisition_name']=header[0][0][8:]
     for x in header:
-        if x[0].strip()=='Acquisition method':
-            acq_data['pattern_method']=x[1].strip()
+        if x[0].strip()=='Imaging method':
+            acq_data['imaging_method']=x[1].strip()
         
         if x[0].strip()=='Integration time':
             acq_data['integration_time_ms']=float(x[1].strip()[:-2])
@@ -47,19 +46,28 @@ def get_header_data(path):
 
 #%% method Selection
 
-class OPReconstruction:
+class Reconstruction:
     """ Class OPReconstruction to reconstruct datacubes according to a ONE-PIX method"""
-    def __init__(self,acq=acq):
+    def __init__(self,acquisition_dict=None):
 
-        if acq:
-            self.imaging_method=acq.imaging_method
-            self.spectra=acq.spectra
-            self.pattern_order=acq.pattern_order
-        else :
+        if acquisition_dict is None:
             self.load_raw_data()
+            self.imaging_method=self.acquisition_dict["imaging_method"]
+            self.spectra=self.acquisition_dict["spectra"]
+            self.pattern_order=self.acquisition_dict["patterns_order"]
+        else :
+            self.imaging_method=acquisition_dict.imaging_method
+            self.spectra=acquisition_dict.spectra
+            self.pattern_order=acquisition_dict.pattern_order
+        
+        self.spatial_res=0
+        self.height=0
+        self.width=0
+        
+        self.imaging_method=ImagingMethodBridge(self.imaging_method,self.spatial_res,self.height,self.width)
         
     
-    def load_raw_data():
+    def load_raw_data(self):
         """
         This function allows to load saved spectra with timers of the displays and spectrometers.
         at runtime, a window appears to select the folder path in which the data are located. 
@@ -71,31 +79,33 @@ class OPReconstruction:
 
         """
     
+        try:
+            chemin_script = os.getcwd()
+            root = Tk()
+            root.withdraw()
+            root.attributes('-topmost', 1)
+            chemin_mesure = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
+            os.chdir(chemin_mesure)
+            
+            header_name=glob.glob('*.txt')[0]
+            self.acquisition_dict=get_header_data(header_name)
+            
+            list_nom_mesure = sorted(glob.glob('*.npy'),key=os.path.getmtime)
+            
+            indice=[x for x, s in enumerate(list_nom_mesure) if "spectra" in s]
+            self.acquisition_dict['spectra']=np.load(list_nom_mesure[indice[0]])
+            
+            indice=[x for x, s in enumerate(list_nom_mesure) if "wavelengths" in s]
+            self.acquisition_dict['wavelengths']=np.load(list_nom_mesure[indice[0]])
+            
+            indice=[x for x, s in enumerate(list_nom_mesure) if "patterns_order" in s]
+            self.acquisition_dict['patterns_order']=np.load(list_nom_mesure[indice[0]])
+            
+            os.chdir(chemin_script)
+        except Exception as e:
+            print(e)
         
-        chemin_script = os.getcwd()
-        root = Tk()
-        root.withdraw()
-        root.attributes('-topmost', 1)
-        chemin_mesure = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
-        os.chdir(chemin_mesure)
         
-        header_name=glob.glob('*.txt')[0]
-        acq_data=get_header_data(header_name)
-        
-        list_nom_mesure = sorted(glob.glob('*.npy'),key=os.path.getmtime)
-        
-        indice=[x for x, s in enumerate(list_nom_mesure) if "spectra" in s]
-        acq_data['spectra']=np.load(list_nom_mesure[indice[0]])
-        
-        indice=[x for x, s in enumerate(list_nom_mesure) if "wavelengths" in s]
-        acq_data['wavelengths']=np.load(list_nom_mesure[indice[0]])
-        
-        indice=[x for x, s in enumerate(list_nom_mesure) if "pattern_order" in s]
-        acq_data['pattern_order']=np.load(list_nom_mesure[indice[0]])
-        
-        os.chdir(chemin_script)
-        
-        return acq_data
 
          
     def nan_corr(self):
@@ -113,22 +123,9 @@ class OPReconstruction:
         except IndexError:
             pass
         
-
-    def Selection(self):
-        """
-        This function allows to reconstruct spatial spectra and images data cubes.
-        These data are stored in the OPReconstruction class object.
-
-        Returns
-        -------
-        None.
-
-        """
-        self.nan_corr()
-        self.whole_spectrum,self.hyperspectral_image=self.decorator.datacube_reconstruction()
-        
        
-    def image_reconstruction(self):
+       
+    def data_reconstruction(self):
         """
         image_reconstruction allows to reconstruct an image data cube from an actualised 
         spatial spectra data cube. Both are stored in the HSPIReconstruction class object.
@@ -138,10 +135,9 @@ class OPReconstruction:
         None.
 
         """
-        self.recontruct_image=self.imaging_method.reconstructionMethod.reconstruct()
-    
-    def save_reconstruct_image(self):
+        self.recontruct_image=self.imaging_method.reconstruction(self.spectra,self.pattern_order)
+
+
+    def save_reconstructed_image(self):
         self.imgaging_method.reconstructionMethod.save()
         
-    
-

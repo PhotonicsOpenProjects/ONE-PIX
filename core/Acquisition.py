@@ -126,7 +126,7 @@ class Acquisition:
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time    
         # Header
-        self.title_param = f"Raw_acquisition_parameters_{fdate}_{actual_time}.txt"
+        self.title_param = f"raw_acquisition_parameters_{fdate}_{actual_time}.txt"
         self.header = f"ONE-PIX_raw_acquisition_{fdate}_{actual_time}"+"\n"\
             + "--------------------------------------------------------"+"\n"\
             + "\n"\

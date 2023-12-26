@@ -26,11 +26,12 @@ class Reconstruction:
             the half rigth hyperspectral and spatial spectrum of the imaged scene.
 
         """
-         
+        print(f"{self.spectra=}")
         coord=[]  
         x=[]
         y=[]
-        spectre_desplit=self.spectra[0::4,:]-self.spectra[1::4,:]-1j*(self.spectra[2::4,:]-self.spectra[3::4,:])        
+        spectre_desplit=self.spectra[0::4,:]-self.spectra[1::4,:]-1j*(self.spectra[2::4,:]-self.spectra[3::4,:])
+        print(f"{spectre_desplit=}")       
         for i in range(0,np.size(self.spectra,0),4):
             deb=self.pattern_order[i].find('(')
             coord.append(self.pattern_order[i][deb:])
@@ -51,7 +52,7 @@ class Reconstruction:
         return half_spectrum    
     
    
-    def datacube_reconstruction(self):
+    def reconstruct_image(self):
         """
         Function for the reconstruction of the whole Fourier spectrum and the hyperspectral image.
 
