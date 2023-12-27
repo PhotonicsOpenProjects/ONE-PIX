@@ -1,6 +1,5 @@
 import importlib
 
-
 class ImagingMethodBridge:
     """
     """

@@ -138,6 +138,6 @@ class Reconstruction:
         self.recontruct_image=self.imaging_method.reconstruction(self.spectra,self.pattern_order)
 
 
-    def save_reconstructed_image(self):
-        self.imaging_method.reconstructionMethod.save()
+    def save_reconstructed_image(self,filename,save_path):
+        self.imaging_method.save_reconstructed_image(filename,save_path,self.recontruct_image,self.acquisition_dict['wavelengths'])
         

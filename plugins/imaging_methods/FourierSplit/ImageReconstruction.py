@@ -5,6 +5,7 @@ Created on Thu Apr 14 10:28:24 2022
 @author: mribes
 """
 import numpy as np
+from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction import FisCommonReconstruction
 
 class Reconstruction:
     """ Class to reconstruct a data cube from Fourier splitting ONE-PIX method."""
@@ -69,4 +70,8 @@ class Reconstruction:
         hyperspectral_image=np.abs(np.fft.ifftn(whole_spectrum,axes=(0,1))) #0 calculation of the hyperspectral image
     
         return whole_spectrum,hyperspectral_image
+    
+    def save_reconstructed_image(self,datacube,wavelengths,filename,save_path=None):
+        saver=FisCommonReconstruction()
+        saver.save_acquisition_envi(datacube,wavelengths,filename,save_path)
         

@@ -1,9 +1,11 @@
 import os
 import numpy as np
-
+from tkinter import filedialog
+from datetime import date
+import time
 
 class FisCommonReconstruction :
-    def __init__(self) 
+    def __init__(self):
 
         return
 
@@ -44,12 +46,12 @@ class FisCommonReconstruction :
         text_file.write(header)
         text_file.close()
         
-        np.save()
+        
         
         return 
 
 
-    def save_acquisition_envi(self, path = "../Hypercubes"):
+    def save_acquisition_envi(self,datacube,wavelengths,path = None):
         """
         This function allow to save the resulting acquisitions from one 
         OPConfig object into the Hypercube folder.
@@ -66,7 +68,6 @@ class FisCommonReconstruction :
         """
         if path==None: path="../Hypercubes"
         root_path=os.getcwd()
-        #path=os.path.join(root_path,'Hypercubes')
         if(os.path.isdir(path)):
             pass
         else:
@@ -75,91 +76,86 @@ class FisCommonReconstruction :
         
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time
-        folder_name = f"ONE-PIX_acquisition_{fdate}_{actual_time}"
+        folder_name = f"ONE-PIX_reconstructed_data_{fdate}_{actual_time}"
         os.mkdir(folder_name)
         os.chdir(folder_name)
         self.save_path=folder_name
-        self.res=OPReconstruction(self.pattern_method,self.spectra,self.pattern_order)
-        self.res.Selection()
+        
         # saving the acquired spatial spectra hypercube
-        if self.normalisation_path !='':
-            # Load raw data
-            acq_data=load_hypercube(self.normalisation_path)
-            ref_datacube=acq_data['hyperspectral_image']
-            if(np.shape(ref_datacube)!=np.shape(self.res.hyperspectral_image)):
-                ref=np.zeros_like(self.res.hyperspectral_image)
-                for wl in range(np.size(ref,2)):
-                    ref[:,:,wl]=cv2.resize(ref_datacube[:,:,wl],(np.shape(ref)[:2]))
-            else: ref=ref_datacube
+        self.py2envi(folder_name,datacube,wavelengths,os.getcwd())
             
-            self.normalised_datacube=self.res.hyperspectral_image/ref
-            
-            py2envi(folder_name+'_normalised',self.normalised_datacube,self.wavelengths,os.getcwd())
-        py2envi(folder_name,self.res.hyperspectral_image,self.wavelengths,os.getcwd())
-            
-        
-        # Header
-        title_param = f"Acquisition_parameters_{fdate}_{actual_time}.txt"
-        header = f"ONE-PIX acquisition_{fdate}_{actual_time}"+"\n"\
-            + "--------------------------------------------------------"+"\n"\
-            + "\n"\
-            + f"Acquisition method : {self.pattern_method}"+"\n"\
-            + "Acquisition duration : %f s" % self.duration+"\n" \
-            + f"Spectrometer {self.name_spectro} : {self.spec_lib.DeviceName}"+"\n"\
-            + "Number of projected patterns : %d" % self.nb_patterns+"\n" \
-            + "Height of pattern window : %d pixels" % self.height+"\n" \
-            + "Width of pattern window : %d pixels" % self.width+"\n" \
-            + "Number of spectral measures per pattern: %d  " %self.rep+"\n" \
-            + "Integration time : %d ms" % self.integration_time_ms+"\n" 
-    
-    
-        text_file = open(title_param, "w+")
-        text_file.write(header)
-        text_file.close()
-        
-        print('is_raspberrypi() : ',is_raspberrypi())
-        if is_raspberrypi():
-            root=Tk()
-            root.geometry("{}x{}+{}+{}".format(self.width, self.height,screenWidth,0))
-            root.wm_attributes('-fullscreen', 'True')
-            c=Canvas(root,width=self.width,height=self.height,bg='black',highlightthickness=0)
-            c.pack()
-            root.update()
-            try:
-                from picamera import PiCamera, PiCameraError
-                camera = PiCamera(resolution = (1024, 768))
-                camera.iso=300
-                time.sleep(2)
-                camera.shutter_speed = camera.exposure_speed
-                camera.exposure_mode = 'off'
-                g = camera.awb_gains
-                camera.awb_mode = 'off'
-                camera.awb_gains = g
-                camera.vflip=True
-                camera.hflip=True
 
-                camera.capture(f"RGBCam_{fdate}_{actual_time}.jpg")
-                camera.close()
-                
-                if(self.pattern_method=='Addressing'):
-                    rgb_name=f"RGBCam_{fdate}_{actual_time}.jpg"
-                    RGB_img = cv2.imread(rgb_name)
-                    RGB_img= np.asarray(RGB_img)
-                    os.chdir(root_path)
-                    print('acq_conf_cor_path', os.path.abspath(os.curdir))
-                    RGB_img=apply_corregistration(RGB_img,'../acquisition_param_ONEPIX.json')
-                    os.chdir(path)
-                    os.chdir(folder_name)
-                    print('corPath : ',os.getcwd())
-                    cv2.imwrite(f"RGB_cor_{fdate}_{actual_time}.jpg",RGB_img)
-            except PiCameraError:
-                print("Warning; check a RPi camera is connected. No picture were stored !")
-            root.destroy()
-        os.chdir(root_path)
-        f = open(self.json_path)
-        acq_params = json.load(f)
-        f.close()
-        acq_params["normalisation_path"] = ""
-        file = open(self.json_path, "w")
-        json.dump(acq_params, file)
-        file.close()
+        
+        
+    
+    def py2ms(self,datacube,wavelengths,save_gerbil_name):
+        """
+    
+        py2ms allows to save ONE-PIX data into Gerbil format http://gerbilvis.org/
+        a window appears to select the directory where the hyperspectral data will be saved in gebril format
+        Input:
+            save_gerbil_name : the name of the saved data into gerbil format (without .txt extension)
+            
+
+        Parameters
+        ----------
+        save_gerbil_name : str
+            the name of the saved data into gerbil format (without .txt extension).
+        datacube : array
+            datacube to export into Gerbil format.
+        wavelengths : array
+            Sampled wavelengths associated to the measured datacube.
+
+        Returns
+        -------
+        None.
+
+        """
+        
+        save_path= filedialog.askdirectory(title = "Open the save directory")        
+        maxval = datacube.max()
+        minval = datacube.min()
+        Range = maxval - minval
+        datacube = (datacube + minval) * (255/Range)
+        
+        fid= open(save_path+'\\'+save_gerbil_name+'.txt','w')
+        os.mkdir(save_path+'\\'+save_gerbil_name)
+        nz = np.shape(datacube)
+        
+        fid.write('{0} {1} \n'.format(nz[2],save_gerbil_name+'\\'))
+        
+        for i in range(0,nz[2]):
+            filename = '{0}_{1}.png'.format(save_gerbil_name,i)
+            cv2.imwrite(save_path+'\\'+save_gerbil_name+'\\'+filename,datacube[:,:,i])
+            fid.write( '{0} {1}\n'.format( filename, wavelengths[i]))
+
+        fid.close()
+        
+
+    def py2envi(self,datacube,wavelengths,save_envi_name,save_path=None):
+        """
+        py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
+        metadata can be improved !
+        
+        Parameters
+        ----------
+        save_envi_name : TYPE
+            DESCRIPTION.
+        datacube : TYPE
+            DESCRIPTION.
+        wavelengths : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
+        # foldername=save_path+'\\'+save_envi_name
+        filename=save_envi_name+'.hdr'
+        # os.mkdir(foldername)
+        path=os.getcwd()
+        os.chdir(save_path)
+        envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
+        os.chdir(path)

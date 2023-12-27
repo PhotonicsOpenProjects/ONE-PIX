@@ -6,4 +6,7 @@ from core.Reconstruction import Reconstruction
 rec=Reconstruction()
 #rec.load_raw_data()
 rec.data_reconstruction()
-rec.save_reconstructed_image()
+
+filename='test_datacube'
+save_path=f'.{os.sep}'
+rec.save_reconstructed_image(filename,save_path)
