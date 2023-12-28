@@ -1,13 +1,14 @@
 class Analysis:
 
-    def __init__(self,rec=rec):
+    def __init__(self,rec=None):
 
-        if rec:
-            self.imaging_method=rec.imaging_method
-            self.reconstruct_image=rec.reconstruct_image()
-        else :
+        if rec is None:
             self.load_reconstruct_image()
             
+        else:
+            self.imaging_method=rec.imaging_method
+            self.reconstruct_image=rec.imaging_method.reconstructed_image
+
 
     def load_reconstruct_image(self):
         self.read_hader()
@@ -15,8 +16,7 @@ class Analysis:
         return 
     
 
-    def plot_image(self)
-
+    def plot_image(self):
         self.imaging_method.analysis.plot_reconstruct_image() 
 
 

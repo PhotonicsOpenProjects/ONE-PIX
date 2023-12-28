@@ -1,8 +1,3 @@
-"""
-@author:PhotonicsOpenProjects
-Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
-
-"""
 from core.hardware.HardwareConfig import *
 from core.ImagingMethodBridge import *
 import cv2
@@ -37,10 +32,10 @@ class Acquisition:
         f.close()
 
         self.acquisition_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'acquisition_parameters.json')
+        
         ## get software configuration
-        f = open(self.acquisition_config_path)
-        acquisition_dict = json.load(f)
-        f.close()
+        with open(self.acquisition_config_path) as f:
+            acquisition_dict = json.load(f)
 
         self.imaging_method_name=software_dict["imaging_method"]
         self.spatial_res=acquisition_dict["spatial_res"]

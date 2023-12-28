@@ -1,14 +1,10 @@
 import numpy as np 
-import matplotlib.pyplot as plt 
 import os
 import glob
 import tkinter as Tk
 from tkinter import filedialog
 from tkinter import *
-import importlib
-from sklearn import mixture
-import spectral.io.envi as envi
-import time
+
 from core.ImagingMethodBridge import *
 
 def get_header_data(path):
@@ -52,19 +48,24 @@ class Reconstruction:
 
         if acquisition_dict is None:
             self.load_raw_data()
-            self.imaging_method=self.acquisition_dict["imaging_method"]
+            self.imaging_method_name=self.acquisition_dict["imaging_method"]
             self.spectra=self.acquisition_dict["spectra"]
             self.pattern_order=self.acquisition_dict["patterns_order"]
-        else :
-            self.imaging_method=acquisition_dict["imaging_method"]
+        elif type(acquisition_dict)()=={} :
+            self.imaging_method_name=acquisition_dict["imaging_method"]
             self.spectra=acquisition_dict["spectra"]
             self.pattern_order=acquisition_dict["patterns_order"]
+        else:
+            self.imaging_method_name=acquisition_dict.imaging_method
+            self.spectra=acquisition_dict.spectra
+            self.pattern_order=acquisition_dict.patterns_order
+
         
         self.spatial_res=0
         self.height=0
         self.width=0
         
-        self.imaging_method=ImagingMethodBridge(self.imaging_method,self.spatial_res,self.height,self.width)
+        self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
         
     
     def load_raw_data(self):
@@ -105,9 +106,7 @@ class Reconstruction:
         except Exception as e:
             print(e)
         
-        
 
-         
     def nan_corr(self):
         """
         nan_corr allows to filter nan from acquired spectra

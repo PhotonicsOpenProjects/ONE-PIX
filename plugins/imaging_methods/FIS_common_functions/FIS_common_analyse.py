@@ -1,10 +1,9 @@
 
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
-
+import glob
 from scipy.signal import savgol_filter
 from tkinter import filedialog
 from tkinter import *
@@ -32,10 +31,7 @@ class FisAnalysis:
             Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.
 
         """
-    
-        # root = Tk()
-        # root.withdraw()
-        # root.attributes('-topmost', 1)
+
         res={"hyperspectral_image":[],"wavelengths":[]}
         
         if opt==None:
