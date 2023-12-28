@@ -69,7 +69,7 @@ class Reconstruction:
         whole_spectrum=np.concatenate((left_spectrum,half_spectrum),axis=1) # concatenation of the left and right part of the spatial spectrum
         hyperspectral_image=np.abs(np.fft.ifftn(whole_spectrum,axes=(0,1))) #0 calculation of the hyperspectral image
     
-        return whole_spectrum,hyperspectral_image
+        return hyperspectral_image
     
     def save_reconstructed_image(self,datacube,wavelengths,filename,save_path=None):
         saver=FisCommonReconstruction()

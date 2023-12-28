@@ -56,9 +56,9 @@ class Reconstruction:
             self.spectra=self.acquisition_dict["spectra"]
             self.pattern_order=self.acquisition_dict["patterns_order"]
         else :
-            self.imaging_method=acquisition_dict.imaging_method
-            self.spectra=acquisition_dict.spectra
-            self.pattern_order=acquisition_dict.pattern_order
+            self.imaging_method=acquisition_dict["imaging_method"]
+            self.spectra=acquisition_dict["spectra"]
+            self.pattern_order=acquisition_dict["patterns_order"]
         
         self.spatial_res=0
         self.height=0
@@ -135,9 +135,11 @@ class Reconstruction:
         None.
 
         """
-        self.recontruct_image=self.imaging_method.reconstruction(self.spectra,self.pattern_order)
+        self.imaging_method.reconstruction(self.spectra,self.pattern_order)
 
 
     def save_reconstructed_image(self,filename,save_path):
-        self.imaging_method.save_reconstructed_image(filename,save_path,self.recontruct_image,self.acquisition_dict['wavelengths'])
+        self.imaging_method.image_reconstruction_method.save_reconstructed_image(self.imaging_method.reconstructed_image,
+                                                                                 self.acquisition_dict['wavelengths'],
+                                                                                 filename,save_path)
         

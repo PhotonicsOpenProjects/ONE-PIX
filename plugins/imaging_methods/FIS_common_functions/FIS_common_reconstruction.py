@@ -3,6 +3,8 @@ import numpy as np
 from tkinter import filedialog
 from datetime import date
 import time
+import spectral.io.envi as envi
+import cv2
 
 class FisCommonReconstruction :
     def __init__(self):
@@ -51,7 +53,7 @@ class FisCommonReconstruction :
         return 
 
 
-    def save_acquisition_envi(self,datacube,wavelengths,path = None):
+    def save_acquisition_envi(self,datacube,wavelengths,save_envi_name=None,save_path = None):
         """
         This function allow to save the resulting acquisitions from one 
         OPConfig object into the Hypercube folder.
@@ -66,13 +68,12 @@ class FisCommonReconstruction :
         None.
     
         """
-        if path==None: path="../Hypercubes"
-        root_path=os.getcwd()
-        if(os.path.isdir(path)):
+        if save_path is None: save_path=f"..{os.sep}Hypercubes"
+        if(os.path.isdir(save_path)):
             pass
         else:
-            os.mkdir(path)
-        os.chdir(path)
+            os.mkdir(save_path)
+        os.chdir(save_path)
         
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time
@@ -80,11 +81,9 @@ class FisCommonReconstruction :
         os.mkdir(folder_name)
         os.chdir(folder_name)
         self.save_path=folder_name
-        
+        if save_envi_name is None : folder_name
         # saving the acquired spatial spectra hypercube
-        self.py2envi(folder_name,datacube,wavelengths,os.getcwd())
-            
-
+        self.py2envi(datacube,wavelengths,save_envi_name,save_path)
         
         
     
@@ -152,10 +151,8 @@ class FisCommonReconstruction :
 
         """
         if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
-        # foldername=save_path+'\\'+save_envi_name
         filename=save_envi_name+'.hdr'
-        # os.mkdir(foldername)
         path=os.getcwd()
         os.chdir(save_path)
-        envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
+        envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelengths':wavelengths,})
         os.chdir(path)
