@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 14 10:28:24 2022
-
-@author: mribes
-"""
 import numpy as np
 from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction import FisCommonReconstruction
 

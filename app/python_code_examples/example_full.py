@@ -21,4 +21,4 @@ rec.save_reconstructed_image(filename,save_path)
 
 # Analysis according to the acquisition method
 ana=Analysis(rec)
-ana.plot_false_rgb()
+ana.plot_rgb_image()

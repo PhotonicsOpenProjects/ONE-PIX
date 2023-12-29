@@ -19,7 +19,7 @@ class FisAnalysis:
     def __init__(self):
         return 
     
-    def load_hypercube(opt=None):
+    def load_data(self,opt=None):
         
         """
         This function allows to load saved spectra with timers of the displays and spectrometers.
@@ -89,7 +89,7 @@ class FisAnalysis:
     
    
 
-    def Flux2Ref(rawHypercube,Wavelengths,reference=None):
+    def Flux2Ref(self,rawHypercube,Wavelengths,reference=None):
         """
         Flux2Ref allows to normalize a raw hypercube in reflectance using a standard present in 
         the reconstructed image and its reflectance certificate.
@@ -134,7 +134,7 @@ class FisAnalysis:
         
         return Normalised_Hypercube
 
-    def spikes_correction(res):
+    def spikes_correction(self,res):
         """
         Allows to correct by clicking on an over represented frequency in the Fourier domain.
 
@@ -171,7 +171,7 @@ class FisAnalysis:
         return res
 
 
-    def select_disp_spectra(datacube,wavelengths,n,mode):
+    def select_disp_spectra(self,datacube,wavelengths,n,mode):
         """
         select_disp_spectra allows to select pixel(s) of one hypercube and plot their spectra.
 
@@ -245,7 +245,7 @@ class FisAnalysis:
 
     
 
-    def smooth_datacube(datacube,window_length,polyorder):
+    def smooth_datacube(self,datacube,window_length,polyorder):
         """
         This function allows to smooth spectra of a whole datacube using Savitzky-Golay filter.
         See more at :
@@ -275,7 +275,7 @@ class FisAnalysis:
                 
         return smoothed_datacube
 
-    def RGB_reconstruction(datacube,wavelengths):
+    def RGB_reconstruction(self,datacube,wavelengths):
         """
         RGB_reconstruction allows to extract red, green and blue channels from a datacube
         to create a false RGB image to represent it in the visible spectral range.
@@ -319,7 +319,7 @@ class FisAnalysis:
         return image_rgb
 
 
-    def clustering(datacube,components,n_cluster):
+    def clustering(self,datacube,components,n_cluster):
         """
         Clustering function allow to realize classification of the datacube
         using kmeans algorithm on princpal components of the PCA.
@@ -351,7 +351,7 @@ class FisAnalysis:
         
         return image_seg  
 
-    def display_clust_spectra(image_seg,datacube,wl):
+    def display_clust_spectra(self,image_seg,datacube,wl):
         """
         display_clust_spectra allows to display mean spectra of each cluster
         of a segmented image.
@@ -395,7 +395,7 @@ class FisAnalysis:
         
         return spec
 
-    def clip_datacube(datacube,wavelengths,lower_bound,upper_bound):
+    def clip_datacube(self,datacube,wavelengths,lower_bound,upper_bound):
         """
         rognage_hyp allows to clip spectral (3rd) dimension of a datacube to 
         limit the analyse to the part of the measured spectra of interest.
@@ -429,77 +429,77 @@ class FisAnalysis:
         return datacube_rogn,wavelengths_rogn
         
         
-        def py2ms(save_gerbil_name,datacube,wavelengths):
-            """
-            
-            py2ms allows to save ONE-PIX data into Gerbil format http://gerbilvis.org/
-            a window appears to select the directory where the hyperspectral data will be saved in gebril format
-            Input:
-                save_gerbil_name : the name of the saved data into gerbil format (without .txt extension)
-                
-
-            Parameters
-            ----------
-            save_gerbil_name : str
-                the name of the saved data into gerbil format (without .txt extension).
-            datacube : array
-                datacube to export into Gerbil format.
-            wavelengths : array
-                Sampled wavelengths associated to the measured datacube.
-
-            Returns
-            -------
-            None.
-
-            """
-                
-            save_path= filedialog.askdirectory(title = "Open the save directory")        
-            maxval = datacube.max()
-            minval = datacube.min()
-            Range = maxval - minval
-            datacube = (datacube + minval) * (255/Range)
-            
-            fid= open(save_path+'\\'+save_gerbil_name+'.txt','w')
-            os.mkdir(save_path+'\\'+save_gerbil_name)
-            nz = np.shape(datacube)
-            
-            fid.write('{0} {1} \n'.format(nz[2],save_gerbil_name+'\\'))
-            
-            for i in range(0,nz[2]):
-                filename = '{0}_{1}.png'.format(save_gerbil_name,i)
-                cv2.imwrite(save_path+'\\'+save_gerbil_name+'\\'+filename,datacube[:,:,i])
-                fid.write( '{0} {1}\n'.format( filename, wavelengths[i]))
-
-            fid.close()
+    def py2ms(save_gerbil_name,datacube,wavelengths):
+        """
+        
+        py2ms allows to save ONE-PIX data into Gerbil format http://gerbilvis.org/
+        a window appears to select the directory where the hyperspectral data will be saved in gebril format
+        Input:
+            save_gerbil_name : the name of the saved data into gerbil format (without .txt extension)
             
 
-        def py2envi(save_envi_name,datacube,wavelengths,save_path=None):
-            """
-            py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
-            metadata can be improved !
+        Parameters
+        ----------
+        save_gerbil_name : str
+            the name of the saved data into gerbil format (without .txt extension).
+        datacube : array
+            datacube to export into Gerbil format.
+        wavelengths : array
+            Sampled wavelengths associated to the measured datacube.
+
+        Returns
+        -------
+        None.
+
+        """
             
-            Parameters
-            ----------
-            save_envi_name : TYPE
-                DESCRIPTION.
-            datacube : TYPE
-                DESCRIPTION.
-            wavelengths : TYPE
-                DESCRIPTION.
+        save_path= filedialog.askdirectory(title = "Open the save directory")        
+        maxval = datacube.max()
+        minval = datacube.min()
+        Range = maxval - minval
+        datacube = (datacube + minval) * (255/Range)
+        
+        fid= open(save_path+'\\'+save_gerbil_name+'.txt','w')
+        os.mkdir(save_path+'\\'+save_gerbil_name)
+        nz = np.shape(datacube)
+        
+        fid.write('{0} {1} \n'.format(nz[2],save_gerbil_name+'\\'))
+        
+        for i in range(0,nz[2]):
+            filename = '{0}_{1}.png'.format(save_gerbil_name,i)
+            cv2.imwrite(save_path+'\\'+save_gerbil_name+'\\'+filename,datacube[:,:,i])
+            fid.write( '{0} {1}\n'.format( filename, wavelengths[i]))
 
-            Returns
-            -------
-            None.
+        fid.close()
+        
 
-            """
-            if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
-            # foldername=save_path+'\\'+save_envi_name
-            filename=save_envi_name+'.hdr'
-            # os.mkdir(foldername)
-            path=os.getcwd()
-            os.chdir(save_path)
-            envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
-            os.chdir(path)
+    def py2envi(save_envi_name,datacube,wavelengths,save_path=None):
+        """
+        py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
+        metadata can be improved !
+        
+        Parameters
+        ----------
+        save_envi_name : TYPE
+            DESCRIPTION.
+        datacube : TYPE
+            DESCRIPTION.
+        wavelengths : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
+        # foldername=save_path+'\\'+save_envi_name
+        filename=save_envi_name+'.hdr'
+        # os.mkdir(foldername)
+        path=os.getcwd()
+        os.chdir(save_path)
+        envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
+        os.chdir(path)
             
 
             

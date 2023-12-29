@@ -29,7 +29,7 @@ def get_header_data(path):
        for line in file.readlines():
            header.append(line.split(':'))
     acq_data=dict()
-    acq_data['Acquisition_name']=header[0][0][8:]
+    acq_data['acquisition_name']=header[0][0][8:]
     for x in header:
         if x[0].strip()=='Imaging method':
             acq_data['imaging_method']=x[1].strip()
@@ -45,20 +45,21 @@ def get_header_data(path):
 class Reconstruction:
     """ Class OPReconstruction to reconstruct datacubes according to a ONE-PIX method"""
     def __init__(self,acquisition_dict=None):
-
-        if acquisition_dict is None:
-            self.load_raw_data()
+        self.acquisition_dict=acquisition_dict
+        if acquisition_dict is None: self.load_raw_data()
+            
+        
+        if type(acquisition_dict)()=={} :
             self.imaging_method_name=self.acquisition_dict["imaging_method"]
             self.spectra=self.acquisition_dict["spectra"]
             self.pattern_order=self.acquisition_dict["patterns_order"]
-        elif type(acquisition_dict)()=={} :
-            self.imaging_method_name=acquisition_dict["imaging_method"]
-            self.spectra=acquisition_dict["spectra"]
-            self.pattern_order=acquisition_dict["patterns_order"]
-        else:
-            self.imaging_method_name=acquisition_dict.imaging_method
-            self.spectra=acquisition_dict.spectra
-            self.pattern_order=acquisition_dict.patterns_order
+            self.wavelengths=self.acquisition_dict["wavelengths"]
+
+        else: # if acquisition_dict is the reconstruction class object
+            self.imaging_method_name=self.acquisition_dict.imaging_method_name
+            self.spectra=self.acquisition_dict.spectra
+            self.pattern_order=self.acquisition_dict.imaging_method.patterns_order
+            self.wavelengths=self.acquisition_dict.hardware.spectrometer.wavelengths
 
         
         self.spatial_res=0
@@ -139,6 +140,6 @@ class Reconstruction:
 
     def save_reconstructed_image(self,filename,save_path):
         self.imaging_method.image_reconstruction_method.save_reconstructed_image(self.imaging_method.reconstructed_image,
-                                                                                 self.acquisition_dict['wavelengths'],
+                                                                                 self.wavelengths,
                                                                                  filename,save_path)
         
