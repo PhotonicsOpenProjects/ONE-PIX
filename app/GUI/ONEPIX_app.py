@@ -724,8 +724,8 @@ class OPApp(ctk.CTk):
             
             self.acq_config.hardware.spectrometer.spec_open()
      
-            if self.acq_config.spec_lib.DeviceName != '':
-                spectro_name=self.acq_config.spec_lib.DeviceName
+            if self.acq_config.hardware.spectrometer.DeviceName != '':
+                spectro_name=self.acq_config.hardware.spectrometer.DeviceName
                 if len(spectro_name)<30: spectro_name+=(30-len(spectro_name))*' '
                 else: spectro_name=spectro_name[:30]
                 self.switch_spectro.configure(text=spectro_name)
@@ -742,8 +742,8 @@ class OPApp(ctk.CTk):
         self.switch_spectro.deselect()
         self.button_acquire_hyp.configure(state = "disabled")
  
-        if self.acq_config.spec_lib.DeviceName != '':
-            self.acq_config.spec_lib.spec_close()
+        if self.acq_config.hardware.spectrometer.DeviceName != '':
+            self.acq_config.hardware.spectrometer.spec_close()
             self.switch_spectro.configure(state= "normal")
             self.button_co.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_disconnection"]["switch_spectro"],command=self.spec_connection)
         else:
@@ -756,10 +756,10 @@ class OPApp(ctk.CTk):
             self.clear_graph_tab1()
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["title"],color='white')
  
-            self.acq_config.integration_time_ms = float(self.entry_integration_time.get()) * 1e3
-            self.acq_config.spec_lib.set_integration_time()
+            self.acq_config.hardware.spectrometer.integration_time_ms = float(self.entry_integration_time.get()) * 1e3
+            self.acq_config.hardware.spectrometer.set_integration_time()
  
-            self.a_acq.plot(self.acq_config.spec_lib.get_wavelengths(), self.acq_config.spec_lib.get_intensities())
+            self.a_acq.plot(self.acq_config.hardware.spectrometer.get_wavelengths(), self.acq_config.hardware.spectrometer.get_intensities())
             self.a_acq.set_xlabel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["xlabel"],color='white')
             self.a_acq.set_ylabel("Intensity (counts)",color='white')
             self.a_acq.set_axis_on()
@@ -787,13 +787,13 @@ class OPApp(ctk.CTk):
  
     def entries_actualisation(self):
         self.json_actualisation()
-        self.acq_config.spec_lib.spec_close()
+        self.acq_config.hardware.spectrometer.spec_close()
         del self.acq_config
-        self.acq_config = OPConfig(json_path)
-        self.acq_config.spec_lib.spec_open()
+        self.acq_config = Acquisition()
+        self.acq_config.hardware.spectrometer.spec_open()
         if (self.simple_mode_button.cget("state") == "normal"):
-            self.acq_config.spec_lib.integration_time_ms = self.acq_config.integration_time_ms
-            self.acq_config.spec_lib.set_integration_time()
+            self.acq_config.hardware.spectrometer.integration_time_ms = self.acq_config.hardware.spectrometer.integration_time_ms
+            self.acq_config.hardware.spectrometer.set_integration_time()
             #self.acq_config.periode_pattern = int(float(self.entry_pattern_duration.get()))
  
     def thread_acquire_hyp(self):
@@ -813,7 +813,7 @@ class OPApp(ctk.CTk):
             self.close_window_proj()
             self.entry_integration_time.configure(state = 'normal')
             self.entry_integration_time.delete(0,10)
-            self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
+            self.entry_integration_time.insert(0,str(self.acq_config.hardware.spectrometer.integration_time_ms))
             self.entry_integration_time.configure(state= 'disabled')
 
             time.sleep(1)
@@ -832,7 +832,7 @@ class OPApp(ctk.CTk):
         self.progressbar.set(value=0)
         if (self.acq_config.pattern_method in self.acq_config.seq_basis+['Hadamard']):
             if len(self.acq_config.spectra) > 0:
-                self.acq_res=OPReconstruction(self.acq_config.pattern_method,
+                self.acq_res=Reconstruction(self.acq_config.pattern_method,
                                           self.acq_config.spectra,self.acq_config.pattern_order)
                 self.acq_res.Selection()
                 
