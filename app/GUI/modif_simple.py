@@ -565,9 +565,9 @@ class OPApp(ctk.CTk):
         json_object["spatial_res"] = int(self.entry_img_res.get())
         json_object["integration_time_ms"] = float(self.acq_config.integration_time_ms)
  
-        file = open(json_path, "w")
-        json.dump(json_object, file)
-        file.close()
+        with open(json_path, "w") as file:
+            json.dump(json_object, file,indent=4)
+        
  
     def params_actualisation(self):
         self.json_actualisation()
@@ -1137,7 +1137,7 @@ class OPApp(ctk.CTk):
         GUI_conf["pattern_method"] = "FourierSplit"
         GUI_conf["spatial_res"] = 31
         with open(json_path, 'w') as f:
-            json.dump(GUI_conf, f)
+            json.dump(GUI_conf, f,indent=4)
             f.close()
             
     def open_languageConfig(self):

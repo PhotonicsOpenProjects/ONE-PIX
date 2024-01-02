@@ -27,9 +27,8 @@ class Acquisition:
 
         self.software_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'software_config.json')
         ## get software configuration
-        f = open(self.software_config_path)
-        software_dict = json.load(f)
-        f.close()
+        with open(self.software_config_path) as f:
+            software_dict = json.load(f)
 
         self.acquisition_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'acquisition_parameters.json')
         

@@ -119,9 +119,9 @@ class OPApp(ctk.CTk):
         acq_params = json.load(f)
         f.close()
         acq_params["normalisation_path"] = norm_path
-        file = open(path_to_json, "w")
-        json.dump(acq_params, file)
-        file.close()
+        with open(path_to_json, "w") as file:
+            json.dump(acq_params, file,indent=4)
+        
         self.isNormalized = False
         self.launch_GUI()
 
@@ -218,7 +218,7 @@ class OPApp(ctk.CTk):
         acq_params["acquisition_method"]=self.acquisition_method
         acq_params["Normalisation"]=self.isNormalized
         with open(path_to_json, 'w') as outfile:
-            json.dump(acq_params, outfile)
+            json.dump(acq_params, outfile,indent=4)
             outfile.close()
             
         with open("languages/config.json", 'r') as f:
@@ -226,7 +226,7 @@ class OPApp(ctk.CTk):
             f.close()
             lang["last_choice"] = self.curLanguage
         with open("languages/config.json", 'w') as f:    
-            json.dump(lang, f)
+            json.dump(lang, f,indent=4)
             f.close()
             
         if self.GuiMode_choice.get()==self.GuiMode_choice_text[0]: # if simple

@@ -201,8 +201,8 @@ class OPApp(ctk.CTk):
         elif self.test_mode=="auto":
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
         with open(json_path, 'w') as outfile:
-            json.dump(params, outfile)
-            outfile.close()
+            json.dump(params, outfile,indent=4)
+            
         
         config=OPConfig(json_path)
         try:
@@ -285,8 +285,8 @@ class OPApp(ctk.CTk):
         GUI_conf["pattern_method"] = "Addressing"
         
         with open(json_path, 'w') as f:
-            json.dump(GUI_conf, f)
-            f.close()
+            json.dump(GUI_conf, f,indent=4)
+           
             
     def open_languageConfig(self):
         with open("./languages/config.json", 'r') as f:

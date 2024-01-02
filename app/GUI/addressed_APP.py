@@ -199,7 +199,7 @@ class OPApp(ctk.CTk):
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
                                      
         with open(json_path, 'w') as outfile:
-            json.dump(params, outfile)
+            json.dump(params, outfile, indent=4)
             outfile.close()
         
         self.config=OPConfig(json_path)
@@ -283,7 +283,7 @@ class OPApp(ctk.CTk):
         GUI_conf["pattern_method"] = "Addressing"
         
         with open(json_path, 'w') as f:
-            json.dump(GUI_conf, f)
+            json.dump(GUI_conf, f,indent=4)
             f.close()
             
     def open_languageConfig(self):

@@ -1,3 +1,4 @@
+import numpy as np
 
 class Reconstruction:
 
@@ -101,6 +102,6 @@ class Reconstruction:
         acq_params = json.load(f)
         f.close()
         acq_params["normalisation_path"] = ""
-        file = open(self.json_path, "w")
-        json.dump(acq_params, file)
-        file.close()
+        with open(self.json_path, "w") as file:
+            json.dump(acq_params, file)
+        

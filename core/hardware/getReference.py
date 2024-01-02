@@ -24,9 +24,10 @@ f.close()
 acq_params["normalisation_path"] =""
 acq_params["spatial_res"] = 21
 acq_params["pattern_method"] = "FourierSplit"
-file = open(jsonpath, "w")
-json.dump(acq_params, file)
-file.close()
+
+with open(jsonpath, "w") as file:
+    json.dump(acq_params, file,indent=4)
+
 
 test = OPConfig(jsonpath)
 test.OP_init()
@@ -35,9 +36,9 @@ f = open(jsonpath)
 acq_params = json.load(f)
 f.close()
 acq_params["integration_time_ms"] = test.integration_time_ms
-file = open(jsonpath, "w")
-json.dump(acq_params, file)
-file.close()
+with open(jsonpath, "w") as file:
+    json.dump(acq_params, file,indent=4)
+
 
 
 if not "Hypercubes" in os.listdir("../"):
@@ -70,7 +71,7 @@ f = open(jsonpath)
 acq_params = json.load(f)
 f.close()
 acq_params["normalisation_path"] = os.path.abspath(save_path+'/reference')
-file = open(jsonpath, "w")
-json.dump(acq_params, file)
-file.close()
+with open(jsonpath, "w") as file:
+    json.dump(acq_params, file)
+
 shutil.copy(glob.glob(save_path+'/'+'ONE-PIX*'+'/*.txt')[0],os.path.abspath(save_path+'/reference'))

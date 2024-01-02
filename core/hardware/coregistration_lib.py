@@ -228,9 +228,8 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         setup_dict["max_width"]=max_width
         setup_dict["max_height"]=max_height
                 
-        file = open(json_path, "w")
-        json.dump(setup_dict,file)
-        file.close()
+        with  open(json_path, "w") as f:
+            json.dump(setup_dict,file,indent=4)
         
         
     else:
@@ -303,9 +302,9 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     setup_dict["max_width"]=max_width
     setup_dict["max_height"]=max_height
             
-    file = open(json_path, "w")
-    json.dump(setup_dict,file)
-    file.close()
+    with open(json_path, "w") as file:
+        json.dump(setup_dict,file,indent=4)
+    
     
 def apply_corregistration(img,json_path):
     """
