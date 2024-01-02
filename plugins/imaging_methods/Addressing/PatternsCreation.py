@@ -141,7 +141,6 @@ class CreationPatterns:
         
     def sequence_order(self):
         
-        
         pattern_order=["vegetation","sol"]
         return pattern_order
 

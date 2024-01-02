@@ -1,9 +1,3 @@
-"""
-@author:PhotonicsOpenProjects
-Modified and traducted by Leo Brechet on Wed Jul 19 18:32:47 2023
-
-"""
-
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
@@ -27,12 +21,11 @@ import sys
 import os
 import glob
 import datetime
+sys.path.append(f'..{os.sep}..{os.sep}')
 
-sys.path.insert(0, os.path.abspath('../'))
-
-from src.AcquisitionConfig import *
-from src.DatacubeReconstructions import *
-import src.datacube_analyse as hsa
+from core.Acquisition import Acquisition
+from core.Reconstruction import Reconstruction
+from core.Analysis import Analysis
 from scipy.linalg import hadamard
 import numpy as np
 import matplotlib.pyplot as plt
@@ -46,15 +39,15 @@ import json
 import customtkinter as ctk
 from skimage.measure import shannon_entropy as entropy
 import threading
-import platform
 import screeninfo
+
 screenWidth = screeninfo.get_monitors()[0].width
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 VERSION = '2.0.0'
-json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
+json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
 
 window_height = 600
 window_width = 1020
@@ -66,15 +59,17 @@ class OPApp(ctk.CTk):
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
-        self.acq_config=OPConfig(json_path)
+        self.acq_config=Acquisition()
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI {VERSION}")
         x = (self.monitor_sz.width -window_width)//2-100
         y = (self.monitor_sz.height-window_height)//2-100
-        if is_raspberrypi(): x,y=x+100,y+100
+       
+        if self.acq_config.hardware.is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
-        icon_path='../imgs/logo_ONE-PIX.png' if is_raspberrypi() else '../imgs/logo_ONE-PIX.ico'
+        ext=".png" if self.acq_config.hardware.is_raspberrypi() else ".ico"
+        icon_path=f'.{os.sep}imgs{os.sep}logo_ONE-PIX{ext}'
         icon_path=PIL.ImageTk.PhotoImage(master=self,file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
@@ -148,7 +143,7 @@ class OPApp(ctk.CTk):
         
         self.entry_integration_time = ctk.CTkEntry(self.acq_mode_frame,width=45)
         self.entry_integration_time.grid(row=1, column=0, pady=(0,20), padx=(0,140))
-        self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
+        self.entry_integration_time.insert(0,str(self.acq_config.hardware.spectrometer.integration_time_ms))
         self.entry_integration_time.configure(state = tk.DISABLED,text_color='gray')
         self.label_integration_time =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_integration_time"])
         self.label_integration_time.grid(row=1, column=0, pady=(0,20), padx=(65,0))
@@ -159,13 +154,17 @@ class OPApp(ctk.CTk):
         self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_img_res"])
         self.label_img_res.grid(row=2, column=0, pady=(0,20), padx=(90,0))
                
-        self.methods_list=glob.glob(r"../src/patterns_bases/*.py")
-        self.methods_list=[x[22:-11] for x in self.methods_list]
-        self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstr",""]]
-        self.spectro_list=glob.glob(r"../src/spectrometer_bridges/*.py")
-        self.spectro_list=[x[28:-9] for x in self.spectro_list]
-        self.spectro_list.remove('__')
-        self.spectro_list.remove('Abstract')
+        self.methods_list=glob.glob(r"../../pugins/imaging_methods/patterns_bases/*.py")
+        self.methods_list=[x[30:] for x in self.methods_list]
+        self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstract","FIS_common_functions"]]
+        self.spectro_list=glob.glob(r"../../plugins/spectrometer/*")
+        self.spectro_list=[x[27:] for x in self.spectro_list]
+        try:
+            self.spectro_list.remove('__init__.py')
+            self.spectro_list.remove('Abstract')
+            self.spectro_list.remove('__pycache__')
+        except ValueError:
+            pass
         
         self.methods_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.methods_list)
         self.methods_optionemenu.grid(row=1, column=1)
@@ -604,8 +603,8 @@ class OPApp(ctk.CTk):
         
         if messagebox.askokcancel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel"]["title"],
                                   self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel"]["confirm"]):
-            if self.acq_config.spec_lib.DeviceName != '':
-                self.acq_config.spec_lib.spec_close()
+            if self.acq_config.hardware.spectrometer.DeviceName != '':
+                self.acq_config.hardware.spectrometer.spec_close()
             plt.close('all')
             self.quit()
             self.destroy()
@@ -630,7 +629,7 @@ class OPApp(ctk.CTk):
         #self.entry_pattern_duration.delete(0,10)
         self.entry_integration_time.delete(0,10)
         #self.entry_pattern_duration.insert(0,str(self.acq_config.periode_pattern))
-        self.entry_integration_time.insert(0,str(self.acq_config.integration_time_ms))
+        self.entry_integration_time.insert(0,str(self.acq_config.hardware.spectrometer.integration_time_ms))
  
     def close_window_proj(self):
         try:
@@ -722,8 +721,8 @@ class OPApp(ctk.CTk):
     def spec_connection(self):
         try:
             self.acq_config.name_spectro =self.spectro_optionemenu.get()
-            self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms,self.acq_config.wl_lim)
-            self.acq_config.spec_lib.spec_open()
+            
+            self.acq_config.hardware.spectrometer.spec_open()
      
             if self.acq_config.spec_lib.DeviceName != '':
                 spectro_name=self.acq_config.spec_lib.DeviceName

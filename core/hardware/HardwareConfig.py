@@ -13,7 +13,7 @@ class Hardware :
         self.root_path=os.getcwd()
         conf_path=f'..{os.sep}..{os.sep}conf'
         self.harware_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),conf_path , 'hardware_config.json')
-        with pen(self.harware_config_path) as f:
+        with open(self.harware_config_path) as f:
             hardware_dict = json.load(f)
        
 
@@ -47,7 +47,7 @@ class Hardware :
         self.camera=CameraBridge(self.name_camera)
         self.projection=Projection(self.height,self.width,self.periode_pattern)
 
-    def is_raspberrypi():
+    def is_raspberrypi(self):
         """
         is_raspberrypi return a boolean to determine if the current OS is a raspberrry
 
