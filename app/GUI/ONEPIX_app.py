@@ -773,9 +773,9 @@ class OPApp(ctk.CTk):
  
  
     def json_actualisation(self):
-        file = open(json_path, "r")
-        json_object = json.load(file)
-        file.close()
+        with open(json_path, "r") as file:
+            json_object = json.load(file)
+      
         json_object["name_spectro"] = self.acq_config.name_spectro
         json_object["pattern_method"] = self.methods_optionemenu.get()
         json_object["spatial_res"] = int(self.entry_img_res.get())
@@ -858,15 +858,6 @@ class OPApp(ctk.CTk):
                 self.switch_spat2im.configure(state='normal')
                 self.switch_spat2im.deselect()
                  
-                
-                
-        
-        # os.chdir(root_path)
-        # file = open(json_path, "r")
-        # json_object = json.load(file)
-        # file.close()
-        
-        
         
         elif self.acq_config.pattern_method in self.acq_config.full_basis:
             pass

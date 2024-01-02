@@ -557,9 +557,9 @@ class OPApp(ctk.CTk):
  
     def json_actualisation(self):
         os.chdir(root_path)
-        file = open(json_path, "r")
-        json_object = json.load(file)
-        file.close()
+        with open(json_path, "r") as file:
+            json_object = json.load(file)
+        
         json_object["name_spectro"] = self.acq_config.name_spectro
         json_object["pattern_method"] = self.methods_optionemenu.get()
         json_object["spatial_res"] = int(self.entry_img_res.get())
@@ -630,10 +630,7 @@ class OPApp(ctk.CTk):
                 self.switch_spat2im.configure(state='normal')
                 self.switch_spat2im.select()
         
-        # os.chdir(root_path)
-        # file = open(json_path, "r")
-        # json_object = json.load(file)
-        # file.close()
+    
         
         
         
@@ -1132,25 +1129,25 @@ class OPApp(ctk.CTk):
     def open_GUIConfig(self):
         with open(json_path, 'r') as f:
             GUI_conf = json.load(f)
-            f.close()
+           
         
         GUI_conf["pattern_method"] = "FourierSplit"
         GUI_conf["spatial_res"] = 31
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f,indent=4)
-            f.close()
+            
             
     def open_languageConfig(self):
         with open("languages/config.json", 'r') as f:
             lang_conf = json.load(f)
-            f.close()
+          
         lang_list = lang_conf['installed_language']
         jsonFile = list(lang_list)[list(lang_list.values()).index(lang_conf["last_choice"])]
         print(jsonFile)
         
         with open(f"languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
-            f.close()
+            
         # print(self.widgets_text)
 
 class Toolbar(NavigationToolbar2Tk):

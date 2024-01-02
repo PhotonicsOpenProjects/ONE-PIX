@@ -18,9 +18,9 @@ import shutil
 
 # Normalisation datacube parameters setting
 jsonpath = '../acquisition_param_ONEPIX.json'  
-f = open(jsonpath)
-acq_params = json.load(f)
-f.close()
+with open(jsonpath) as f:
+    acq_params = json.load(f)
+
 acq_params["normalisation_path"] =""
 acq_params["spatial_res"] = 21
 acq_params["pattern_method"] = "FourierSplit"
@@ -67,9 +67,9 @@ ref=spat_ref[:,:,np.newaxis]*np.reshape(spec_ref,(1,1,np.size(spec_ref)))
 py2envi(f"reference_{fdate}_{actual_time}",ref,test.wavelengths,save_path+'/reference')
 
 # Notify in json file where to find the normalised datacube
-f = open(jsonpath)
-acq_params = json.load(f)
-f.close()
+with open(jsonpath) as f:
+    acq_params = json.load(f)
+
 acq_params["normalisation_path"] = os.path.abspath(save_path+'/reference')
 with open(jsonpath, "w") as file:
     json.dump(acq_params, file)

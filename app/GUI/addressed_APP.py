@@ -115,9 +115,8 @@ class OPApp(ctk.CTk):
         self.integration_time_label.grid(column=0, row=3, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         self.integration_time_entry = ctk.CTkEntry(self.Mode_frame, state = "normal")
         self.integration_time_entry.grid(column=1, row=3, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        f = open(json_path)
-        params = json.load(f)
-        f.close()
+        with open(json_path) as f:
+            params = json.load(f)
         self.integration_time_entry.insert(0,str(params["integration_time_ms"]))
         
 # =============================================================================
@@ -200,7 +199,6 @@ class OPApp(ctk.CTk):
                                      
         with open(json_path, 'w') as outfile:
             json.dump(params, outfile, indent=4)
-            outfile.close()
         
         self.config=OPConfig(json_path)
         
@@ -284,19 +282,17 @@ class OPApp(ctk.CTk):
         
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f,indent=4)
-            f.close()
             
     def open_languageConfig(self):
         with open("./languages/config.json", 'r') as f:
             lang_conf = json.load(f)
-            f.close()
+
         lang_list = lang_conf['installed_language']
         jsonFile = list(lang_list)[list(lang_list.values()).index(lang_conf["last_choice"])]
         print(jsonFile)
         
         with open(f"./languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
-            f.close()
         # print(self.widgets_text)
 
     def close_window(self):

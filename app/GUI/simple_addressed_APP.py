@@ -193,9 +193,10 @@ class OPApp(ctk.CTk):
         self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
                                      text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["acquireButton_WIP"])
         self.update()
-        f = open(json_path)
-        params = json.load(f)
-        f.close()
+        
+        with open(json_path) as f:
+            params = json.load(f)
+      
         if self.test_mode=="manual":
             params['spatial_res']='manual_segmentation'
         elif self.test_mode=="auto":
@@ -291,15 +292,14 @@ class OPApp(ctk.CTk):
     def open_languageConfig(self):
         with open("./languages/config.json", 'r') as f:
             lang_conf = json.load(f)
-            f.close()
+           
         lang_list = lang_conf['installed_language']
         jsonFile = list(lang_list)[list(lang_list.values()).index(lang_conf["last_choice"])]
         print(jsonFile)
         
         with open(f"./languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
-            f.close()
-        # print(self.widgets_text)
+           
 
     def close_window(self):
         plt.close('all')

@@ -62,9 +62,9 @@ class Reconstruction:
             + "Integration time : %d ms" % self.integration_time_ms+"\n" 
     
     
-        text_file = open(title_param, "w+")
-        text_file.write(header)
-        text_file.close()
+        with open(title_param, "w+") as text_file:
+            text_file.write(header)
+        
 
 
                 
@@ -98,9 +98,10 @@ class Reconstruction:
             root.destroy()
         
         os.chdir(root_path)
-        f = open(self.json_path)
-        acq_params = json.load(f)
-        f.close()
+        
+        with open(self.json_path) as f:
+            acq_params = json.load(f)
+        
         acq_params["normalisation_path"] = ""
         with open(self.json_path, "w") as file:
             json.dump(acq_params, file)

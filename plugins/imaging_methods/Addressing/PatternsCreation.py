@@ -1,8 +1,3 @@
-"""
-@author:PhotonicsOpenProject
-Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
-
-"""
 #Import libraries (camera, ssh, scp...)
 import numpy as np
 import time
@@ -136,9 +131,9 @@ def realtime_labelme(img):
 
 
 
-class AddressingPatterns:
+class CreationPatterns:
     
-    def __init__(self,spatial_res):
+    def __init__(self,spatial_res=0,height=0,width=0):
         self.pattern_order=[]
         self.sequence=[]
         self.nb_patterns=2 #Two patterns at this times : "vegetation and background"
@@ -154,9 +149,8 @@ class AddressingPatterns:
     
     def creation_patterns(self):
         json_path="../acquisition_param_ONEPIX.json"
-        f = open(json_path)
-        acqui_dict = json.load(f)
-        f.close()
+        with open(json_path) as f:
+            acqui_dict = json.load(f)
         #parameters to connect by SSH to the GPU server and execute SCP command get/add
         ip=acqui_dict["IP"]
         

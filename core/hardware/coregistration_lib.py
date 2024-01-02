@@ -220,9 +220,9 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         m = cv2.getPerspectiveTransform(rect, dst)
         showinfo(message='Initialisation du vidéoprojecteur réussie.')
         
-        file = open(json_path, "r")
-        setup_dict = json.load(file)
-        file.close()
+        with open(json_path, "r") as file:
+            setup_dict = json.load(file)
+        
         
         setup_dict["m"]=m.tolist()
         setup_dict["max_width"]=max_width

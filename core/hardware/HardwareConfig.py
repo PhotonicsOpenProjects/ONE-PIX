@@ -13,17 +13,17 @@ class Hardware :
         self.root_path=os.getcwd()
         conf_path=f'..{os.sep}..{os.sep}conf'
         self.harware_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),conf_path , 'hardware_config.json')
-        f = open(self.harware_config_path)
-        hardware_dict = json.load(f)
-        f.close()
+        with pen(self.harware_config_path) as f:
+            hardware_dict = json.load(f)
+       
 
         self.name_spectro = hardware_dict["name_spectro"]
         self.name_camera=hardware_dict["name_camera"]
 
         self.acquisition_parameter_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),conf_path ,'acquisition_parameters.json')
-        f = open(self.acquisition_parameter_path)
-        param_dict = json.load(f)
-        f.close()
+        
+        with open(self.acquisition_parameter_path) as f:
+            param_dict = json.load(f)
 
         self.integration_time_ms =param_dict["integration_time_ms"]    
         self.repetition=param_dict["spectro_scans2avg"]

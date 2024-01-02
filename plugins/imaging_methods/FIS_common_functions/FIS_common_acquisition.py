@@ -29,9 +29,9 @@ class FisCommonAcquisition:
         os.chdir(folder_name)
         self.save_path=folder_name
 
-        text_file = open(self.acquisition_class.title_param, "w+")
-        text_file.write(self.acquisition_class.header)
-        text_file.close()
+        with open(self.acquisition_class.title_param, "w+") as text_file:
+            text_file.write(self.acquisition_class.header)
+        
         # save raw acquisition data in numpy format
         np.save(camera_image_filename,self.acquisition_class.camera_image) #RGB image from camera
         np.save(acquisition_filename,self.acquisition_class.spectra) # measured spectra 
