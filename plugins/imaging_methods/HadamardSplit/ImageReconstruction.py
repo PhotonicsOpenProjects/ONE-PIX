@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.linalg import hadamard
+from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction import FisCommonReconstruction
 
-class HadamardReconstruction:
+class Reconstruction:
     """ Class to reconstruct a data cube from Hadamard splitting ONE-PIX method."""
     def __init__(self,spectra,pattern_order):
         self.spectra=spectra
@@ -46,7 +47,7 @@ class HadamardReconstruction:
         return whole_spectrum
  
 
-    def datacube_reconstruction(self):
+    def image_reconstruction(self):
         """
         Function for the reconstruction of the whole Hadamard spectrum and the 
         associated hyperspectral image
@@ -64,8 +65,11 @@ class HadamardReconstruction:
         whole_spectrum=self.spectrum_reconstruction()
         dim=np.size(whole_spectrum,0)
         H=hadamard(dim)
-        # H=np.dstack([H]*np.size(whole_spectrum,2))
         hyperspectral_image=np.zeros_like(whole_spectrum)
         for wl in range(np.size(whole_spectrum,2)): hyperspectral_image[:,:,wl]=abs(H@whole_spectrum[:,:,wl]@H)
         
-        return whole_spectrum,hyperspectral_image
+        return hyperspectral_image
+
+    def save_reconstructed_image(self,datacube,wavelengths,filename,save_path=None):
+            saver=FisCommonReconstruction()
+            saver.save_acquisition_envi(datacube,wavelengths,filename,save_path)

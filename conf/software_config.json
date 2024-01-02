@@ -1,5 +1,5 @@
 {
-    "imaging_method": "FourierShift",
+    "imaging_method": "HadamardSplit",
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
     "mode_choice": "Avanc\u00e9",

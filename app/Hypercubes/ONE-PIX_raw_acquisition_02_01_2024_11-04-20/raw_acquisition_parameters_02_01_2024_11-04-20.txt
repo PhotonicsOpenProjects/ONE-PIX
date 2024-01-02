@@ -1,0 +1,12 @@
+ONE-PIX_raw_acquisition_02_01_2024_11-04-20
+--------------------------------------------------------
+
+Imaging method: HadamardSplit
+Acquisition duration: 3.458387 s
+Spectrometer Stub : stub_spectrometer
+Camera: Stub
+Number of projected patterns: 32
+Height of pattern window: 600 pixels
+Width of pattern window: 800 pixels
+Number of spectral measures per pattern: 5  
+Integration time: 15 ms

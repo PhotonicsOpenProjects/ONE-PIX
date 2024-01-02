@@ -1,19 +1,20 @@
 import numpy as np
 from scipy.linalg import hadamard
-import gc
+import cv2
+import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
 
-class HadamardPatterns:
+class CreationPatterns:
     """ Class HadamardPatterns allows to create a sequence of 
         Hadamard split patterns and their order list.
     """
-    def __init__(self,spatial_res):
+    def __init__(self,spatial_res,height=0,width=0):
              
         self.dim=2**(round(np.log2(spatial_res)))
         self.nb_patterns=2*self.dim**2
         self.sequence=[]
         self.pattern_order=[]
         self.white_pattern_idx=0
-        
+        self.interp_method=cv2.INTER_AREA
         if self.dim != spatial_res:
             print(f'Warning: Hadamard sampling request for powers of 2 dimensions. The nearest eligible size is {self.dim}. ')
   
@@ -30,16 +31,16 @@ class HadamardPatterns:
             list of tuples of 2D spatial frequencies sampled.
 
         """
-        pattern_order=[]
+        patterns_order=[]
         freqs=[]
         
         for j in range(self.dim): #column broom
             for k in range(self.dim): #line broom
-                pattern_order.append("Hpos(%d,%d)"%(j,k))
-                pattern_order.append("Hneg(%d,%d)"%(j,k))
+                patterns_order.append("Hpos(%d,%d)"%(j,k))
+                patterns_order.append("Hneg(%d,%d)"%(j,k))
         freqs.append((j,k))
                 
-        return pattern_order,freqs
+        return patterns_order,freqs
      
 
 
@@ -61,7 +62,10 @@ class HadamardPatterns:
             self.sequence.append(np.uint8(255*((1+(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim])))//2))) # reshape of the Patterns in 2D(dim X dim)
             self.sequence.append(np.uint8(255*((1-(np.reshape(hadamard_matrix[:,col],[self.dim,self.dim])))//2)))
         del hadamard_matrix
-        gc.collect()
         
-        self.pattern_order,freqs=self.sequence_order()
-        return self.pattern_order,freqs
+        self.patterns_order,freqs=self.sequence_order()
+        return self.sequence
+
+    def save_raw_data(self,acquisition_class,path=None):
+        saver=FIS.FisCommonAcquisition(acquisition_class)
+        saver.save_raw_data(path=None)
