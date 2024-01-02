@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
 
 class CreationPatterns:
     """ Class FourierShiftPatterns allows to create a sequence of 
@@ -94,3 +95,7 @@ class CreationPatterns:
             patterns.extend(self.creation_freq_patterns(freq))
 
         return patterns
+
+    def save_raw_data(self,acquisition_class,path=None):
+        saver=FIS.FisCommonAcquisition(acquisition_class)
+        saver.save_raw_data(path=None)

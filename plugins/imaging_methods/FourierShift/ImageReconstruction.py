@@ -1,12 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 14 10:28:24 2022
-
-@author: mribes
-"""
+from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction import FisCommonReconstruction
 import numpy as np
 
-class FourierShiftReconstruction:
+class Reconstruction:
     """ Class to reconstruct a data cube from Fourier shifting ONE-PIX method."""
     def __init__(self,spectra,pattern_order):
         self.spectra=spectra
@@ -51,7 +46,7 @@ class FourierShiftReconstruction:
         return half_spectrum    
     
     
-    def datacube_reconstruction(self):
+    def image_reconstruction(self):
         """
         Function for the reconstruction of the whole Fourier spectrum and the hyperspectral image.
 
@@ -71,5 +66,9 @@ class FourierShiftReconstruction:
         whole_spectrum=np.concatenate((left_spectrum,half_spectrum),axis=1) # concatenation of the left and right part of the spatial spectrum
         hyperspectral_image=np.abs(np.fft.ifftn(whole_spectrum,axes=(0,1))) #0 calculation of the hyperspectral image
     
-        return whole_spectrum,hyperspectral_image
+        return hyperspectral_image
         
+
+    def save_reconstructed_image(self,datacube,wavelengths,filename,save_path=None):
+        saver=FisCommonReconstruction()
+        saver.save_acquisition_envi(datacube,wavelengths,filename,save_path)

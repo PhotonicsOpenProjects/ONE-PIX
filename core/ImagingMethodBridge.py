@@ -34,7 +34,7 @@ class ImagingMethodBridge:
             reconstruction_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'ImageReconstruction')
             self.image_reconstruction_classObj = getattr(reconstruction_module, 'Reconstruction')
             self.image_reconstruction_method = self.image_reconstruction_classObj(spectra,pattern_order)
-            self.reconstructed_image=self.image_reconstruction_method.reconstruct_image()
+            self.reconstructed_image=self.image_reconstruction_method.image_reconstruction()
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
     

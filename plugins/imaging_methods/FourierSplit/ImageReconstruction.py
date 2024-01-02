@@ -45,7 +45,7 @@ class Reconstruction:
         return half_spectrum    
     
    
-    def reconstruct_image(self):
+    def image_reconstruction(self):
         """
         Function for the reconstruction of the whole Fourier spectrum and the hyperspectral image.
 
