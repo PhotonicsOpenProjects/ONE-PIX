@@ -62,6 +62,7 @@ class OPApp(ctk.CTk):
         self.open_languageConfig()
         self.open_GUIConfig()
         self.acq_config=Acquisition()
+        
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI {VERSION}")
@@ -856,7 +857,8 @@ class OPApp(ctk.CTk):
             self.acq_res.imaging_method.reconstructed_image = self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]  # Shift error correction
         
         # Reconstruct a RGB preview of the acquisition
-        self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.imaging_method.reconstructed_image, self.acq_config.wavelengths)
+        self.analysis=Analysis(self.acq_res).analyser
+        self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image, self.acq_config.hardware.spectrometer.wavelengths)
         # Display RGB image
         self.clear_graph_tab1()
 

@@ -15,11 +15,16 @@ class Analysis:
         self.datacube=self.data_dict["reconstructed_image"]
         self.wavelengths=self.data_dict["wavelengths"]
     
-    def plot_reconstructed_image(self,datacube,wavelengths):
+    def get_rgb_image(self,datacube,wavelengths):
         rgb_image=self.analyse.RGB_reconstruction(datacube,wavelengths)
+        return rgb_image
+    
+    def plot_reconstructed_image(self,datacube,wavelengths):
+        rgb_image=self.get_rgb_image(self,datacube,wavelengths)
         plt.figure()
         plt.imshow(rgb_image)
         plt.show()
+        
         
 
 
