@@ -37,14 +37,15 @@ class SpectrometerBridge:
         self.DeviceName =self.spectrometer.DeviceName
         wavelengths=self.spectrometer.get_wavelengths()
         self.idx_wl_lim=[np.abs(wavelengths-self.wl_lim[0]).argmin(),np.abs(wavelengths-self.wl_lim[1]).argmin()]
-            
+        
+
     def set_integration_time(self):
         self.spectrometer.integration_time_ms=self.integration_time_ms
         self.spectrometer.set_integration_time()
 
     def get_wavelengths(self):
         self.wavelengths=self.spectrometer.get_wavelengths()[self.idx_wl_lim[0]:self.idx_wl_lim[1]]
-        
+        return self.wavelengths
 
     def get_intensities(self):
         spectrum=self.spectrometer.get_intensities()[self.idx_wl_lim[0]:self.idx_wl_lim[1]]

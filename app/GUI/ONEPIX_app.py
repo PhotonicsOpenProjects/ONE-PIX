@@ -47,7 +47,9 @@ ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
 VERSION = '2.0.0'
-json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
+acquisition_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
+hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
+software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
 
 window_height = 600
 window_width = 1020
@@ -154,9 +156,10 @@ class OPApp(ctk.CTk):
         self.label_img_res =ctk.CTkLabel(self.acq_mode_frame, text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 2"]["label_img_res"])
         self.label_img_res.grid(row=2, column=0, pady=(0,20), padx=(90,0))
                
-        self.methods_list=glob.glob(r"../../pugins/imaging_methods/patterns_bases/*.py")
+        self.methods_list=glob.glob(r"../../plugins/imaging_methods/*")
         self.methods_list=[x[30:] for x in self.methods_list]
         self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstract","FIS_common_functions"]]
+        
         self.spectro_list=glob.glob(r"../../plugins/spectrometer/*")
         self.spectro_list=[x[27:] for x in self.spectro_list]
         try:
@@ -710,7 +713,7 @@ class OPApp(ctk.CTk):
         else:#raw hypercube
 
             # Reconstruct a RGB preview of the acquisition
-            self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.hyperspectral_image, self.acq_config.wavelengths)
+            self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.imaging_method.reconstructed_image, self.acq_config.wavelengths)
             # Display RGB image
 
             self.a_acq.imshow(self.acq_res.rgb_image)
@@ -720,10 +723,8 @@ class OPApp(ctk.CTk):
             
     def spec_connection(self):
         try:
-            self.acq_config.name_spectro =self.spectro_optionemenu.get()
-            
+            self.acq_config.hardware.name_spectro =self.spectro_optionemenu.get()
             self.acq_config.hardware.spectrometer.spec_open()
-     
             if self.acq_config.hardware.spectrometer.DeviceName != '':
                 spectro_name=self.acq_config.hardware.spectrometer.DeviceName
                 if len(spectro_name)<30: spectro_name+=(30-len(spectro_name))*' '
@@ -734,7 +735,7 @@ class OPApp(ctk.CTk):
                 self.button_co.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_connection"]["button_co"],command=self.spec_disconnection)
         except Exception:
             error_text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_connection"]["warning"]
-            showwarning(error_text[0],f"{self.acq_config.name_spectro}{error_text[1]}")
+            showwarning(error_text[0],f"{self.acq_config.hardware.name_spectro}{error_text[1]}")
 
 
     def spec_disconnection(self):
@@ -752,13 +753,13 @@ class OPApp(ctk.CTk):
  
     def draw_spectrum(self):
         if (self.switch_spectro.get()==1):
-            self.entries_actualisation()
+            #self.entries_actualisation()
             self.clear_graph_tab1()
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["title"],color='white')
  
             self.acq_config.hardware.spectrometer.integration_time_ms = float(self.entry_integration_time.get()) * 1e3
             self.acq_config.hardware.spectrometer.set_integration_time()
- 
+            
             self.a_acq.plot(self.acq_config.hardware.spectrometer.get_wavelengths(), self.acq_config.hardware.spectrometer.get_intensities())
             self.a_acq.set_xlabel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["xlabel"],color='white')
             self.a_acq.set_ylabel("Intensity (counts)",color='white')
@@ -772,16 +773,28 @@ class OPApp(ctk.CTk):
  
  
     def json_actualisation(self):
-        with open(json_path, "r") as file:
-            json_object = json.load(file)
+        with open(acquisition_json_path, "r") as file:
+             acquisition_json_object= json.load(file)
+
+        with open(hardware_json_path, "r") as file:
+            hardware_json_object = json.load(file)
+
+        with open(software_json_path, "r") as file:
+            software_json_object = json.load(file)
       
-        json_object["name_spectro"] = self.acq_config.name_spectro
-        json_object["pattern_method"] = self.methods_optionemenu.get()
-        json_object["spatial_res"] = int(self.entry_img_res.get())
-        json_object["integration_time_ms"] = float(self.entry_integration_time.get())
+        hardware_json_object["name_spectro"] = self.acq_config.hardware.name_spectro
+        software_json_object["imaging_method"] = self.methods_optionemenu.get()
+        acquisition_json_object["spatial_res"] = int(self.entry_img_res.get())
+        acquisition_json_object["integration_time_ms"] = float(self.entry_integration_time.get())
         
-        with open(json_path, "w") as file:
-            json.dump(json_object, file,indent=4)
+        with open(acquisition_json_path, "w") as file:
+            json.dump(acquisition_json_object, file,indent=4)
+        
+        with open(hardware_json_path, "w") as file:
+            json.dump(hardware_json_object, file,indent=4)
+        
+        with open(software_json_path, "w") as file:
+            json.dump(software_json_object, file,indent=4)
         
  
  
@@ -794,7 +807,6 @@ class OPApp(ctk.CTk):
         if (self.simple_mode_button.cget("state") == "normal"):
             self.acq_config.hardware.spectrometer.integration_time_ms = self.acq_config.hardware.spectrometer.integration_time_ms
             self.acq_config.hardware.spectrometer.set_integration_time()
-            #self.acq_config.periode_pattern = int(float(self.entry_pattern_duration.get()))
  
     def thread_acquire_hyp(self):
         self.close_window_proj()
@@ -821,7 +833,8 @@ class OPApp(ctk.CTk):
  
         # Start acquisition
         self.progressbar.start()
-        est_duration=round(1.5*self.acq_config.pattern_lib.nb_patterns*self.acq_config.periode_pattern/(60*1000),2)
+        self.acq_config.init_measure()
+        est_duration=round(1.5*self.acq_config.nb_patterns*self.acq_config.hardware.periode_pattern/(60*1000),2)
         est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
         est_end_label = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 5"]["est_time_label"]
         self.est_time_label.configure(text=f"{est_end_label}{est_end}")
@@ -830,36 +843,31 @@ class OPApp(ctk.CTk):
         self.progressbar.stop()
         self.est_time_label.configure(text=est_end_label)
         self.progressbar.set(value=0)
-        if (self.acq_config.pattern_method in self.acq_config.seq_basis+['Hadamard']):
-            if len(self.acq_config.spectra) > 0:
-                self.acq_res=Reconstruction(self.acq_config.pattern_method,
-                                          self.acq_config.spectra,self.acq_config.pattern_order)
-                self.acq_res.Selection()
-                
-                if len(self.acq_config.normalised_datacube)!=0:
-                    self.switch_raw2norm.configure(state='normal')
-                    self.switch_raw2norm.select()
-                    
-                    
-                if self.acq_config.pattern_method == 'FourierShift':
-                    self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
-                
-                # Reconstruct a RGB preview of the acquisition
-                self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.hyperspectral_image, self.acq_config.wavelengths)
-                # Display RGB image
-                self.clear_graph_tab1()
-
-                self.a_acq.imshow(self.acq_res.rgb_image)
-                self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
-                self.a_acq.set_axis_on()
-                self.canvas.draw_idle()
-                
-                self.switch_spat2im.configure(state='normal')
-                self.switch_spat2im.deselect()
-                 
         
-        elif self.acq_config.pattern_method in self.acq_config.full_basis:
-            pass
+        self.acq_res=Reconstruction(self.acq_config)
+        self.acq_res.data_reconstruction()
+        """"       
+        if len(self.acq_config.normalised_datacube)!=0:
+            self.switch_raw2norm.configure(state='normal')
+            self.switch_raw2norm.select()
+        """        
+                   
+        if self.acq_config.imaging_method_name == 'FourierShift':
+            self.acq_res.imaging_method.reconstructed_image = self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]  # Shift error correction
+        
+        # Reconstruct a RGB preview of the acquisition
+        self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.imaging_method.reconstructed_image, self.acq_config.wavelengths)
+        # Display RGB image
+        self.clear_graph_tab1()
+
+        self.a_acq.imshow(self.acq_res.rgb_image)
+        self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
+        self.a_acq.set_axis_on()
+        self.canvas.draw_idle()
+        
+        self.switch_spat2im.configure(state='normal')
+        self.switch_spat2im.deselect()
+    
         self.button_acquire_hyp.configure(state='normal')
 # =============================================================================
 #         Analysis' tab functions
@@ -906,7 +914,7 @@ class OPApp(ctk.CTk):
         try:
             self.res=load_hypercube()
             self.res["current_data_level"]="hyperspectral_image"
-            self.res["hyperspectral_image"]=self.res["hyperspectral_image"][1:,1:,:] if self.res["pattern_method"]=='FourierShift' else self.res["hyperspectral_image"]
+            self.res["hyperspectral_image"]=self.res["hyperspectral_image"][1:,1:,:] if self.res["imaging_method_name"]=='FourierShift' else self.res["hyperspectral_image"]
             self.entry_wmin.configure(state='normal')
             self.entry_wmax.configure(state='normal')
             self.wl_limits=[round(self.res["wavelengths"][0],2),round(self.res["wavelengths"][-1],2)]
@@ -920,12 +928,12 @@ class OPApp(ctk.CTk):
             self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='white')
             self.normalisation_button.configure(state='normal')
             
-            if self.res['pattern_method'] in ['FourierSplit','FourierShift']:
+            if self.res['imaging_method_name'] in ['FourierSplit','FourierShift']:
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))
 
-            elif self.res['pattern_method']=='Hadamard':
+            elif self.res['imaging_method_name']=='Hadamard':
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 dim=len(self.res['rgb_image'])
@@ -1179,7 +1187,7 @@ class OPApp(ctk.CTk):
                     for datacube in data_list:
                         if datacube in ['rgb_image','image_seg','rgb_spectrum']:
                             plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
-                        elif datacube in ['wavelengths','wavelengths_clipped','current_data_level','spectra','infos','pattern_method']:
+                        elif datacube in ['wavelengths','wavelengths_clipped','current_data_level','spectra','infos','imaging_method_name']:
                             pass
                         elif datacube=='hyperspectral_image':
                             hyp_path=path+'/hyperspectral_image_'+today
@@ -1687,14 +1695,17 @@ class OPApp(ctk.CTk):
         self.IDXS = {"id":np.asarray(idx),"names":list(np.asarray(idx.index))}
 
     def open_GUIConfig(self):
+        pass
+        """
         with open(json_path, 'r') as f:
             GUI_conf = json.load(f)
             f.close()
         
-        GUI_conf["pattern_method"] = "FourierSplit"
+        GUI_conf["imaging_method_name"] = "FourierSplit"
         GUI_conf["spatial_res"] = 31
         with open(json_path, 'w') as f:
             json.dump(GUI_conf, f,indent=4)
+        """
 
   
         

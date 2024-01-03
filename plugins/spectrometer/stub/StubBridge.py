@@ -22,7 +22,7 @@ class StubBridge:
         None.
 
         """
-        print("Stub_spectrometer connected")
+        print("Stub_spectrometer is connected")
         
 
             
@@ -79,5 +79,5 @@ class StubBridge:
         None.
 
         """
-        print(" stub_spectro is close")
+        print("Stub_spectrometer is closed")
     
