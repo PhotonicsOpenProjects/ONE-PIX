@@ -20,7 +20,9 @@ rcParams['ytick.color']='white'
 import sys
 import os
 import glob
+import time
 import datetime
+from datetime import date
 sys.path.append(f'..{os.sep}..{os.sep}')
 
 from core.Acquisition import Acquisition
@@ -859,6 +861,9 @@ class OPApp(ctk.CTk):
         # Reconstruct a RGB preview of the acquisition
         self.analysis=Analysis(self.acq_res).analyser
         self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image, self.acq_config.hardware.spectrometer.wavelengths)
+        fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time    
+        self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','./')
         # Display RGB image
         self.clear_graph_tab1()
 
