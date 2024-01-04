@@ -69,28 +69,28 @@ class SpectrometerBridge:
             None. Actualisation of the integration_time_ms parameter of config
         
             """
-            
+            repetitions=5
             max_counts = 30000
-            self.spec_lib.set_integration_time()
+            self.set_integration_time()
             
             flag = True
             self.spectro_flag=True
             count=0
-            delta_wl=round(0.05*np.size(self.spec_lib.get_wavelengths()))
+            delta_wl=round(0.05*np.size(self.get_wavelengths()))
             while flag:
                 mes = []
-                for acq in range(self.rep):
-                    mes.append(self.spec_lib.get_intensities())
+                for acq in range(repetitions):
+                    mes.append(self.get_intensities())
                 mes = np.mean(np.array(mes), 0)[delta_wl:-delta_wl]
                 delta = max(mes)-max_counts
                 print(f"Tint{count}={self.integration_time_ms} ms with intensity peak at {round(max(mes))} counts")
         
                 if (abs(delta)<2500):
                     flag = False
-                elif self.spec_lib.integration_time_ms >= 10E3 or self.spec_lib.integration_time_ms==0:
+                elif self.integration_time_ms >= 10E3 or self.integration_time_ms==0:
                     flag = False
-                    self.spec_lib.spec_close()
-                    raise Exception(f"Integration time: {self.spec_lib.integration_time_ms} ms, if you want to continue set the parameter by hand")
+                    self.spec_close()
+                    raise Exception(f"Integration time: {self.integration_time_ms} ms, if you want to continue set the parameter by hand")
                     
                 elif (count>=10):
                     flag=False
@@ -100,10 +100,10 @@ class SpectrometerBridge:
                     flag = True
                     coeff = (max_counts/max(mes))
                     self.integration_time_ms = int(self.integration_time_ms*coeff)
-                    self.spec_lib.integration_time_ms = self.integration_time_ms
-                    self.spec_lib.set_integration_time()
+                    self.integration_time_ms = self.integration_time_ms
+                    self.set_integration_time()
                     
-                self.spec_lib.set_integration_time()
+                self.set_integration_time()
                 self.spectro_flag=False
             print(f"Integration time (ms): {self.integration_time_ms}")
 

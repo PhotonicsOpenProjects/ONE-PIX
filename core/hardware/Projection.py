@@ -3,6 +3,7 @@ import screeninfo
 import numpy as np
 import time
 from tkinter import *
+import PIL.Image, PIL.ImageTk
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
@@ -30,12 +31,8 @@ class Projection:
         self.width=width
         self.periode_pattern=periode_pattern
 
-        
 
-    
-    
-
-    def OP_init(self):
+    def get_integration_time_auto(self,acq_config):
         """
         This functions allows to display one Fourier pattern and then adapt and
         set the spectrometer's integration time within the OPConfig class.
@@ -51,9 +48,8 @@ class Projection:
             actualised OPConfig class object.
     
         """ 
-        if self.spec_lib.DeviceName=='':
-            self.spec_lib.spec_open()
-            self.spec_lib.DeviceName=self.spec_lib.decorator.DeviceName
+        if acq_config.hardware.spectrometer.DeviceName=='':
+            acq_config.hardware.spectrometer.spec_open()
     
         # create static pattern to be displayed
         proj = Toplevel()
@@ -77,10 +73,10 @@ class Projection:
         time.sleep(0.5)
         
         print('Finding the optimal integration time (ms):')
-        self.get_optimal_integration_time()
+        acq_config.hardware.spectrometer.get_optimal_integration_time()
         proj.destroy()
-        self.periode_pattern=int(self.rep*self.integration_time_ms)
-        if self.periode_pattern<60 :self.periode_pattern=60
+        acq_config.periode_pattern=int(acq_config.hardware.repetition*acq_config.hardware.spectrometer.integration_time_ms)
+        if acq_config.periode_pattern<60 :acq_config.periode_pattern=60
 
     def init_projection(self,patterns,patterns_order,interp_method):
         
