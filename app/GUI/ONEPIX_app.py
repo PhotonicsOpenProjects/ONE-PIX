@@ -705,7 +705,7 @@ class OPApp(ctk.CTk):
         self.switch_raw2norm.configure(state='normal')
         if self.switch_raw2norm.get()==0:#Normalised hypercube
             # Reconstruct a RGB preview of the acquisition
-            self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_config.normalised_datacube, self.acq_config.wavelengths)
+            self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_config.normalised_datacube, self.acq_config.wavelengths)
             # Display RGB image
 
             self.a_acq.imshow(self.acq_res.rgb_image)
@@ -716,7 +716,7 @@ class OPApp(ctk.CTk):
         else:#raw hypercube
 
             # Reconstruct a RGB preview of the acquisition
-            self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.imaging_method.reconstructed_image, self.acq_config.wavelengths)
+            self.acq_res.rgb_image =self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image, self.acq_config.wavelengths)
             # Display RGB image
 
             self.a_acq.imshow(self.acq_res.rgb_image)
@@ -849,7 +849,7 @@ class OPApp(ctk.CTk):
         
         self.acq_res=Reconstruction(self.acq_config)
         self.acq_res.data_reconstruction()
-        """"       
+        """       
         if len(self.acq_config.normalised_datacube)!=0:
             self.switch_raw2norm.configure(state='normal')
             self.switch_raw2norm.select()
@@ -859,8 +859,9 @@ class OPApp(ctk.CTk):
             self.acq_res.imaging_method.reconstructed_image = self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]  # Shift error correction
         
         # Reconstruct a RGB preview of the acquisition
-        self.analysis=Analysis(self.acq_res).analyser
-        self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image, self.acq_config.hardware.spectrometer.wavelengths)
+        self.analysis=Analysis(self.acq_res)
+        self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image,
+                                                              self.acq_config.hardware.spectrometer.wavelengths)
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time    
         self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','./')
@@ -896,8 +897,8 @@ class OPApp(ctk.CTk):
         self.a_analysis.set_axis_off()
         self.analysis_canvas.draw_idle()
        
-    def rgb_display(self,hyperspectral_image,wavelengths,title):
-        self.res["rgb_image"] = hsa.RGB_reconstruction(hyperspectral_image,wavelengths)
+    def rgb_display(self,reconstructed_image,wavelengths,title):
+        self.res["rgb_image"] = self.analysis.get_rgb_image(reconstructed_image,wavelengths)
         self.clear_rgb_graph()
         self.a_rgb.imshow(self.res["rgb_image"])
         self.a_rgb.set_title(title,color='white')
@@ -919,9 +920,11 @@ class OPApp(ctk.CTk):
         
         # Load raw data
         try:
-            self.res=load_hypercube()
-            self.res["current_data_level"]="hyperspectral_image"
-            self.res["hyperspectral_image"]=self.res["hyperspectral_image"][1:,1:,:] if self.res["imaging_method_name"]=='FourierShift' else self.res["hyperspectral_image"]
+            self.analysis=Analysis()
+            self.res=self.analysis.imaging_method.image_analysis_method.data_dict
+            #self.res['reconstructed_image']=self.analysis.reconstructed_image[1:,1:,:] if self.analysis.imaging_method_name=='FourierShift' else self.analysis.reconstructed_image
+                      
+            self.res["current_data_level"]="reconstructed_image"
             self.entry_wmin.configure(state='normal')
             self.entry_wmax.configure(state='normal')
             self.wl_limits=[round(self.res["wavelengths"][0],2),round(self.res["wavelengths"][-1],2)]
@@ -929,18 +932,17 @@ class OPApp(ctk.CTk):
             self.entry_wmin.insert(0, self.wl_limits[0])
             self.entry_wmax.delete(0,10)
             self.entry_wmax.insert(0,self.wl_limits[1])
-    
-            self.rgb_display(self.res["hyperspectral_image"],self.res["wavelengths"],title="RGB reconstructed image")
+            self.rgb_display(self.res["reconstructed_image"],self.res["wavelengths"],title="RGB reconstructed image")
             self.a_rgb.set_axis_on
             self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='white')
             self.normalisation_button.configure(state='normal')
             
-            if self.res['imaging_method_name'] in ['FourierSplit','FourierShift']:
+            if self.analysis.imaging_method_name in ['FourierSplit','FourierShift']:
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))
 
-            elif self.res['imaging_method_name']=='Hadamard':
+            elif self.analysis.imaging_method_name =='Hadamard':
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
                 dim=len(self.res['rgb_image'])
@@ -966,8 +968,8 @@ class OPApp(ctk.CTk):
             showwarning(warning_text[0],warning_text[1])
         else:
             self.clear_analysis_graph()
-            if self.res["current_data_level"]=="hyperspectral_image_clipped":
-                self.res["spectra_clipped"] = hsa.select_disp_spectra(self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"], int(self.entry_draw.get()), 'single')
+            if self.res["current_data_level"]=="reconstructed_image_clipped":
+                self.res["spectra_clipped"] = hsa.select_disp_spectra(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths_clipped"],self.res["spectra_clipped"].T)
             else:    
                 self.res["spectra"] = hsa.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
@@ -1000,10 +1002,10 @@ class OPApp(ctk.CTk):
             except KeyError:
                 wl=self.res["wavelengths"]
                 
-            self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"] = hsa.clip_datacube(self.res[self.res["current_data_level"]], 
+            self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"] = hsa.clip_datacube(self.res[self.res["current_data_level"]], 
                                                     wl,user_wl[0],user_wl[1])
-            self.rgb_display(self.res["hyperspectral_image_clipped"], self.res["wavelengths_clipped"],self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["trim"])
-            self.res["current_data_level"]="hyperspectral_image_clipped"
+            self.rgb_display(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"],self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["trim"])
+            self.res["current_data_level"]="reconstructed_image_clipped"
             self.a_analysis.set_xlim([round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get()))])
             self.analysis_canvas.draw_idle()
            
@@ -1035,7 +1037,7 @@ class OPApp(ctk.CTk):
             showwarning(warning_text[0],warning_text[1])
         else:
             try:
-                self.res["hyperspectral_image_smoothed"] = hsa.smooth_datacube(self.res[self.res["current_data_level"]],
+                self.res["reconstructed_image_smoothed"] = hsa.smooth_datacube(self.res[self.res["current_data_level"]],
                                                                            int(self.entry_boxcar.get()), int(self.entry_polyorder.get()))
                 try:
                     wl=self.res["wavelengths_clipped"]
@@ -1044,14 +1046,14 @@ class OPApp(ctk.CTk):
                     wl=self.res["wavelengths"]
                     spectra=self.res["spectra"]
                 
-                self.rgb_display(self.res["hyperspectral_image_smoothed"], wl,title=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["smooth"])
+                self.rgb_display(self.res["reconstructed_image_smoothed"], wl,title=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["smooth"])
                 spectra_smooth=hsa.smooth_datacube(spectra.reshape(1,spectra.shape[0],spectra.shape[1]),int(self.entry_boxcar.get()), int(self.entry_polyorder.get())).squeeze()
                 self.clear_analysis_graph()
                 self.a_analysis.plot(wl,spectra_smooth.T)
                 self.analysis_canvas.draw_idle()
                 self.a_analysis.set_axis_on()
                 self.a_analysis.grid(True, linestyle='--')
-                self.res["current_data_level"]="hyperspectral_image_smoothed"
+                self.res["current_data_level"]="reconstructed_image_smoothed"
             except ValueError:
                 warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["polyorder"]
                 showwarning(warning_text[0],warning_text[1])
@@ -1119,11 +1121,11 @@ class OPApp(ctk.CTk):
                 except KeyError:
                     pass
             
-            self.res["hyperspectral_image_norm"],norm_coeff = self.flux2ref(self.res[self.res["current_data_level"]], wl)
-            self.rgb_display(self.res["hyperspectral_image_norm"],wl
+            self.res["reconstructed_image_norm"],norm_coeff = self.flux2ref(self.res[self.res["current_data_level"]], wl)
+            self.rgb_display(self.res["reconstructed_image_norm"],wl
                              ,title=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["norm"])
             self.normalisation_button.configure(state='disabled')
-            self.res["current_data_level"]="hyperspectral_image_norm"
+            self.res["current_data_level"]="reconstructed_image_norm"
             
             try:
                 self.clear_analysis_graph()
@@ -1190,14 +1192,13 @@ class OPApp(ctk.CTk):
                 wl=self.res["wavelengths"]
             try:
                 if choice_list.index(self.data_choice.get())==0: # if data_choice == 'All'
-                    print(data_list)
                     for datacube in data_list:
                         if datacube in ['rgb_image','image_seg','rgb_spectrum']:
                             plt.imsave(path+'/'+datacube+'.png',self.res[datacube])
                         elif datacube in ['wavelengths','wavelengths_clipped','current_data_level','spectra','infos','imaging_method_name']:
                             pass
-                        elif datacube=='hyperspectral_image':
-                            hyp_path=path+'/hyperspectral_image_'+today
+                        elif datacube=='reconstructed_image':
+                            hyp_path=path+'/reconstructed_image_'+today
                             os.mkdir(hyp_path)
                             py2envi(datacube,self.res[datacube],self.res["wavelengths"],hyp_path)
                         else:
@@ -1633,7 +1634,7 @@ class OPApp(ctk.CTk):
         
         elif self.data_path.endswith('.hdr'):
             res=load_hypercube(opt=os.path.dirname(self.data_path))
-            self.IM = {"IM" : res["hyperspectral_image"].T,
+            self.IM = {"IM" : res["reconstructed_image"].T,
                         "wl" : res["wavelengths"],
                         "folder_name" : self.data_path.split('/')[-2][:]}
         

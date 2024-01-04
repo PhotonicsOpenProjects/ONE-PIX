@@ -4,7 +4,8 @@ import glob
 import tkinter as Tk
 from tkinter import filedialog
 from tkinter import *
-
+from datetime import date
+import time
 from core.ImagingMethodBridge import *
 
 def get_header_data(path):
@@ -139,7 +140,19 @@ class Reconstruction:
 
 
     def save_reconstructed_image(self,filename,save_path):
+        header=self.create_reconstruction_header()
         self.imaging_method.image_reconstruction_method.save_reconstructed_image(self.imaging_method.reconstructed_image,
-                                                                                 self.wavelengths,
+                                                                                 self.wavelengths,header,
                                                                                  filename,save_path)
+    
+    def create_reconstruction_header(self):
+        fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time    
+        # Header
+        header = f"ONE-PIX_reconstructed_acquisition_{fdate}_{actual_time}"+"\n"\
+            + "--------------------------------------------------------"+"\n"\
+            + "\n"\
+            + f"Imaging method: {self.imaging_method_name}"+"\n"
         
+        return header
+      

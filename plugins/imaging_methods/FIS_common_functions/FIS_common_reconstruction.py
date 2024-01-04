@@ -12,11 +12,8 @@ class FisCommonReconstruction :
         return
 
 
-   
-        
-     
 
-    def save_acquisition_envi(self,datacube,wavelengths,save_envi_name=None,save_path = None):
+    def save_acquisition_envi(self,datacube,wavelengths,header,save_envi_name=None,save_path = None):
         """
         This function allow to save the resulting acquisitions from one 
         OPConfig object into the Hypercube folder.
@@ -47,6 +44,8 @@ class FisCommonReconstruction :
         if save_envi_name is None : folder_name
         # saving the acquired spatial spectra hypercube
         self.py2envi(datacube,wavelengths,save_envi_name,save_path)
+        with open(folder_name+'.txt', "w+") as header_file:
+            header_file.write(header)
         
 
     def py2envi(self,datacube,wavelengths,save_envi_name,save_path=None):
@@ -72,7 +71,7 @@ class FisCommonReconstruction :
         filename=save_envi_name+'.hdr'
         path=os.getcwd()
         os.chdir(save_path)
-        envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelengths':wavelengths,})
+        envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
         os.chdir(path)
 
     

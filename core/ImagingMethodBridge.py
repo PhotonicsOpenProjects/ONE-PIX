@@ -30,7 +30,6 @@ class ImagingMethodBridge:
     def reconstruction(self,spectra,pattern_order):
         try:
             #Import reconstruction module specific to the chosen imaging method
-            print(self.imaging_method)
             reconstruction_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'ImageReconstruction')
             self.image_reconstruction_classObj = getattr(reconstruction_module, 'Reconstruction')
             self.image_reconstruction_method = self.image_reconstruction_classObj(spectra,pattern_order)
@@ -38,12 +37,12 @@ class ImagingMethodBridge:
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
     
-    def analysis(self):
+    def analysis(self,data_path=None):
         try:
             #Import analysis modules specifics to the chosen imaging method
             analysis_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'ImageAnalysis')
             self.image_analysis_classObj = getattr(analysis_module, 'Analysis')
-            self.image_analysis_method = self.image_analysis_classObj()
+            self.image_analysis_method = self.image_analysis_classObj(data_path)
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
     

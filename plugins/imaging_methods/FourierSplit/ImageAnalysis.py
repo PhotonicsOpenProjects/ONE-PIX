@@ -11,8 +11,8 @@ class Analysis:
    
     
     def load_reconstructed_data(self,):
-        self.data_dict=self.analyse.load_hypercube(self.data_path)
-        self.datacube=self.data_dict["reconstructed_image"]
+        self.data_dict=self.analyse.load_data(self.data_path)
+        self.reconstructed_image=self.data_dict["reconstructed_image"]
         self.wavelengths=self.data_dict["wavelengths"]
     
     def get_rgb_image(self,datacube,wavelengths):
@@ -20,7 +20,7 @@ class Analysis:
         return rgb_image
     
     def plot_reconstructed_image(self,datacube,wavelengths):
-        rgb_image=self.get_rgb_image(self,datacube,wavelengths)
+        rgb_image=self.get_rgb_image(datacube,wavelengths)
         plt.figure()
         plt.imshow(rgb_image)
         plt.show()

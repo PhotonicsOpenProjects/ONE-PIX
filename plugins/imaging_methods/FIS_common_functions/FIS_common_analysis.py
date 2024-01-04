@@ -32,7 +32,7 @@ class FisAnalysis:
 
         """
 
-        res={"hyperspectral_image":[],"wavelengths":[]}
+        res={"reconstructed_image":[],"wavelengths":[]}
         
         if opt==None:
             if os.path.isdir('./Hypercubes'):
@@ -59,9 +59,8 @@ class FisAnalysis:
             pass
         res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]
         data=envi.open(hyp_filename)
-        res["hyperspectral_image"]=data.load()
+        res["reconstructed_image"]=data.load()
         res["wavelengths"]=np.array(data.bands.centers)
-        
         
         return res
     
@@ -153,7 +152,7 @@ class FisAnalysis:
         """
         
         fig,ax=plt.subplots()
-        whole_spectrum=np.fft.fftshift(np.fft.fft2(res["hyperspectral_image"],axes=(0,1)))
+        whole_spectrum=np.fft.fftshift(np.fft.fft2(res["reconstructed_image"],axes=(0,1)))
         plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
         plt.title('Spectral frequencies spikes correction. Pacq_datas escape key to end')
         p=plt.ginput(-1)
@@ -167,7 +166,7 @@ class FisAnalysis:
                 whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]+1,:]
         plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
         plt.show()
-        res["hyperspectral_image"]=abs(np.fft.ifft2(whole_spectrum,axes=(0,1)))
+        res["reconstructed_image"]=abs(np.fft.ifft2(whole_spectrum,axes=(0,1)))
         return res
 
 

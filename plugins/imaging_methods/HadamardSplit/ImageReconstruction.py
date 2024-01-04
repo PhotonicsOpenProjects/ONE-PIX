@@ -70,6 +70,6 @@ class Reconstruction:
         
         return hyperspectral_image
 
-    def save_reconstructed_image(self,datacube,wavelengths,filename,save_path=None):
-            saver=FisCommonReconstruction()
-            saver.save_acquisition_envi(datacube,wavelengths,filename,save_path)
+    def save_reconstructed_image(self,datacube,wavelengths,header,filename,save_path=None):
+        saver=FisCommonReconstruction()
+        saver.save_acquisition_envi(datacube,wavelengths,header,filename,save_path)

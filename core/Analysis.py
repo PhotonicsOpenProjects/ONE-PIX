@@ -4,23 +4,23 @@ import glob
 from tkinter import *
 from tkinter import filedialog
 class Analysis:
-
     def __init__(self,rec=None):
-        
+        self.data_path=None
         if rec is None:
+            self.read_header()
+            self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
+            self.imaging_method.analysis(self.data_path)
             self.load_data()
-            self.imaging_method_name=rec["imaging_method"]
-            self.reconstructed_image=rec["reconstructed_image"]
-            self.wavelengths=rec["wavelengths"]
+            self.reconstructed_image=self.imaging_method.image_analysis_method.reconstructed_image
+            self.wavelengths=self.imaging_method.image_analysis_method.wavelengths
             
         else:
             self.imaging_method_name=rec.imaging_method_name
             self.reconstructed_image=rec.imaging_method.reconstructed_image
             self.wavelengths=rec.wavelengths
-        
-        self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
-        self.imaging_method.analysis()
-        self.analyser= self.imaging_method.image_analysis_method
+            self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
+            self.imaging_method.analysis(self.data_path)
+         
     
     def read_header(self):
         """
@@ -43,8 +43,8 @@ class Analysis:
             root = Tk()
             root.withdraw()
             root.attributes('-topmost', 1)
-            chemin_mesure = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
-            os.chdir(chemin_mesure)
+            self.data_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
+            os.chdir(self.data_path)
         except Exception as e:
             print(e)
 
@@ -60,17 +60,18 @@ class Analysis:
                     acq_data['imaging_method']=x[1].strip()
                 
         os.chdir(chemin_script)
+        self.imaging_method_name=acq_data["imaging_method"]
         
-        return acq_data
-
+       
    
     def load_data(self):
-        self.read_header()
-        self.analyser.load_reconstructed_data()
-         
+        self.imaging_method.image_analysis_method.load_reconstructed_data()
     
+    def get_rgb_image(self,datacube,wavelengths):
+        rgb_image=self.imaging_method.image_analysis_method.get_rgb_image(datacube,wavelengths)
+        return rgb_image
 
     def plot_rgb_image(self):
-        self.analyser.plot_reconstructed_image(self.reconstructed_image,self.wavelengths) 
+        self.imaging_method.image_analysis_method.plot_reconstructed_image(self.reconstructed_image,self.wavelengths) 
 
 
