@@ -62,7 +62,6 @@ class OPApp(ctk.CTk):
         super().__init__()
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
-        self.open_GUIConfig()
         self.acq_config=Acquisition()
         
         # configure window
@@ -1704,20 +1703,6 @@ class OPApp(ctk.CTk):
             slb = slb
             )
         self.IDXS = {"id":np.asarray(idx),"names":list(np.asarray(idx.index))}
-
-    def open_GUIConfig(self):
-        pass
-        """
-        with open(json_path, 'r') as f:
-            GUI_conf = json.load(f)
-            f.close()
-        
-        GUI_conf["imaging_method_name"] = "FourierSplit"
-        GUI_conf["spatial_res"] = 31
-        with open(json_path, 'w') as f:
-            json.dump(GUI_conf, f,indent=4)
-        """
-
   
         
     def open_languageConfig(self):

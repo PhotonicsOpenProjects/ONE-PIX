@@ -18,7 +18,6 @@ import matplotlib.cm as CM
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
-import platform
 
 rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
@@ -29,12 +28,14 @@ import sys
 import os
 import glob
 import datetime
+from datetime import date
+import time
 
-sys.path.insert(0, os.path.abspath('../'))
+sys.path.append(f'..{os.sep}..{os.sep}')
 
-from src.AcquisitionConfig import *
-from src.DatacubeReconstructions import *
-import src.datacube_analyse as hsa
+from core.Acquisition import Acquisition
+from core.Reconstruction import Reconstruction
+from core.Analysis import Analysis
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -52,8 +53,10 @@ ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark
 
 VERSION = '2.0.0'
 root_path = os.getcwd()
-os_name=platform.system()
-json_path = "../acquisition_param_ONEPIX.json"
+acquisition_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
+hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
+software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
+
 
 window_height = 600
 window_width = 1020
@@ -64,16 +67,17 @@ class OPApp(ctk.CTk):
         super().__init__()
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
-        self.open_GUIConfig()
-        self.acq_config=OPConfig(json_path)
+        #self.open_GUIConfig()
+        self.acq_config=Acquisition()
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI {VERSION}")
         x = (self.monitor_sz.width//2) - (window_width//2)-100
         y = (self.monitor_sz.height//2) - (window_height//2)-100
-        if is_raspberrypi(): x,y=x+100,y+100
+        if self.acq_config.hardware.is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x, y))
-        icon_path='../imgs/logo_ONE-PIX.png' if is_raspberrypi() else '../imgs/logo_ONE-PIX.ico'
+        ext=".png" if self.acq_config.hardware.is_raspberrypi() else ".ico"
+        icon_path=f'.{os.sep}imgs{os.sep}logo_ONE-PIX{ext}'
         icon_path=PIL.ImageTk.PhotoImage(master=self,file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
@@ -132,14 +136,19 @@ class OPApp(ctk.CTk):
         self.label_img_res.grid(row=2, column=0, pady=0, padx=0)
         
                
-        self.methods_list=glob.glob(r"../src/patterns_bases/*.py")
-        self.methods_list=[x[22:-11] for x in self.methods_list]
-        self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstr",""]]
-        self.spectro_list=glob.glob(r"../src/spectrometer_bridges/*.py")
-        self.spectro_list=[x[28:-9] for x in self.spectro_list]
-        self.spectro_list.remove('__')
-        self.spectro_list.remove('Abstract')
+        self.methods_list=glob.glob(r"../../plugins/imaging_methods/*")
+        self.methods_list=[x[30:] for x in self.methods_list]
+        self.methods_list=[m for m in self.methods_list if m not in ["Addressing","Abstract","FIS_common_functions"]]
         
+        self.spectro_list=glob.glob(r"../../plugins/spectrometer/*")
+        self.spectro_list=[x[27:] for x in self.spectro_list]
+        try:
+            self.spectro_list.remove('__init__.py')
+            self.spectro_list.remove('Abstract')
+            self.spectro_list.remove('__pycache__')
+        except ValueError:
+            pass
+
         self.methods_optionemenu = ctk.CTkOptionMenu(self.acq_mode_frame, values=self.methods_list)
         self.methods_optionemenu.grid(row=2, column=1, padx=(2.5,2.5), pady=(2.5,2.5))
         self.methods_optionemenu.set('FourierSplit')
@@ -433,11 +442,10 @@ class OPApp(ctk.CTk):
         
   
     def close_window(self):
-        
         if messagebox.askokcancel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel"]["title"],
                                   self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel"]["confirm"]):
-            if self.acq_config.spec_lib.DeviceName != '':
-                self.acq_config.spec_lib.spec_close()
+            if self.acq_config.hardware.spectrometer.DeviceName != '':
+                self.acq_config.hardware.spectrometer.spec_close()
             plt.close('all')
             self.quit()
             self.destroy()
@@ -459,7 +467,6 @@ class OPApp(ctk.CTk):
  
     def window_size_test(self):      
         self.proj = ctk.CTkToplevel()
-        os_name = platform.system()
         self.proj.geometry("{}x{}+{}+{}".format(self.acq_config.width, self.acq_config.height, screenWidth, 0))
         self.proj.update()
         y = list(range(self.acq_config.height))  # horizontal vector for the pattern creation
@@ -507,13 +514,12 @@ class OPApp(ctk.CTk):
         for i in self.spectro_list:
             if test==0:
                 try:
-                    self.acq_config.name_spectro = i
-                    self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms,self.acq_config.wl_lim)
-                    self.acq_config.spec_lib.spec_open()
+                    self.acq_config.hardware.name_spectro = i
+                    self.acq_config.hardware.spectrometer.spec_open()
              
-                    if self.acq_config.spec_lib.DeviceName != '':
+                    if self.acq_config.hardware.spectrometer.DeviceName != '':
                         test = 1
-                        spectro_name=self.acq_config.spec_lib.DeviceName
+                        spectro_name=self.acq_config.hardware.spectrometer.DeviceName
                         if len(spectro_name)<30: spectro_name+=(30-len(spectro_name))*' '
                         else: spectro_name=spectro_name[:30]
                         self.switch_spectro.configure(text=spectro_name)
@@ -523,32 +529,15 @@ class OPApp(ctk.CTk):
                         self.update()
                 except Exception:
                     pass
-                #     showwarning('Spectrometer error',f"{self.acq_config.name_spectro} is not available")
-        # try:
-        #     self.acq_config.name_spectro =self.spectro_optionemenu.get()
-        #     self.acq_config.spec_lib = SpectrometerBridge(self.acq_config.name_spectro, self.acq_config.integration_time_ms,self.acq_config.wl_lim)
-        #     self.acq_config.spec_lib.spec_open()
-     
-        #     if self.acq_config.spec_lib.DeviceName != '':
-        #         spectro_name=self.acq_config.spec_lib.DeviceName
-        #         if len(spectro_name)<30: spectro_name+=(30-len(spectro_name))*' '
-        #         else: spectro_name=spectro_name[:30]
-        #         self.switch_spectro.configure(text=spectro_name)
-        #         self.switch_spectro.select()
-        #         self.button_acquire_hyp.configure(state = "normal")
-        #         self.button_co.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_connection"]["warning"],command=self.spec_disconnection)
-        # except Exception:
-        #     error_text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_connection"]["warning"]
-        #     showwarning(error_text[0],f"{self.acq_config.name_spectro}{error_text[1]}")
-
+                
 
     def spec_disconnection(self):
         self.switch_spectro.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_disconnection"]["switch_spectro"])
         self.switch_spectro.deselect()
         self.button_acquire_hyp.configure(state = "disabled")
  
-        if self.acq_config.spec_lib.DeviceName != '':
-            self.acq_config.spec_lib.spec_close()
+        if self.acq_config.hardware.spectrometer.DeviceName != '':
+            self.acq_config.hardware.spectrometer.spec_close()
             self.switch_spectro.configure(state= "normal")
             self.button_co.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_disconnection"]["switch_spectro"],command=self.spec_connection)
         else:
@@ -556,27 +545,37 @@ class OPApp(ctk.CTk):
  
  
     def json_actualisation(self):
-        os.chdir(root_path)
-        with open(json_path, "r") as file:
-            json_object = json.load(file)
+        with open(acquisition_json_path, "r") as file:
+             acquisition_json_object= json.load(file)
+
+        with open(hardware_json_path, "r") as file:
+            hardware_json_object = json.load(file)
+
+        with open(software_json_path, "r") as file:
+            software_json_object = json.load(file)
+      
+        hardware_json_object["name_spectro"] = self.acq_config.hardware.name_spectro
+        software_json_object["imaging_method"] = self.methods_optionemenu.get()
+        acquisition_json_object["spatial_res"] = int(self.entry_img_res.get())
         
-        json_object["name_spectro"] = self.acq_config.name_spectro
-        json_object["pattern_method"] = self.methods_optionemenu.get()
-        json_object["spatial_res"] = int(self.entry_img_res.get())
-        json_object["integration_time_ms"] = float(self.acq_config.integration_time_ms)
- 
-        with open(json_path, "w") as file:
-            json.dump(json_object, file,indent=4)
+        with open(acquisition_json_path, "w") as file:
+            json.dump(acquisition_json_object, file,indent=4)
         
+        with open(hardware_json_path, "w") as file:
+            json.dump(hardware_json_object, file,indent=4)
+        
+        with open(software_json_path, "w") as file:
+            json.dump(software_json_object, file,indent=4)
+
  
     def params_actualisation(self):
         self.json_actualisation()
-        self.acq_config.spec_lib.spec_close()
+        self.acq_config.hardware.spectrometer.spec_close()
         del self.acq_config
-        self.acq_config = OPConfig(json_path)
-        self.acq_config.spec_lib.spec_open()
-        self.acq_config.spec_lib.integration_time_ms = self.acq_config.integration_time_ms
-        self.acq_config.spec_lib.set_integration_time()
+        self.acq_config = Acquisition()
+        self.acq_config.hardware.spectrometer.spec_open()
+        self.acq_config.hardware.spectrometer.integration_time_ms = self.acq_config.hardware.spectrometer.integration_time_ms
+        self.acq_config.hardware.spectrometer.set_integration_time()
         
  
     def thread_acquire_hyp(self):
@@ -600,7 +599,7 @@ class OPApp(ctk.CTk):
         time.sleep(1)
         # Start acquisition
         self.progressbar.start()
-        est_duration=round(1.5*self.acq_config.pattern_lib.nb_patterns*self.acq_config.periode_pattern/(60*1000),2)
+        est_duration=round(1.5*self.acq_config.nb_patterns*self.acq_config.hardware.periode_pattern/(60*1000),2)
         est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
         est_end_label = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 5"]["est_time_label"]
         self.est_time_label.configure(text=f"{est_end_label}{est_end}")
@@ -609,33 +608,32 @@ class OPApp(ctk.CTk):
         self.progressbar.stop()
         self.est_time_label.configure(text=est_end_label)
         self.progressbar.set(value=0)
-        if (self.acq_config.pattern_method in self.acq_config.seq_basis or self.acq_config.pattern_method == 'Hadamard'):
-            if len(self.acq_config.spectra) > 0:
-                self.acq_res=OPReconstruction(self.acq_config.pattern_method,
-                                          self.acq_config.spectra,self.acq_config.pattern_order)
-                self.acq_res.Selection()
-                if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
-                if self.acq_config.pattern_method == 'FourierShift':
-                    self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
-                # Reconstruct a RGB preview of the acquisition
-                self.acq_res.rgb_image = hsa.RGB_reconstruction(self.acq_res.hyperspectral_image, self.acq_config.wavelengths)
-                # Display RGB image
-                self.clear_graph_tab1()
-
-                self.a_acq.imshow(self.acq_res.rgb_image)
-                self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
-                self.a_acq.set_axis_on()
-                self.canvas.draw_idle()
+        
+        self.acq_res=Reconstruction(self.acq_config)
+        self.acq_res.data_reconstruction()
                 
-                self.switch_spat2im.configure(state='normal')
-                self.switch_spat2im.select()
+        #if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
+        if self.acq_config.pattern_method == 'FourierShift':
+                self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
         
-    
+        # Reconstruct a RGB preview of the acquisition
+        self.analysis=Analysis(self.acq_res)
+        self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image,
+                                                              self.acq_config.hardware.spectrometer.wavelengths)
+        fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time    
+        self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','./')
         
+        # Display RGB image
+        self.clear_graph_tab1()
+
+        self.a_acq.imshow(self.acq_res.rgb_image)
+        self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
+        self.a_acq.set_axis_on()
+        self.canvas.draw_idle()
         
-        
-        elif self.acq_config.pattern_method in self.acq_config.full_basis:
-            pass
+        self.switch_spat2im.configure(state='normal')
+        self.switch_spat2im.select()
         self.button_acquire_hyp.configure(state='normal')
 
 # =============================================================================
@@ -818,8 +816,7 @@ class OPApp(ctk.CTk):
         self.save_options.configure(state = "normal")
         self.WIP.configure(text = "Done")
         
-                    
-            
+
     # =========================================================================
     #     pour le bind des combobox des indices et des bandes
     # =========================================================================
@@ -877,8 +874,8 @@ class OPApp(ctk.CTk):
                 self.calc_bouton.configure(state = "disabled")
             
         else: #if name == "data"
-            folder_path=filedialog.askdirectory(initialdir='../Hypercubes')
-            data_list=glob.glob(folder_path+'/*.hdr')+glob.glob(folder_path+'/*.tif')
+            self.folder_path=filedialog.askdirectory(initialdir='../Hypercubes')
+            data_list=glob.glob(self.folder_path+'/*.hdr')+glob.glob(self.folder_path+'/*.tif')
             if data_list[0].endswith((".tif",".hdr")):
                 self.data_path_label.configure(text_color='white')
                 self.shown_data_path.set(os.path.join('', *data_list[0].split('/')[-3:]))
@@ -1058,7 +1055,8 @@ class OPApp(ctk.CTk):
                         "folder_name" : self.data_path.split('/')[-2][:]}
         
         elif self.data_path.endswith('.hdr'):
-            res=load_hypercube(opt=os.path.dirname(self.data_path))
+            self.analysis=Analysis(rec=None,data_path=self.folder_path)
+            res=self.analysis.imaging_method.image_analysis_method.data_dict
             self.IM = {"IM" : res["hyperspectral_image"].T,
                         "wl" : res["wavelengths"],
                         "folder_name" : self.data_path.split('/')[-2][:]}
@@ -1126,16 +1124,7 @@ class OPApp(ctk.CTk):
             )
         self.IDXS = {"id":np.asarray(idx),"names":list(np.asarray(idx.index))}
         
-    def open_GUIConfig(self):
-        with open(json_path, 'r') as f:
-            GUI_conf = json.load(f)
-           
-        
-        GUI_conf["pattern_method"] = "FourierSplit"
-        GUI_conf["spatial_res"] = 31
-        with open(json_path, 'w') as f:
-            json.dump(GUI_conf, f,indent=4)
-            
+          
             
     def open_languageConfig(self):
         with open("languages/config.json", 'r') as f:
@@ -1148,7 +1137,6 @@ class OPApp(ctk.CTk):
         with open(f"languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
             
-        # print(self.widgets_text)
 
 class Toolbar(NavigationToolbar2Tk):
     def set_message(self, s):
