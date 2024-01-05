@@ -6,28 +6,27 @@ HUB interfaces ONE-PIX
 
 @author: brechl
 """
-import sys
-import os
-sys.path.append(os.path.abspath('./ONE-PIX_soft/src'))
-sys.path.append(os.path.abspath('./ONE-PIX_soft'))
-
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import  ttk
 from tkinter.messagebox import showwarning
 from PIL import Image
-from AcquisitionConfig import is_raspberrypi
-from matplotlib.backends.backend_tkagg import  NavigationToolbar2Tk
+
+import sys
+import os
+sys.path.append(f'..{os.sep}..{os.sep}')
+from core.hardware.HardwareConfig import *
 
 import json
 
-import os
 import screeninfo
-path_to_GUI = '/'.join([os.getcwd(),'ONE-PIX_soft/GUI'])
+#path_to_GUI = '/'.join([os.getcwd(),'ONE-PIX_soft/GUI'])
+path_to_GUI = os.getcwd()
 os.chdir(path_to_GUI)
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.hardware=Hardware()
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.update_trad()
@@ -43,10 +42,12 @@ class OPApp(ctk.CTk):
         height=250
         x = (self.monitor_sz.width -width)//2-100
         y = (self.monitor_sz.height-height)//2-100
-        if is_raspberrypi(): x,y=x+100,y+100
+        if self.hardware.is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (width, height, x, y))
-        self.logo_image = ctk.CTkImage(Image.open(path_to_GUI + "/logo_ONE-PIX.png"),
-                                               size=(200, 200))
+        ext='png' if self.hardware.is_raspberrypi() else '.ico'
+        logo=PIL.Image.open(f"./imgs/logo_ONE-PIX{ext}")
+        self.logo_image = ctk.CTkImage(logo,size=(200, 200))
+        
         self.logo_image_label = ctk.CTkLabel(self, image=self.logo_image,text="")
         self.logo_image_label.grid(row=0, column=0,sticky='nsew',pady=20,padx=(10,10))    
 
