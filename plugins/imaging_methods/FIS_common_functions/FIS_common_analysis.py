@@ -193,7 +193,7 @@ class FisAnalysis:
 
         """
         # Display Hypercube spectral mean to visualise an image
-        rgb_image=RGB_reconstruction(datacube,wavelengths)
+        rgb_image=self.RGB_reconstruction(datacube,wavelengths)
         fig,ax=plt.subplots()
     #     plt.subplot(1,2,1)
         ax.imshow(rgb_image)

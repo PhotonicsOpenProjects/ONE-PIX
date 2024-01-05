@@ -921,6 +921,7 @@ class OPApp(ctk.CTk):
         # Load raw data
         try:
             self.analysis=Analysis()
+            self.analyser=self.analysis.imaging_method.image_analysis_method.analyse
             self.res=self.analysis.imaging_method.image_analysis_method.data_dict
             #self.res['reconstructed_image']=self.analysis.reconstructed_image[1:,1:,:] if self.analysis.imaging_method_name=='FourierShift' else self.analysis.reconstructed_image
                       
@@ -969,10 +970,10 @@ class OPApp(ctk.CTk):
         else:
             self.clear_analysis_graph()
             if self.res["current_data_level"]=="reconstructed_image_clipped":
-                self.res["spectra_clipped"] = hsa.select_disp_spectra(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"], int(self.entry_draw.get()), 'single')
+                self.res["spectra_clipped"] = self.analyser.select_disp_spectra(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths_clipped"],self.res["spectra_clipped"].T)
             else:    
-                self.res["spectra"] = hsa.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
+                self.res["spectra"] = self.analyser.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths"],self.res["spectra"].T)
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
@@ -1002,7 +1003,7 @@ class OPApp(ctk.CTk):
             except KeyError:
                 wl=self.res["wavelengths"]
                 
-            self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"] = hsa.clip_datacube(self.res[self.res["current_data_level"]], 
+            self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"] = self.analyser.clip_datacube(self.res[self.res["current_data_level"]], 
                                                     wl,user_wl[0],user_wl[1])
             self.rgb_display(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"],self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["trim"])
             self.res["current_data_level"]="reconstructed_image_clipped"
@@ -1010,7 +1011,7 @@ class OPApp(ctk.CTk):
             self.analysis_canvas.draw_idle()
            
             try:
-                self.res["spectra_clipped"],wl=hsa.clip_datacube(self.res["spectra"].reshape(1,self.res["spectra"].shape[0],self.res["spectra"].shape[1]),
+                self.res["spectra_clipped"],wl=self.analyser.clip_datacube(self.res["spectra"].reshape(1,self.res["spectra"].shape[0],self.res["spectra"].shape[1]),
                                                                  wl,round(float(self.entry_wmin.get())),round(float(self.entry_wmax.get())))
                 self.res["spectra_clipped"]=self.res["spectra_clipped"].squeeze()
             except KeyError:
@@ -1021,7 +1022,7 @@ class OPApp(ctk.CTk):
             warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
             showwarning(warning_text[0],warning_text[1])
         else:
-            self.res["image_seg"] = hsa.clustering(self.res[self.res["current_data_level"]], int(self.entry_pca.get()), int(self.entry_clust.get()))
+            self.res["image_seg"] = self.analyser.clustering(self.res[self.res["current_data_level"]], int(self.entry_pca.get()), int(self.entry_clust.get()))
             
             self.clear_analysis_graph()
             
@@ -1037,7 +1038,7 @@ class OPApp(ctk.CTk):
             showwarning(warning_text[0],warning_text[1])
         else:
             try:
-                self.res["reconstructed_image_smoothed"] = hsa.smooth_datacube(self.res[self.res["current_data_level"]],
+                self.res["reconstructed_image_smoothed"] = self.analyser.smooth_datacube(self.res[self.res["current_data_level"]],
                                                                            int(self.entry_boxcar.get()), int(self.entry_polyorder.get()))
                 try:
                     wl=self.res["wavelengths_clipped"]
@@ -1047,7 +1048,7 @@ class OPApp(ctk.CTk):
                     spectra=self.res["spectra"]
                 
                 self.rgb_display(self.res["reconstructed_image_smoothed"], wl,title=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["rgb_display"]["smooth"])
-                spectra_smooth=hsa.smooth_datacube(spectra.reshape(1,spectra.shape[0],spectra.shape[1]),int(self.entry_boxcar.get()), int(self.entry_polyorder.get())).squeeze()
+                spectra_smooth=self.analyser.smooth_datacube(spectra.reshape(1,spectra.shape[0],spectra.shape[1]),int(self.entry_boxcar.get()), int(self.entry_polyorder.get())).squeeze()
                 self.clear_analysis_graph()
                 self.a_analysis.plot(wl,spectra_smooth.T)
                 self.analysis_canvas.draw_idle()
@@ -1451,8 +1452,8 @@ class OPApp(ctk.CTk):
                 self.calc_bouton.configure(state = "disabled")
             
         else: #if name == "data"
-            folder_path=filedialog.askdirectory(initialdir='../Hypercubes')
-            data_list=glob.glob(folder_path+'/*.hdr')+glob.glob(folder_path+'/*.tif')
+            self.folder_path=filedialog.askdirectory(initialdir='../Hypercubes')
+            data_list=glob.glob(self.folder_path+'/*.hdr')+glob.glob(self.folder_path+'/*.tif')
             if data_list[0].endswith((".tif",".hdr")):
                 self.data_path_label.configure(text_color='white')
                 self.shown_data_path.set(os.path.join('', *data_list[0].split('/')[-3:]))
@@ -1633,7 +1634,9 @@ class OPApp(ctk.CTk):
                         "folder_name" : self.data_path.split('/')[-2][:]}
         
         elif self.data_path.endswith('.hdr'):
-            res=load_hypercube(opt=os.path.dirname(self.data_path))
+            self.analysis=Analysis(rec=None,data_path=self.folder_path)
+            res=self.analysis.imaging_method.image_analysis_method.data_dict
+            
             self.IM = {"IM" : res["reconstructed_image"].T,
                         "wl" : res["wavelengths"],
                         "folder_name" : self.data_path.split('/')[-2][:]}

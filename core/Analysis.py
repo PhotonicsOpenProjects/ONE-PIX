@@ -4,8 +4,8 @@ import glob
 from tkinter import *
 from tkinter import filedialog
 class Analysis:
-    def __init__(self,rec=None):
-        self.data_path=None
+    def __init__(self,rec=None,data_path=None):
+        self.data_path=data_path
         if rec is None:
             self.read_header()
             self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
@@ -38,16 +38,17 @@ class Analysis:
             Dictionnary containing acquisition data.
 
         """
-        try:
-            chemin_script = os.getcwd()
-            root = Tk()
-            root.withdraw()
-            root.attributes('-topmost', 1)
-            self.data_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
-            os.chdir(self.data_path)
-        except Exception as e:
-            print(e)
-
+        chemin_script = os.getcwd()
+        if self.data_path is None:
+            try:
+                root = Tk()
+                root.withdraw()
+                root.attributes('-topmost', 1)
+                self.data_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
+                
+            except Exception as e:
+                print(e)
+        os.chdir(self.data_path)
         header_filepath=glob.glob('*.txt')[0]
         header=[]
         with open(header_filepath, 'r') as file:
