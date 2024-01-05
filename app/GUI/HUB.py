@@ -10,7 +10,7 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import  ttk
 from tkinter.messagebox import showwarning
-from PIL import Image
+import PIL.Image 
 
 import sys
 import os
@@ -22,7 +22,9 @@ import json
 import screeninfo
 #path_to_GUI = '/'.join([os.getcwd(),'ONE-PIX_soft/GUI'])
 path_to_GUI = os.getcwd()
-os.chdir(path_to_GUI)
+
+software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
+
 class OPApp(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -116,12 +118,12 @@ class OPApp(ctk.CTk):
         self.pop_up.destroy()
         path_to_json = '/'.join(['/'.join(path_to_GUI.split('/')[:-1]), 'acquisition_param_ONEPIX.json'])
         norm_path=tk.filedialog.askdirectory(initialdir='../Hypercubes')
-        with open(path_to_json) as f:
-            acq_params = json.load(f)
+        with open(software_json_path) as f:
+            software_json_object = json.load(f)
        
-        acq_params["normalisation_path"] = norm_path
-        with open(path_to_json, "w") as file:
-            json.dump(acq_params, file,indent=4)
+        software_json_object["normalisation_path"] = norm_path
+        with open(software_json_path, "w") as file:
+            json.dump(software_json_object, file,indent=4)
         
         self.isNormalized = False
         self.launch_GUI()
@@ -210,17 +212,16 @@ class OPApp(ctk.CTk):
         self.destroy()
         
     def launch_GUI(self):
-        path_to_json = '/'.join(['/'.join(path_to_GUI.split('/')[:-1]), 'acquisition_param_ONEPIX.json'])
-        print(path_to_json)
-        with open(path_to_json) as f:
-            acq_params = json.load(f)
+
+        with open(software_json_path, "r") as file:
+            software_json_object = json.load(file)
     
-        acq_params["mode_choice"]=self.GuiMode_choice.get()
-        acq_params["acquisition_method"]=self.acquisition_method
-        acq_params["Normalisation"]=self.isNormalized
+        software_json_object["mode_choice"]=self.GuiMode_choice.get()
+        software_json_object["acquisition_method"]=self.acquisition_method
+        software_json_object["Normalisation"]=self.isNormalized
         
-        with open(path_to_json, 'w') as outfile:
-            json.dump(acq_params, outfile,indent=4)
+        with open(software_json_path, 'w') as outfile:
+            json.dump(software_json_object, outfile,indent=4)
             
             
         with open("languages/config.json", 'r') as f:

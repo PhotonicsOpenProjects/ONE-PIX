@@ -2,7 +2,8 @@
     "imaging_method": "FourierSplit",
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
-    "mode_choice": "Avanc\u00e9",
+    "mode_choice": "Simple",
+    "acquisition_method": "Complete",
     "Normalisation": false,
     "normalisation_path": ""
 }
