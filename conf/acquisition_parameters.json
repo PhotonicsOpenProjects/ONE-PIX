@@ -7,8 +7,6 @@
     "integration_time_ms": 17.0,
     "height": 600,
     "width": 800,
-    "spectro_scans2avg": 5,
-    "m": [],
-    "max_height": 352,
-    "max_width": 469
+    "spectro_scans2avg": 5
+    
 }

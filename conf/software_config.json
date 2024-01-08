@@ -1,9 +1,19 @@
 {
-    "imaging_method": "FourierSplit",
+    "imaging_method": "Addressing",
+    
+    "m": [],
+	"clustering_method": "kmeans",
+	"clustering_parameters": [2,2],
+    
+    "max_height": 352,
+    "max_width": 469,
+
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
+    
     "mode_choice": "Simple",
     "acquisition_method": "Complete",
+    
     "Normalisation": false,
     "normalisation_path": ""
 }

@@ -1,6 +1,7 @@
 import importlib
-from plugins.camera.AbstractBridge import AbstractBridge
-import numpy as np
+import sys
+import os
+sys.path.append(f'..{os.sep}..{os.sep}')
 
 class CameraBridge:
     """
@@ -33,8 +34,8 @@ class CameraBridge:
         
        
     
-    def get_image(self):
-        self.image=self.camera.image_capture()
+    def get_image(self,tag=None,save_path=None):
+        self.image=self.camera.image_capture(tag,save_path)
         
     
         

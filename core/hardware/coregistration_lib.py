@@ -1,8 +1,3 @@
-try:
-    from picamera import PiCamera
-except:
-    pass
-
 import time
 import numpy as np
 import imutils
@@ -12,7 +7,9 @@ import os
 from tkinter.messagebox import showinfo
 import screeninfo
 import sys
-print('coregistration_path', os.path.abspath(os.curdir))
+sys.path.append(f'..{os.sep}..{os.sep}core{os.sep}hardware')
+from CameraBridge import *
+
 screenWidth = screeninfo.get_monitors()[0].width
 try:
     proj_shape=screeninfo.get_monitors()[1]
@@ -21,26 +18,13 @@ except IndexError:
     proj_shape=screeninfo.get_monitors()[0]
     #sys.exit()
 
-#%% Get and handle camera pictures       
-def get_picture(tag,save_path='./'):
-    camera = PiCamera(resolution = (1024, 768))
-    camera.iso=300
-    time.sleep(2)
-    camera.shutter_speed = camera.exposure_speed
-    camera.exposure_mode = 'off'
-    g = camera.awb_gains
-    camera.awb_mode = 'off'
-    camera.awb_gains = g
-    camera.vflip=True
-    camera.hflip=True
-    camera.hflip = True
-    camera.vflip = True 
 
-    if tag=='init': save_path=f"./{tag}.png"
-    
-    camera.capture(save_path)
-    camera.close()
-    return
+software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
+hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
+with open(hardware_json_path) as file:
+    hardware_dict=json.load(file)
+
+camera=CameraBridge(hardware_dict['name_camera'])
 
 def order_corners(pts):
     """
@@ -168,15 +152,13 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
     projected region
     
     """
-    json_path='../acquisition_param_ONEPIX.json'
-    f = open(json_path)
-    setup_dict = json.load(f)
+    with open(software_json_path) as f:
+        setup_dict = json.load(f)
     m=setup_dict["m"]
     max_width=setup_dict["max_width"]
     max_height=setup_dict["max_height"]
     
     res=False
-    keys=list(setup_dict.keys())
     if m==[]:
         res=True
         
@@ -196,7 +178,7 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         
 
         # Grab a photo of the frame
-        get_picture(tag)
+        camera.get_image(tag)
         save_path=f"./{tag}.png"
         frame = cv2.imread(save_path)
         #os.remove(save_path)
@@ -220,7 +202,7 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         m = cv2.getPerspectiveTransform(rect, dst)
         showinfo(message='Initialisation du vidéoprojecteur réussie.')
         
-        with open(json_path, "r") as file:
+        with open(software_json_path, "r") as file:
             setup_dict = json.load(file)
         
         
@@ -228,7 +210,7 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         setup_dict["max_width"]=max_width
         setup_dict["max_height"]=max_height
                 
-        with  open(json_path, "w") as f:
+        with  open(software_json_path, "w") as f:
             json.dump(setup_dict,file,indent=4)
         
         
@@ -236,19 +218,16 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         
         
         # Grab a photo of the frame
-        get_picture(tag)
+        camera.get_image(tag)
         save_path=f"./{tag}.png"
         pict = cv2.imread(save_path)
-        #os.remove(save_path)
            
         
     # Uncomment the lines below to see the transformed image
     wrap = cv2.resize(cv2.warpPerspective(pict, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
     cv2.imwrite(save_path,wrap)
 
-#     cv2.imshow('all better', wrap)
-#     cv2.waitKey(0)
-#     return wrap
+
 
 def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.height)):
     
@@ -261,7 +240,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     except IndexError:
         showinfo(title=None,message='Please use a projector to use ONE-PIX')
         sys.exit()
-    json_path='../acquisition_param_ONEPIX.json'
+    
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)
     # Delay execution a quarter of a second to make sure the image is displayed 
@@ -269,7 +248,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     cv2.waitKey(500)
         
     # Grab a photo of the frame
-    get_picture('calibration',"init.png")
+    camera.get_image('calibration',"init.png")
     save_path="init.png"
     frame = cv2.imread(save_path)
 
@@ -290,33 +269,31 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     hide_full_frame()
 
     m = cv2.getPerspectiveTransform(rect, dst)
-#     root=tk.Tk()
-#     showinfo(root,message='Initialisation du vidéoprojecteur réussie.')
-#     root.destroy()
+
     
-    file = open(json_path, "r")
-    setup_dict = json.load(file)
-    file.close()
+    with open(software_json_path, "r") as file:
+        setup_dict = json.load(file)
     
     setup_dict["m"]=m.tolist()
     setup_dict["max_width"]=max_width
     setup_dict["max_height"]=max_height
             
-    with open(json_path, "w") as file:
+    with open(software_json_path, "w") as file:
         json.dump(setup_dict,file,indent=4)
     
     
-def apply_corregistration(img,json_path):
+def apply_corregistration(img):
     """
     Function allow to resize image of the pi with coregistration with the video projector
     """
     
-    #json_path='acquisition_param_ONEPIX.json'
-    f = open(json_path)
-    setup_dict = json.load(f)
+    with open(software_json_path) as f:
+        setup_dict = json.load(f)
     m=setup_dict["m"]
     m=np.asarray(m)
     max_width=setup_dict["max_width"]
     max_height=setup_dict["max_height"]
-    wrap = cv2.resize(cv2.warpPerspective(img, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
+    if m!=[]:
+        wrap = cv2.resize(cv2.warpPerspective(img, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
+    else : wrap=img
     return wrap

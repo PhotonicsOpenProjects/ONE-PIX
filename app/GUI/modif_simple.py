@@ -584,7 +584,7 @@ class OPApp(ctk.CTk):
         self.process.start()
     
     def acquire_hyp(self):
-        
+         
         # Entries actualisation
         self.params_actualisation()
         
