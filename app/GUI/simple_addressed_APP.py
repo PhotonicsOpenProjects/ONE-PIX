@@ -1,9 +1,3 @@
-"""
-Created on Wed Jul 19 18:32:47 2023
-
-@author: Leo Brechet
-"""
-
 import customtkinter as ctk
 from tkinter import filedialog
 from tkinter.messagebox import showerror
@@ -19,15 +13,20 @@ import json
 import screeninfo
 import PIL.ImageTk
 
-sys.path.insert(0, os.path.abspath('../'))
-from src.AcquisitionConfig import *
-from src.coregistration_lib import *
+sys.path.append(f'..{os.sep}..{os.sep}')
+from core.Acquisition import Acquisition
+from core.Reconstruction import Reconstruction
+from core.Analysis import Analysis
+from core.hardware.coregistration_lib import *
+
 
 window_height = 575
 window_width = 825
 
-json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
-print(json_path)
+acquisition_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
+hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
+software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
+
 def find_rgb_label(nb_mask):
     """
     
@@ -64,22 +63,21 @@ class OPApp(ctk.CTk):
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
+        self.config=Acquisition()
         # configure window
         self.resizable(False, False)
         self.title(f"ONEPIX GUI")
         
         x = (self.monitor_sz.width -window_width)//2-100
         y = (self.monitor_sz.height-window_height)//2-100
-        if is_raspberrypi(): x,y=x+100,y+100
+        if self.config.hardware.is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
-        icon_path='../imgs/logo_ONE-PIX.png' if is_raspberrypi() else '../imgs/logo_ONE-PIX.ico'
+        ext=".png" if self.config.hardware.is_raspberrypi() else ".ico"
+        icon_path=f'.{os.sep}imgs{os.sep}logo_ONE-PIX{ext}'
         icon_path=PIL.ImageTk.PhotoImage(master=self,file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
 
-   
-
-        
         self.fig_vis = Figure(figsize=(8.1,3.45), dpi=100)
         self.fig_vis.patch.set_facecolor('#C4C4C4')
         gs = self.fig_vis.add_gridspec(10,50)
@@ -87,7 +85,6 @@ class OPApp(ctk.CTk):
         self.b_vis = self.fig_vis.add_subplot(gs[:,22:], anchor='W')
         self.a_vis.axis('off')
         self.b_vis.axis('off')
-        
         
         self.test_mode = "auto"
 
@@ -194,21 +191,29 @@ class OPApp(ctk.CTk):
                                      text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["acquireButton_WIP"])
         self.update()
         
-        with open(json_path) as f:
+        with open(acquisition_json_path) as f:
             params = json.load(f)
-      
+        
+        with open(software_json_path) as f:
+            software_params = json.load(f)
+
+        params['integration_time_ms']=int(float(self.integration_time_entry.get()))
+        
         if self.test_mode=="manual":
             params['spatial_res']='manual_segmentation'
         elif self.test_mode=="auto":
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
-        with open(json_path, 'w') as outfile:
-            json.dump(params, outfile,indent=4)
-            
+                                     
+        with open(acquisition_json_path, 'w') as outfile:
+            json.dump(params, outfile, indent=4)
+
+        with open(software_json_path, 'w') as outfile:
+            json.dump(software_params, outfile, indent=4)
         
-        config=OPConfig(json_path)
+        self.config=Acquisition()
         try:
-            config.OP_init()
-            config.thread_acquisition(time_warning=False)
+            self.config.OP_init()
+            self.config.thread_acquisition(time_warning=False)
             directory = '../Hypercubes'
             newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
             print(newest)
@@ -279,13 +284,12 @@ class OPApp(ctk.CTk):
         
     
     def open_GUIConfig(self):
-        with open(json_path, 'r') as f:
+        with open(software_json_path, 'r') as f:
             GUI_conf = json.load(f)
-            f.close()
         
         GUI_conf["pattern_method"] = "Addressing"
         
-        with open(json_path, 'w') as f:
+        with open(software_json_path, 'w') as f:
             json.dump(GUI_conf, f,indent=4)
            
             
