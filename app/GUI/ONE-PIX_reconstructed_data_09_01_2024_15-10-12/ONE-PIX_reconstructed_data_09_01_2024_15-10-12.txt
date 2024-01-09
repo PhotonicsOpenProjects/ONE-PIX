@@ -1,0 +1,4 @@
+ONE-PIX_reconstructed_acquisition_09_01_2024_15-10-12
+--------------------------------------------------------
+
+Imaging method: FourierSplit

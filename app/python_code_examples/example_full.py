@@ -7,9 +7,8 @@ from core.Analysis import Analysis
 
 # Starting a new acquisition
 acq=Acquisition()
-acq.init_measure()
 acq.thread_acquisition()
-#acq.save_raw_data()
+acq.save_raw_data()
 
 # Data reconstruction 
 rec=Reconstruction(acq)
