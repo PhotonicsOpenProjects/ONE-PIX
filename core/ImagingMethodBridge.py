@@ -22,7 +22,6 @@ class ImagingMethodBridge:
             self.pattern_creation_method = self.pattern_creation_classObj(self.spatial_res,self.height,self.width)
             self.patterns=self.pattern_creation_method.creation_patterns()
             self.patterns_order=self.pattern_creation_method.patterns_order
-            print(self.patterns)
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
 

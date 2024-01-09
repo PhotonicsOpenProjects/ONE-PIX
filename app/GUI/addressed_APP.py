@@ -10,9 +10,11 @@ from tkinter.messagebox import showerror
 import sys
 import os
 import glob
-sys.path.insert(0, os.path.abspath('../'))
-from src.AcquisitionConfig import *
-from src.coregistration_lib import *
+sys.path.append(f'..{os.sep}..{os.sep}')
+from core.Acquisition import Acquisition
+from core.Reconstruction import Reconstruction
+from core.Analysis import Analysis
+from core.hardware.coregistration_lib import *
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
@@ -26,8 +28,9 @@ import PIL.Image, PIL.ImageTk
 window_height = 575
 window_width = 825
 
-json_path = os.path.abspath("../acquisition_param_ONEPIX.json")
-print(json_path)
+acquisition_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
+hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
+software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
 
 def find_rgb_label(nb_mask):
     """
@@ -65,19 +68,19 @@ class OPApp(ctk.CTk):
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
         self.open_GUIConfig()
-        self.config=0
+        self.config=Acquisition()
         # configure window
-        #self.resizable(False, False)
+        # self.resizable(False, False)
         self.title(f"ONEPIX GUI")
         x = (self.monitor_sz.width -window_width)//2-100
         y = (self.monitor_sz.height-window_height)//2-100
-        if is_raspberrypi(): x,y=x+100,y+100
+        if self.config.hardware.is_raspberrypi(): x,y=x+100,y+100
         self.geometry('%dx%d+%d+%d' % (window_width, window_height, x,y))
-        icon_path='../imgs/logo_ONE-PIX.png' if is_raspberrypi() else '../imgs/logo_ONE-PIX.ico'
+        ext=".png" if self.config.hardware.is_raspberrypi() else ".ico"
+        icon_path=f'.{os.sep}imgs{os.sep}logo_ONE-PIX{ext}'
         icon_path=PIL.ImageTk.PhotoImage(master=self,file=icon_path)
         self.wm_iconbitmap()
         self.iconphoto(False,icon_path)
-
         
         self.fig_vis = Figure(figsize=(8.1,3.45), dpi=100)
         self.fig_vis.patch.set_facecolor('#C4C4C4')
@@ -115,7 +118,8 @@ class OPApp(ctk.CTk):
         self.integration_time_label.grid(column=0, row=3, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         self.integration_time_entry = ctk.CTkEntry(self.Mode_frame, state = "normal")
         self.integration_time_entry.grid(column=1, row=3, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        with open(json_path) as f:
+        
+        with open(acquisition_json_path) as f:
             params = json.load(f)
         self.integration_time_entry.insert(0,str(params["integration_time_ms"]))
         
@@ -188,20 +192,26 @@ class OPApp(ctk.CTk):
         self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
                                      text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["acquireButton_WIP"])
         self.update()
-        f = open(json_path)
-        params = json.load(f)
-        f.close()
+        with open(acquisition_json_path) as f:
+            params = json.load(f)
+        
+        with open(software_json_path) as f:
+            software_params = json.load(f)
+
         params['integration_time_ms']=int(float(self.integration_time_entry.get()))
+        
         if self.test_mode=="manual":
             params['spatial_res']='manual_segmentation'
         elif self.test_mode=="auto":
             params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
                                      
-        with open(json_path, 'w') as outfile:
+        with open(acquisition_json_path, 'w') as outfile:
             json.dump(params, outfile, indent=4)
+
+        with open(software_json_path, 'w') as outfile:
+            json.dump(software_params, outfile, indent=4)
         
-        self.config=OPConfig(json_path)
-        
+        self.config=Acquisition()
         try :   
             self.config.thread_acquisition(time_warning=False)
             self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
@@ -220,6 +230,7 @@ class OPApp(ctk.CTk):
         self.Prim_seg.configure(state = "disabled", fg_color="gray")
         self.Sec_seg.configure(state = "disabled", fg_color="gray")
         self.test_mode = "manual"
+
     def auto_toogle(self):
         self.auto_choice.configure(state = "disabled", fg_color="#3B8ED0")
         self.manual_choice.configure(state = "normal", fg_color="gray")
@@ -274,13 +285,12 @@ class OPApp(ctk.CTk):
         
     
     def open_GUIConfig(self):
-        with open(json_path, 'r') as f:
+        with open(software_json_path, 'r') as f:
             GUI_conf = json.load(f)
-            f.close()
         
         GUI_conf["pattern_method"] = "Addressing"
         
-        with open(json_path, 'w') as f:
+        with open(software_json_path, 'w') as f:
             json.dump(GUI_conf, f,indent=4)
             
     def open_languageConfig(self):

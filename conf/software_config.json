@@ -13,5 +13,6 @@
     "mode_choice": "Simple",
     "acquisition_method": "Complete",
     "Normalisation": false,
-    "normalisation_path": ""
+    "normalisation_path": "",
+    "pattern_method": "Addressing"
 }
