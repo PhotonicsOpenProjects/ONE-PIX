@@ -20,10 +20,9 @@ class ImagingMethodBridge:
             patterns_module=importlib.import_module(f'plugins.imaging_methods.{self.imaging_method}.'+'PatternsCreation')
             self.pattern_creation_classObj = getattr(patterns_module,'CreationPatterns')
             self.pattern_creation_method = self.pattern_creation_classObj(self.spatial_res,self.height,self.width)
-            self.pattern_creation_method.creation_patterns()
             self.patterns=self.pattern_creation_method.creation_patterns()
             self.patterns_order=self.pattern_creation_method.patterns_order
-
+            print(self.patterns)
         except ModuleNotFoundError:
             raise Exception("Concrete bridge \"" + self.imaging_method + "\" implementation has not been found.")
 

@@ -89,17 +89,18 @@ class Acquisition:
         * wavelengths : (array of floats) 1D wavelengths sampled by the spectrometer.
     
         """
+        self.init_measure()
         est_duration=round((self.nb_patterns*(self.hardware.periode_pattern+self.hardware.repetition*(self.hardware.integration_time_ms+2))+2)/(60*1000),2)
         ans='no'
         if time_warning :
             ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
         if np.logical_or(ans=='yes',time_warning==False):
             begin_acq = time.time()
-            self.init_measure()
             #Threads initialisation
             event=threading.Event()
             patterns_thread = threading.Thread(target=self.hardware.projection.thread_projection,args=(event,self.imaging_method.patterns,self.imaging_method.patterns_order,self.imaging_method.pattern_creation_method.interp_method))
             spectrometer_thread = threading.Thread(target=self.hardware.spectrometer.thread_singlepixel_measure,args=(event,self.spectra))
+            print("ok")
             # Start both display and measure threads
             patterns_thread.start()
             spectrometer_thread.start()

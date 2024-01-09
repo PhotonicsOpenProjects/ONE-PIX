@@ -16,6 +16,7 @@ import os
 from datetime import date
 import PIL.Image
 import screeninfo
+import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
@@ -140,14 +141,12 @@ class CreationPatterns:
         self.patterns_order=[]
         self.sequence=[]
         self.interp_method=cv2.INTER_AREA
-        self.nb_patterns=2 #Two patterns at this times : "vegetation and background"
-        #The goal is to have 3 patterns --> improve segmentation program (dataset)
+        self.nb_patterns=2
         
     def sequence_order(self):
-        pass
-
-
-    
+        self.patterns_order=['']*self.nb_patterns
+        
+  
     def creation_patterns(self):
         
         with open(json_path) as f:
@@ -183,19 +182,21 @@ class CreationPatterns:
         clustering_parameters=acqui_dict["clustering_parameters"]
 
         if clustering_method == "kmeans":
-            print(clustering_parameters)
-            masks= Niagara_means(RGB_img,clustering_parameters)
+            #print(clustering_parameters)
+            self.patterns= Niagara_means(RGB_img,clustering_parameters)
         elif clustering_method == "labelme":
-            masks = realtime_labelme(RGB_img)
+            self.patterns = realtime_labelme(RGB_img)
         
         else:
             raise Exception('Unknown clustering method ')
             
         
         #Add dark pattern
-        masks=np.append(masks,np.zeros_like(masks[0,:,:][np.newaxis,:,:],dtype=np.uint8),axis=0)
+        self.patterns=np.append(self.patterns,np.zeros_like(self.patterns[0,:,:][np.newaxis,:,:],dtype=np.uint8),axis=0)
+        self.nb_patterns=np.size(self.patterns,0)
+        self.sequence_order()
+        return self.patterns
 
-        self.nb_patterns=np.size(masks,0)
-
-        self.sequence = masks
-        return self.patterns_order,[]
+    def save_raw_data(self,acquisition_class,path=None):
+        saver=FIS.FisCommonAcquisition(acquisition_class)
+        saver.save_raw_data(path=None)

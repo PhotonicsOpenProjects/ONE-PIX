@@ -2,7 +2,7 @@
     "imaging_method": "Addressing",
     
     "m": [],
-	"clustering_method": "kmeans",
+	"clustering_method": "labelme",
 	"clustering_parameters": [2,2],
     
     "max_height": 352,
