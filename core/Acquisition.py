@@ -36,7 +36,7 @@ class Acquisition:
         with open(self.acquisition_config_path) as f:
             acquisition_dict = json.load(f)
 
-        self.imaging_method_name=software_dict["imaging_method"]
+        self.imaging_method_name=acquisition_dict["imaging_method"]
         self.spatial_res=acquisition_dict["spatial_res"]
         self.width=acquisition_dict["width"]
         self.height=acquisition_dict["height"]

@@ -785,7 +785,7 @@ class OPApp(ctk.CTk):
             software_json_object = json.load(file)
       
         hardware_json_object["name_spectro"] = self.acq_config.hardware.name_spectro
-        software_json_object["imaging_method"] = self.methods_optionemenu.get()
+        acquisition_json_object["imaging_method"] = self.methods_optionemenu.get()
         acquisition_json_object["spatial_res"] = int(self.entry_img_res.get())
         acquisition_json_object["integration_time_ms"] = float(self.entry_integration_time.get())
         

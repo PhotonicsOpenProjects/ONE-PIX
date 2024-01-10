@@ -1,11 +1,12 @@
-{
+{   "imaging_method": "HadamardSplit",
+    "spatial_res": 64,
+    "integration_time_ms": 8,
+   
+    "height": 600,
+    "width": 800,
     "wl_lim": [
         350,
         800
     ],
-    "spatial_res": 64,
-    "integration_time_ms": 8,
-    "height": 600,
-    "width": 800,
     "spectro_scans2avg": 5
 }
