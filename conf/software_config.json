@@ -1,5 +1,5 @@
 {
-    "imaging_method": "FourierSplit",
+    "imaging_method": "HadamardSplit",
     "m": [],
     "clustering_method": "labelme",
     "clustering_parameters": [

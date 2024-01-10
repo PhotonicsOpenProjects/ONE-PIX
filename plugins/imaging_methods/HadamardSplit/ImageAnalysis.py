@@ -20,7 +20,7 @@ class Analysis:
         return rgb_image
     
     def plot_reconstructed_image(self,datacube,wavelengths):
-        rgb_image=self.get_rgb_image(self,datacube,wavelengths)
+        rgb_image=self.get_rgb_image(datacube,wavelengths)
         plt.figure()
         plt.imshow(rgb_image)
         plt.show()
