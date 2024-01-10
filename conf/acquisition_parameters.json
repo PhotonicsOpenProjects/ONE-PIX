@@ -1,4 +1,4 @@
-{   "imaging_method": "HadamardSplit",
+{   "imaging_method": "Addressing",
     "spatial_res": 4,
     "integration_time_ms": 8,
    
