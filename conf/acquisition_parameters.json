@@ -1,5 +1,5 @@
 {   "imaging_method": "HadamardSplit",
-    "spatial_res": 64,
+    "spatial_res": 4,
     "integration_time_ms": 8,
    
     "height": 600,

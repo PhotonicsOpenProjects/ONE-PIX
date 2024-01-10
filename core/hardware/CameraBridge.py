@@ -31,8 +31,7 @@ class CameraBridge:
  		
     def camera_open(self):
         self.camera.init_camera()
-        
-       
+
     
     def get_image(self,tag=None,save_path=None):
         self.image=self.camera.image_capture(tag,save_path)

@@ -248,8 +248,8 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     cv2.waitKey(500)
         
     # Grab a photo of the frame
-    camera.get_image('calibration',"init.png")
     save_path="init.png"
+    camera.get_image('calibration',save_path)
     frame = cv2.imread(save_path)
 
     # We're going to work with a smaller image, so we need to save the scale

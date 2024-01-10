@@ -41,7 +41,7 @@ class FisCommonReconstruction :
         os.mkdir(folder_name)
         os.chdir(folder_name)
         self.save_path=folder_name
-        if save_envi_name is None : folder_name
+        if save_envi_name is None : save_envi_name=folder_name
         # saving the acquired spatial spectra hypercube
         self.py2envi(datacube,wavelengths,save_envi_name,save_path)
         with open(folder_name+'.txt', "w+") as header_file:

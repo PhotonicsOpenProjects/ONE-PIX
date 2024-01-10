@@ -107,7 +107,6 @@ class Acquisition:
             spectrometer_thread.join()
 
             self.spectra=self.hardware.spectrometer.spectra
-            self.camera_image=self.hardware.camera.get_image() 
             self.duration = time.time()-begin_acq
             self.create_acquisition_header()
             
