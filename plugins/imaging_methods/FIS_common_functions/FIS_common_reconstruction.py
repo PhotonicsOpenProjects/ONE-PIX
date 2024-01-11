@@ -28,6 +28,7 @@ class FisCommonReconstruction :
         None.
     
         """
+        root_path=os.getcwd()
         if save_path is None: save_path=f"..{os.sep}Hypercubes"
         if(os.path.isdir(save_path)):
             pass
@@ -46,7 +47,7 @@ class FisCommonReconstruction :
         self.py2envi(datacube,wavelengths,save_envi_name,save_path)
         with open(folder_name+'.txt', "w+") as header_file:
             header_file.write(header)
-        
+        os.chdir(root_path)
 
     def py2envi(self,datacube,wavelengths,save_envi_name,save_path=None):
         """
@@ -67,12 +68,18 @@ class FisCommonReconstruction :
         None.
 
         """
-        if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
         filename=save_envi_name+'.hdr'
         path=os.getcwd()
-        os.chdir(save_path)
-        envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
-        os.chdir(path)
+        if save_path==None:
+            save_path= filedialog.askdirectory(title = "Open the save directory")
+            os.chdir(save_path)
+            envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
+            os.chdir(path)
+        else:
+            envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
+        
+        
+        
 
     
 

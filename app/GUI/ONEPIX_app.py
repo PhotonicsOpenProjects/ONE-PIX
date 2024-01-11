@@ -863,7 +863,7 @@ class OPApp(ctk.CTk):
                                                               self.acq_config.hardware.spectrometer.wavelengths)
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time    
-        self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','./')
+        self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','../Hypercubes')
         # Display RGB image
         self.clear_graph_tab1()
 
