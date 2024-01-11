@@ -7,7 +7,7 @@ class StubBridge:
     def __init__(self,integration_time_ms):
         self.integration_time_ms=integration_time_ms
         self.spec=[]
-        self.DeviceName='stub_spectrometer'
+        
         self.nb_wl=200
         self.wl_lim=[400,1000]
         self.step=(self.wl_lim[1]-self.wl_lim[0])//self.nb_wl
@@ -22,6 +22,7 @@ class StubBridge:
         None.
 
         """
+        self.DeviceName='stub_spectrometer'
         print("Stub_spectrometer is connected")
         
 
@@ -80,4 +81,5 @@ class StubBridge:
 
         """
         print("Stub_spectrometer is closed")
+        self.DeviceName=''
     

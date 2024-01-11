@@ -1,7 +1,7 @@
-{   "imaging_method": "Addressing",
+{
+    "imaging_method": "FourierSplit",
     "spatial_res": 4,
     "integration_time_ms": 8,
-   
     "height": 600,
     "width": 800,
     "wl_lim": [

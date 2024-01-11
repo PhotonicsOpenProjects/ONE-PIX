@@ -34,6 +34,7 @@ import time
 sys.path.append(f'..{os.sep}..{os.sep}')
 
 from core.Acquisition import Acquisition
+from core.hardware.SpectrometerBridge import SpectrometerBridge
 from core.Reconstruction import Reconstruction
 from core.Analysis import Analysis
 import numpy as np
@@ -515,9 +516,14 @@ class OPApp(ctk.CTk):
             if test==0:
                 try:
                     self.acq_config.hardware.name_spectro = i
+                    self.acq_config.hardware.spectrometer= SpectrometerBridge(
+                        self.acq_config.hardware.name_spectro,self.acq_config.hardware.integration_time_ms,
+                        self.acq_config.hardware.wl_lim,self.acq_config.hardware.repetition)
+                    
                     self.acq_config.hardware.spectrometer.spec_open()
-             
+
                     if self.acq_config.hardware.spectrometer.DeviceName != '':
+                        print(i)
                         test = 1
                         spectro_name=self.acq_config.hardware.spectrometer.DeviceName
                         if len(spectro_name)<30: spectro_name+=(30-len(spectro_name))*' '
@@ -529,7 +535,7 @@ class OPApp(ctk.CTk):
                         self.update()
                 except Exception:
                     pass
-                
+          
 
     def spec_disconnection(self):
         self.switch_spectro.configure(text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["spec_disconnection"]["switch_spectro"])
@@ -589,18 +595,18 @@ class OPApp(ctk.CTk):
         self.params_actualisation()
         
         self.acq_res=[]
-        self.window_size_test()
-        self.acq_config.OP_init()
+        #self.window_size_test()
+        self.acq_config.hardware.projection.get_integration_time_auto(self.acq_config)
         if self.acq_config.periode_pattern<60 :self.acq_config.periode_pattern=60
             
-        while self.acq_config.spectro_flag:
-            pass
+        #while self.acq_config.spectro_flag:
+        #    pass
         self.close_window_proj()
         time.sleep(1)
         # Start acquisition
         self.progressbar.start()
-        est_duration=round(1.5*self.acq_config.nb_patterns*self.acq_config.hardware.periode_pattern/(60*1000),2)
-        est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(est_duration))).strftime('%H:%M:%S')
+        self.acq_config.init_measure()
+        est_end=(datetime.datetime.now()+datetime.timedelta(minutes=round(self.acq_config.est_duration))).strftime('%H:%M:%S')
         est_end_label = self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 5"]["est_time_label"]
         self.est_time_label.configure(text=f"{est_end_label}{est_end}")
         self.button_acquire_hyp.configure(state='disabled')
@@ -613,7 +619,7 @@ class OPApp(ctk.CTk):
         self.acq_res.data_reconstruction()
                 
         #if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
-        if self.acq_config.pattern_method == 'FourierShift':
+        if self.acq_config.imaging_method_name == 'FourierShift':
                 self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
         
         # Reconstruct a RGB preview of the acquisition
@@ -622,7 +628,7 @@ class OPApp(ctk.CTk):
                                                               self.acq_config.hardware.spectrometer.wavelengths)
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time    
-        self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','./')
+        self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','../Hypercubes')
         
         # Display RGB image
         self.clear_graph_tab1()

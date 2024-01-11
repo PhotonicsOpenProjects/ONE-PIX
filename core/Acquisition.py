@@ -42,7 +42,7 @@ class Acquisition:
         self.height=acquisition_dict["height"]
         self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
         self.hardware=Hardware()
-        
+        self.is_init=False
 
     def init_measure(self):
         """
@@ -60,13 +60,18 @@ class Acquisition:
         * actualised OPConfig class object.
         * self.pattern_lib.decorator.sequence : sequence of patterns
         """
-        #self.wavelengths=self.hardware.spectrometer.wavelengths
-        self.imaging_method.creation_patterns()
-        self.nb_patterns = len(self.imaging_method.patterns_order)
-        self.hardware.hardware_initialisation()
-        self.spectra=np.zeros((self.nb_patterns,len(self.hardware.spectrometer.wavelengths)),dtype=np.float32)
-
-     
+        if not(self.is_init):
+            try:
+                self.imaging_method.creation_patterns()
+                self.nb_patterns = len(self.imaging_method.patterns_order)
+                self.hardware.hardware_initialisation()
+                self.spectra=np.zeros((self.nb_patterns,len(self.hardware.spectrometer.wavelengths)),dtype=np.float32)
+                self.est_duration=round((self.nb_patterns*(self.hardware.periode_pattern+self.hardware.repetition*(self.hardware.integration_time_ms+2))+2)/(60*1000),2)
+                self.is_init=True
+            except Exception as e:
+                print(e)
+                self.is_init=False
+        else:pass
         
     def thread_acquisition(self, path=None, time_warning=True):
         """
@@ -90,10 +95,9 @@ class Acquisition:
     
         """
         self.init_measure()
-        est_duration=round((self.nb_patterns*(self.hardware.periode_pattern+self.hardware.repetition*(self.hardware.integration_time_ms+2))+2)/(60*1000),2)
         ans='no'
         if time_warning :
-            ans=askquestion(message=f"Estimated acquisition duration : {est_duration} min ")
+            ans=askquestion(message=f"Estimated acquisition duration : {self.est_duration} min ")
         if np.logical_or(ans=='yes',time_warning==False):
             begin_acq = time.time()
             #Threads initialisation
@@ -114,6 +118,8 @@ class Acquisition:
         else:
             cv2.destroyAllWindows()
             pass
+
+        self.is_init=False 
 
     def create_acquisition_header(self):
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string

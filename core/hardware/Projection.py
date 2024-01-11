@@ -31,6 +31,11 @@ class Projection:
         self.width=width
         self.periode_pattern=periode_pattern
 
+    def create_fullscreen_window(self):
+        # Initialise cv2 display on the second monitor 
+        cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('ImageWindow', screenWidth, 0)
+        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
 
     def get_integration_time_auto(self,acq_config):
         """
@@ -47,13 +52,8 @@ class Projection:
         config : class
             actualised OPConfig class object.
     
-        """ 
-        if acq_config.hardware.spectrometer.DeviceName=='':
-            acq_config.hardware.spectrometer.spec_open()
-    
-        # create static pattern to be displayed
-        proj = Toplevel()
-        proj.geometry("{}x{}+{}+{}".format(self.width, self.height, screenWidth, 0))
+        """
+        
         y = list(range(self.height))  # horizontal vector for the pattern creation
         x = list(range(self.width))  # vertical vector for the pattern creation
         Y, X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
@@ -61,29 +61,20 @@ class Projection:
         B = 2 * np.pi * Y * 10 / self.width
         test_pattern = np.cos(A + B)  # gray pattern creation
         test_pattern[test_pattern < 0] = 0
-        #test_pattern=np.ones((self.height,self.width),dtype=np.uint8)
-        pil_img = PIL.Image.fromarray(255 * test_pattern)
-
-        img = PIL.ImageTk.PhotoImage(master=proj, image=pil_img)
-        label_test_proj = Label(proj, image=img)
-        label_test_proj.image = img
-        label_test_proj.pack()
-
-        proj.update()
-        time.sleep(0.5)
         
+        
+        self.create_fullscreen_window()
+        cv2.imshow('ImageWindow',cv2.resize(test_pattern,(self.width,self.height),interpolation=cv2.INTER_LINEAR_EXACT))
+        cv2.waitKey(100)
         print('Finding the optimal integration time (ms):')
         acq_config.hardware.spectrometer.get_optimal_integration_time()
-        proj.destroy()
+        cv2.destroyAllWindows()
         acq_config.periode_pattern=int(acq_config.hardware.repetition*acq_config.hardware.spectrometer.integration_time_ms)
         if acq_config.periode_pattern<60 :acq_config.periode_pattern=60
 
     def init_projection(self,patterns,patterns_order,interp_method):
-        
         # Initialise cv2 display on the second monitor 
-        cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
-        cv2.moveWindow('ImageWindow', screenWidth, 0)
-        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
+        self.create_fullscreen_window()
         cv2.imshow('ImageWindow',cv2.resize(patterns[0],(self.width,self.height),interpolation=interp_method))
         cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white     
 

@@ -35,7 +35,7 @@ class Hardware :
         self.normalised_datacube=[]
         self.spectro_flag=False
 
-        wl_lim=param_dict["wl_lim"]
+        self.wl_lim=param_dict["wl_lim"]
         
 
         # Displaying infos
@@ -43,7 +43,7 @@ class Hardware :
         self.periode_pattern=int(self.repetition*self.integration_time_ms)
         if self.periode_pattern<60 :self.periode_pattern=60
 
-        self.spectrometer= SpectrometerBridge(self.name_spectro,self.integration_time_ms,wl_lim,self.repetition)
+        self.spectrometer= SpectrometerBridge(self.name_spectro,self.integration_time_ms,self.wl_lim,self.repetition)
         self.camera=CameraBridge(self.name_camera)
         self.projection=Projection(self.height,self.width,self.periode_pattern)
 

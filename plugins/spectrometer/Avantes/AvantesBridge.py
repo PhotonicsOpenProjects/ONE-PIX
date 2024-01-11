@@ -1,10 +1,6 @@
 import sys
 import os
-sys.path.insert(0, os.path.abspath('../DLL/'))
-try:
-    from src.DLL.avaspec import *
-except ModuleNotFoundError:
-    from avaspec import *
+from plugins.spectrometer.Avantes.avaspec import *
 import time
 import numpy as np
 
