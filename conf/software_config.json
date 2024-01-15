@@ -1,6 +1,6 @@
 {
     "m": [],
-    "clustering_method": "labelme",
+    "clustering_method": "Kmeans",
     "clustering_parameters": [
         2,
         2

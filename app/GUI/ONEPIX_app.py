@@ -1727,7 +1727,6 @@ class OPApp(ctk.CTk):
     
     def open_web_infos(self):
         webbrowser.open('https://spyndex.readthedocs.io/en/latest/')
-        print("okokok")
 
 class Toolbar(NavigationToolbar2Tk):
     def set_message(self, s):
