@@ -201,25 +201,17 @@ class FisAnalysis:
         
         # Selection of pixel(s) or region of interest
         if mode=='single':
-            tick=np.arange(n)+1
+            self.tick=np.arange(n)+1
             # Select pixel(s)
-            p=fig.ginput(n)
-            p=np.round(p).astype(np.int32)
+            self.pixels=fig.ginput(n)
+            self.pixels=np.round(self.pixels).astype(np.int32)
             # Display results
-            plt.plot(p[:,0],p[:,1],'x',color='red')
-            for i, txt in enumerate(tick):
-                plt.annotate(txt, (p[i,0]+1, p[i,1]+1),color='r',bbox=dict(boxstyle="circle"))
-            spec=datacube[p[:,1],p[:,0],:]
+            plt.plot(self.pixels[:,0],self.pixels[:,1],'x',color='red')
+            for i, txt in enumerate(self.tick):
+                plt.annotate(txt, (self.pixels[i,0]+1, self.pixels[i,1]+1),color='r',bbox=dict(boxstyle="circle"))
+            spec=datacube[self.pixels[:,1],self.pixels[:,0],:]
             plt.show(block=False)
-    #         plt.subplot(1,2,2)
-    #         
-    #         plt.plot(wavelengths,np.transpose(spec))
-    #         plt.xlabel('Wavelengths (nm)')
-    #         plt.ylabel('Intensity (counts)')
-    #         plt.legend(tick)
-    #         fig.canvas.draw()
-    #         plt.show(block=False)
-    #         plt.pause(0.001)
+    
         elif mode=='mean':
             # Select 2 corner pixels of rectangle area
             p=plt.ginput(2)
@@ -239,7 +231,7 @@ class FisAnalysis:
             print("mode='single' to display each spectrum or mode='mean' to display the mean of the spectra from the selected area")
 
         plt.close()
-        del fig,ax
+       
         return spec
 
     

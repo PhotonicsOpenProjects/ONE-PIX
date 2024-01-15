@@ -972,11 +972,16 @@ class OPApp(ctk.CTk):
                 self.res["spectra_clipped"] = self.analyser.select_disp_spectra(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths_clipped"],self.res["spectra_clipped"].T)
             else:    
-                self.res["spectra"] = self.analyser.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
+                self.res["spectra"]= self.analyser.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"], int(self.entry_draw.get()), 'single')
                 self.a_analysis.plot(self.res["wavelengths"],self.res["spectra"].T)
+                self.clear_rgb_graph()
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
             self.a_analysis.grid(True, linestyle='--')
+        
+        self.rgb_display(self.res["reconstructed_image"],self.res["wavelengths"],title="RGB reconstructed image")
+        self.a_rgb.plot(self.analyser.pixels[:,0],self.analyser.pixels[:,1],'x',color='red')
+        self.rgb_canvas.draw_idle()
         plt.switch_backend('Agg')
             
     def rogn(self):
