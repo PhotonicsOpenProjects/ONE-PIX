@@ -168,8 +168,28 @@ class FisAnalysis:
         plt.show()
         res["reconstructed_image"]=abs(np.fft.ifft2(whole_spectrum,axes=(0,1)))
         return res
+    
+    def datacube_normalisation_snv(self,datacube):
+        """
+        datacube_normalisation_snv allows to normamlize an hypercube using Standrad Variate normalisation 
 
+        Parameters
+        ----------
+        datacube : array
+            3D image data cube.
 
+        Returns
+        -------
+        datacube : array
+            3D normalize datacube.
+
+        """
+        for i in range(0,np.shape(datacube)[0]):
+            for j in range(0,np.shape(datacube)[1]):
+                datacube[i,j,:]=(datacube[i,j,:]-np.mean(datacube[i,j,:]))/np.std(datacube[i,j,:])
+        return datacube
+
+        
     def select_disp_spectra(self,datacube,wavelengths,n,mode):
         """
         select_disp_spectra allows to select pixel(s) of one hypercube and plot their spectra.
