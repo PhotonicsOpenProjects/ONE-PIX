@@ -688,10 +688,17 @@ class OPApp(ctk.CTk):
     def switch_spat2im_command(self):
         self.clear_graph_tab1()
         self.switch_spat2im.configure(state='normal')
-        
+
         if self.switch_spat2im.get()==1:
             #display spectra
-            self.a_acq.imshow(np.log10(abs(np.mean(self.acq_res.whole_spectrum,2))))
+            if self.analysis.imaging_method_name in ['FourierSplit','FourierShift']:
+                spectrum=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.acq_res.rgb_image,2)))))
+
+            elif self.analysis.imaging_method_name =='Hadamard':
+                dim=np.size(self.acq_res.reconstructed,0)
+                spectrum=hadamard(dim)@np.mean(self.acq_res.rgb_image,2)@hadamard(dim)
+                    
+            self.a_acq.imshow(spectrum)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
         else:
             #display image
