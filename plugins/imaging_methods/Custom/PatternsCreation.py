@@ -7,12 +7,12 @@ import glob
 from tkinter.messagebox import showwarning
 
 
-class CustomPatterns:
+class CreationPatterns:
     """ Class CustomPatterns allows to create a sequence of loaded patterns and their order list"""
-    def __init__(self,spatial_res):
+    def __init__(self,spatial_res=0,height=0,width=0):
         self.nb_patterns=0
-        self.sequence=[]
-        self.pattern_order=[]
+        self.patterns_order=[]
+        self.interp_method=cv2.INTER_AREA
     
     """
     Inputs: 
@@ -74,6 +74,7 @@ class CustomPatterns:
         None.
     
         """ 
+        self.patterns=[]
         try:
             chemin_script = os.getcwd()
             root = Tk()
@@ -91,13 +92,18 @@ class CustomPatterns:
             
             for i in range(len(list_nom_mesure)):
                 try:
-                    self.sequence.append(cv2.cvtColor(cv2.imread(list_nom_mesure[i]), cv2.COLOR_BGR2GRAY)/255)
-                    self.pattern_order.append(list_nom_mesure[i][:-4])
+                    self.patterns.append(cv2.cvtColor(cv2.imread(list_nom_mesure[i]), cv2.COLOR_BGR2GRAY)/255)
+                    self.patterns_order.append(list_nom_mesure[i][:-4])
                 except cv2.error:
                     pass
                 
             os.chdir(chemin_script)
-            self.nb_patterns=len(self.sequence)
-            return self.pattern_order,[]
+            self.nb_patterns=len(self.patterns)
+            return self.patterns
+            
         except (OSError,TypeError):
             showwarning('Path error','Undefined folder path')
+        
+    def save_raw_data(self,acquisition_class,path=None):
+        saver=FIS.FisCommonAcquisition(acquisition_class)
+        saver.save_raw_data(path=None)

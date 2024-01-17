@@ -1,9 +1,3 @@
-"""
-@author:PhotonicsOpenProjects
-Modified and traducted by Leo Brecheton Wed Jul 19 18:32:47 2023
-
-"""
-
 import customtkinter as ctk
 import tkinter as tk
 from tkinter import messagebox, ttk, filedialog
@@ -620,7 +614,7 @@ class OPApp(ctk.CTk):
                 
         #if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
         if self.acq_config.imaging_method_name == 'FourierShift':
-                self.acq_res.hyperspectral_image = self.acq_res.hyperspectral_image[1:, 1:, :]  # Shift error correction
+                self.acq_res.imaging_method.reconstructed_image = self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]  # Shift error correction
         
         # Reconstruct a RGB preview of the acquisition
         self.analysis=Analysis(self.acq_res)

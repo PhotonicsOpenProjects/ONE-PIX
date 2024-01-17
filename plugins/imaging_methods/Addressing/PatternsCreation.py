@@ -26,9 +26,8 @@ class CreationPatterns:
     
     def __init__(self,spatial_res=0,height=0,width=0):
         self.patterns_order=[]
-        self.sequence=[]
         self.interp_method=cv2.INTER_AREA
-        self.nb_patterns=2
+        self.nb_patterns=0
 
         with open(json_path) as f:
             acqui_dict = json.load(f)
