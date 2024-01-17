@@ -8,12 +8,11 @@ import PIL.Image, PIL.ImageTk
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.cm as CM
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
 
-rcParams.update({'figure.autolayout': True})
+#rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
 rcParams['xtick.color']='white'
 rcParams['ytick.color']='white'
@@ -199,7 +198,7 @@ class OPApp(ctk.CTk):
         self.canvas = FigureCanvasTkAgg(self.fig, master=self.display_frame)  # A tk.DrawingArea.
         self.canvas.draw()
         self.canvas.get_tk_widget().grid(row=1,column=0,padx=20,pady=5,sticky="")
-        self.a_acq= self.fig.add_subplot(111)
+        self.a_acq= self.fig.subplots()
         self.a_acq.set_axis_off()
                 
         self.switch_spat2im = ctk.CTkSwitch(master=self.display_frame,text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["block 3"]["switch_spat2im"],
@@ -242,7 +241,7 @@ class OPApp(ctk.CTk):
         # figure création for bands preview
         self.bands_graph = Figure(figsize=(2.8,2), dpi=100)
         self.bands_graph.patch.set_facecolor('#2D2D2D')
-        self.bands_subplot = self.bands_graph.add_subplot(111)
+        self.bands_subplot = self.bands_graph.subplots()
         self.bands_subplot.axis('off')
         
         # figure creation for index
@@ -894,7 +893,7 @@ class OPApp(ctk.CTk):
             VAL = int(val)
             self.a.clear()
             self.a.axis('off')
-            current_cmap = CM.get_cmap()
+            current_cmap = plt.get_cmap()
             current_cmap.set_bad(color='white')
             self.a.set_title(self.IDXS["names"][VAL],color='white')
             self.color.clear()
@@ -1057,7 +1056,7 @@ class OPApp(ctk.CTk):
         elif self.data_path.endswith('.hdr'):
             self.analysis=Analysis(rec=None,data_path=self.folder_path)
             res=self.analysis.imaging_method.image_analysis_method.data_dict
-            self.IM = {"IM" : res["hyperspectral_image"].T,
+            self.IM = {"IM" : res["reconstructed_image"].T,
                         "wl" : res["wavelengths"],
                         "folder_name" : self.data_path.split('/')[-2][:]}
         

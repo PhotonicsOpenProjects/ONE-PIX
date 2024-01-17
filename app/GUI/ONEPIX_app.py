@@ -12,7 +12,7 @@ import matplotlib.patches as patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg,NavigationToolbar2Tk
 from matplotlib.figure import Figure
 from matplotlib import rcParams
-rcParams.update({'figure.autolayout': True})
+#rcParams.update({'figure.autolayout': True})
 rcParams['axes.edgecolor'] = '#ffffff'
 rcParams['xtick.color']='white'
 rcParams['ytick.color']='white'
@@ -910,9 +910,12 @@ class OPApp(ctk.CTk):
         if self.switch_spat2im_analysis.get()==0:
             #display spectra
             self.a_rgb.imshow(self.res['rgb_spectrum'])
+            #self.a_rgb.set_axis_on()
+
         else:
             #display image
             self.a_rgb.imshow(self.res["rgb_image"])
+            self.a_rgb.set_axis_on()
             
     def load_data(self):
         self.clear_rgb_graph()
@@ -1477,7 +1480,7 @@ class OPApp(ctk.CTk):
             VAL = int(val)
             self.a.clear()
             self.a.axis('off')
-            current_cmap = CM.get_cmap()
+            current_cmap = plt.get_cmap()
             current_cmap.set_bad(color='white')
             self.a.set_title(self.IDXS["names"][VAL],color='white')
             self.color.clear()
