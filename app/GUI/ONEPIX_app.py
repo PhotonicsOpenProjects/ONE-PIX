@@ -1149,7 +1149,9 @@ class OPApp(ctk.CTk):
                 self.analysis_canvas.draw_idle()
                 self.a_analysis.set_axis_on()
                 self.a_analysis.grid(True, linestyle='--')
-            except KeyError:
+                self.res["spectra"]=spectra*norm_coeff
+                
+            except (KeyError,UnboundLocalError):
                 pass
         plt.switch_backend('Agg')
             
