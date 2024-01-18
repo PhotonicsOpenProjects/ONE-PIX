@@ -295,7 +295,7 @@ class OPApp(ctk.CTk):
         self.rgb_toolbar.config(background='#2D2D2D')
         self.rgb_toolbar._message_label.config(background='#2D2D2D')
         self.rgb_toolbar.update()
-        
+        self.nb_spectra=0
         # =====================================================================
         #         block 2
         # =====================================================================
@@ -910,7 +910,9 @@ class OPApp(ctk.CTk):
         self.a_rgb.imshow(self.res["rgb_image"])
         self.a_rgb.set_title(title,color='white')
         self.a_rgb.set_axis_on()
+        self.show_spectra_location()
         self.rgb_canvas.draw_idle()
+
         
     def switch_spat2im_command_analysis(self):
         self.clear_rgb_graph()
@@ -971,13 +973,14 @@ class OPApp(ctk.CTk):
         self.res=0
         self.label_data_info.configure(text=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["load_data"]["label_data_info"],text_color='red')
         self.switch_spat2im_analysis.configure(state='disabled')
+        self.analyser.pixels=[]
         
     def draw_spectra(self):
-        nb_spectra=int(self.entry_draw.get())
+        self.nb_spectra=int(self.entry_draw.get())
         colormap=plt.get_cmap('Spectral')
-        colors=colormap(np.linspace(0, 1,nb_spectra))
+        self.colors=colormap(np.linspace(0, 1,self.nb_spectra))
         rng = np.random.default_rng()
-        rng.shuffle(colors,0)
+        rng.shuffle(self.colors,0)
 
         plt.switch_backend('TkAgg')
         if self.res==0:
@@ -986,12 +989,12 @@ class OPApp(ctk.CTk):
         else:
             self.clear_analysis_graph()
             if self.res["current_data_level"]=="reconstructed_image_clipped":
-                self.res["spectra_clipped"] = self.analyser.select_disp_spectra(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"],nb_spectra, 'single')
+                self.res["spectra_clipped"] = self.analyser.select_disp_spectra(self.res["reconstructed_image_clipped"], self.res["wavelengths_clipped"],self.nb_spectra, 'single')
                 self.a_analysis.plot(self.res["wavelengths_clipped"],self.res["spectra_clipped"].T)
             else:    
-                self.res["spectra"]= self.analyser.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"],nb_spectra, 'single')
-                for idx in range(nb_spectra):
-                    self.a_analysis.plot(self.res["wavelengths"],np.squeeze(self.res["spectra"][idx]),color=colors[idx])
+                self.res["spectra"]= self.analyser.select_disp_spectra(self.res[self.res["current_data_level"]], self.res["wavelengths"],self.nb_spectra, 'single')
+                for idx in range(self.nb_spectra):
+                    self.a_analysis.plot(self.res["wavelengths"],np.squeeze(self.res["spectra"][idx]),color=self.colors[idx])
                 self.clear_rgb_graph()
             self.analysis_canvas.draw_idle()
             self.a_analysis.set_axis_on()
@@ -999,12 +1002,18 @@ class OPApp(ctk.CTk):
         
         self.rgb_display(self.res["reconstructed_image"],self.res["wavelengths"],title="RGB reconstructed image")
         
-        for idx in range(nb_spectra):
-            self.a_rgb.plot(self.analyser.pixels[:,0][idx],self.analyser.pixels[:,1][idx],'x',color=colors[idx],markersize=10)
+        self.show_spectra_location()
         
         self.rgb_canvas.draw_idle()
         plt.switch_backend('Agg')
-            
+   
+    def show_spectra_location(self):
+        try:
+            for idx in range(self.nb_spectra):
+                self.a_rgb.plot(self.analyser.pixels[:,0][idx],self.analyser.pixels[:,1][idx],'x',color=self.colors[idx],markersize=8)
+        except Exception as e:
+            pass
+
     def rogn(self):
         if self.res==0:
             warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
