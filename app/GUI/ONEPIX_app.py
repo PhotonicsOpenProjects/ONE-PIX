@@ -1056,7 +1056,8 @@ class OPApp(ctk.CTk):
             warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
             showwarning(warning_text[0],warning_text[1])
         else:
-            self.res["image_seg"] = self.analyser.clustering(self.res[self.res["current_data_level"]], int(self.entry_pca.get()), int(self.entry_clust.get()))
+            datacube=self.analyser.datacube_normalisation_snv(np.array(self.res[self.res["current_data_level"]]))
+            self.res["image_seg"] = self.analyser.clustering(datacube, int(self.entry_pca.get()), int(self.entry_clust.get()))
             
             self.clear_analysis_graph()
             
