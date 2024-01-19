@@ -140,6 +140,7 @@ class OPApp(ctk.CTk):
             self.spectro_list.remove('__init__.py')
             self.spectro_list.remove('Abstract')
             self.spectro_list.remove('__pycache__')
+            self.spectro_list.remove('Stub')
         except ValueError:
             pass
 
@@ -515,7 +516,7 @@ class OPApp(ctk.CTk):
                     
                     self.acq_config.hardware.spectrometer.spec_open()
 
-                    if self.acq_config.hardware.spectrometer.DeviceName != '':
+                    if self.acq_config.hardware.spectrometer.DeviceName !='':
                         print(i)
                         test = 1
                         spectro_name=self.acq_config.hardware.spectrometer.DeviceName
@@ -528,6 +529,13 @@ class OPApp(ctk.CTk):
                         self.update()
                 except Exception:
                     pass
+        if test==0:
+            if messagebox.askokcancel(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel_stubspectro"]["title"],
+                                  self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["askokcancel_stubspectro"]["confirm"]):
+                self.spectro_list.append('Stub')
+                self.spec_connection()
+
+
           
 
     def spec_disconnection(self):

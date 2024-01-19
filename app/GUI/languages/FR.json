@@ -37,6 +37,12 @@
 					"title":"Quitter",
 					"confirm":"Voulez vous vraiment quitter ?"
 					},
+				
+				"askokcancel_stubspectro":{
+					"title":"Aucun spectromètre",
+					"confirm":"Aucun spectromètre détecté. Voulez vous utilisé un spectromètre bouchon ?"
+					},
+				
 				"switch_spat2im_command":{
 					"freq":"Moyenne spectrale dans le domaine fr\u00e9quentiel (\u00e9chelle logarithmique)",
 					"spat":"Faux RVB de l'image hyperspectrale"

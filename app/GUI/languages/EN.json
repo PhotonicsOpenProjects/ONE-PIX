@@ -37,6 +37,12 @@
 					"title":"Quit",
 					"confirm":"Do you want to quit ?"
 					},
+					
+				"askokcancel_stubspectro":{
+					"title":"No spectrometer",
+					"confirm":"No spectrometer detected. Do you want to use a stub spectrometer ?"
+					},	
+				
 				"switch_spat2im_command":{
 					"freq":"Spectral mean frequency domain (log scale)",
 					"spat":"False RGB color of the hyperspectral image"
