@@ -12,7 +12,6 @@ class Clustering:
         Z = np.float32(Z)
         
         criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-        print(cv2.KMEANS_RANDOM_CENTERS)
         ret,label,center=cv2.kmeans(Z,nb_clust,None,criteria,10,cv2.KMEANS_RANDOM_CENTERS)
 
         center = np.uint8(center)

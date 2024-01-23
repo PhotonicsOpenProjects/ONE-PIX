@@ -16,13 +16,13 @@
             1.0
         ]
     ],
-    "clustering_method": "LabelMe",
+    "clustering_method": "Kmeans",
     "clustering_parameters": [
         2,
         5
     ],
-    "max_height": 107,
-    "max_width": 207,
+    "max_height": 0,
+    "max_width": 257,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
     "mode_choice": "Advanced",

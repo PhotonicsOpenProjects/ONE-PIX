@@ -1,0 +1,12 @@
+ONE-PIX_raw_acquisition_23_01_2024_15-48-25
+--------------------------------------------------------
+
+Imaging method: Addressing
+Acquisition duration: 2.317630 s
+Spectrometer Avantes : 2111047U1
+Camera: Stub
+Number of projected patterns: 4
+Height of pattern window: 600 pixels
+Width of pattern window: 800 pixels
+Number of spectral measures per pattern: 5  
+Integration time: 4 ms
