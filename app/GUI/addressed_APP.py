@@ -254,7 +254,7 @@ class OPApp(ctk.CTk):
     def plotMask(self, path):
         self.a_vis.clear()
         self.b_vis.clear()
-        rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('mask')][0]))
+        rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('masks')][0]))
         try:
             if len(self.config.normalised_datacube)!=0: #Load Normalised data
                 rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 

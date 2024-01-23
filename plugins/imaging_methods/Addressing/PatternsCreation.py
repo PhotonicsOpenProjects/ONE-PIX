@@ -11,7 +11,8 @@ from core.hardware.coregistration_lib import *
 
 import PIL.Image
 import screeninfo
-import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
+from datetime import date
+import time
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
@@ -84,5 +85,44 @@ class CreationPatterns:
         return self.patterns
 
     def save_raw_data(self,acquisition_class,path=None):
-        saver=FIS.FisCommonAcquisition(acquisition_class)
-        saver.save_raw_data(path=None)
+        #saver=FIS.FisCommonAcquisition(acquisition_class)
+        #saver.save_raw_data(path=None)
+        root_path=os.getcwd()
+        if path==None: path=f"..{os.sep}Hypercubes"
+        print(path)
+        if(os.path.isdir(path)):
+            pass
+        else:
+            os.mkdir(path)
+        os.chdir(path)
+        
+        fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time
+        folder_name = f"ONE-PIX_raw_acquisition_{fdate}_{actual_time}"
+        acquisition_filename = f"spectra_{fdate}_{actual_time}.npy"
+        wavelengths_filename = f"wavelengths_{fdate}_{actual_time}.npy"
+        camera_image_filename=f"camera_image_{fdate}_{actual_time}.png"
+        patterns_order_filename=f"patterns_order_{fdate}_{actual_time}.npy"
+        masks_filename=f"masks_{fdate}_{actual_time}.npy"
+        
+        os.mkdir(folder_name)
+        os.chdir(folder_name)
+        self.save_path=folder_name
+
+        with open(acquisition_class.title_param, "w+") as text_file:
+            text_file.write(acquisition_class.header)
+        
+
+        
+        #save RGB camera image and coregistrated image of the scene
+        acquisition_class.hardware.camera.get_image(tag=None,save_path=f'./{camera_image_filename}')
+        RGB_img = cv2.imread(f'./{camera_image_filename}')
+        RGB_img= np.asarray(RGB_img)
+        RGB_img=apply_corregistration(RGB_img)
+        cv2.imwrite(f"RGB_cor_{fdate}_{actual_time}.jpg",RGB_img)
+        # save raw acquisition data in numpy format
+        np.save(acquisition_filename,acquisition_class.spectra) # measured spectra 
+        np.save(wavelengths_filename,acquisition_class.hardware.spectrometer.wavelengths) # associated wavelengths
+        np.save(patterns_order_filename,acquisition_class.imaging_method.patterns_order)
+        np.save(masks_filename,acquisition_class.imaging_method.patterns)
+        os.chdir(root_path)
