@@ -6,6 +6,15 @@ import numpy as np
 from core.hardware.SpectrometerBridge import *
 from core.hardware.CameraBridge import *
 from core.hardware.Projection import *
+import screeninfo
+
+screenWidth = screeninfo.get_monitors()[0].width
+try:
+    proj_shape=screeninfo.get_monitors()[1]
+    
+except IndexError:
+    print('Please use a projector to use ONE-PIX')
+    #sys.exit()
 
 class Hardware :
 
@@ -29,6 +38,7 @@ class Hardware :
         self.repetition=param_dict["spectro_scans2avg"]
         self.height = param_dict['height']
         self.width = param_dict["width"]
+        self.proj_position=np.array(hardware_dict["proj_position"])
         self.spatial_res = param_dict['spatial_res']
         self.spectra = []
         self.res=[]
@@ -45,7 +55,7 @@ class Hardware :
 
         self.spectrometer= SpectrometerBridge(self.name_spectro,self.integration_time_ms,self.wl_lim,self.repetition)
         self.camera=CameraBridge(self.name_camera)
-        self.projection=Projection(self.height,self.width,self.periode_pattern)
+        self.projection=Projection(self.height,self.width,self.periode_pattern,self.proj_position)
 
     def is_raspberrypi(self):
         """

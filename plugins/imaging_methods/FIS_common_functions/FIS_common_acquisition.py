@@ -9,7 +9,7 @@ class FisCommonAcquisition:
 
 
     def save_raw_data(self,path=None):
-
+        root_path=os.getcwd()
         if path==None: path=f"..{os.sep}Hypercubes"
         print(path)
         if(os.path.isdir(path)):
@@ -37,7 +37,7 @@ class FisCommonAcquisition:
         np.save(acquisition_filename,self.acquisition_class.spectra) # measured spectra 
         np.save(wavelengths_filename,self.acquisition_class.hardware.spectrometer.wavelengths) # associated wavelengths
         np.save(patterns_order_filename,self.acquisition_class.imaging_method.patterns_order)
-         
+        os.chdir(root_path)
 
 
    

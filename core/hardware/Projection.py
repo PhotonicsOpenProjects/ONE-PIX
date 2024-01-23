@@ -26,16 +26,36 @@ class Projection:
     		spectrometer integration time in milliseconds.
     """
     
-    def __init__(self,height,width,periode_pattern):
+    def __init__(self,height,width,periode_pattern,proj_position):
         self.height=height
         self.width=width
         self.periode_pattern=periode_pattern
+        self.proj_position=proj_position
+
+        try:
+            self.proj_shape=np.array([proj_shape.height,proj_shape.width])
+        except Exception as e:
+            pass
 
     def create_fullscreen_window(self):
         # Initialise cv2 display on the second monitor 
         cv2.namedWindow('ImageWindow', cv2.WINDOW_NORMAL)
         cv2.moveWindow('ImageWindow', screenWidth, 0)
         cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
+    
+    def create_integrated_frame(self):
+        # Backgroung black image 
+        cv2.namedWindow('background', cv2.WINDOW_NORMAL)
+        cv2.moveWindow('background', screenWidth, 0)
+        cv2.setWindowProperty("background", cv2.WND_PROP_FULLSCREEN, 1)
+        cv2.imshow("background",np.zeros(self.proj_shape))
+        # Image disposed at proj_position from hardware json
+        cv2.namedWindow('ImageWindow', flags=cv2.WINDOW_GUI_EXPANDED)
+        cv2.setWindowProperty("ImageWindow", cv2.WND_PROP_FULLSCREEN, 1)
+        cv2.moveWindow('ImageWindow', screenWidth+self.proj_position[0], self.proj_position[1])
+        cv2.resizeWindow('ImageWindow', self.width, self.height)
+        cv2.setWindowProperty("ImageWindow",cv2.WND_PROP_TOPMOST , 1)
+
 
     def get_integration_time_auto(self,acq_config):
         """
@@ -74,7 +94,7 @@ class Projection:
 
     def init_projection(self,patterns,patterns_order,interp_method):
         # Initialise cv2 display on the second monitor 
-        self.create_fullscreen_window()
+        self.create_fullscreen_window() if np.all(self.proj_position=='auto') else self.create_integrated_frame()
         cv2.imshow('ImageWindow',cv2.resize(patterns[0],(self.width,self.height),interpolation=interp_method))
         cv2.waitKey(750) # allows the projector to take the time to display the first pattern, particularly if it is white     
 

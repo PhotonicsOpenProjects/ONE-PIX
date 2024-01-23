@@ -1,16 +1,31 @@
 {
-    "m": [],
-    "clustering_method": "Kmeans",
+    "m": [
+        [
+            0.0,
+            0.0,
+            0.0
+        ],
+        [
+            0.0,
+            0.0,
+            0.0
+        ],
+        [
+            0.0,
+            0.0,
+            1.0
+        ]
+    ],
+    "clustering_method": "LabelMe",
     "clustering_parameters": [
         2,
-        2
+        5
     ],
-    "max_height": 352,
-    "max_width": 469,
+    "max_height": 333,
+    "max_width": 294,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
-    "mode_choice": "Simple",
-    "acquisition_method": "Complete",
+    "mode_choice": "Advanced",
     "Normalisation": false,
     "normalisation_path": "",
     "pattern_method": "Addressing"

@@ -239,7 +239,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
         proj_shape=screeninfo.get_monitors()[1]
     except IndexError:
         showinfo(title=None,message='Please use a projector to use ONE-PIX')
-        sys.exit()
+        #sys.exit()
     
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)
@@ -293,7 +293,7 @@ def apply_corregistration(img):
     m=np.asarray(m)
     max_width=setup_dict["max_width"]
     max_height=setup_dict["max_height"]
-    if m!=[]:
+    if m.tolist()!=[]:
         wrap = cv2.resize(cv2.warpPerspective(img, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
     else : wrap=img
     return wrap
