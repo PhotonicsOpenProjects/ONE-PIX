@@ -34,10 +34,10 @@ class Hardware :
         with open(self.acquisition_parameter_path) as f:
             param_dict = json.load(f)
 
-        self.integration_time_ms =param_dict["integration_time_ms"]    
-        self.repetition=param_dict["spectro_scans2avg"]
-        self.height = param_dict['height']
-        self.width = param_dict["width"]
+        self.integration_time_ms =hardware_dict["integration_time_ms"]    
+        self.repetition=hardware_dict["spectro_scans2avg"]
+        self.height = hardware_dict['height']
+        self.width = hardware_dict["width"]
         self.proj_position=np.array(hardware_dict["proj_position"])
         self.spatial_res = param_dict['spatial_res']
         self.spectra = []
@@ -47,7 +47,7 @@ class Hardware :
 
         self.wl_lim=param_dict["wl_lim"]
         
-
+        
         # Displaying infos
         self.interp_method=None
         self.periode_pattern=int(self.repetition*self.integration_time_ms)

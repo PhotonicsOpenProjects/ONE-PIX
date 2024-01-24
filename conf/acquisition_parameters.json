@@ -1,12 +1,8 @@
 {
     "imaging_method": "Addressing",
     "spatial_res": 4,
-    "integration_time_ms": 4,
-    "height": 600,
-    "width": 800,
-    "wl_lim": [
-        350,
-        800
-    ],
-    "spectro_scans2avg": 5
+    
+	
+	"Normalisation": false,
+    "normalisation_path": ""
 }

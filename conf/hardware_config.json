@@ -1,5 +1,14 @@
 {
     "name_spectro": "Avantes",
     "name_camera": "Stub",
+	
+	"integration_time_ms": 4,
+    "height": 600,
+    "width": 800,
+    "wl_lim": [
+        350,
+        800
+    ],
+    "spectro_scans2avg": 5,
     "proj_position": "auto"
 }
