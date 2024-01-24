@@ -40,6 +40,7 @@ class Acquisition:
         self.spatial_res=acquisition_dict["spatial_res"]
         self.width=hardware_dict["width"]
         self.height=hardware_dict["height"]
+        
         self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
         self.hardware=Hardware()
         self.is_init=False

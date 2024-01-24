@@ -228,8 +228,9 @@ class OPApp(ctk.CTk):
             directory = f'..{os.sep}Hypercubes'
             newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX")], key=os.path.getmtime)
             print(newest)
-            self.plotMask(newest)
-            
+            self.load_data(newest)    
+            self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
+                                        text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["acquireButton"])        
         except:
             pass
         
@@ -247,52 +248,54 @@ class OPApp(ctk.CTk):
         self.Sec_seg.configure(state = "normal", fg_color="white")
         self.test_mode = "auto"
         
-    def load_data(self):
-        path = filedialog.askdirectory(title=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["askdirectory"],
+    def load_data(self,path=None):
+        if path is None : path = filedialog.askdirectory(title=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["askdirectory"],
                                        initialdir = '../Hypercubes')
         if path!='':
             try:
-                self.plotMask(path)
+                self.analysis=Analysis(data_path=path).imaging_method.image_analysis_method
+                #self.analysis.load_reconstructed_data()
+                self.plotMask()
             except Exception as e:
                 showerror(title='Loading data error',message=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["errors"]["load_data_error"])
-
+            """"
+            try:
+                if len(self.config.normalised_datacube)!=0: #Load Normalised data
+                    rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 
+                else:
+                    rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
+            except Exception as e:
+                print(e)
+                rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
+            """
         
-    def plotMask(self, path):
+    def plotMask(self):
         self.a_vis.clear()
         self.b_vis.clear()
-        rawMasks = np.uint8(np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('masks')][0]))
-        try:
-            if len(self.config.normalised_datacube)!=0: #Load Normalised data
-                rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 
-            else:
-                rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
-        except Exception as e:
-            print(e)
-            rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
-       
-        wl = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('wavelengths')][0])
-        customColormap = find_rgb_label(rawMasks.shape[0])
-        im = np.zeros((rawMasks.shape[1],rawMasks.shape[2],3),dtype = np.uint8)
-        for i in range(1, rawMasks.shape[0]):
-            mask = rawMasks[i,:,:].reshape(rawMasks.shape[1],rawMasks.shape[2],-1)
+        
+        customColormap = find_rgb_label(self.analysis.clusters.shape[0])
+        im = np.zeros((self.analysis.clusters.shape[1],self.analysis.clusters.shape[2],3),dtype = np.uint8)
+        for i in range(1, self.analysis.clusters.shape[0]):
+            mask = self.analysis.clusters[i,:,:].reshape(self.analysis.clusters.shape[1],self.analysis.clusters.shape[2],-1)
             mask = mask * customColormap[i].reshape(1,1,-1)
             im+=mask
-        image = cv2.imread(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('RGB_cor')][0])
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        spectra=self.analysis.reconstructed_data
+
+        image = cv2.cvtColor(self.analysis.rgb_image, cv2.COLOR_BGR2RGB)
         customColormap = customColormap/255
         self.b_vis.imshow(image)
         self.b_vis.imshow(im, alpha = .5)
         self.b_vis.axis('off')
-        for i in range(1, rawSpecs.shape[0]):
+        for i in range(1, spectra.shape[0]):
             curvColor = list(customColormap[i])
             curvColor.append(.5)
-            self.a_vis.plot(wl, rawSpecs[i,:],color=curvColor)
+            self.a_vis.plot(self.analysis.wavelengths, spectra[i,:],color=curvColor)
         self.a_vis.set_xlabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["xlabel"], fontsize = 10)
         self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()
 
         
-    
     def open_GUIConfig(self):
         with open(software_json_path, 'r') as f:
             GUI_conf = json.load(f)

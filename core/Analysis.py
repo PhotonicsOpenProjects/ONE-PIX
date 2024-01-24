@@ -3,6 +3,8 @@ import os
 import glob
 from tkinter import *
 from tkinter import filedialog
+import json
+
 class Analysis:
     def __init__(self,rec=None,data_path=None):
         self.data_path=data_path
@@ -11,7 +13,7 @@ class Analysis:
             self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
             self.imaging_method.analysis(self.data_path)
             self.load_data()
-            self.reconstructed_image=self.imaging_method.image_analysis_method.reconstructed_image
+            self.reconstructed_data=self.imaging_method.image_analysis_method.reconstructed_data
             self.wavelengths=self.imaging_method.image_analysis_method.wavelengths
             
         else:
@@ -20,7 +22,11 @@ class Analysis:
             self.wavelengths=rec.wavelengths
             self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
             self.imaging_method.analysis(self.data_path)
-         
+
+        self.acquisition_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'acquisition_parameters.json')
+        with open(self.acquisition_config_path) as f:
+            acquisition_dict = json.load(f)
+        self.normalisation_path=acquisition_dict["normalisation_path"] 
     
     def read_header(self):
         """
@@ -67,6 +73,14 @@ class Analysis:
    
     def load_data(self):
         self.imaging_method.image_analysis_method.load_reconstructed_data()
+    
+    def data_normalisation(self,datacube):
+        if self.normalisation_path!="":
+            ref_datacube=self.load_data(self.normalisation_path)
+            self.imaging_method.image_analysis_method.data_normalisation(datacube,ref_datacube)
+        else:
+            pass
+    
     
     def get_rgb_image(self,datacube,wavelengths):
         rgb_image=self.imaging_method.image_analysis_method.get_rgb_image(datacube,wavelengths)

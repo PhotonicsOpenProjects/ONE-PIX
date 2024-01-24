@@ -12,9 +12,13 @@ class Analysis:
     
     def load_reconstructed_data(self,):
         self.data_dict=self.analyse.load_hypercube(self.data_path)
-        self.datacube=self.data_dict["reconstructed_image"]
+        self.reconstructed_data=self.data_dict["reconstructed_image"]
         self.wavelengths=self.data_dict["wavelengths"]
     
+    def data_normalisation(self,datacube,ref_datacube):
+        normalised_datacube=self.analyse.datacube_reflectance_normalisation(datacube,ref_datacube)
+        return normalised_datacube
+
     def get_rgb_image(self,datacube,wavelengths):
         rgb_image=self.analyse.RGB_reconstruction(datacube,wavelengths)
         return rgb_image

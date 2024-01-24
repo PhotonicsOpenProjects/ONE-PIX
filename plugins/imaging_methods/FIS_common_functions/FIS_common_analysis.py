@@ -189,7 +189,19 @@ class FisAnalysis:
                 datacube[i,j,:]=(datacube[i,j,:]-np.mean(datacube[i,j,:]))/np.std(datacube[i,j,:])
         return datacube
 
-        
+    def datacube_reflectance_normalisation(self,datacube,ref_datacube):
+        if(np.shape(ref_datacube)!=np.shape(datacube)):
+                    ref=np.zeros_like(datacube)
+                    for wl in range(np.size(ref,2)):
+                        ref[:,:,wl]=cv2.resize(ref_datacube[:,:,wl],(np.shape(ref)[:2]))
+        else: ref=ref_datacube
+                
+        normalised_datacube=datacube/ref
+
+        return normalised_datacube
+
+
+
     def select_disp_spectra(self,datacube,wavelengths,n,mode):
         """
         select_disp_spectra allows to select pixel(s) of one hypercube and plot their spectra.

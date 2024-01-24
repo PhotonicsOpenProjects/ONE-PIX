@@ -1,6 +1,6 @@
 {
-    "imaging_method": "FourierSplit",
-    "spatial_res": 4,
+    "imaging_method": "Addressing",
+    "spatial_res": "manual_segmentation",
     "Normalisation": false,
     "normalisation_path": "",
     "integration_time_ms": 4.0

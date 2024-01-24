@@ -1,11 +1,10 @@
 import numpy as np 
 import os
 import glob
-import tkinter as Tk
-from tkinter import filedialog
-from tkinter import *
 from datetime import date
 import time
+
+
 from core.ImagingMethodBridge import *
 
 def get_header_data(path):
@@ -66,7 +65,7 @@ class Reconstruction:
         self.spatial_res=0
         self.height=0
         self.width=0
-        
+
         self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
         
     
