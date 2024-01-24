@@ -45,7 +45,7 @@ class Hardware :
         self.normalised_datacube=[]
         self.spectro_flag=False
 
-        self.wl_lim=param_dict["wl_lim"]
+        self.wl_lim=hardware_dict["wl_lim"]
         
         
         # Displaying infos

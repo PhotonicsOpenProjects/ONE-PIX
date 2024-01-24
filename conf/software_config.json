@@ -1,11 +1,15 @@
 {
     "m": [],
     "clustering_method": "Kmeans",
-    "clustering_parameters": [2,5],
+    "clustering_parameters": [
+        2,
+        5
+    ],
     "max_height": 0,
     "max_width": 257,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
     "mode_choice": "Advanced",
-    
+    "acquisition_method": "Complete",
+    "Normalisation": false
 }

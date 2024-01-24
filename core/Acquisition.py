@@ -25,10 +25,10 @@ class Acquisition:
 
     def __init__(self):
 
-        self.software_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'software_config.json')
+        self.hardware_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'hardware_config.json')
         ## get software configuration
-        with open(self.software_config_path) as f:
-            software_dict = json.load(f)
+        with open(self.hardware_config_path) as f:
+            hardware_dict = json.load(f)
 
         self.acquisition_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'acquisition_parameters.json')
         
@@ -38,8 +38,8 @@ class Acquisition:
 
         self.imaging_method_name=acquisition_dict["imaging_method"]
         self.spatial_res=acquisition_dict["spatial_res"]
-        self.width=acquisition_dict["width"]
-        self.height=acquisition_dict["height"]
+        self.width=hardware_dict["width"]
+        self.height=hardware_dict["height"]
         self.imaging_method=ImagingMethodBridge(self.imaging_method_name,self.spatial_res,self.height,self.width)
         self.hardware=Hardware()
         self.is_init=False
