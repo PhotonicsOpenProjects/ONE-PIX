@@ -61,7 +61,6 @@ class OPApp(ctk.CTk):
         super().__init__()
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
-        #self.open_GUIConfig()
         self.acq_config=Acquisition()
         # configure window
         self.resizable(False, False)

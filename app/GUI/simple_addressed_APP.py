@@ -62,7 +62,7 @@ class OPApp(ctk.CTk):
         super().__init__()
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
-        self.open_GUIConfig()
+        
         self.config=Acquisition()
         # configure window
         self.resizable(False, False)
@@ -125,14 +125,14 @@ class OPApp(ctk.CTk):
         
         self.Prim_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["Prim_seg_label"])
         self.Prim_seg_label.grid(column=0, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        self.Prim_seg = ctk.CTkEntry(self.Params_frame, state = "normal")
+        self.Prim_seg = ctk.CTkEntry(self.Params_frame, state = "normal",width=60)
         self.Prim_seg.insert(0,"2")
         self.Prim_seg.configure(state = "disabled", fg_color="gray")
         self.Prim_seg.grid(column=1, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         
         self.Sec_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["Sec_seg_label"])
         self.Sec_seg_label.grid(column=0, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        self.Sec_seg = ctk.CTkEntry(self.Params_frame, state = "normal")
+        self.Sec_seg = ctk.CTkEntry(self.Params_frame, state = "normal",width=60)
         self.Sec_seg.insert(0,"5")
         self.Sec_seg.configure(state = "disabled", fg_color="gray")
         self.Sec_seg.grid(column=1, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
@@ -297,17 +297,6 @@ class OPApp(ctk.CTk):
         self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()
 
-        
-    
-    def open_GUIConfig(self):
-        with open(acquisition_json_path, 'r') as f:
-            GUI_conf = json.load(f)
-        
-        GUI_conf["imaging_method"] = "Addressing"
-        
-        with open(acquisition_json_path, 'w') as f:
-            json.dump(GUI_conf, f,indent=4)
-           
             
     def open_languageConfig(self):
         with open("./languages/config.json", 'r') as f:

@@ -21,8 +21,8 @@
         2,
         5
     ],
-    "max_height": 183,
-    "max_width": 137,
+    "max_height": 275,
+    "max_width": 178,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
     "mode_choice": "Simple",

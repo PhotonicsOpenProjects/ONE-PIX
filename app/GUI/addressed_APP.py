@@ -67,7 +67,7 @@ class OPApp(ctk.CTk):
         super().__init__()
         self.monitor_sz=screeninfo.get_monitors()[0]
         self.open_languageConfig()
-        self.open_GUIConfig()
+        
         self.config=Acquisition()
         # configure window
         # self.resizable(False, False)
@@ -136,14 +136,14 @@ class OPApp(ctk.CTk):
         
         self.Prim_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["Prim_seg_label"])
         self.Prim_seg_label.grid(column=0, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        self.Prim_seg = ctk.CTkEntry(self.Params_frame, state = "normal")
+        self.Prim_seg = ctk.CTkEntry(self.Params_frame, state = "normal",width=60)
         self.Prim_seg.insert(0,"2")
         self.Prim_seg.configure(state = "disabled", fg_color="gray")
         self.Prim_seg.grid(column=1, row=1, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
         
         self.Sec_seg_label = ctk.CTkLabel(self.Params_frame,text = self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["Sec_seg_label"])
         self.Sec_seg_label.grid(column=0, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
-        self.Sec_seg = ctk.CTkEntry(self.Params_frame, state = "normal")
+        self.Sec_seg = ctk.CTkEntry(self.Params_frame, state = "normal",width=60)
         self.Sec_seg.insert(0,"5")
         self.Sec_seg.configure(state = "disabled", fg_color="gray")
         self.Sec_seg.grid(column=1, row=2, padx=(2.5,2.5), pady=(2.5,2.5), rowspan=1, columnspan=1, sticky='w')
@@ -187,11 +187,7 @@ class OPApp(ctk.CTk):
             self.auto_toogle()
         self.calibrationButton.configure(fg_color="#31D900", hover_color="#249F00",
                                          text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["calibrationButton"])
-
-    def acquire(self):
-        self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
-                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["acquireButton_WIP"])
-        self.update()
+    def json_actualisation(self):
         with open(acquisition_json_path) as f:
             params = json.load(f)
         
@@ -218,7 +214,23 @@ class OPApp(ctk.CTk):
         
         with open(hardware_json_path, 'w') as outfile:
             json.dump(hardware_params, outfile, indent=4)
+
+    def params_actualisation(self):
+        self.json_actualisation()
+        self.config.hardware.spectrometer.spec_close()
+        del self.config
+        self.config = Acquisition()
+        self.config.hardware.spectrometer.spec_open()
+        self.config.hardware.spectrometer.integration_time_ms = self.config.hardware.spectrometer.integration_time_ms
+        self.config.hardware.spectrometer.set_integration_time()
         
+
+    def acquire(self):
+        self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
+                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["acquireButton_WIP"])
+        self.update()
+        
+        self.params_actualisation()
         self.config=Acquisition()
         try :  
             self.config.thread_acquisition(time_warning=False)
@@ -296,14 +308,6 @@ class OPApp(ctk.CTk):
         self.fig_vis.canvas.draw_idle()
 
         
-    def open_GUIConfig(self):
-        with open(software_json_path, 'r') as f:
-            GUI_conf = json.load(f)
-        
-        GUI_conf["pattern_method"] = "Addressing"
-        
-        with open(software_json_path, 'w') as f:
-            json.dump(GUI_conf, f,indent=4)
             
     def open_languageConfig(self):
         with open("./languages/config.json", 'r') as f:
