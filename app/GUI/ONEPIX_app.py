@@ -828,7 +828,6 @@ class OPApp(ctk.CTk):
         self.entries_actualisation()
         self.acq_res=[]
         if (self.simple_mode_button.cget("state") =="disabled"):
-            #self.window_size_test()
             self.acq_config.hardware.projection.get_integration_time_auto(self.acq_config)
             if self.acq_config.periode_pattern<60 :self.acq_config.periode_pattern=60
             

@@ -21,12 +21,10 @@
         2,
         5
     ],
-    "max_height": 176,
-    "max_width": 97,
+    "max_height": 183,
+    "max_width": 137,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
-    "mode_choice": "Advanced",
-    "acquisition_method": "Complete",
-    "Normalisation": false,
-    "pattern_method": "Addressing"
+    "mode_choice": "Simple",
+    "acquisition_method": "Complete"
 }

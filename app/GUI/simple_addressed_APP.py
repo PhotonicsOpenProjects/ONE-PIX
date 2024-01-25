@@ -186,18 +186,13 @@ class OPApp(ctk.CTk):
         self.calibrationButton.configure(fg_color="#31D900", hover_color="#249F00",
                                          text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["calibrationButton"])
 
-    def acquire(self):
-        self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
-                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["acquireButton_WIP"])
-        self.update()
-        
+    def json_actualisation(self):
         with open(acquisition_json_path) as f:
             params = json.load(f)
         
         with open(software_json_path) as f:
             software_params = json.load(f)
-       
-        
+
         if self.test_mode=="manual":
             params['spatial_res']='manual_segmentation'
         elif self.test_mode=="auto":
@@ -209,19 +204,38 @@ class OPApp(ctk.CTk):
         with open(software_json_path, 'w') as outfile:
             json.dump(software_params, outfile, indent=4)
         
+
+    def params_actualisation(self):
+        self.json_actualisation()
+        self.config.hardware.spectrometer.spec_close()
+        del self.config
+        self.config = Acquisition()
+        self.config.hardware.spectrometer.spec_open()
+        self.config.hardware.spectrometer.integration_time_ms = self.config.hardware.spectrometer.integration_time_ms
+        self.config.hardware.spectrometer.set_integration_time()
+        
+
+
+    def acquire(self):
+        self.acquireButton.configure(state = 'normal', fg_color = "#9D0000",
+                                     text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["functions"]["acquireButton_WIP"])
+        self.update()
+        self.params_actualisation()
+        
        
-        self.config=Acquisition()
         try:
             self.config.hardware.projection.get_integration_time_auto(self.config)
+            if self.config.periode_pattern<60 :self.config.periode_pattern=60
             self.config.thread_acquisition(time_warning=False)
-            directory = '../Hypercubes'
-            newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX_acquisition")], key=os.path.getmtime)
+            self.config.save_raw_data()
+            directory = f'..{os.sep}Hypercubes'
+            newest = max([os.path.join(directory,d) for d in os.listdir(directory) if d.startswith("ONE-PIX")], key=os.path.getmtime)    
             print(newest)
             self.load_data(newest) 
             self.acquireButton.configure(state = 'normal', fg_color = "#3B8ED0",
                                         text=self.widgets_text["specific_GUI"]["Addressed"]["Simple"]["acquireButton"])
-        except:
-            pass 
+        except Exception as e:
+            print(e)
         
     def manual_toogle(self):
         self.manual_choice.configure(state = "disabled", fg_color="#3B8ED0")
@@ -286,12 +300,12 @@ class OPApp(ctk.CTk):
         
     
     def open_GUIConfig(self):
-        with open(software_json_path, 'r') as f:
+        with open(acquisition_json_path, 'r') as f:
             GUI_conf = json.load(f)
         
-        GUI_conf["pattern_method"] = "Addressing"
+        GUI_conf["imaging_method"] = "Addressing"
         
-        with open(software_json_path, 'w') as f:
+        with open(acquisition_json_path, 'w') as f:
             json.dump(GUI_conf, f,indent=4)
            
             

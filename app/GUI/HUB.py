@@ -24,6 +24,7 @@ import screeninfo
 path_to_GUI = os.getcwd()
 
 software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
+acquisition_json_path= os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_parameters.json')
 
 class OPApp(ctk.CTk):
     def __init__(self):
@@ -111,7 +112,7 @@ class OPApp(ctk.CTk):
         
         self.normalize_noButton = ctk.CTkButton(self.pop_up, text = self.normalization_request_normalize_noButton, fg_color = '#D70000', hover_color="#9D0000", command = self.deactivate_normalization)
         self.normalize_noButton.grid(row=1, column=1, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="news")
-        self.normalizationHelp_button = ctk.CTkButton(self.pop_up, text="?", font=('Helvetica', 18, 'bold'), width =12, command=self.open_normalizeation_help)
+        self.normalizationHelp_button = ctk.CTkButton(self.pop_up, text="?", font=('Helvetica', 18, 'bold'), width =12, command=self.open_normalisation_help)
         self.normalizationHelp_button.grid(row=0, column = 2, pady=(2.5,2.5), padx = (2.5,2.5), rowspan=1, columnspan=1, sticky="")
     
     def get_normalisation_path(self):
@@ -196,7 +197,7 @@ class OPApp(ctk.CTk):
         
             
         
-    def open_normalizeation_help(self):
+    def open_normalisation_help(self):
         self.normalizationHelp_top = ctk.CTkToplevel()
         self.pop_up.attributes('-topmost', 0)
         self.normalizationHelp_top.attributes('-topmost', 1)
@@ -218,10 +219,16 @@ class OPApp(ctk.CTk):
     
         software_json_object["mode_choice"]=self.GuiMode_choice.get()
         software_json_object["acquisition_method"]=self.acquisition_method
-        software_json_object["Normalisation"]=self.isNormalized
         
         with open(software_json_path, 'w') as outfile:
             json.dump(software_json_object, outfile,indent=4)
+        
+        with open(acquisition_json_path, "r") as file:
+            acquisition_json_object = json.load(file)
+        acquisition_json_object["Normalisation"]=self.isNormalized
+        
+        with open(acquisition_json_path, 'w') as outfile:
+            json.dump(acquisition_json_object, outfile,indent=4)
             
             
         with open("languages/config.json", 'r') as f:
