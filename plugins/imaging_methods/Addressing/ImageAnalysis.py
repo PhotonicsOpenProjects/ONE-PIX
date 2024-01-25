@@ -14,6 +14,7 @@ class Analysis:
     def load_reconstructed_data(self,):
         try:
             self.reconstructed_data=np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('spectra_')][0])
+            self.patterns_order=np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('patterns_order')][0])
             self.clusters= np.uint8(np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('masks')][0]))
             self.wavelengths=np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('wavelengths')][0])
             self.rgb_image=cv2.imread(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('RGB_cor')][0])

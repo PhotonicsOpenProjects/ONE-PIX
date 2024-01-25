@@ -289,14 +289,15 @@ class OPApp(ctk.CTk):
         self.b_vis.imshow(image)
         self.b_vis.imshow(im, alpha = .5)
         self.b_vis.axis('off')
+        
         for i in range(1, spectra.shape[0]):
             curvColor = list(customColormap[i])
             curvColor.append(.5)
             self.a_vis.plot(self.analysis.wavelengths, spectra[i,:],color=curvColor)
+        self.a_vis.legend(self.analysis.patterns_order[1:-1],draggable=True)
         self.a_vis.set_xlabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["xlabel"], fontsize = 10)
         self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()
-
             
     def open_languageConfig(self):
         with open("./languages/config.json", 'r') as f:

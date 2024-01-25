@@ -47,7 +47,12 @@ class CreationPatterns:
             raise Exception("Concrete bridge \"" + self.clustering_method_name + "\" implementation has not been found.")
     
     def sequence_order(self):
-        self.patterns_order=['']*self.nb_patterns
+        try:
+            self.patterns_order=self.clustering_method.patterns_order
+            self.patterns_order.insert(0,'Background')
+            self.patterns_order.append('Dark')
+        except Exception:
+            self.patterns_order=['']*self.nb_patterns
         
   
     def creation_patterns(self):
@@ -81,12 +86,12 @@ class CreationPatterns:
         #Add dark pattern
         self.patterns=np.append(self.patterns,np.zeros_like(self.patterns[0,:,:][np.newaxis,:,:],dtype=np.uint8),axis=0)
         self.nb_patterns=np.size(self.patterns,0)
+        print(self.nb_patterns)
         self.sequence_order()
         return self.patterns
 
     def save_raw_data(self,acquisition_class,path=None):
-        #saver=FIS.FisCommonAcquisition(acquisition_class)
-        #saver.save_raw_data(path=None)
+        
         root_path=os.getcwd()
         if path==None: path=f"..{os.sep}Hypercubes"
         print(path)
@@ -121,7 +126,8 @@ class CreationPatterns:
         RGB_img=apply_corregistration(RGB_img)
         cv2.imwrite(f"RGB_cor_{fdate}_{actual_time}.jpg",RGB_img)
         # save raw acquisition data in numpy format
-        np.save(acquisition_filename,acquisition_class.spectra) # measured spectra 
+        spectra=acquisition_class.spectra-acquisition_class.spectra[-1,:]
+        np.save(acquisition_filename,spectra[:-1,:]) # measured spectra 
         np.save(wavelengths_filename,acquisition_class.hardware.spectrometer.wavelengths) # associated wavelengths
         np.save(patterns_order_filename,acquisition_class.imaging_method.patterns_order)
         np.save(masks_filename,acquisition_class.imaging_method.patterns)

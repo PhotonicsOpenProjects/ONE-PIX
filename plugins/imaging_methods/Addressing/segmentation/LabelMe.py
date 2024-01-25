@@ -6,13 +6,12 @@ import os
 from datetime import date
 import time
 
-json_path=os.path.dirname(__file__)+os.sep+'labelme.json'
 
 class Clustering:
 
     def __init__(self,clustering_parameters):
         self.clustering_parameters=clustering_parameters
-
+        self.patterns_order=[]
 
     def label2mask(self,json_file):
         
@@ -23,6 +22,7 @@ class Clustering:
         
         for shape in sorted(label_file.shapes, key=lambda x: x["label"]):
             label_name = shape["label"]
+            self.patterns_order.append(label_name)
             if label_name in label_name_to_value:
                 label_value = label_name_to_value[label_name]
             else:
