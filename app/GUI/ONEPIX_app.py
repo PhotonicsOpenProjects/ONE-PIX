@@ -29,6 +29,7 @@ from core.Acquisition import Acquisition
 from core.Reconstruction import Reconstruction
 from core.Analysis import Analysis
 from scipy.linalg import hadamard
+from plugins.imaging_methods.HadamardWalshSplit.custom_walsh_hadamard import *
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -694,9 +695,15 @@ class OPApp(ctk.CTk):
             if self.analysis.imaging_method_name in ['FourierSplit','FourierShift']:
                 spectrum=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.acq_res.rgb_image,2)))))
 
-            elif self.analysis.imaging_method_name =='Hadamard':
-                dim=np.size(self.acq_res.reconstructed,0)
-                spectrum=hadamard(dim)@np.mean(self.acq_res.rgb_image,2)@hadamard(dim)
+            elif self.analysis.imaging_method_name =='HadamardSplit':
+                dim=np.size(self.acq_res.rgb_image,0)
+                H=hadamard(dim)
+                spectrum=H@np.mean(self.acq_res.rgb_image,2)@H
+            
+            elif self.analysis.imaging_method_name =='HadamardWalshSplit':
+                dim=np.size(self.acq_res.rgb_image,0)
+                HW=walsh_matrix(dim)
+                spectrum=HW@np.mean(self.acq_res.rgb_image,2)@HW
                     
             self.a_acq.imshow(spectrum)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
