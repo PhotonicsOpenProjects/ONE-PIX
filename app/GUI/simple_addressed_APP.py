@@ -194,9 +194,10 @@ class OPApp(ctk.CTk):
             software_params = json.load(f)
 
         if self.test_mode=="manual":
-            params['spatial_res']='manual_segmentation'
+            software_params['clustering_method']='LabelMe'
         elif self.test_mode=="auto":
-            params['spatial_res']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
+            software_params['clustering_method']='Kmeans'
+            software_params['clustering_parameters']=[int(self.Prim_seg.get()),int(self.Sec_seg.get())]
                                      
         with open(acquisition_json_path, 'w') as outfile:
             json.dump(params, outfile, indent=4)
