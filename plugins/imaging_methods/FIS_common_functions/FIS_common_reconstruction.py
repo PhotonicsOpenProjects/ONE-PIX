@@ -72,17 +72,9 @@ class FisCommonReconstruction :
         path=os.getcwd()
         if save_path==None:
             save_path= filedialog.askdirectory(title = "Open the save directory")
-            os.chdir(save_path)
-            envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
-            os.chdir(path)
-        else:
-            envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
+            
+        envi.save_image(filename,datacube,dtype=np.float32,metadata={'wavelength': wavelengths})
         
-        
-        
-
-    
-
 
     def py2ms(self,datacube,wavelengths,save_gerbil_name):
         """

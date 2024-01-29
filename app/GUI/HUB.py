@@ -117,8 +117,7 @@ class OPApp(ctk.CTk):
     
     def get_normalisation_path(self):
         self.pop_up.destroy()
-        path_to_json = '/'.join(['/'.join(path_to_GUI.split('/')[:-1]), 'acquisition_param_ONEPIX.json'])
-        norm_path=tk.filedialog.askdirectory(initialdir='../Hypercubes')
+        norm_path=tk.filedialog.askdirectory(initialdir=f'..{os.sep}Hypercubes')
         with open(software_json_path) as f:
             software_json_object = json.load(f)
        
@@ -243,7 +242,7 @@ class OPApp(ctk.CTk):
             if self.acquisition_method=='Complete':
                 if self.isNormalized:
                     self.destroy()
-                    os.system("python ../src/getReference.py")
+                    os.system(f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py")
                 else:
                     self.destroy()
                 os.system("python modif_simple.py")
@@ -251,7 +250,7 @@ class OPApp(ctk.CTk):
             elif self.acquisition_method=='Addressed':
                 if self.isNormalized:
                     self.destroy()
-                    os.system("python ../src/getReference.py")
+                    os.system(f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py")
                 else:
                     self.destroy()
                 os.system("python simple_addressed_APP.py")
@@ -260,14 +259,14 @@ class OPApp(ctk.CTk):
             if self.acquisition_method=='Complete':
                 if self.isNormalized:
                     self.destroy()
-                    os.system("python ../src/getReference.py")
+                    os.system(f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py")
                 else:
                     self.destroy()
                 os.system("python ONEPIX_app.py")
             elif self.acquisition_method=='Addressed':
                 if self.isNormalized:
                     self.destroy()
-                    os.system("python ../src/getReference.py")
+                    os.system(f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py")
                 else:
                     self.destroy()
                 os.system("python addressed_APP.py")
