@@ -15,9 +15,8 @@ class Analysis:
         self.reconstructed_data=self.data_dict["reconstructed_image"]
         self.wavelengths=self.data_dict["wavelengths"]
     
-    def data_normalisation(self,datacube,ref_datacube):
-        normalised_datacube=self.analyse.datacube_reflectance_normalisation(datacube,ref_datacube)
-        return normalised_datacube
+    def data_normalisation(self,ref_datacube):
+        self.normalised_data=self.analyse.datacube_reflectance_normalisation(self.reconstructed_data,ref_datacube)
 
     def get_rgb_image(self,datacube,wavelengths):
         rgb_image=self.analyse.RGB_reconstruction(datacube,wavelengths)

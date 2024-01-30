@@ -695,15 +695,10 @@ class OPApp(ctk.CTk):
             if self.analysis.imaging_method_name in ['FourierSplit','FourierShift']:
                 spectrum=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.acq_res.rgb_image,2)))))
 
-            elif self.analysis.imaging_method_name =='HadamardSplit':
+            elif self.analysis.imaging_method_name in ['HadamardSplit','HadamardWalshSplit']:
                 dim=np.size(self.acq_res.rgb_image,0)
-                H=hadamard(dim)
+                H=hadamard(dim) if self.analysis.imaging_method_name=='HadamardSplit' else walsh_matrix(dim)
                 spectrum=H@np.mean(self.acq_res.rgb_image,2)@H
-            
-            elif self.analysis.imaging_method_name =='HadamardWalshSplit':
-                dim=np.size(self.acq_res.rgb_image,0)
-                HW=walsh_matrix(dim)
-                spectrum=HW@np.mean(self.acq_res.rgb_image,2)@HW
                     
             self.a_acq.imshow(spectrum)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
@@ -961,11 +956,12 @@ class OPApp(ctk.CTk):
                 self.switch_spat2im_analysis.select()
                 self.res['rgb_spectrum']=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.res["rgb_image"],2)))))
 
-            elif self.analysis.imaging_method_name =='Hadamard':
+            elif self.analysis.imaging_method_name in ['HadamardSplit','HadamardWalshSplit']:
+                dim=len(self.res['rgb_image'])
+                H=hadamard(dim) if self.analysis.imaging_method_name=='HadamardSplit' else walsh_matrix(dim)
                 self.switch_spat2im_analysis.configure(state='normal')
                 self.switch_spat2im_analysis.select()
-                dim=len(self.res['rgb_image'])
-                self.res['rgb_spectrum']=hadamard(dim)@np.mean(self.res['rgb_image'],2)@hadamard(dim)
+                self.res['rgb_spectrum']=H@np.mean(self.res['rgb_image'],2)@H
                 
             else:
                 self.switch_spat2im_analysis.configure(state='disabled')
