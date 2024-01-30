@@ -75,10 +75,11 @@ class Analysis:
         self.imaging_method.image_analysis_method.load_reconstructed_data()
     
     def data_normalisation(self):
+        self.normalised_data=[]
         try:
             if self.normalisation_path!="":
                 ref_data=self.load_data(self.normalisation_path)
-                self.imaging_method.image_analysis_method.data_normalisation(ref_data)
+                self.normalised_data=self.imaging_method.image_analysis_method.data_normalisation(ref_data)
             else:
                 pass
         except Exception as e:

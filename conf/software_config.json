@@ -25,6 +25,7 @@
     "max_width": 189,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
-    "mode_choice": "Simple",
-    "acquisition_method": "Complete"
+    "mode_choice": "Advanced",
+    "acquisition_method": "Complete",
+    "normalisation_path": "C:/Users/Mathieu/Documents/GitHub/refactoring_ONE-PIX/app/References/Normalisation_30_01_2024_10-15-34/reference/ONE-PIX_reconstructed_data_30_01_2024_10-15-37"
 }

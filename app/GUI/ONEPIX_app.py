@@ -615,7 +615,14 @@ class OPApp(ctk.CTk):
             plt.close('all')
             self.quit()
             self.destroy()
- 
+            # Set Normalisation to False
+            with open(acquisition_json_path, "r") as file:
+                acquisition_json_object = json.load(file)
+            acquisition_json_object["Normalisation"]=False
+        
+            with open(acquisition_json_path, 'w') as outfile:
+                json.dump(acquisition_json_object, outfile,indent=4)
+    
  
     def simple_acq_mode(self):
         self.simple_mode_button.configure(state="disabled")
@@ -714,7 +721,7 @@ class OPApp(ctk.CTk):
         self.switch_raw2norm.configure(state='normal')
         if self.switch_raw2norm.get()==0:#Normalised hypercube
             # Reconstruct a RGB preview of the acquisition
-            self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_config.normalised_datacube, self.acq_config.wavelengths)
+            self.acq_res.rgb_image = self.analysis.get_rgb_image(self.analysis.normalised_data, self.analysis.wavelengths)
             # Display RGB image
 
             self.a_acq.imshow(self.acq_res.rgb_image)
@@ -725,7 +732,7 @@ class OPApp(ctk.CTk):
         else:#raw hypercube
 
             # Reconstruct a RGB preview of the acquisition
-            self.acq_res.rgb_image =self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image, self.acq_config.wavelengths)
+            self.acq_res.rgb_image =self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image, self.analysis.wavelengths)
             # Display RGB image
 
             self.a_acq.imshow(self.acq_res.rgb_image)
@@ -798,7 +805,8 @@ class OPApp(ctk.CTk):
         acquisition_json_object["imaging_method"] = self.methods_optionemenu.get()
         acquisition_json_object["spatial_res"] = int(self.entry_img_res.get())
         acquisition_json_object["integration_time_ms"] = float(self.entry_integration_time.get())
-        
+        self.is_normalised=acquisition_json_object["Normalisation"]
+
         with open(acquisition_json_path, "w") as file:
             json.dump(acquisition_json_object, file,indent=4)
         
@@ -857,11 +865,7 @@ class OPApp(ctk.CTk):
         
         self.acq_res=Reconstruction(self.acq_config)
         self.acq_res.data_reconstruction()
-        """       
-        if len(self.acq_config.normalised_datacube)!=0:
-            self.switch_raw2norm.configure(state='normal')
-            self.switch_raw2norm.select()
-        """        
+        
                    
         if self.acq_config.imaging_method_name == 'FourierShift':
             self.acq_res.imaging_method.reconstructed_image = self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]  # Shift error correction
@@ -873,6 +877,16 @@ class OPApp(ctk.CTk):
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time    
         self.acq_res.save_reconstructed_image(f'ONE-PIX_app_{fdate}_{actual_time}','../Hypercubes')
+        
+        
+        if self.is_normalised:self.analysis.data_normalisation()
+
+        if len(self.analysis.normalised_data)!=0:
+            self.switch_raw2norm.configure(state='normal')
+            self.switch_raw2norm.select()
+                
+        
+        
         # Display RGB image
         self.clear_graph_tab1()
 

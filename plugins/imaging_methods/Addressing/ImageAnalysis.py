@@ -11,13 +11,14 @@ class Analysis:
         
    
     
-    def load_reconstructed_data(self,):
+    def load_reconstructed_data(self,data_path=None):
+        if data_path is None: data_path=self.data_path 
         try:
-            self.reconstructed_data=np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('spectra_')][0])
-            self.patterns_order=np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('patterns_order')][0])
-            self.clusters= np.uint8(np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('masks')][0]))
-            self.wavelengths=np.load(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('wavelengths')][0])
-            self.rgb_image=cv2.imread(['/'.join([self.data_path, files]) for files in os.listdir(self.data_path) if files.startswith('RGB_cor')][0])
+            self.reconstructed_data=np.load(['/'.join([data_path, files]) for files in os.listdir(data_path) if files.startswith('spectra_')][0])
+            self.patterns_order=np.load(['/'.join([data_path, files]) for files in os.listdir(data_path) if files.startswith('patterns_order')][0])
+            self.clusters= np.uint8(np.load(['/'.join([data_path, files]) for files in os.listdir(data_path) if files.startswith('masks')][0]))
+            self.wavelengths=np.load(['/'.join([data_path, files]) for files in os.listdir(data_path) if files.startswith('wavelengths')][0])
+            self.rgb_image=cv2.imread(['/'.join([data_path, files]) for files in os.listdir(data_path) if files.startswith('RGB_cor')][0])
         except Exception as e:
             print(e)
 
@@ -40,9 +41,10 @@ class Analysis:
 
             ref_spec-=np.repeat(np.nanmean(ref_spec[:,:10],axis=1)[:,np.newaxis],np.size(ref_data,2),axis=1)
             
-            self.normalised_data=self.spectra/ref_spec
+            normalised_data=self.spectra/ref_spec
         except Exception as e:
             print(e)
+        return normalised_data
         
 
 

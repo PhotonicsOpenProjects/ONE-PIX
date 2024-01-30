@@ -19,7 +19,7 @@ class FisAnalysis:
     def __init__(self):
         return 
     
-    def load_data(self,opt=None):
+    def load_hypercube(self,opt=None):
         
         """
         This function allows to load saved spectra with timers of the displays and spectrometers.
@@ -184,10 +184,11 @@ class FisAnalysis:
             3D normalize datacube.
 
         """
+        norm_datacube=np.zeros_like(datacube)
         for i in range(0,np.shape(datacube)[0]):
             for j in range(0,np.shape(datacube)[1]):
-                datacube[i,j,:]=(datacube[i,j,:]-np.mean(datacube[i,j,:]))/np.std(datacube[i,j,:])
-        return datacube
+                norm_datacube[i,j,:]=(datacube[i,j,:]-np.mean(datacube[i,j,:]))/np.std(datacube[i,j,:])
+        return norm_datacube
 
     def datacube_reflectance_normalisation(self,datacube,ref_datacube):
         if(np.shape(ref_datacube)!=np.shape(datacube)):
