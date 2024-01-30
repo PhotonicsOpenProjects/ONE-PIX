@@ -22,36 +22,28 @@ class Analysis:
             print(e)
 
     
-    def data_normalisation(self,data,ref_data):
-        # dark pattern correction
-        self.spectra-=self.spectra[-1,:]
-        self.spectra=self.spectra[:-1,:]
+    def data_normalisation(self,ref_data):
         
-        if self.normalisation_path !='':
-            try:
-                # Load raw data
-                acq_data=self.load_reconstructed_data(self.normalisation_path)
-                ref_datacube=acq_data['hyperspectral_image']
-                masks=np.asarray(self.pattern_lib.decorator.sequence)[:-1,:,:]
-                nb_masks=np.size(masks,0)
-                print(f"{nb_masks=}")
-                new_masks=np.zeros((nb_masks,np.size(ref_datacube,0),np.size(ref_datacube,1)))
-                for idx in range(nb_masks):
-                    new_masks[idx,:,:]=cv2.resize(masks[idx,:,:],np.shape(new_masks[idx,:,:]),interpolation=cv2.INTER_AREA)
+        try:
+            nb_clusters=np.size(self.masks,0)
+            print(f"{nb_clusters=}")
+            new_masks=np.zeros((nb_clusters,np.size(ref_data,0),np.size(ref_data,1)))
+            for idx in range(nb_clusters):
+                new_masks[idx,:,:]=cv2.resize(self.clusters[idx,:,:],np.shape(new_masks[idx,:,:]),interpolation=cv2.INTER_AREA)
 
 
-                ref_spec=np.zeros((nb_masks,np.size(ref_datacube,2)))
-                for idx in range(nb_masks):
-                    mask=np.where(new_masks[idx,:,:],new_masks[idx,:,:],np.nan)/255
-                    for wl in range(np.size(ref_datacube,2)):
-                        ref_spec[idx,wl]=np.nanmean(ref_datacube[:,:,wl].squeeze()*mask,axis=(0,1))
+            ref_spec=np.zeros((nb_clusters,np.size(ref_data,2)))
+            for idx in range(nb_clusters):
+                mask=np.where(new_masks[idx,:,:],new_masks[idx,:,:],np.nan)/255
+                for wl in range(np.size(ref_data,2)):
+                    ref_spec[idx,wl]=np.nanmean(ref_data[:,:,wl].squeeze()*mask,axis=(0,1))
 
-                ref_spec-=np.repeat(np.nanmean(ref_spec[:,:10],axis=1)[:,np.newaxis],np.size(ref_datacube,2),axis=1)
-                
-                self.normalised_datacube=self.spectra/ref_spec
-            except Exception as e:
-                print(e)
-        return normalised_data
+            ref_spec-=np.repeat(np.nanmean(ref_spec[:,:10],axis=1)[:,np.newaxis],np.size(ref_data,2),axis=1)
+            
+            self.normalised_data=self.spectra/ref_spec
+        except Exception as e:
+            print(e)
+        
 
 
     def plot_reconstructed_image(self,datacube,wavelengths):
