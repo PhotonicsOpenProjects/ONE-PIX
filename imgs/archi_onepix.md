@@ -1,6 +1,6 @@
 
 
 <p align="center">
-<img src="imgs\archi onepix refactoring.jpg" alt="vnc vnc viewer double screen" width="500"/>
+<img src="archi onepix refactoring.jpg" alt="ONE-PIX soft archi" width="500"/>
 </p>
 
