@@ -170,7 +170,7 @@ click one the green ticks to validate changes.
 </p>
 
 The installation is now complete. 
-Now you can follow the [tutorial measure hyperspectral image](/ONE-PIX_soft/doc/tutorial_measure_hyperspectral_image.pdf) to measure your first hyperspectral datacube ! 
+Now you can follow the [tutorial measure hyperspectral image](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide) to measure your first hyperspectral datacube ! 
 
 
 
@@ -179,11 +179,12 @@ Now you can follow the [tutorial measure hyperspectral image](/ONE-PIX_soft/doc/
 The software architecture of the ONE-PIX kit offers different ways to measure, reconstruct and analyze hyperspectral images. 
 
 <p align="center">
-<img src="imgs/software_architecture.png" alt="ONE-PIX software architecture" width="400"/ >
+<img src="imgs/archi onepix refactoring.png" alt="ONE-PIX software architecture" width="400"/ >
 </p>
 
-- The fastest way to measure and analyze hyperspectral images is to use the [GUI interface](ONE-PIX_soft/doc/ONE-PIX_GUI_user_manual.pdf)
-- For more advanced acquisitions,use directly ONEPIX_acquisition.py and ONEPIX_reconstruction.py [Python examples scripts](ONE-PIX_soft) and improve them with using the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
+
+- The fastest way to measure and analyze hyperspectral images without write any lien of code is to use the [GUI interface](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide)
+- For more advanced acquisitions,use directly [command line interfaces](app/cli) or [python script examples](app/python_code_examples) and adapt them to your use case  with using the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
  
 ## Contributing 
 
