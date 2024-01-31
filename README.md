@@ -55,7 +55,7 @@ This tutorial details all the steps required to install the ONE-PIX software on 
 For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
 
 ### Installing ONE-PIX on a raspberry pi  
-All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it install are available [here]("imgs/ONE-PIX install on rasp.md"). 
+All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it install are available [here](imgs/ONE-PIX_install_on_rasp.md"). 
 For otehr OS just continue to read this readme file. 
 
 
