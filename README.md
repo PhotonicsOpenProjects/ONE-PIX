@@ -21,7 +21,7 @@ The ONE-PIX kit contains a video projector and a fibered spectrometer with super
 <img src="imgs/principle.png" alt="ONE-PIX principle" width="500"/>
 </p>
 
-For more information about the single pixel imaging you can go [here](ONE-PIX_soft/doc/Single%20Pixel%20Imaging%20tutorial/Single%20Pixel%20Imaging.ipynb)
+For more information about the single pixel imaging you can go [here](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/2.-Theoretical-principles)
 
 ONE-PIX technology involves projecting a series of patterns onto a scene to be imaged. A spectrometer measures the average reflected spectrum of the scene for each projection. An algorithm then reconstructs the hypercube of the scene from all the spectra measured during the acquisition. 
 The Raspberry Pi board ensures the synchronization between patterns projections and the spectrometer measurements.
