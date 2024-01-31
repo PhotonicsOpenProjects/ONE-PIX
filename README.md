@@ -179,7 +179,7 @@ Now you can follow the [tutorial measure hyperspectral image](https://github.com
 The software architecture of the ONE-PIX kit offers different ways to measure, reconstruct and analyze hyperspectral images. 
 
 <p align="center">
-<img src="imgs/archi onepix refactoring.png" alt="ONE-PIX software architecture" width="400"/ >
+<img src="imgs/archi onepix refactoring.png" alt="ONE-PIX software architecture" width="600"/ >
 </p>
 
 
