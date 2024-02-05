@@ -75,34 +75,3 @@ plt.xlim(400,800)
 
 
 plt.show()
-
-
-plt.figure()
-plt.imshow(rgb_image)
-plt.axis('off')
-plt.savefig('bonzai_rgb.png',dpi=600, transparent=True)
-plt.show()
-
-plt.figure()
-plt.imshow(image_seg)
-plt.axis('off')
-plt.savefig('bonzai_clusters.png',dpi=600, transparent=True)
-
-plt.show()
-
-fig=plt.figure()
-ax = fig.add_subplot(projection='3d')
-
-ax.scatter(principalComponents[np.where(kmeans.labels_==0), 0], principalComponents[np.where(kmeans.labels_==0), 1], principalComponents[np.where(kmeans.labels_==0), 2],'r')
-ax.scatter(principalComponents[np.where(kmeans.labels_==1), 0], principalComponents[np.where(kmeans.labels_==1), 1], principalComponents[np.where(kmeans.labels_==1), 2],'r')
-ax.scatter(principalComponents[np.where(kmeans.labels_==2), 0], principalComponents[np.where(kmeans.labels_==2), 1], principalComponents[np.where(kmeans.labels_==2), 2],'r')
-
-plt.savefig('bonzai_3Dclusters.png',dpi=600, transparent=True)
-plt.show()
-
-plt.figure()
-plt.plot(an.wavelengths,0.2*normalised_spectra[1:,:].T)
-plt.ylim(0,0.5)
-plt.xlim(400,800)
-plt.savefig('bonzai_spectra.png',dpi=600, transparent=True)
-plt.show()
