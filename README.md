@@ -55,7 +55,7 @@ This tutorial details all the steps required to install the ONE-PIX software on 
 For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
 
 ### Installing ONE-PIX on a raspberry pi  
-All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it install are available [here](imgs/ONE-PIX_install_on_rasp.md"). 
+All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it install are available [here](imgs/ONE-PIX_install_on_rasp.md). 
 For otehr OS just continue to read this readme file. 
 
 
@@ -92,7 +92,7 @@ python setup.py
 ### Spectrometer installation 
 
 The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins/spectrometer) of plugins. For each of them instruction of installattion on a raspberry pi board are detailed in the readme folder. 
-For example you can see the [OceanInsigth](plugins/spectrometer/OceanInsight/README.md) or [Avantes](plugins/spectrometer/avantes/README.md) installation instructions to achieve before measure with your ONE-PIX  
+For example you can see the [OceanInsigth](plugins/spectrometer/OceanInsight/README.md) or [Avantes](plugins/spectrometer/Avantes/README.md) installation instructions to achieve before measure with your ONE-PIX  
 
 If you want to implement a new model of spectrometer  you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
 
