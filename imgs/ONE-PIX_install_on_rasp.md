@@ -58,7 +58,7 @@ cd ONE-PIX/install
 and run the installtion script with this command :
 
 ```
-python setup.py 
+. install.sh 
 ```
 
 ## Configure the raspberry pi 
