@@ -91,8 +91,8 @@ python setup.py
 
 ### Spectrometer installation 
 
-The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins\spectrometer) of plugins. For each of them instruction of installattion on a raspberry pi board are detailed in the readme folder. 
-For example you can see the [OceanInsigth](plugins\spectrometer\OceanInsight\README.md) or [Avantes](plugins\spectrometer\avantes\README.md) installation instructions to achieve before measure with your ONE-PIX  
+The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins/spectrometer) of plugins. For each of them instruction of installattion on a raspberry pi board are detailed in the readme folder. 
+For example you can see the [OceanInsigth](plugins/spectrometer/OceanInsight/README.md) or [Avantes](plugins/spectrometer/avantes/README.md) installation instructions to achieve before measure with your ONE-PIX  
 
 If you want to implement a new model of spectrometer  you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
 
