@@ -19,6 +19,39 @@ class FisAnalysis:
     def __init__(self):
         return 
     
+    def get_header_data(self,path):
+        """
+        This function allows to generate a dictionnary containing acquisition data 
+        useful for the data cube reconstruction.
+
+        Parameters
+        ----------
+        path : str
+            Header file path
+
+        Returns
+        -------
+        acq_data : dict
+            Dictionnary containing acquisition data.
+
+        """
+        
+        header=[]
+        with open(path, 'r') as file:
+            for line in file.readlines():
+                header.append(line.split(':'))
+        acq_data=dict()
+        #acq_data['Acquisition_name']=header[0][0][8:]
+        for x in header:
+            if x[0].strip()=='Imaging method':
+                acq_data['imaging_method']=x[1].strip()
+            
+            if x[0].strip()=='Integration time':
+                acq_data['integration_time_ms']=float(x[1].strip()[:-2])
+        
+        return acq_data
+
+
     def load_hypercube(self,opt=None):
         
         """
@@ -54,7 +87,7 @@ class FisAnalysis:
         hyp_filename=glob.glob(f'{meas_path}/*.hdr')[0]
         try:
             info_filename=glob.glob(f'{meas_path}/*.txt')[0]
-            res['pattern_method']=get_header_data(info_filename)['pattern_method']
+            res['pattern_method']=self.get_header_data(info_filename)['imaging_method']
         except:
             pass
         res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]

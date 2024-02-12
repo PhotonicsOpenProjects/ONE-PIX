@@ -2,7 +2,7 @@
 API Reference
 ###############
 
-The public api of ONE-PIX is provided allows to acquire hyperspectral datacubes using single pixel imaging.
+The public api of ONE-PIX allows to acquire hyperspectral datacubes using single pixel imaging.
 The basic features to acquire a datacube are provided, for several spectrometer brands or patterns bases.
 
 =======================================

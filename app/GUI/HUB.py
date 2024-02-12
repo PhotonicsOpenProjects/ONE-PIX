@@ -20,7 +20,6 @@ from core.hardware.HardwareConfig import *
 import json
 
 import screeninfo
-#path_to_GUI = '/'.join([os.getcwd(),'ONE-PIX_soft/GUI'])
 path_to_GUI = os.getcwd()
 
 software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
@@ -64,13 +63,13 @@ class OPApp(ctk.CTk):
         self.GuiMode_choice.grid(column=0, row=0, pady=(10,2.5), padx = (0,0))
         
         self.choseLanguage = ttk.Combobox(self.Hub_frame, textvariable = self.lang_names,
-                                   state = "readonly", values = self.lang_values,font=('Helvetica', 13),width=15)
+                                   state = "readonly", values = self.lang_values,font=('Helvetica', 12),width=10)
         self.choseLanguage.current(self.lang_values.index(self.curLanguage)) #index de l'élément sélectionné
         self.choseLanguage.grid(column=1, row=0, pady=(10,2.5), padx = (0,0))
         self.choseLanguage.bind("<<ComboboxSelected>>", lambda event=None:
                         self.change_language())
                 
-        self.Gui_help = ctk.CTkButton(self.Hub_frame, text=" ?", font=('Helvetica', 15, 'bold'), width =12, command=self.open_Gui_help)
+        self.Gui_help = ctk.CTkButton(self.Hub_frame, text="?", font=('Helvetica', 15, 'bold'), width =12, command=self.open_Gui_help)
         
         self.Gui_help.grid(column=2, row=0, pady=(10,2.5), padx = (1,3))
         

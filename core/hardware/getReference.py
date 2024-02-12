@@ -44,12 +44,12 @@ if not "References" in os.listdir(f"..{os.sep}..{os.sep}app"):
 #os.chdir('Hypercubes')
 fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
 actual_time = time.strftime("%H-%M-%S")  # get the current time
-folder_name = f"Normalisation_{fdate}_{actual_time}"
-os.mkdir(f"..{os.sep}..{os.sep}app{os.sep}References{os.sep}{folder_name}")
+#folder_name = f"Normalisation_{fdate}_{actual_time}"
+#os.mkdir(f"..{os.sep}..{os.sep}app{os.sep}References{os.sep}{folder_name}")
 #os.chdir(folder_name)
-os.mkdir(f"..{os.sep}..{os.sep}app{os.sep}References{os.sep}{folder_name}{os.sep}reference")
+#os.mkdir(f"..{os.sep}..{os.sep}app{os.sep}References{os.sep}{folder_name}{os.sep}reference")
 
-save_path=f"..{os.sep}..{os.sep}app{os.sep}References{os.sep}{folder_name}"
+save_path=f"..{os.sep}..{os.sep}app{os.sep}References{os.sep}"
 test.thread_acquisition(path =save_path , time_warning = False)
 
 # load hypercube
@@ -64,12 +64,13 @@ spec_ref=np.mean(raw_ref,(0,1))
 ref=spat_ref[:,:,np.newaxis]*np.reshape(spec_ref,(1,1,np.size(spec_ref)))
 header=rec.create_reconstruction_header()
 saver=Fis()
-saver.save_acquisition_envi(ref,test.hardware.spectrometer.wavelengths,header,f"reference_{fdate}_{actual_time}",save_path+os.sep+'reference')
+saver.save_acquisition_envi(ref,test.hardware.spectrometer.wavelengths,header,f"reference_{fdate}_{actual_time}",save_path)
+save_path=save_path+os.sep+f"reference_{fdate}_{actual_time}"
 # Notify in json file where to find the normalised datacube
 with open(acquisition_json_path) as f:
     acq_params = json.load(f)
 
-acq_params["normalisation_path"] = os.path.abspath(save_path+'/reference')
+acq_params["normalisation_path"] = os.path.abspath(save_path)
 with open(acquisition_json_path, "w") as file:
     json.dump(acq_params, file)
 

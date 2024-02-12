@@ -619,6 +619,7 @@ class OPApp(ctk.CTk):
             with open(acquisition_json_path, "r") as file:
                 acquisition_json_object = json.load(file)
             acquisition_json_object["Normalisation"]=False
+            acquisition_json_object["normalisation_path"]=''
         
             with open(acquisition_json_path, 'w') as outfile:
                 json.dump(acquisition_json_object, outfile,indent=4)
@@ -871,7 +872,7 @@ class OPApp(ctk.CTk):
             self.acq_res.imaging_method.reconstructed_image = self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]  # Shift error correction
         
         # Reconstruct a RGB preview of the acquisition
-        self.analysis=Analysis(self.acq_res)
+        self.analysis=Analysis(rec=self.acq_res)
         self.acq_res.rgb_image = self.analysis.get_rgb_image(self.acq_res.imaging_method.reconstructed_image,
                                                               self.acq_config.hardware.spectrometer.wavelengths)
         fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string

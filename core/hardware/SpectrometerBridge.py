@@ -91,7 +91,7 @@ class SpectrometerBridge:
                     flag = False
                     self.spec_close()
                     self.integration_time_ms=1
-                    raise Exception(f"Integration time: {self.integration_time_ms} ms, if you want to continue set the parameter by hand")
+                    print(Exception(f"Integration time: {self.integration_time_ms} ms, if you want to continue set the parameter by hand"))
                     
                 elif (count>=10):
                     flag=False

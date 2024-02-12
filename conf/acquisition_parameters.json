@@ -2,6 +2,6 @@
     "imaging_method": "FourierSplit",
     "spatial_res": 3,
     "Normalisation": false,
-    "normalisation_path": "C:\\Users\\Mathieu\\Documents\\GitHub\\refactoring_ONE-PIX\\app\\References\\Normalisation_30_01_2024_10-15-34\\reference",
+    "normalisation_path": "",
     "integration_time_ms": 1.0
 }

@@ -38,7 +38,7 @@ class FisCommonReconstruction :
         
         self.fdate = date.today().strftime('%d_%m_%Y')  # convert the current date in string
         self.actual_time = time.strftime("%H-%M-%S")  # get the current time
-        folder_name = f"ONE-PIX_reconstructed_data_{self.fdate}_{self.actual_time}"
+        folder_name = f"ONE-PIX_reconstructed_data_{self.fdate}_{self.actual_time}" if save_envi_name is None else save_envi_name
         os.mkdir(folder_name)
         os.chdir(folder_name)
         self.save_path=folder_name

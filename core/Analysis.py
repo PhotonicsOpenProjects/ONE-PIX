@@ -12,13 +12,13 @@ class Analysis:
             self.read_header()
             self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
             self.imaging_method.analysis(self.data_path)
-            self.load_data()
+            self.load_data(self.data_path)
             self.reconstructed_data=self.imaging_method.image_analysis_method.reconstructed_data
             self.wavelengths=self.imaging_method.image_analysis_method.wavelengths
             
         else:
             self.imaging_method_name=rec.imaging_method_name
-            self.reconstructed_image=rec.imaging_method.reconstructed_image
+            self.reconstructed_data=rec.imaging_method.reconstructed_image
             self.wavelengths=rec.wavelengths
             self.imaging_method=ImagingMethodBridge(self.imaging_method_name)
             self.imaging_method.analysis(self.data_path)
@@ -26,7 +26,8 @@ class Analysis:
         self.acquisition_config_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), f'..{os.sep}conf', 'acquisition_parameters.json')
         with open(self.acquisition_config_path) as f:
             acquisition_dict = json.load(f)
-        self.normalisation_path=acquisition_dict["normalisation_path"] 
+        self.normalisation_path=acquisition_dict["normalisation_path"]
+        self.normalised_data=[] 
     
     def read_header(self):
         """
@@ -71,14 +72,16 @@ class Analysis:
         
        
    
-    def load_data(self):
-        self.imaging_method.image_analysis_method.load_reconstructed_data()
+    def load_data(self,path):
+        self.imaging_method.image_analysis_method.load_reconstructed_data(path)
     
     def data_normalisation(self):
         self.normalised_data=[]
         try:
             if self.normalisation_path!="":
-                ref_data=self.load_data(self.normalisation_path)
+                self.load_data(self.normalisation_path)
+                ref_data=self.imaging_method.image_analysis_method.reconstructed_data
+                self.imaging_method.image_analysis_method.reconstructed_data=self.reconstructed_data
                 self.normalised_data=self.imaging_method.image_analysis_method.data_normalisation(ref_data)
             else:
                 pass
