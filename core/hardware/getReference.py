@@ -19,7 +19,7 @@ with open(acquisition_json_path) as f:
     acq_params = json.load(f)
 
 acq_params["normalisation_path"] =""
-acq_params["spatial_res"] = 3
+acq_params["spatial_res"] = 21
 acq_params["imaging_method"] = "FourierSplit"
 
 with open(acquisition_json_path, "w") as file:
