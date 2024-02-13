@@ -28,6 +28,8 @@ sys.path.append(f'..{os.sep}..{os.sep}')
 from core.Acquisition import Acquisition
 from core.Reconstruction import Reconstruction
 from core.Analysis import Analysis
+from core.hardware.SpectrometerBridge import SpectrometerBridge
+
 from scipy.linalg import hadamard
 from plugins.imaging_methods.HadamardWalshSplit.custom_walsh_hadamard import *
 import numpy as np
@@ -744,6 +746,9 @@ class OPApp(ctk.CTk):
     def spec_connection(self):
         try:
             self.acq_config.hardware.name_spectro =self.spectro_optionemenu.get()
+            self.acq_config.hardware.spectrometer= SpectrometerBridge(
+                        self.acq_config.hardware.name_spectro,self.acq_config.hardware.integration_time_ms,
+                        self.acq_config.hardware.wl_lim,self.acq_config.hardware.repetition)
             self.acq_config.hardware.spectrometer.spec_open()
             if self.acq_config.hardware.spectrometer.DeviceName != '':
                 spectro_name=self.acq_config.hardware.spectrometer.DeviceName
@@ -777,7 +782,7 @@ class OPApp(ctk.CTk):
             self.clear_graph_tab1()
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["draw_spectrum"]["title"],color='white')
  
-            self.acq_config.hardware.spectrometer.integration_time_ms = float(self.entry_integration_time.get()) * 1e3
+            self.acq_config.hardware.spectrometer.integration_time_ms = float(self.entry_integration_time.get())
             self.acq_config.hardware.spectrometer.set_integration_time()
             
             self.a_acq.plot(self.acq_config.hardware.spectrometer.get_wavelengths(), self.acq_config.hardware.spectrometer.get_intensities())
