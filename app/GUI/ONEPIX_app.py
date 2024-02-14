@@ -438,9 +438,9 @@ class OPApp(ctk.CTk):
         self.shown_sat_path = ctk.StringVar()
         self.shown_sat_path.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["shown_sat_path"])
         self.shown_data_path = ctk.StringVar()
-        self.shown_data_path.set(self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 1"]["shown_data_path"])
-        
-        self.sat_path = ''
+        self.path_to_csv = '/'.join(['/'.join(os.path.abspath(os.curdir).split('\\')),'Sentinel2B.csv'])
+        self.sat_path = self.path_to_csv
+        self.shown_sat_path.set('/'.join(self.path_to_csv.split('/')[-3:]))
         self.sat_path_label = ctk.CTkEntry(self.loadfiles_frame, textvariable = self.shown_sat_path,
                                            state = 'readonly',width=300,text_color='red')
         self.sat_path_label.grid(column=1, row=0, padx=10, pady=(2.5,2.5), rowspan =1, columnspan=1,sticky='e')
@@ -665,10 +665,12 @@ class OPApp(ctk.CTk):
  
     def window_size_test(self):
         proj_width=screeninfo.get_monitors()[1].width
-        proj_height=screeninfo.get_monitors()[1].height      
+        proj_height=screeninfo.get_monitors()[1].height  
         self.proj = ctk.CTkToplevel()
-        self.proj.geometry("{}x{}+{}+{}".format(proj_width, proj_height, screenWidth-1, 0))
+        
+        self.proj.geometry("{}x{}+{}+{}".format(proj_width, proj_height, screenWidth-10, 0))
         self.proj.update()
+
         y = list(range(proj_height))  # horizontal vector for the pattern creation
         x = list(range(proj_width))  # vertical vector for the pattern creation
 
@@ -892,17 +894,17 @@ class OPApp(ctk.CTk):
             self.switch_raw2norm.select()
                 
         
-        
-        # Display RGB image
-        self.clear_graph_tab1()
+        if np.all(self.acq_res.rgb_image)!=0:
+            # Display RGB image
+            self.clear_graph_tab1()
 
-        self.a_acq.imshow(self.acq_res.rgb_image)
-        self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
-        self.a_acq.set_axis_on()
-        self.canvas.draw_idle()
-        
-        self.switch_spat2im.configure(state='normal')
-        self.switch_spat2im.deselect()
+            self.a_acq.imshow(self.acq_res.rgb_image)
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
+            self.a_acq.set_axis_on()
+            self.canvas.draw_idle()
+            
+            self.switch_spat2im.configure(state='normal')
+            self.switch_spat2im.deselect()
     
         self.button_acquire_hyp.configure(state='normal')
 # =============================================================================

@@ -45,13 +45,13 @@ class Analysis:
             Dictionnary containing acquisition data.
 
         """
-        chemin_script = os.getcwd()
+        chemin_script=os.getcwd()
         if self.data_path is None:
             try:
                 root = Tk()
                 root.withdraw()
                 root.attributes('-topmost', 1)
-                self.data_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
+                self.data_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = '../Hypercubes')
                 
             except Exception as e:
                 print(e)

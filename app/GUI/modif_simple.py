@@ -53,7 +53,7 @@ acquisition_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/acquisition_p
 hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
 software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
 
-
+screenWidth = screeninfo.get_monitors()[0].width
 window_height = 600
 window_width = 1020
 
@@ -635,13 +635,14 @@ class OPApp(ctk.CTk):
         # Display RGB image
         self.clear_graph_tab1()
 
-        self.a_acq.imshow(self.acq_res.rgb_image)
-        self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
-        self.a_acq.set_axis_on()
-        self.canvas.draw_idle()
+        if np.all(self.acq_res.rgb_image)!=0:
+            self.a_acq.imshow(self.acq_res.rgb_image)
+            self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
+            self.a_acq.set_axis_on()
+            self.canvas.draw_idle()
         
-        self.switch_spat2im.configure(state='normal')
-        self.switch_spat2im.select()
+            self.switch_spat2im.configure(state='normal')
+            self.switch_spat2im.select()
         self.button_acquire_hyp.configure(state='normal')
 
 # =============================================================================
