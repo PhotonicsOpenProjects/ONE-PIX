@@ -42,6 +42,8 @@ import json
 import customtkinter as ctk
 import threading
 import screeninfo
+import webbrowser
+
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
@@ -301,7 +303,7 @@ class OPApp(ctk.CTk):
         self.domain_desc = ctk.CTkLabel(self.seldomain_frame,text=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 2"]["domain_desc"])
         self.domain_desc.grid(column=0, row=0, padx=10, pady=(2.5,2.5), rowspan=1, columnspan=1)
         test = ctk.CTkButton(self.seldomain_frame, text = "?",
-                             font=(tk.font.nametofont("TkDefaultFont"),20),text_color='red', width =12)
+                             font=(tk.font.nametofont("TkDefaultFont"),20),text_color='red', width =12,command=self.open_web_infos)
         test.grid(column=1, row=0, padx=30, pady=(10,2.5), rowspan=1, columnspan=1)
         self.domain = ctk.CTkComboBox(self.seldomain_frame)
         self.domain.configure(values=self.widgets_text["specific_GUI"]["complete"]["VI_tab"]["block 2"]["domain"])
@@ -1143,6 +1145,8 @@ class OPApp(ctk.CTk):
         with open(f"languages/{jsonFile}.json", 'r') as f:
             self.widgets_text = json.load(f)
             
+    def open_web_infos(self):
+        webbrowser.open('https://spyndex.readthedocs.io/en/latest/')
 
 class Toolbar(NavigationToolbar2Tk):
     def set_message(self, s):

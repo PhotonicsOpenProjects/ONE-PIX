@@ -1,6 +1,6 @@
 {
-    "imaging_method": "HadamardSplit",
-    "spatial_res": 16,
+    "imaging_method": "HadamardWalshSplit",
+    "spatial_res": 32,
     "Normalisation": false,
     "normalisation_path": "",
     "integration_time_ms": 12.0
