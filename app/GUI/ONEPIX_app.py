@@ -665,10 +665,11 @@ class OPApp(ctk.CTk):
  
     def window_size_test(self):
         proj_width=screeninfo.get_monitors()[1].width
-        proj_height=screeninfo.get_monitors()[1].height  
+        proj_height=screeninfo.get_monitors()[1].height 
+        pos_x=screenWidth if self.acq_config.hardware.is_raspberrypi() else screenWidth-10
         self.proj = ctk.CTkToplevel()
         
-        self.proj.geometry("{}x{}+{}+{}".format(proj_width, proj_height, screenWidth-10, 0))
+        self.proj.geometry("{}x{}+{}+{}".format(proj_width, proj_height, pos_x, 0))
         self.proj.update()
 
         y = list(range(proj_height))  # horizontal vector for the pattern creation
