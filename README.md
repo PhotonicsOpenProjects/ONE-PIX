@@ -55,8 +55,8 @@ This tutorial details all the steps required to install the ONE-PIX software on 
 For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
 
 ### Installing ONE-PIX on a raspberry pi  
-All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it install are available [here](imgs/ONE-PIX_install_on_rasp.md). 
-For otehr OS just continue to read this readme file. 
+All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it are available [here](imgs/ONE-PIX_install_on_rasp.md). 
+For other OS just continue to read this readme file. 
 
 
 ### Download git repository
@@ -91,7 +91,7 @@ python setup.py
 
 ### Spectrometer installation 
 
-The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins/spectrometer) of plugins. For each of them instruction of installattion on a raspberry pi board are detailed in the readme folder. 
+The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins/spectrometer) of plugins. For each of them instruction of installation on a raspberry pi board are detailed in the readme folder. 
 For example you can see the [OceanInsigth](plugins/spectrometer/OceanInsight/README.md) or [Avantes](plugins/spectrometer/Avantes/README.md) installation instructions to achieve before measure with your ONE-PIX  
 
 If you want to implement a new model of spectrometer  you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
@@ -110,8 +110,8 @@ The software architecture of the ONE-PIX kit offers different ways to measure, r
 </p>
 
 
-- The fastest way to measure and analyze hyperspectral images without write any lien of code is to use the [GUI interface](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide)
-- For more advanced acquisitions,use directly [command line interfaces](app/cli) or [python script examples](app/python_code_examples) and adapt them to your use case  with using the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
+- The fastest way to measure and analyze hyperspectral images without write any line of code is to use the [GUI interface](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide)
+- For more advanced acquisitions,use directly [command line interfaces](app/cli) or [python script examples](app/python_code_examples) and adapt them on your usecase  with help in the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
  
 ## Contributing 
 
