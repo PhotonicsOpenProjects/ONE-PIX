@@ -3,7 +3,8 @@ import os
 import glob
 from datetime import date
 import time
-
+from tkinter import *
+from tkinter.filedialog import askdirectory
 
 from core.ImagingMethodBridge import *
 
@@ -32,7 +33,7 @@ def get_header_data(path):
     acq_data['acquisition_name']=header[0][0][8:]
     for x in header:
         if x[0].strip()=='Imaging method':
-            acq_data['imaging_method']=x[1].strip()
+            acq_data['imaging_method_name']=x[1].strip()
         
         if x[0].strip()=='Integration time':
             acq_data['integration_time_ms']=float(x[1].strip()[:-2])
@@ -47,10 +48,10 @@ class Reconstruction:
     def __init__(self,acquisition_dict=None):
         self.acquisition_dict=acquisition_dict
         if acquisition_dict is None: self.load_raw_data()
-            
         
-        if type(acquisition_dict)()=={} :
-            self.imaging_method_name=self.acquisition_dict["imaging_method"]
+        
+        if type(self.acquisition_dict)()=={} :
+            self.imaging_method_name=self.acquisition_dict["imaging_method_name"]
             self.spectra=self.acquisition_dict["spectra"]
             self.pattern_order=self.acquisition_dict["patterns_order"]
             self.wavelengths=self.acquisition_dict["wavelengths"]
@@ -86,7 +87,7 @@ class Reconstruction:
             root = Tk()
             root.withdraw()
             root.attributes('-topmost', 1)
-            chemin_mesure = filedialog.askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
+            chemin_mesure = askdirectory(title = "Select the folder containing the acquisitions", initialdir = chemin_script)
             os.chdir(chemin_mesure)
             
             header_name=glob.glob('*.txt')[0]
