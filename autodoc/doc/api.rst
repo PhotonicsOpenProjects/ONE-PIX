@@ -9,27 +9,20 @@ The basic features to acquire a datacube are provided, for several spectrometer 
 Hyperspectral SPI acquisition
 =======================================
 
-Pattern Methods
+Imaging methods
 ------------------
 
 Class allowing to use a specific pattern method.
 
-.. automodule:: PatternMethods
+.. automodule:: ImagingMethodBridge
    :members:
 
-Spectrometer Selection
-------------------------
-
-This class is used to access spectrometer features.
-
-.. automodule:: SpectrometerBridge
-   :members:
 
 Acquisition
 ---------------
 This class allows to set acquisition parameters to perform ONE-PIX acqusitions.
 
-.. automodule:: AcquisitionConfig
+.. automodule:: Acquisition
    :members:
 
 
@@ -41,11 +34,12 @@ Reconstruction
 ------------------
 This class contains the set of methods to reconstruct datacubes according to the chosen acquisition method.
 
-.. automodule:: DatacubeReconstructions
+.. automodule:: Reconstruction
    :members:
 
 Analysis
 ------------------
 Library containing several methods to analyse datacube
 
-.. automodule:: datacube_analyse
+.. automodule:: Analysis
+   :members:

@@ -20,8 +20,10 @@ get its API necessary informations to open and close the communication with the 
 intensities and sampled wavelengths and set the integration times.
 
 
-Add a new spectrometer class python file to `ONE-PIX_soft/src/spectrometer_bridges` with the file name:
-<Spectrometer_name>Bridge.py
+Add a new spectrometer class python file to `ONE-PIX/plugins/spectrometer` with the folder name:
+<Spectrometer_name>. In this folder create a python class file named <Spectrometer_name>Bridge.py. 
+This folder will also be the location where every needed library to run spectral measures must be in.
+
 
 ..  code:: python
 	
@@ -55,13 +57,19 @@ Fulfilling these lines allows to use your device with the ONE-PIX kit.
 Adding a new pattern basis or method 
 -----------------------------------------
 
-You can also add new pattern bases or new methods for hyperspectral compressive imaging:
-Add a new pattern method class python file to `ONE-PIX_soft/src/pattern_bases` with the file name:
-<Pattern_method>Basis.py
+You can also add new pattern bases or new methods for hyperspectral compressive imaging.
+To do so, create a new folder <Pattern_method> in `ONE-PIX_soft/plugins/imaging_methods`.
+
+In this folder, you must then buil three different classes for patterns creation, data reconstruction and data analysis strictly named :
+"PatternsCreation.py", "ImageReconstruction.py" and "ImageAnalysis.py".
+
+The formats of the following classes to be created are explained below:
+
+"PatternsCreation.py"
 
 ..  code:: python
 	
-	class Pattern_methodBasis:
+	class PatternsCreation:
 	
 		def sequence_order(self):
 			# create a list of string describing the name of the patterns 
@@ -72,18 +80,11 @@ Add a new pattern method class python file to `ONE-PIX_soft/src/pattern_bases` w
 			return sequence
 
 		
-Adding a new reconstruction method
------------------------------------------
-
-Finally, if needed, you can add a reconstruction method to transform your acquisitions made from 
-a new basis.
-
-To do so, add a new reconstruction method class python file to `ONE-PIX_soft/src/reconstruction_methods` with the file name:
-<Reconstruction_method>Reconstruction.py
+"ImageReconstruction.py"
 
 ..  code:: python
 	
-	class Pattern_methodBasis:
+	class ImageReconstruction:
 	
 		def __init__(self,spectra,pattern_order):
 			self.spectra=spectra
@@ -98,3 +99,30 @@ To do so, add a new reconstruction method class python file to `ONE-PIX_soft/src
 			return spectrum,datacube
 
 			
+"ImageAnalysis.py"
+
+..  code:: python
+	
+	class ImageAnalysis:
+	
+		def __init__(self,data_path=None):
+			self.data_path=data_path
+			
+		def load_reconstructed_data(self,data_path=None):
+			# Method to load data produced by the methods described before. You must fulfill the way of getting reconstructed_data and wavelengths to the class.
+			#self.reconstructed_data=
+			#self.wavelengths=
+		def data_normalisation(self,ref_datacube):
+			#allows to specify how to normalise your data using reflectance
+			#normalised_data=
+			return normalised_data
+
+		def get_rgb_image(self,datacube,wavelengths):
+			# if relevant, mehod to build RGB image from reconstructed data, else pass
+			#rgb_image=
+			return rgb_image
+		
+		def plot_reconstructed_image(self,datacube,wavelengths):
+			# Design a typical plot to display after data reconstruction
+			
+        
