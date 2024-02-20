@@ -30,7 +30,7 @@ The Raspberry Pi board ensures the synchronization between patterns projections 
 
 This repository contains scripts and software embedded on the Raspberry Pi and all the information to install and use it properly. 
 
-An other [ONE-PIX_hardware] repository contains all the files and information to build a case containing all the components of the ONE-PIX kit and their 3D printed attachments.
+An other [ONE-PIX_hardware](https://github.com/PhotonicsOpenProjects/ONE-PIX_harware) repository contains all the files and information to build a case containing all the components of the ONE-PIX kit and their 3D printed attachments.
 
 
 ## ONE-PIX software Installation
