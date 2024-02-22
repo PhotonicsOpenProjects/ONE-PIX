@@ -895,17 +895,20 @@ class OPApp(ctk.CTk):
             self.switch_raw2norm.select()
                 
         
-        if np.all(self.acq_res.rgb_image)!=0:
-            # Display RGB image
-            self.clear_graph_tab1()
-
+        
+        # Display RGB image
+        self.clear_graph_tab1()
+        try:
             self.a_acq.imshow(self.acq_res.rgb_image)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
             self.a_acq.set_axis_on()
             self.canvas.draw_idle()
-            
-            self.switch_spat2im.configure(state='normal')
-            self.switch_spat2im.deselect()
+        except Exception as e:
+            print(e)
+            self.clear_graph_tab1()
+        
+        self.switch_spat2im.configure(state='normal')
+        self.switch_spat2im.deselect()
     
         self.button_acquire_hyp.configure(state='normal')
 # =============================================================================

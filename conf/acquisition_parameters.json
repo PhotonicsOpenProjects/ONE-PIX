@@ -1,7 +1,7 @@
 {
     "imaging_method": "FourierSplit",
-    "spatial_res": 32,
+    "spatial_res": 3,
     "Normalisation": false,
     "normalisation_path": "",
-    "integration_time_ms": 12.0
+    "integration_time_ms": 1.0
 }
