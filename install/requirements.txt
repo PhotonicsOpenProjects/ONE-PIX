@@ -15,5 +15,6 @@ xarray>=2023.1.0
 pyusb>=1.2.1
 labelme>=5.2.1
 opencv-python>=4.5.5.64
+sympy>=1.12
 sphinx-rtd-theme
 
