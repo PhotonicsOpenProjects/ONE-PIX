@@ -2,7 +2,7 @@
 echo -e '\e[32mpython dependencies installation with pip'
 
 echo -e '\033[0m_________________________________________________'
-pip install -r requirements.txt
+pip install -r rasp_requirements.txt
 
 echo -e '\e[32m opencv python dependencies insatllation with apt'
 echo -e '\033[0m_________________________________________________'
