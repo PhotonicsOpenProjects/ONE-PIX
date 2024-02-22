@@ -508,10 +508,12 @@ class OPApp(ctk.CTk):
                 spectrum=H@np.mean(self.acq_res.rgb_image,2)@H
                     
             self.a_acq.imshow(spectrum)
+            self.a_acq.set_axis_on()
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
         else:
             #display image
             self.a_acq.imshow(self.acq_res.rgb_image)
+            self.a_acq.set_axis_on()
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
        
             
