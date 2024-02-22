@@ -30,6 +30,8 @@ from core.Acquisition import Acquisition
 from core.hardware.SpectrometerBridge import SpectrometerBridge
 from core.Reconstruction import Reconstruction
 from core.Analysis import Analysis
+from scipy.linalg import hadamard
+from plugins.imaging_methods.HadamardWalshSplit.custom_walsh_hadamard import *
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -495,9 +497,17 @@ class OPApp(ctk.CTk):
         self.clear_graph_tab1()
         self.switch_spat2im.configure(state='normal')
         
-        if self.switch_spat2im.get()==0:
+        if self.switch_spat2im.get()==1:
             #display spectra
-            self.a_acq.imshow(np.log10(abs(np.mean(self.acq_res.whole_spectrum,2))))
+            if self.analysis.imaging_method_name in ['FourierSplit','FourierShift']:
+                spectrum=np.log10(abs(np.fft.fftshift(np.fft.fft2(np.mean(self.acq_res.rgb_image,2)))))
+
+            elif self.analysis.imaging_method_name in ['HadamardSplit','HadamardWalshSplit']:
+                dim=np.size(self.acq_res.rgb_image,0)
+                H=hadamard(dim) if self.analysis.imaging_method_name=='HadamardSplit' else walsh_matrix(dim)
+                spectrum=H@np.mean(self.acq_res.rgb_image,2)@H
+                    
+            self.a_acq.imshow(spectrum)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["freq"],color='white')
         else:
             #display image
@@ -634,15 +644,17 @@ class OPApp(ctk.CTk):
         
         # Display RGB image
         self.clear_graph_tab1()
-
-        if np.all(self.acq_res.rgb_image)!=0:
+        try:
             self.a_acq.imshow(self.acq_res.rgb_image)
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
             self.a_acq.set_axis_on()
             self.canvas.draw_idle()
-        
             self.switch_spat2im.configure(state='normal')
-            self.switch_spat2im.select()
+            self.switch_spat2im.deselect()
+        except Exception as e:
+            print(e)
+            self.clear_graph_tab1()
+
         self.button_acquire_hyp.configure(state='normal')
 
 # =============================================================================

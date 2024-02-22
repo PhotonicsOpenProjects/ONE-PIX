@@ -903,13 +903,12 @@ class OPApp(ctk.CTk):
             self.a_acq.set_title(self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"]["functions"]["switch_spat2im_command"]["spat"],color='white')
             self.a_acq.set_axis_on()
             self.canvas.draw_idle()
+            self.switch_spat2im.configure(state='normal')
+            self.switch_spat2im.deselect()
         except Exception as e:
             print(e)
             self.clear_graph_tab1()
         
-        self.switch_spat2im.configure(state='normal')
-        self.switch_spat2im.deselect()
-    
         self.button_acquire_hyp.configure(state='normal')
 # =============================================================================
 #         Analysis' tab functions
