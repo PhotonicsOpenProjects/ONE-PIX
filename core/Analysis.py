@@ -72,7 +72,7 @@ class Analysis:
         
        
    
-    def load_data(self,path):
+    def load_data(self,path=None):
         self.imaging_method.image_analysis_method.load_reconstructed_data(path)
     
     def data_normalisation(self):
