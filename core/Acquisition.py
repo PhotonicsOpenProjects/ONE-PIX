@@ -67,7 +67,7 @@ class Acquisition:
                 self.nb_patterns = len(self.imaging_method.patterns_order)
                 self.hardware.hardware_initialisation()
                 self.spectra=np.zeros((self.nb_patterns,len(self.hardware.spectrometer.wavelengths)),dtype=np.float32)
-                self.est_duration=round((self.nb_patterns*(self.hardware.periode_pattern+self.hardware.repetition*(self.hardware.integration_time_ms+2))+2)/(60*1000),2)
+                self.est_duration=round((self.nb_patterns*self.hardware.periode_pattern)/(60*1000),2)
                 self.is_init=True
             except Exception as e:
                 print(e)
