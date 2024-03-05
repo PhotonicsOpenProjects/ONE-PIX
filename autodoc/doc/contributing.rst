@@ -53,6 +53,36 @@ This folder will also be the location where every needed library to run spectral
 
 Fulfilling these lines allows to use your device with the ONE-PIX kit.
 
+Adding a new camera
+-------------------------
+
+To add a new camera, you need to get its API necessary informations to open and close the communication with the device, capture images 
+and set every needed parameters like exposure time.
+
+
+Add a new camera class python file to `ONE-PIX/plugins/camera` with the folder name:
+<Camera_name>. In this folder create a python class file named <Camera_name>Bridge.py. 
+This folder will also be the location where every needed library to capture images must be in.
+
+
+..  code:: python
+	
+	class Camera_nameBridge:
+			
+		def __init__(self):
+			
+				
+		def init_camera(self):
+			# commands to initiate the communication with the camera and set parameters
+
+		def image_capture(self,tag,save_path):
+			# capture an image and save it with filename tag in save_path
+		
+		def close(self):
+			# commands to end the communication with the camera
+
+Fulfilling these lines allows to use your device with the ONE-PIX kit.
+
 
 Adding a new pattern basis or method 
 -----------------------------------------
