@@ -208,7 +208,10 @@ class OPApp(ctk.CTk):
 
     def params_actualisation(self):
         self.json_actualisation()
-        self.config.hardware.spectrometer.spec_close()
+        try:
+            self.config.hardware.spectrometer.spec_close()
+        except Exception:
+            pass
         del self.config
         self.config = Acquisition()
         self.config.hardware.spectrometer.spec_open()
@@ -295,7 +298,7 @@ class OPApp(ctk.CTk):
             curvColor = list(customColormap[i])
             curvColor.append(.5)
             self.a_vis.plot(self.analysis.wavelengths, spectra[i,:],color=curvColor)
-        self.a_vis.legend(self.analysis.patterns_order[1:-1],draggable=True)
+        self.a_vis.legend(self.analysis.patterns_order[1:-1])
         self.a_vis.set_xlabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["xlabel"], fontsize = 10)
         self.a_vis.set_ylabel(self.widgets_text["specific_GUI"]["Addressed"]["Advanced"]["functions"]["plotMask"]["ylabel"], fontsize = 10)
         self.fig_vis.canvas.draw_idle()

@@ -7,7 +7,8 @@ import os
 from tkinter.messagebox import showinfo
 import screeninfo
 import sys
-sys.path.append(f'..{os.sep}..{os.sep}core{os.sep}hardware')
+hardware_path=os.path.dirname(os.path.abspath(__file__))
+sys.path.append(hardware_path)
 from CameraBridge import *
 
 screenWidth = screeninfo.get_monitors()[0].width
@@ -19,13 +20,12 @@ except IndexError:
     #sys.exit()
 
 
-software_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/software_config.json')
-hardware_json_path = os.path.abspath(f'..{os.sep}..{os.sep}conf/hardware_config.json')
+software_json_path = os.path.abspath(hardware_path+f"{os.sep}..{os.sep}..{os.sep}conf/software_config.json")
+hardware_json_path = os.path.abspath(hardware_path+f"{os.sep}..{os.sep}..{os.sep}conf/hardware_config.json")
 with open(hardware_json_path) as file:
     hardware_dict=json.load(file)
 
 camera=CameraBridge(hardware_dict['name_camera'])
-
 def order_corners(pts):
     """
     Given the four points found for our contour, order them into
@@ -44,14 +44,14 @@ def order_corners(pts):
     rect[3] = pts[np.argmax(diff)]
     return rect
 
-def get_reference_image(img_resolution=(proj_shape.width, proj_shape.height)):
+def get_reference_image(img_resolution=(proj_shape.width, proj_shape.height),grayscale=50):
     """
     Build the image we will be searching for.  In this case, we just want a
     large white box (full screen)
     :param img_resolution: this is our screen/projector resolution
     """
     width, height = img_resolution
-    img = np.zeros((height, width, 1), np.uint8)
+    img = grayscale*np.ones((height, width, 1), np.uint8)
     return img
 
 
@@ -152,6 +152,7 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
     projected region
     
     """
+    camera.camera_open()
     with open(software_json_path) as f:
         setup_dict = json.load(f)
     m=setup_dict["m"]
@@ -178,10 +179,12 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         
 
         # Grab a photo of the frame
+        
         camera.get_image(tag)
+        
         save_path=f"./{tag}.png"
         frame = cv2.imread(save_path)
-        os.remove(save_path)
+        #os.remove(save_path)
 
         # We're going to work with a smaller image, so we need to save the scale
         ratio = frame.shape[0] / 300.0
@@ -212,21 +215,20 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
                 
         with  open(software_json_path, "w") as f:
             json.dump(setup_dict,file,indent=4)
-        
-        
+
     else:
-        
-        
+
         # Grab a photo of the frame
         camera.get_image(tag)
         save_path=f"./{tag}.png"
         pict = cv2.imread(save_path)
-        os.remove(save_path)
+        #os.remove(save_path)
            
         
     # Uncomment the lines below to see the transformed image
     wrap = cv2.resize(cv2.warpPerspective(pict, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
     cv2.imwrite(save_path,wrap)
+    camera.close_camera()
 
 
 
@@ -241,7 +243,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     except IndexError:
         showinfo(title=None,message='Please use a projector to use ONE-PIX')
         #sys.exit()
-    
+    camera.camera_open()
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)
     # Delay execution a quarter of a second to make sure the image is displayed 
@@ -250,9 +252,11 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
         
     # Grab a photo of the frame
     save_path="init.png"
+    
     camera.get_image('calibration',save_path)
+    camera.close_camera()
     frame = cv2.imread(save_path)
-    os.remove(save_path)
+    #os.remove(save_path)
 
     # We're going to work with a smaller image, so we need to save the scale
     ratio = frame.shape[0] / 300.0
