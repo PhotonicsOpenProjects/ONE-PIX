@@ -85,12 +85,13 @@ class Projection:
         
         self.create_fullscreen_window()
         cv2.imshow('ImageWindow',cv2.resize(test_pattern,(self.width,self.height),interpolation=cv2.INTER_LINEAR_EXACT))
-        cv2.waitKey(100)
+        cv2.waitKey(1)
+        time.sleep(0.5)
         print('Finding the optimal integration time (ms):')
         acq_config.hardware.spectrometer.get_optimal_integration_time()
-        cv2.destroyAllWindows()
         acq_config.periode_pattern=int(acq_config.hardware.repetition*acq_config.hardware.spectrometer.integration_time_ms)
         if acq_config.periode_pattern<60 :acq_config.periode_pattern=60
+        cv2.destroyAllWindows()
 
     def init_projection(self,patterns,patterns_order,interp_method):
         # Initialise cv2 display on the second monitor 
