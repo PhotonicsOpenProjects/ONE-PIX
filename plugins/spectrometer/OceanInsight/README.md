@@ -17,7 +17,7 @@ To configure Ocean Insight USB rules you need to copy the file the 10-oceanoptic
 For that copy/paste the 10-oceanoptics.rules in /etc/udev/rules.d folder with this command line:
 
 ```
-sudo cp ~/Desktop/ONE-PIX/ONE-PIX_soft/plugins/spectrometer/OceanInsight/10-oceanoptics.rules   /etc/udev/rules.d
+sudo cp ~/Desktop/ONE-PIX/plugins/spectrometer/OceanInsight/10-oceanoptics.rules   /etc/udev/rules.d
 ```
 
 
