@@ -266,8 +266,12 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     pict = frame.copy()
     # Resize our image smaller, this will make things a lot faster
     frame = imutils.resize(frame, height=300)
+    try:
+        rect = get_region_corners(frame)
+    except AttributeError:
+        print("Lancement de la coregistration manuelle")
+        #rect=manual_get_region_corners(frame)
 
-    rect = get_region_corners(frame)
     rect *= ratio  # We shrank the image, so now we have to scale our points up
 
     dst, max_width, max_height = get_destination_array(rect)

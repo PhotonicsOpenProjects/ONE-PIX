@@ -78,7 +78,7 @@ class Hardware :
         self.spectrometer.get_wavelengths() 
         
         # Camera connection
-        self.camera.camera_open()
+        #self.camera.camera_open()
         
         #self.projection.reshape_patterns(self,patterns)
     
