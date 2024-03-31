@@ -1,4 +1,4 @@
-import time
+import matplotlib.pyplot as plt
 import numpy as np
 import imutils
 import cv2
@@ -93,6 +93,28 @@ def find_edges(frame):
     edged = cv2.Canny(gray, 30, 200)  # Find our edges
     return edged
 
+def manual_get_region_corners(frame):
+    """
+    User selects the four corners of our projected region and return them in
+    the proper order
+    :param frame: Camera Image
+    :return: Projection region rectangle
+    """
+    fig=plt.figure()
+    plt.imshow(frame)
+    plt.title('Projection corners selection')
+    screen_contours=plt.ginput(n=4)
+    plt.show()
+    plt.close(fig)
+    pts = np.asarray(screen_contours,dtype=np.int32).reshape(4, 2)
+    rect = order_corners(pts)
+    # Uncomment these lines to see the contours on the image
+    
+    cv2.drawContours(frame, [pts], -1, (255, 0, 0), 3)
+    cv2.imshow('Screen', frame)
+    cv2.waitKey(1)
+    return rect
+
 def get_region_corners(frame):
     """
     Find the four corners of our projected region and return them in
@@ -152,18 +174,15 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
     projected region
     
     """
-    camera.camera_open()
+    #camera.camera_open()
     with open(software_json_path) as f:
         setup_dict = json.load(f)
     m=setup_dict["m"]
     max_width=setup_dict["max_width"]
     max_height=setup_dict["max_height"]
     
-    res=False
-    if m==[]:
-        res=True
         
-    if(res):
+    if(m==[]):
         tag='init'
     else:
         m=np.reshape(m,(3,3))
@@ -184,7 +203,7 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
         
         save_path=f"./{tag}.png"
         frame = cv2.imread(save_path)
-        #os.remove(save_path)
+        os.remove(save_path)
 
         # We're going to work with a smaller image, so we need to save the scale
         ratio = frame.shape[0] / 300.0
@@ -228,7 +247,7 @@ def get_perspective_transform(tag,screen_resolution=(proj_shape.width,proj_shape
     # Uncomment the lines below to see the transformed image
     wrap = cv2.resize(cv2.warpPerspective(pict, m, (max_width, max_height)),(proj_shape.width,proj_shape.height))
     cv2.imwrite(save_path,wrap)
-    camera.close_camera()
+    #camera.close_camera()
 
 
 
@@ -266,11 +285,13 @@ def coregistration_calibration(screen_resolution=(proj_shape.width,proj_shape.he
     pict = frame.copy()
     # Resize our image smaller, this will make things a lot faster
     frame = imutils.resize(frame, height=300)
+    """"
     try:
         rect = get_region_corners(frame)
     except AttributeError:
         print("Lancement de la coregistration manuelle")
-        #rect=manual_get_region_corners(frame)
+    """
+    rect=manual_get_region_corners(frame)
 
     rect *= ratio  # We shrank the image, so now we have to scale our points up
 

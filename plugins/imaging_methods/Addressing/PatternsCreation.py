@@ -76,7 +76,7 @@ class CreationPatterns:
         cv2.waitKey(250)
         
         # PiCamera settings
-        camera.camera_open()
+        #camera.camera_open()
         camera.get_image(tag='Addressing',save_path=RGB_path)
         self.RGB_img = PIL.Image.open(RGB_path)
         self.RGB_img= np.asarray(self.RGB_img)
@@ -93,7 +93,7 @@ class CreationPatterns:
         self.nb_patterns=np.size(self.patterns,0)
         print(self.nb_patterns)
         self.sequence_order()
-        camera.close_camera()
+        #camera.close_camera()
         return self.patterns
 
     def save_raw_data(self,acquisition_class,path=None):
