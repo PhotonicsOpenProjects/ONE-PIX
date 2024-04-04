@@ -6,19 +6,19 @@ import glob
 import tkinter as Tk
 from tkinter import filedialog
 from tkinter import *
-from spyrit.misc.walsh_hadamard import sequency_perm
+from plugins.imaging_methods.Spyrit.spyrit.misc.walsh_hadamard import sequency_perm
 
-from spyrit.core.meas import HadamSplit
-from spyrit.core.noise import NoNoise
-from spyrit.core.prep import SplitPoisson
-from spyrit.core.recon import PseudoInverse
+from plugins.imaging_methods.Spyrit.spyrit.core.meas import HadamSplit
+from plugins.imaging_methods.Spyrit.spyrit.core.noise import NoNoise
+from plugins.imaging_methods.Spyrit.spyrit.core.prep import SplitPoisson
+from plugins.imaging_methods.Spyrit.spyrit.core.recon import PseudoInverse
 import math
-from spyrit.core.noise import Poisson
-from spyrit.core.recon import DCNet, PinvNet
+from plugins.imaging_methods.Spyrit.spyrit.core.noise import Poisson
+from plugins.imaging_methods.Spyrit.spyrit.core.recon import DCNet, PinvNet
 
-from spyrit.core.train import load_net
-from spyrit.core.nnet import Unet
-from spyrit.misc.sampling import reorder, Permutation_Matrix
+from plugins.imaging_methods.Spyrit.spyrit.core.train import load_net
+from plugins.imaging_methods.Spyrit.spyrit.core.nnet import Unet
+from plugins.imaging_methods.Spyrit.spyrit.misc.sampling import reorder, Permutation_Matrix
 
 class Reconstruction:
     """ Class to reconstruct a data cube from Walsh Hadamard splitting ONE-PIX method."""
