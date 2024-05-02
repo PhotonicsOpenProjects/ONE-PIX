@@ -26,14 +26,14 @@ class Analysis:
             self.imaging_method = ImagingMethodBridge(self.imaging_method_name)
             self.imaging_method.analysis(self.data_path)
 
-        self.acquisition_config_path = os.path.join(
+        self.software_config_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
             f"..{os.sep}conf",
-            "acquisition_parameters.json",
+            "software_config.json",
         )
-        with open(self.acquisition_config_path) as f:
-            acquisition_dict = json.load(f)
-        self.normalisation_path = acquisition_dict["normalisation_path"]
+        with open(self.software_config_path) as f:
+            software_dict = json.load(f)
+        self.normalisation_path = software_dict["normalisation_path"]
         self.normalised_data = []
 
     def read_header(self):
