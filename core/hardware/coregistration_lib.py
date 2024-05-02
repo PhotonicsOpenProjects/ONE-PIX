@@ -292,7 +292,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
     save_path = "init.png"
 
     camera.get_image("calibration", save_path)
-    camera.close_camera()
+    
     frame = cv2.imread(save_path)
     # os.remove(save_path)
 
