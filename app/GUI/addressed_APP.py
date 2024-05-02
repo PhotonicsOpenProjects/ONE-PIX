@@ -199,9 +199,9 @@ class OPApp(ctk.CTk):
             sticky="w",
         )
 
-        with open(acquisition_json_path) as f:
-            params = json.load(f)
-        self.integration_time_entry.insert(0, str(params["integration_time_ms"]))
+        with open(hardware_json_path) as f:
+            hardware_dict = json.load(f)
+        self.integration_time_entry.insert(0, str(hardware_dict["integration_time_ms"]))
 
         # =============================================================================
         #
