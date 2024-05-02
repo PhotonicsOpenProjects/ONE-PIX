@@ -126,8 +126,9 @@ def manual_get_region_corners(frame):
     # Uncomment these lines to see the contours on the image
 
     cv2.drawContours(frame, [pts], -1, (255, 0, 0), 3)
-    cv2.imshow("Screen", frame)
-    cv2.waitKey(1)
+    plt.figure()
+    plt.imshow(frame)
+    plt.show()
     return rect
 
 
