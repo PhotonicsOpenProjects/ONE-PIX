@@ -1,6 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python,virtualenv,pycharm+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,virtualenv,pycharm+all
 
+.vscde
 
 ### Ignore data before push ##
 app/Hypercubes
