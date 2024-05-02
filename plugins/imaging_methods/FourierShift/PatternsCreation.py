@@ -2,30 +2,33 @@ import numpy as np
 import cv2
 import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
 
+
 class CreationPatterns:
-    """ Class FourierShiftPatterns allows to create a sequence of 
-        Fourier shifted patterns and their order list
+    """Class FourierShiftPatterns allows to create a sequence of
+    Fourier shifted patterns and their order list
     """
-    def __init__(self,spatial_res,height,width):
 
-        self.spatial_res=spatial_res
-        self.width=width
-        self.height=height
+    def __init__(self, spatial_res, height, width):
 
-        if (self.spatial_res%2==0):
-            self.spatial_res=self.spatial_res+1
-        
-        self.spectrum_size=(self.spatial_res-1)//2
-        self.nb_patterns=2*(self.spectrum_size+1)*(2*self.spectrum_size+1)
-        
-        self.white_pattern_idx=2*self.spectrum_size
-        
+        self.spatial_res = spatial_res
+        self.width = width
+        self.height = height
+
+        if self.spatial_res % 2 == 0:
+            self.spatial_res = self.spatial_res + 1
+
+        self.spectrum_size = (self.spatial_res - 1) // 2
+        self.nb_patterns = 2 * (self.spectrum_size + 1) * (2 * self.spectrum_size + 1)
+
+        self.white_pattern_idx = 2 * self.spectrum_size
+
         y = list(range(self.height))  # horizontal vector for the pattern creation
         x = list(range(self.width))  # vertical vector for the pattern creation
-        self.Y, self.X = np.meshgrid(x, y)  # horizontal and vertical array for the pattern creation
-        
-        self.interp_method=cv2.INTER_LINEAR_EXACT
-    
+        self.Y, self.X = np.meshgrid(
+            x, y
+        )  # horizontal and vertical array for the pattern creation
+
+        self.interp_method = cv2.INTER_LINEAR_EXACT
 
     def sequence_order(self):
         """
@@ -34,26 +37,25 @@ class CreationPatterns:
         Returns
         -------
         pattern_order : list of str
-            list of name of fourier patterns stored in sequence. 
-            The name contains shifting parameter names (preal or pim) 
-            and the associated coordinates from the half rigth spatial spectrum.  
+            list of name of fourier patterns stored in sequence.
+            The name contains shifting parameter names (preal or pim)
+            and the associated coordinates from the half rigth spatial spectrum.
         .
         freqs : list of tuples
             list of tuples of 2D spatial frequencies sampled.
 
         """
-        pattern_order=[]
-        freqs=[]
-        for j in range(self.spectrum_size+1): #column broom
-            for k in range(-self.spectrum_size,self.spectrum_size+1): #line broom
-                pattern_order.append("preal(%d,%d)"%(self.spectrum_size+k,j))
-                pattern_order.append("pim(%d,%d)"%(self.spectrum_size+k,j))
-                freqs.append((j,k))
-                
-        return pattern_order,freqs
-    
+        pattern_order = []
+        freqs = []
+        for j in range(self.spectrum_size + 1):  # column broom
+            for k in range(-self.spectrum_size, self.spectrum_size + 1):  # line broom
+                pattern_order.append("preal(%d,%d)" % (self.spectrum_size + k, j))
+                pattern_order.append("pim(%d,%d)" % (self.spectrum_size + k, j))
+                freqs.append((j, k))
 
-    def creation_freq_patterns(self,freq):
+        return pattern_order, freqs
+
+    def creation_freq_patterns(self, freq):
         """
         Function for the creation of Fourrier patterns with the shifting method
 
@@ -74,19 +76,19 @@ class CreationPatterns:
             Imaginary Fourier pattern.
 
         """
-    
-        j,k=freq
-        u=k/self.height # spatial horizontal frequency
-        v=j/self.width # spatial vertical frequency
-        
-        A=2*np.pi*self.X*u 
-        B=2*np.pi*self.Y*v 
-        
-        Preal=np.cos(A+B,dtype=np.float32) #desired real pattern creation
-        Pim=np.sin(A+B,dtype=np.float32) #desired imaginary pattern creation
-        
-        return Preal,Pim
-    
+
+        j, k = freq
+        u = k / self.height  # spatial horizontal frequency
+        v = j / self.width  # spatial vertical frequency
+
+        A = 2 * np.pi * self.X * u
+        B = 2 * np.pi * self.Y * v
+
+        Preal = np.cos(A + B, dtype=np.float32)  # desired real pattern creation
+        Pim = np.sin(A + B, dtype=np.float32)  # desired imaginary pattern creation
+
+        return Preal, Pim
+
     def creation_patterns(self):
         self.patterns_order, freqs = self.sequence_order()
         patterns = []
@@ -96,6 +98,6 @@ class CreationPatterns:
 
         return patterns
 
-    def save_raw_data(self,acquisition_class,path=None):
-        saver=FIS.FisCommonAcquisition(acquisition_class)
+    def save_raw_data(self, acquisition_class, path=None):
+        saver = FIS.FisCommonAcquisition(acquisition_class)
         saver.save_raw_data(path=None)
