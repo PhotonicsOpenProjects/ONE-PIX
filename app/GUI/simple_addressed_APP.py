@@ -354,8 +354,16 @@ class OPApp(ctk.CTk):
         with open(acquisition_json_path) as f:
             params = json.load(f)
 
+        with open(hardware_json_path) as f:
+            hardware_params = json.load(f)
+
         with open(software_json_path) as f:
             software_params = json.load(f)
+
+        hardware_params["integration_time_ms"] = int(
+            float(self.integration_time_entry.get())
+        )
+        params["imaging_method"] = "Addressing"
 
         if self.test_mode == "manual":
             software_params["clustering_method"] = "LabelMe"
@@ -371,6 +379,9 @@ class OPApp(ctk.CTk):
 
         with open(software_json_path, "w") as outfile:
             json.dump(software_params, outfile, indent=4)
+
+        with open(hardware_json_path, "w") as outfile:
+            json.dump(hardware_params, outfile, indent=4)
 
     def params_actualisation(self):
         self.json_actualisation()

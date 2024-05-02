@@ -18,25 +18,34 @@ import shutil
 # Normalisation datacube parameters setting
 acquisition_json_path = f"..{os.sep}..{os.sep}conf{os.sep}acquisition_parameters.json"
 hardware_json_path = f"..{os.sep}..{os.sep}conf{os.sep}hardware_config.json"
+software_json_path = f"..{os.sep}..{os.sep}conf{os.sep}software_config.json"
+
 with open(acquisition_json_path) as f:
     acq_params = json.load(f)
 
-acq_params["normalisation_path"] = ""
+with open(software_json_path) as f:
+    soft_params = json.load(f)
+
+soft_params["normalisation_path"] = ""
 acq_params["spatial_res"] = 21
 acq_params["imaging_method"] = "FourierSplit"
 
 with open(acquisition_json_path, "w") as file:
     json.dump(acq_params, file, indent=4)
 
+with open(software_json_path, "w") as file:
+    json.dump(soft_params, file, indent=4)
+
 
 test = Acquisition()
 test.hardware.spectrometer.spec_open()
 test.hardware.projection.get_integration_time_auto(test)
 # save auto measured integration time
-f = open(hardware_json_path)
-acq_params = json.load(f)
-f.close()
-acq_params["integration_time_ms"] = test.hardware.spectrometer.integration_time_ms
+with open(hardware_json_path) as f:
+    hardware_params = json.load(f)
+
+hardware_params["integration_time_ms"] = test.hardware.spectrometer.integration_time_ms
+
 with open(hardware_json_path, "w") as file:
     json.dump(acq_params, file, indent=4)
 
@@ -75,11 +84,11 @@ saver.save_acquisition_envi(
 )
 save_path = save_path + os.sep + f"reference_{fdate}_{actual_time}"
 # Notify in json file where to find the normalised datacube
-with open(acquisition_json_path) as f:
-    acq_params = json.load(f)
+with open(software_json_path) as f:
+    software_params = json.load(f)
 
 acq_params["normalisation_path"] = os.path.abspath(save_path)
-with open(acquisition_json_path, "w") as file:
-    json.dump(acq_params, file)
+with open(software_json_path, "w") as file:
+    json.dump(software_params, file)
 
 # shutil.copy(glob.glob(save_path+os.sep+'ONE-PIX*'+os.sep+'*.txt')[0],os.path.abspath(save_path+os.sep+'reference'))

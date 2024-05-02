@@ -1067,11 +1067,18 @@ class OPApp(ctk.CTk):
             # Set Normalisation to False
             with open(acquisition_json_path, "r") as file:
                 acquisition_json_object = json.load(file)
+            
+            with open(software_json_path, "r") as file:
+                software_json_object = json.load(file)
+
             acquisition_json_object["Normalisation"] = False
-            acquisition_json_object["normalisation_path"] = ""
+            software_json_object["normalisation_path"] = ""
 
             with open(acquisition_json_path, "w") as outfile:
                 json.dump(acquisition_json_object, outfile, indent=4)
+            
+            with open(software_json_path, "w") as outfile:
+                json.dump(software_json_object, outfile, indent=4)
 
     def simple_acq_mode(self):
         self.simple_mode_button.configure(state="disabled")
@@ -1341,7 +1348,7 @@ class OPApp(ctk.CTk):
         hardware_json_object["name_spectro"] = self.acq_config.hardware.name_spectro
         acquisition_json_object["imaging_method"] = self.methods_optionemenu.get()
         acquisition_json_object["spatial_res"] = int(self.entry_img_res.get())
-        acquisition_json_object["integration_time_ms"] = float(
+        hardware_json_object["integration_time_ms"] = float(
             self.entry_integration_time.get()
         )
         self.is_normalised = acquisition_json_object["Normalisation"]

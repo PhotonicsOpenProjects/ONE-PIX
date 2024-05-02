@@ -1,7 +1,6 @@
 {
     "imaging_method": "Addressing",
     "spatial_res": 11,
-    "Normalisation": false,
-    "normalisation_path": "",
-    "integration_time_ms": 1.0
+    "Normalisation": false
+    
 }
