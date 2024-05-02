@@ -183,4 +183,4 @@ class Acquisition:
 
     def save_raw_data(self, path=None):
         self.imaging_method.pattern_creation_method.save_raw_data(self)
-        self.hardware.camera.close_camera()
+        

@@ -1,31 +1,15 @@
 {
-    "m": [
-        [
-            1.047904725295221,
-            0.034170807551037206,
-            -78.70037895822914
-        ],
-        [
-            -0.017033601063350147,
-            1.0458634464244851,
-            -108.55285784977819
-        ],
-        [
-            3.305133782989041e-05,
-            3.6047484898131246e-05,
-            1.0
-        ]
-    ],
+    "m": [],
     "clustering_method": "LabelMe",
     "clustering_parameters": [
         2,
         5
     ],
-    "max_height": 483,
-    "max_width": 799,
+    "max_height": 338,
+    "max_width": 481,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
     "mode_choice": "Advanced",
     "acquisition_method": "Complete",
-    "normalisation_path": "C:/Users/Mathieu/Documents/GitHub/refactoring_ONE-PIX/app/References/Normalisation_08_02_2024_17-42-00/reference/ONE-PIX_reconstructed_data_08_02_2024_17-42-03"
+    "normalisation_path": ""
 }

@@ -1,5 +1,5 @@
 {
-    "imaging_method": "FourierSplit",
+    "imaging_method": "Addressing",
     "spatial_res": 11,
     "Normalisation": false,
     "normalisation_path": "",
