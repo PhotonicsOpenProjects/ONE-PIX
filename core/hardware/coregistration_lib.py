@@ -119,7 +119,7 @@ def manual_get_region_corners(frame):
     plt.imshow(frame)
     plt.title("Projection corners selection")
     screen_contours = plt.ginput(n=4)
-    plt.show()
+    plt.show(block=False)
     plt.close(fig)
     pts = np.asarray(screen_contours, dtype=np.int32).reshape(4, 2)
     rect = order_corners(pts)
@@ -128,7 +128,7 @@ def manual_get_region_corners(frame):
     cv2.drawContours(frame, [pts], -1, (255, 0, 0), 3)
     plt.figure()
     plt.imshow(frame)
-    plt.show()
+    plt.show(block=False)
     return rect
 
 
