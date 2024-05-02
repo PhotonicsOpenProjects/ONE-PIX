@@ -330,6 +330,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
     with open(software_json_path, "w") as file:
         json.dump(setup_dict, file, indent=4)
 
+    camera.camera_close()
 
 def apply_corregistration(img):
     """
