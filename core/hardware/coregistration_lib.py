@@ -268,7 +268,6 @@ def get_perspective_transform(
         (proj_shape.width, proj_shape.height),
     )
     cv2.imwrite(save_path, wrap)
-    # camera.close_camera()
 
 
 def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.height)):
@@ -281,7 +280,6 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
     except IndexError:
         showinfo(title=None, message="Please use a projector to use ONE-PIX")
         # sys.exit()
-    camera.camera_open()
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)
     # Delay execution a quarter of a second to make sure the image is displayed
@@ -330,7 +328,6 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
     with open(software_json_path, "w") as file:
         json.dump(setup_dict, file, indent=4)
 
-    camera.close()
 
 def apply_corregistration(img):
     """
