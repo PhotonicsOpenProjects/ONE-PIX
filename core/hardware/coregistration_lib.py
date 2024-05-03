@@ -261,7 +261,7 @@ def get_perspective_transform(
         camera.get_image(tag)
         save_path = f"./{tag}.png"
         pict = cv2.imread(save_path)
-        # os.remove(save_path)
+        os.remove(save_path)
 
     # Uncomment the lines below to see the transformed image
     wrap = cv2.resize(
@@ -293,7 +293,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
     camera.get_image("calibration", save_path)
     
     frame = cv2.imread(save_path)
-    # os.remove(save_path)
+    os.remove(save_path)
 
     # We're going to work with a smaller image, so we need to save the scale
     ratio = frame.shape[0] / 300.0
