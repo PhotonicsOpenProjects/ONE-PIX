@@ -103,7 +103,7 @@ class CreationPatterns:
             axis=0,
         )
         self.nb_patterns = np.size(self.patterns, 0)
-        print(self.nb_patterns)
+        #(self.nb_patterns)
         self.sequence_order()
         # camera.close_camera()
         return self.patterns

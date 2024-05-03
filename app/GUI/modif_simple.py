@@ -807,10 +807,10 @@ class OPApp(ctk.CTk):
 
     def spec_connection(self):
         test = 0
-        for i in self.spectro_list:
+        for spectro_name in self.spectro_list:
             if test == 0:
                 try:
-                    self.acq_config.hardware.name_spectro = i
+                    self.acq_config.hardware.name_spectro = spectro_name
                     self.acq_config.hardware.spectrometer = SpectrometerBridge(
                         self.acq_config.hardware.name_spectro,
                         self.acq_config.hardware.integration_time_ms,
@@ -821,7 +821,7 @@ class OPApp(ctk.CTk):
                     self.acq_config.hardware.spectrometer.spec_open()
 
                     if self.acq_config.hardware.spectrometer.DeviceName != "":
-                        print(i)
+                        print(spectro_name)
                         test = 1
                         spectro_name = self.acq_config.hardware.spectrometer.DeviceName
                         if len(spectro_name) < 30:
