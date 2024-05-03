@@ -1986,6 +1986,7 @@ class OPApp(ctk.CTk):
         data_list = list(self.res.keys())
         data_list.remove("wavelengths")
         data_list.remove("current_data_level")
+        data_list.remove("pattern_method")
         path = self.analysis_save_path + "/" + "ONE-PIX_analysis_" + today
         os.mkdir(path)
         choice_list = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"][

@@ -536,7 +536,7 @@ class FisAnalysis:
 
         return datacube_rogn, wavelengths_rogn
 
-    def py2ms(save_gerbil_name, datacube, wavelengths):
+    def py2ms(self,save_gerbil_name, datacube, wavelengths):
         """
 
         py2ms allows to save ONE-PIX data into Gerbil format http://gerbilvis.org/
@@ -581,7 +581,7 @@ class FisAnalysis:
 
         fid.close()
 
-    def py2envi(save_envi_name, datacube, wavelengths, save_path=None):
+    def py2envi(self,save_envi_name, datacube, wavelengths, save_path=None):
         """
         py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
         metadata can be improved !
