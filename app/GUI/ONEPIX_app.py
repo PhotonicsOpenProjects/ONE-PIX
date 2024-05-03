@@ -2014,7 +2014,7 @@ class OPApp(ctk.CTk):
                     elif datacube == "reconstructed_image":
                         hyp_path = path + "/reconstructed_image_" + today
                         os.mkdir(hyp_path)
-                        py2envi(
+                        self.analysis.py2envi(
                             datacube,
                             self.res[datacube],
                             self.res["wavelengths"],
@@ -2023,9 +2023,9 @@ class OPApp(ctk.CTk):
                     else:
                         data_path = path + "/" + datacube + "_" + today
                         os.mkdir(data_path)
-                        py2envi(datacube, self.res[datacube], wl, data_path)
+                        self.analysis.py2envi(datacube, self.res[datacube], wl, data_path)
             else:
-                py2envi(
+                self.analysis.py2envi(
                     self.res["current_data_level"],
                     self.res[self.res["current_data_level"]],
                     wl,
