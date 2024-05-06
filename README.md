@@ -82,10 +82,11 @@ To install ONE-PIX on the raspberry pi board just run the setup.sh for that go i
 ```
 cd ONE-PIX/install 
 ```
-and run the installtion script with this command :
+and run the installation script with this command :
 
 ```
-python setup.py 
+sudo chmod +x ./install.sh
+./install.sh
 ```
 
 
