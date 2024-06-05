@@ -1,0 +1,12 @@
+ONE-PIX_raw_acquisition_19_02_2024_15-30-13
+--------------------------------------------------------
+
+Imaging method: HadamardWalshSplit
+Acquisition duration: 343.122190 s
+Spectrometer OceanInsight : FLMS18770
+Camera: Stub
+Number of projected patterns: 2048
+Height of pattern window: 600 pixels
+Width of pattern window: 800 pixels
+Number of spectral measures per pattern: 5  
+Integration time: 16 ms
