@@ -1,7 +1,3 @@
-<p align="center">
-<img src="imgs/POP_SFO_2024.png" alt="SFO2024POP" />
-</p>
-
 
 <p align="center">
 <img src="imgs/logo.png" alt="logo" width="200"/>
