@@ -8,7 +8,7 @@ class CreationPatterns:
         Hadamard split patterns and their order list.
     """
     def __init__(self,spatial_res,height=0,width=0):
-             
+        spatial_res=32
         self.dim=2**(round(np.log2(spatial_res)))
         self.nb_patterns=2*self.dim**2
         self.sequence=[]

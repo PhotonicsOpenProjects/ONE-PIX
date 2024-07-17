@@ -18,18 +18,20 @@ from spyrit.core.recon import DCNet, PinvNet
 
 from spyrit.core.train import load_net
 from spyrit.core.nnet import Unet
-from sampling import reorder, Permutation_Matrix
+from spyrit.misc.sampling import reorder, Permutation_Matrix
 
+from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction import (
+    FisCommonReconstruction,
+)
 import json
 
 class Reconstruction:
     """ Class to reconstruct a data cube from Walsh Hadamard splitting ONE-PIX method."""
     def __init__(self,spectra,pattern_order):
-
-
     
         self.spectra=spectra
         self.pattern_order=pattern_order
+
 
     def onepix2spyrit_mes(self):
         self.spyrit_mes = torch.from_numpy(self.spectra.T).to(dtype=torch.float)   
@@ -73,7 +75,7 @@ class Reconstruction:
         # model = DCNet(noise, prep, Cov_rec, denoi)
     
     
-        
+        device='cpu'
         load_net(title, model, device, strict = False)
         model.eval() 
         
@@ -83,7 +85,7 @@ class Reconstruction:
         
         Perm_rec = Permutation_Matrix(Ord_rec)    # from natural order to reconstrcution order 
         Perm_acq = Permutation_Matrix(Ord_acq).T  # from acquisition to natural order
-        m = reorder(self.onepix_mes["spectra"], Perm_acq, Perm_rec)
+        m = reorder(self.spectra, Perm_acq, Perm_rec)
         print(np.shape(m))
         with torch.no_grad():
             m_torch = torch.Tensor(m[:2*1024,:]).to(device)
@@ -92,7 +94,7 @@ class Reconstruction:
         print(np.shape(rec))
         self.datacube = rec
         self.datacube=self.datacube.T
-        
+        hyperspectral_image=self.datacube
         return hyperspectral_image
 
     def save_reconstructed_image(self,datacube,wavelengths,header,filename,save_path=None):
