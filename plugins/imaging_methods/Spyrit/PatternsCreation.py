@@ -1,5 +1,5 @@
 import numpy as np
-from plugins.imaging_methods.Spyrit.custom_walsh_hadamard import *
+from plugins.imaging_methods.Spyrit.core.custom_walsh_hadamard import *
 import cv2
 import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
 

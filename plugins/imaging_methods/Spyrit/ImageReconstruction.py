@@ -31,6 +31,11 @@ class Reconstruction:
     
         self.spectra=spectra
         self.pattern_order=pattern_order
+        spyrit_config_path=os.path.dirname(os.path.abspath(__file__))+f"{os.sep}conf"+f"{os.sep}spyrit_config.json"
+        with open(spyrit_config_path) as f:
+            spyrit_dict = json.load(f)
+        self.cnn_path=spyrit_dict["cnn_path"]
+        print(self.cnn_path)
 
 
     def onepix2spyrit_mes(self):
@@ -39,19 +44,19 @@ class Reconstruction:
  
     def image_reconstruction(self):
 
-        chemin_script = os.getcwd()
-        root = Tk()
-        root.withdraw()
-        root.attributes('-topmost', 1)
-        cnn_path = filedialog.askdirectory(title = "Select the folder containing cnn model", initialdir = chemin_script)
-        os.chdir(cnn_path)
 
 
-    
-        chemin_script = os.getcwd()
-        Cov_rec = np.load(cnn_path+'\Cov_64x64.npy')
-        title=chemin_script+'\cnn_32to64'
-        
+        # chemin_script = os.getcwd()
+        # root = Tk()
+        # root.withdraw()
+        # root.attributes('-topmost', 1)
+        # cnn_path = filedialog.askdirectory(title = "Select the folder containing cnn model", initialdir = chemin_script)
+        # os.chdir(cnn_path)
+
+
+
+        Cov_rec = np.load(self.cnn_path+'\Cov_64x64.npy')
+        title=self.cnn_path+'\cnn_32to64'
         
         Ord_acq = np.ones((32, 32))
         
