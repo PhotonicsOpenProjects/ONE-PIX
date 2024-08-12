@@ -157,14 +157,18 @@ class Reconstruction:
         fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time
         # Header
-        header = (
-            f"ONE-PIX_reconstructed_acquisition_{fdate}_{actual_time}"
-            + "\n"
-            + "--------------------------------------------------------"
-            + "\n"
-            + "\n"
-            + f"Imaging method: {self.imaging_method_name}"
-            + "\n"
-        )
+        if type(self.acquisition_dict) is dict:
+            header = (
+                f"ONE-PIX_reconstructed_acquisition_{fdate}_{actual_time}"
+                + "\n"
+                + "--------------------------------------------------------"
+                + "\n"
+                + "\n"
+                + f"Imaging method: {self.imaging_method_name}"
+                + "\n"
+            )
+        else:
+            self.acquisition_dict.create_acquisition_header()
+            header=self.acquisition_dict.header
 
         return header

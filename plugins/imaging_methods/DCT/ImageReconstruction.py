@@ -67,7 +67,7 @@ class Reconstruction:
 
         spectrum = self.spectrum_reconstruction()
         hyperspectral_image=np.zeros_like(spectrum)
-        for wl in range(np.shape(spectrum,2)):
+        for wl in range(np.shape(spectrum)[2]):
             hyperspectral_image[:,:,wl]=idct(idct(spectrum[:,:,wl].T, norm='ortho').T, norm='ortho')
 
         return hyperspectral_image

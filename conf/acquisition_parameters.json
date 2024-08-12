@@ -1,5 +1,5 @@
 {
-    "imaging_method": "Addressing",
-    "spatial_res": 11,
+    "imaging_method": "DCT",
+    "spatial_res": 32,
     "Normalisation": false
 }

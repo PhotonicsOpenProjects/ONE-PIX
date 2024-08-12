@@ -16,17 +16,16 @@ class CreationPatterns:
     def __init__(self, spatial_res, height, width):
         # import users defined spatial infos
         self.spatial_res = spatial_res
+        self.spectrum_size=self.spatial_res//2
         self.height = height
         self.width = width
 
         
-        self.nb_patterns = self.spatial_res**2
+        self.nb_patterns = 2*self.spatial_res**2
+        print(self.nb_patterns)
         # define white pattern index for display
-        self.white_pattern_idx = 4 * self.spectrum_size
+        self.white_pattern_idx =0
 
-        self.fourier_shift = shift.CreationPatterns(
-            self.spatial_res, self.height, self.width
-        )
         self.interp_method = cv2.INTER_LINEAR_EXACT
 
     def sequence_order(self):
@@ -45,10 +44,10 @@ class CreationPatterns:
         """
         pattern_order = []
         freqs = []
-        for j in range(0, self.spectrum_size + 1):  # column broom
-            for k in range(-self.spectrum_size, self.spectrum_size + 1):  # line broom
-                pattern_order.append("posr(%d,%d)" % (self.spectrum_size + k, j))
-                pattern_order.append("negr(%d,%d)" % (self.spectrum_size + k, j))
+        for j in range(self.spatial_res):  # column broom
+            for k in range(self.spatial_res):  # line broom
+                pattern_order.append("posr(%d,%d)" % (j, k))
+                pattern_order.append("negr(%d,%d)" % (j, k))
                 
                 freqs.append((j, k))
         return pattern_order, freqs
@@ -70,9 +69,11 @@ class CreationPatterns:
 
         """
         u,v=freq
-        pattern = np.outer(self.dct_basis_vector(self.spatial_res, u), self.dct_basis_vector(self.spatial_res, v))
-        pos=pattern[pattern>=0]
-        neg=pattern[pattern<=0]
+        pattern = np.outer(self.dct_basis_vector(u), self.dct_basis_vector( v))
+        pos = np.float64(255 * np.where(pattern > 0, pattern, 0))
+        neg = np.float64(255 * np.where(pattern < 0, abs(pattern), 0))
+        
+        
         return pos,neg
 
     def creation_patterns(self):
