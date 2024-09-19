@@ -127,53 +127,60 @@ class SpectrometerBridge:
             self.spectro_flag = False
         print(f"Integration time (ms): {self.integration_time_ms}")
 
-    def thread_singlepixel_measure(self, event, spectra):
+    def thread_singlepixel_measure(self, event, spectra, dynamic_tint=False):
         """
-        spectrometer_acquisition allows to use the spectrometer so that it is synchronised with patterns displays.
+        Synchronises spectrometer acquisition with pattern display, measuring spectra
+        in response to the event signal. Results are stored in the provided spectra array.
 
         Parameters
         ----------
         event : threading.Event
-            event that notifies when pattern is displayed and allow display to continue when cleared.
-        config : class
-            OPConfig class object.
+            Event that indicates when a pattern is displayed and synchronises the measurement.
+        spectra : np.ndarray
+            2D array where measured spectra will be stored.
+        dynamic_spec : bool, optional
+            If True, dynamically adjust the spectrometer's integration time (default is False).
 
         Returns
         -------
-        None. measured spectra are stored in config.
-
+        None
         """
+        
+        # Initial validation
+        if spectra is None or not isinstance(spectra, np.ndarray):
+            raise ValueError("The spectra parameter must be a valid NumPy array.")
+        
+        try:
+            cnt = 0
+            self.spectra = spectra
+            nb_patterns = np.size(spectra, 0)
+            coeff = 1  # Coefficient to adjust for integration time scaling
 
-        cnt = 0
-        self.spectra = spectra
-        nb_patterns = np.size(spectra, 0)
-        coeff = 1
-        while cnt < nb_patterns:
-            """
-            if self.spectro_flag: # check to adjust integration time for white pattern
-                self.spectrometer.integration_time_ms=self.integration_time_ms//2
-                self.set_integration_time()
-                coeff=self.integration_time_ms/self.spectrometer.integration_time_ms
-            """
+            while cnt < nb_patterns:
+                if event.is_set():  # Event set when a pattern is displayed
+                    if dynamic_tint:
+                        self.get_optimal_integration_time()
 
-            if event.is_set():  # event set when pattern is displayed
-                chronograms = []
-                for _ in range(self.repetition):
-                    chronograms.append(coeff * self.get_intensities())
-                self.spectra[cnt, :] = np.mean(chronograms, 0)
+                    # Measure intensities for the current pattern
+                    chronograms = []
+                    for _ in range(self.repetition):
+                        intensities = self.get_intensities()
+                        if intensities is None:
+                            raise RuntimeError("Failed to retrieve intensities from the spectrometer.")
+                        chronograms.append(coeff * intensities)
 
-                """
-                if spectro_flag: #
-                    self.spectrometer.integration_time_ms=self.integration_time_ms
-                    self.spectrometer.set_integration_time()
-                    coeff=1
-                    spectro_flag=False
-                """
-                cnt += 1
-                event.clear()
-            else:
-                time.sleep(1e-6)
+                    # Average the measurements and store the result in spectra
+                    self.spectra[cnt, :] = np.mean(chronograms, axis=0) / self.integration_time_ms
+                    cnt += 1
+                    event.clear()  # Clear event to wait for the next pattern
+                else:
+                    # Small sleep to avoid busy waiting
+                    time.sleep(1e-6)
 
-        # spectra=np.mean(chronograms,0)
+        except Exception as e:
+            # Log error for debugging
+            print(f"An error occurred during spectrometer acquisition: {e}")
 
-        self.spec_close()
+        finally:
+            # Ensure the spectrometer is closed properly
+            self.spec_close()

@@ -46,6 +46,7 @@ class Acquisition:
 
         self.imaging_method_name = acquisition_dict["imaging_method"]
         self.spatial_res = acquisition_dict["spatial_res"]
+        self.dynamic_tint=acquisition_dict["dynamic_tint"]
         self.width = hardware_dict["width"]
         self.height = hardware_dict["height"]
 
@@ -92,63 +93,75 @@ class Acquisition:
 
     def thread_acquisition(self, path=None, time_warning=True):
         """
-        This funtion allows to run in parallel the projection of a sequence of
-        patterns and spectrometers' measurements in free running mode.
-        The result is measured hyperspectral chronograms need to be processed to
-        extract means spectrums for each patterns.
-
+        Runs the projection of a sequence of patterns and spectrometer measurements
+        in free-running mode, using threads for parallel execution. The resulting hyperspectral 
+        chronograms are processed to extract mean spectrums for each pattern.
 
         Parameters
         ----------
-        config : class
-            OPConfig class object.
+        path : str, optional
+            File path to save the acquisition data (default is None).
+        time_warning : bool, optional
+            If True, a warning about the estimated acquisition duration will be shown before starting (default is True).
 
         Returns
         -------
-        config : class
-        * actualised OPConfig class object.
-        * spectra : (array of floats) 2D array of spectra stored in chronological order.
-        * wavelengths : (array of floats) 1D wavelengths sampled by the spectrometer.
-
+        None
+            The method updates the object's state with the acquired spectra and metadata.
         """
+
         self.init_measure()
-        ans = "no"
+        
+        # Show time warning if necessary
         if time_warning:
-            ans = askquestion(
-                message=f"Estimated acquisition duration : {self.est_duration} min "
+            ans = askquestion(message=f"Estimated acquisition duration: {self.est_duration} min")
+            if ans != "yes":
+                cv2.destroyAllWindows()
+                return  # Exit early if the user doesn't confirm the acquisition
+
+        # Begin acquisition process
+        begin_acq = time.time()
+        
+        # Threads initialization
+        event = threading.Event()
+        
+        # Define threads for pattern projection and spectrometer measurement
+        patterns_thread = threading.Thread(
+            target=self.hardware.projection.thread_projection,
+            args=(
+                event,
+                self.imaging_method.patterns,
+                self.imaging_method.patterns_order,
+                self.imaging_method.pattern_creation_method.interp_method,
             )
-        if np.logical_or(ans == "yes", time_warning == False):
-            begin_acq = time.time()
-            # Threads initialisation
-            event = threading.Event()
-            patterns_thread = threading.Thread(
-                target=self.hardware.projection.thread_projection,
-                args=(
-                    event,
-                    self.imaging_method.patterns,
-                    self.imaging_method.patterns_order,
-                    self.imaging_method.pattern_creation_method.interp_method,
-                ),
-            )
-            spectrometer_thread = threading.Thread(
-                target=self.hardware.spectrometer.thread_singlepixel_measure,
-                args=(event, self.spectra),
-            )
-            # Start both display and measure threads
+        )
+        
+        spectrometer_thread = threading.Thread(
+            target=self.hardware.spectrometer.thread_singlepixel_measure,
+            args=(event, self.spectra)
+        )
+
+        try:
+            # Start threads
             patterns_thread.start()
             spectrometer_thread.start()
+
+            # Wait for threads to complete
             patterns_thread.join()
             spectrometer_thread.join()
 
+            # Retrieve data after the threads finish
             self.spectra = self.hardware.spectrometer.spectra
             self.duration = time.time() - begin_acq
             self.create_acquisition_header()
 
-        else:
+        except Exception as e:
+            # Handle any potential errors during the acquisition process
+            print(f"An error occurred during acquisition: {e}")
             cv2.destroyAllWindows()
-            pass
 
-        self.is_init = False
+        finally:
+            self.is_init = False
 
     def create_acquisition_header(self):
         fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string

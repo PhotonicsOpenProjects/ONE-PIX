@@ -1,5 +1,6 @@
 {
     "imaging_method": "DCT",
     "spatial_res": 32,
-    "Normalisation": false
+    "Normalisation": false,
+    "dynamic_tint":false
 }
