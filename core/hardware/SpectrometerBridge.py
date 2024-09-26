@@ -138,45 +138,84 @@ class SpectrometerBridge:
             Event that indicates when a pattern is displayed and synchronises the measurement.
         spectra : np.ndarray
             2D array where measured spectra will be stored.
-        dynamic_spec : bool, optional
+        dynamic_tint : bool, optional
             If True, dynamically adjust the spectrometer's integration time (default is False).
 
         Returns
         -------
         None
         """
-        
+
         # Initial validation
         if spectra is None or not isinstance(spectra, np.ndarray):
             raise ValueError("The spectra parameter must be a valid NumPy array.")
-        
+
         try:
             cnt = 0
             self.spectra = spectra
             nb_patterns = np.size(spectra, 0)
             coeff = 1  # Coefficient to adjust for integration time scaling
-
+            integration_times = []  # List to store the integration times for each pattern
             while cnt < nb_patterns:
                 if event.is_set():  # Event set when a pattern is displayed
-                    if dynamic_tint:
+                    if dynamic_tint and cnt < nb_patterns - 1:
+                        # Adjust integration time for all patterns except the last one
                         self.get_optimal_integration_time()
+                        # Store the current integration time for future use (last pattern)
+                        integration_times.append(self.integration_time_ms)
 
-                    # Measure intensities for the current pattern
-                    chronograms = []
-                    for _ in range(self.repetition):
-                        intensities = self.get_intensities()
-                        if intensities is None:
-                            raise RuntimeError("Failed to retrieve intensities from the spectrometer.")
-                        chronograms.append(coeff * intensities)
+                        # Measure intensities for the current pattern
+                        chronograms = []
+                        for _ in range(self.repetition):
+                            intensities = self.get_intensities()
+                            if intensities is None:
+                                raise RuntimeError("Failed to retrieve intensities from the spectrometer.")
+                            chronograms.append(coeff * intensities)
+                        # Average the measurements and store the result in spectra
+                        self.spectra[cnt, :] = np.mean(chronograms, axis=0) / self.integration_time_ms
+                    
+                    elif dynamic_tint and cnt==nb_patterns-1:
+                        # Last iteration: Measure the dark image for each previously used integration time
+                        print("Measuring dark images for all previous integration times.")
 
-                    # Average the measurements and store the result in spectra
-                    self.spectra[cnt, :] = np.mean(chronograms, axis=0) / self.integration_time_ms
+                        dark_spectra = np.zeros_like(self.spectra)  # Array to store dark spectra for each pattern
+
+                        for i, tint in enumerate(integration_times):
+                            print(f"Measuring dark spectrum for pattern {i+1} with integration time {tint} ms.")
+                            self.integration_time_ms = tint  # Set the same integration time as during the pattern acquisition
+                            self.set_integration_time()
+                            chronograms_dark = []
+                            for _ in range(self.repetition):
+                                dark_intensities = self.get_intensities()  # Measure the dark image
+                                if dark_intensities is None:
+                                    raise RuntimeError("Failed to retrieve dark image intensities.")
+                                chronograms_dark.append(dark_intensities)
+
+                            # Average the dark measurements
+                            dark_spectra[i, :] = np.mean(chronograms_dark, axis=0) / tint
+
+                        # Subtract the dark spectra from the measured spectra
+                        self.spectra -= dark_spectra
+                        print("Dark spectrum subtraction complete.")
+                    
+                    else: # Measure without dynamic integration time
+                        # Measure intensities for the current pattern
+                        chronograms = []
+                        for _ in range(self.repetition):
+                            intensities = self.get_intensities()
+                            if intensities is None:
+                                raise RuntimeError("Failed to retrieve intensities from the spectrometer.")
+                            chronograms.append(coeff * intensities)
+                        # Average the measurements and store the result in spectra
+                        self.spectra[cnt, :] = np.mean(chronograms, axis=0) / self.integration_time_ms
+                    
                     cnt += 1
                     event.clear()  # Clear event to wait for the next pattern
                 else:
                     # Small sleep to avoid busy waiting
                     time.sleep(1e-6)
 
+            
         except Exception as e:
             # Log error for debugging
             print(f"An error occurred during spectrometer acquisition: {e}")
