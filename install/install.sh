@@ -16,6 +16,7 @@ sudo apt -y install libhdf5-dev libhdf5-serial-dev libhdf5-103
 sudo apt -y install libqt5gui5 libqt5webkit5 libqt5test5 python3-pyqt5
 sudo apt -y install python3-dev
 sudo apt install python3-opencv
+sudo apt-get install git-all build-essential libusb-dev
 
 echo -e '\e[32mcut and paste a new config.txt  in boot '
 echo -e '\033[0m_________________________________________________'
