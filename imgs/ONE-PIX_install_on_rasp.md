@@ -1,23 +1,23 @@
-# ONE-PIX installation on raspbnerry pi 
+# ONE-PIX installation on a Raspberry Pi 4 
 
 
 ## Raspberry pi needed setup 
 
 The tested configuration of ONE-PIX on a raspebrry is  :
 
-- on a raspberry pi 4B model with 8 Go RAM. 
-- with [Rasbian bullseye version 11 (32-Bit)](https://www.raspberrypi.com/software/operating-systems/) OS 
-- with python 3.9 
+- on a Raspberry Pi 4B model with 8 Go RAM. 
+- with [Raspbian bullseye version 11 (32-Bit)](https://www.raspberrypi.com/software/operating-systems/) OS 
+- with Python 3.9 (default)
 
-Maybe other OS and model of raspberry pi are available but not tested 
+Maybe other OS and Raspberry Pi models are available but not tested yet.
 
 
-## Download and install ONE-PIX on the rasp 
+## Download and install ONE-PIX on the Raspberry Pi 
 
 
 ### Installing the Raspberry Pi OS on the SD card and remote control
 
-We recommend to use The ONE-PIX with a remote control Desktop.It allow you to run long acquisition in a more automated way. 
+We recommend to use The ONE-PIX with a remote control Desktop.It allows you to run acquisitions in a more automated way. 
 
 <p align="center">
 <img src="remote_control.png" alt="remote control" width="500"/>
@@ -30,9 +30,9 @@ To remote control your raspberry pi you can follow this tutorial [here](https://
 
 
 
-### Download git repository
+### Download the ONE-PIX git repository
 
-The first step of this installation is to clone the ONE-PIX directory from Github.
+The first step of this installation is to clone the ONE-PIX directory from GitHub.
 
 From the Raspberry Pi, open a terminal and go to the desktop with the following command line:
 
@@ -55,17 +55,18 @@ To install ONE-PIX on the raspberry pi board just run the setup.sh for that go i
 ```
 cd ONE-PIX/install 
 ```
-and run the installtion script with this command :
+and run the installation script with this command :
 
 ```
-. install.sh 
+sudo chmod +x ./install.sh
+./install.sh 
 ```
 
-## Configure the raspberry pi 
+## Configure the Raspberry Pi 
 
 ### Activate Raspberry Pi camera 
 
-to use ONE-PIX kit you need to activate the raspberry pi camera for that go 
+[IF NEEDED] To use ONE-PIX kit you need to activate the Raspberry Pi camera for that go 
 
 
 Enable SSH,VNC and the camera 
@@ -77,15 +78,17 @@ Enable SSH,VNC and the camera
 If you want to implement another model of camera on the ONE-PIX you need to see [here]() 
 
 ### Dual screen configuration
+[INCLUDED IN THE AUTOMATIC INSTALLATION METHOD]
 In order to perform ONE-PIX  measurements, it is necessary to set up a second screen dedicated to displaying the patterns to be projected on your scenes.
  
 You need to change the boot/config.txt file of the Raspberry Pi to force the double screen stored in DLL folder. 
-You need to supress your existing boot/config.txt and replace it by  preconfiguring config file stored in the[install folder](../ONE-PIX _soft/src/DLL).
+You need to supress your existing boot/config.txt and replace it by  preconfiguring config file stored in the[install folder](../ONE-PIX _soft/src/DLL). 
+
 For that use these command lines : 
 
 ```
 sudo rm /boot/config.txt
-sudo cp ~/Desktop/ONE-PIX/ONE-PIX_soft/src/DLL/config.txt /boot
+sudo cp ~/Desktop/ONE-PIX/install/config.txt /boot
 ```
 
 
