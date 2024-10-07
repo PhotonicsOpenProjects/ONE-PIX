@@ -1,12 +1,18 @@
 cff-version: 1.2.0
-message: "Si vous utilisez ce projet, veuillez citer le travail suivant :"
+message: "If you use this project, please quote the following work:"
 title: "ONE-PIX"
 version: "2.0.0"
 doi: "10.3390/s20041132"  
 date-released: 2022-06-24
 authors:
-  - family-names: "Ribes","Russias","Tregoat","Fournier"
-    given-names: "Mathieu","Gaspard","Denis","Antoine"
+  - family-names: "Ribes"
+    given-names: "Mathieu"
+  - family-names: "Russias"
+    given-names: "Gaspard"
+  - family-names: "Tregoat"
+    given-names: "Denis"
+  - family-names: "Fournier"
+    given-names: "Antoine"
 affiliation: "Owners: Photonics Bretagne & Arvalis-Institut du végétal - Administrator: Photonics Open Projects "
 keywords:
   - "single-pixel-imaging"
