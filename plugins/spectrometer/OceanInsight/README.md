@@ -4,6 +4,8 @@
 
 Installing Seabreeze dependencies: 
 ```
+sudo apt-get install git-all build-essential libusb-dev
+
 sudo apt-get -y install libglu1
 sudo apt-get -y install libaio1 libaio-dev
 sudo apt-get -y install libglib2.0-0
