@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "Si vous utilisez ce projet, veuillez citer le travail suivant :"
+title: "ONE-PIX"
+version: "2.0.0"
+doi: "10.3390/s20041132"  
+date-released: 2022-06-24
+authors:
+  - family-names: "Ribes","Russias","Tregoat","Fournier"
+    given-names: "Mathieu","Gaspard","Denis","Antoine"
+affiliation: "Owners: Photonics Bretagne & Arvalis-Institut du végétal - Administrator: Photonics Open Projects "
+keywords:
+  - "single-pixel-imaging"
+  - "hyperspectral"
+  - "compressive-sensing"
+license: "CC BY-NC 4.0"  
+url: "https://github.com/PhotonicsOpenProjects/ONE-PIX/" 
