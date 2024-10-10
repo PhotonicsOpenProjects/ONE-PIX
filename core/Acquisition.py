@@ -138,7 +138,7 @@ class Acquisition:
         
         spectrometer_thread = threading.Thread(
             target=self.hardware.spectrometer.thread_singlepixel_measure,
-            args=(event, self.spectra)
+            args=(event, self.spectra,self.dynamic_tint)
         )
 
         try:
