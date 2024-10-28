@@ -66,73 +66,73 @@ class SpectrometerBridge:
         self.spectrometer.spec_close()
 
     def get_optimal_integration_time(self, verbose=True):
-    """
-    This function automatically sets the optimal integration time for
-    ONE-PIX acquisitions based on the measurable optical flux.
-
-    Parameters
-    ----------
-    verbose : bool, optional
-        If True, print the details of each step (default is True).
-
-    Returns
-    -------
-    int
-        Optimal integration time in milliseconds.
-    """
-    repetitions = 2
-    max_counts = 30000
-    tolerance = 2500
-    max_iterations = 10
-    max_integration_time = 10000  # Maximum 10 seconds (10000 ms)
-    min_integration_time = 1      # Minimum 1 millisecond
-
-    self.set_integration_time()
-    delta_wl = round(0.05 * np.size(self.get_wavelengths()))
-    count = 0
-
-    while True:
-        measurements = []
-        for _ in range(repetitions):
-            measurements.append(self.get_intensities())
-
-        # Calculate mean of measurements and exclude the edges defined by delta_wl
-        mean_measurement = np.mean(np.array(measurements), axis=0)[delta_wl:-delta_wl]
-        peak_intensity = max(mean_measurement)
-        delta_intensity = peak_intensity - max_counts
-
-        if verbose:
-            print(f"T{count}={self.integration_time_ms} ms with intensity peak at {round(peak_intensity)} counts")
-
-        # Check if the peak intensity is within the tolerance range
-        if abs(delta_intensity) < tolerance:
-            break
-
-        # Stop if max iterations are reached
-        if count >= max_iterations:
-            warnings.warn(f"Stopped after {count} iterations. Final integration time: {self.integration_time_ms} ms.")
-            break
-
-        # Adjust integration time based on the intensity ratio
-        adjustment_factor = max_counts / peak_intensity
-        self.integration_time_ms = int(self.integration_time_ms * adjustment_factor)
-
-        # Handle limits: force integration time between 1 ms and 1 second (1000 ms)
-        if self.integration_time_ms < min_integration_time:
-            self.integration_time_ms = min_integration_time
-        elif self.integration_time_ms > max_integration_time:
-            self.integration_time_ms = 1000  # Force to 1 second if it exceeds 10 seconds
-
-        # Apply the new integration time
+        """
+        This function automatically sets the optimal integration time for
+        ONE-PIX acquisitions based on the measurable optical flux.
+    
+        Parameters
+        ----------
+        verbose : bool, optional
+            If True, print the details of each step (default is True).
+    
+        Returns
+        -------
+        int
+            Optimal integration time in milliseconds.
+        """
+        repetitions = 2
+        max_counts = 30000
+        tolerance = 2500
+        max_iterations = 10
+        max_integration_time = 10000  # Maximum 10 seconds (10000 ms)
+        min_integration_time = 1      # Minimum 1 millisecond
+    
         self.set_integration_time()
-        count += 1
-
-    # Reset spectro_flag and display final integration time
-    self.spectro_flag = False
-    if verbose:
-        print(f"Final integration time (ms): {self.integration_time_ms}")
-
-    return self.integration_time_ms
+        delta_wl = round(0.05 * np.size(self.get_wavelengths()))
+        count = 0
+    
+        while True:
+            measurements = []
+            for _ in range(repetitions):
+                measurements.append(self.get_intensities())
+    
+            # Calculate mean of measurements and exclude the edges defined by delta_wl
+            mean_measurement = np.mean(np.array(measurements), axis=0)[delta_wl:-delta_wl]
+            peak_intensity = max(mean_measurement)
+            delta_intensity = peak_intensity - max_counts
+    
+            if verbose:
+                print(f"T{count}={self.integration_time_ms} ms with intensity peak at {round(peak_intensity)} counts")
+    
+            # Check if the peak intensity is within the tolerance range
+            if abs(delta_intensity) < tolerance:
+                break
+    
+            # Stop if max iterations are reached
+            if count >= max_iterations:
+                warnings.warn(f"Stopped after {count} iterations. Final integration time: {self.integration_time_ms} ms.")
+                break
+    
+            # Adjust integration time based on the intensity ratio
+            adjustment_factor = max_counts / peak_intensity
+            self.integration_time_ms = int(self.integration_time_ms * adjustment_factor)
+    
+            # Handle limits: force integration time between 1 ms and 1 second (1000 ms)
+            if self.integration_time_ms < min_integration_time:
+                self.integration_time_ms = min_integration_time
+            elif self.integration_time_ms > max_integration_time:
+                self.integration_time_ms = 1000  # Force to 1 second if it exceeds 10 seconds
+    
+            # Apply the new integration time
+            self.set_integration_time()
+            count += 1
+    
+        # Reset spectro_flag and display final integration time
+        self.spectro_flag = False
+        if verbose:
+            print(f"Final integration time (ms): {self.integration_time_ms}")
+    
+        return self.integration_time_ms
 
     def thread_singlepixel_measure(self, event, spectra, dynamic_tint=False):
         """
