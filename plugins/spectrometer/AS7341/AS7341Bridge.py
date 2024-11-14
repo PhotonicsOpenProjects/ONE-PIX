@@ -1,42 +1,35 @@
-import smbus2
-import time
+import sys
+import os
+try:
+    from plugins.spectrometer.AS7341 import AS7341
+except ModuleNotFoundError:
+    import AS7341
+    
 import numpy as np
-# Adresse I2C du capteur AS7341
-AS7341_I2C_ADDR = 0x39
+import time
 
-# Commandes et registres spécifiques
-AS7341_ENABLE = 0x80
-AS7341_ATIME = 0x81
-AS7341_CONFIG = 0x70
-AS7341_STATUS = 0x93
-AS7341_DATA_START = 0x95
-
-# Sélection de la banque A ou B
-AS7341_CFG0 = 0xA9
+INTEGRATION_CYCLE_DURATION=2.78E-3 #ms
+ASTEP_MAX=2**16
+ATIME_MAX=255
+INTEGRATION_TIME_MS_MAX=ATIME_MAX*ASTEP_MAX*INTEGRATION_CYCLE_DURATION
 
 # Longueurs d'onde correspondantes aux canaux (en nm)
 CHANNEL_WAVELENGTHS = {
-    'F1': 415,   # Canal 1
-    'F2': 445,   # Canal 2
-    'F3': 480,   # Canal 3
-    'F4': 515,   # Canal 4
-    'F5': 555,   # Canal 5
-    'F6': 590,   # Canal 6
-    'F7': 630,   # Canal 7
+    'C1': 415,   # Canal 1
+    'C2': 445,   # Canal 2
+    'C3': 480,   # Canal 3
+    'C4': 515,   # Canal 4
+    'C5': 555,   # Canal 5
+    'C6': 590,   # Canal 6
+    'C7': 630,   # Canal 7
+    'C8': 670,   # Canal 8
     'NIR': 910  # Canal proche infrarouge
-    
     }
 
-# Temps d'intégration de base par cycle en ms
-INTEGRATION_TIME_BASE_MS = 2.78
-
 class AS7341Bridge:
-    """Class AS7341Bridge allows to use OceanInsight spectrometers with the ONE-PIX
+    """Class AS7341Bridge allows to use AS7341 spectral sensor with the ONE-PIX
     kit. Available spectrometers relies on the seabreeze library."""
-    def __init__(self, integration_time_ms,i2c_bus=1, address=AS7341_I2C_ADDR):
-        self.bus = None
-        self.address = address
-        self.i2c_bus = i2c_bus
+    def __init__(self, integration_time_ms):
         self.integration_time_ms = integration_time_ms
         self.spec = []
         self.DeviceName = ""
@@ -51,14 +44,43 @@ class AS7341Bridge:
         None.
 
         """
-        self.bus = smbus2.SMBus(self.i2c_bus)
-        """Initialisation interne du capteur."""
-        self.bus.write_byte_data(self.address, AS7341_ENABLE, 0x03)  # Activer le capteur
-        self.set_integration_time()  # Définir un temps d'intégration par défaut
-        self.bus.write_byte_data(self.address, AS7341_CONFIG, 0x00)  # Configuration de base
-        time.sleep(0.1)  # Attendre que le capteur se stabilise
+        
+        self.spec = AS7341.AS7341()
+        self.spec.measureMode = 0
+        self.spec.AS7341_AGAIN_config(64)
+        self.spec.AS7341_EnableLED(False) 
         self.DeviceName = "AS7341"
+        self.set_integration_time()
    
+
+    def get_optimal_registers(self):
+        """
+        # Essayer des valeurs croissantes de ATIME pour trouver une solution acceptable
+        target=(self.integration_time_ms/INTEGRATION_CYCLE_DURATION)
+        print(target)
+        atime_range=np.arange(256)
+        astep_range=(target//(atime_range+1)-1)
+
+        astep_idx0=np.abs(astep_range-ASTEP_MAX).argmin()
+        astep=int(astep_range[astep_idx0])-1
+        atime=int(target/(astep+1))-1
+
+        while astep > ASTEP_MAX or atime > ATIME_MAX or atime<20:
+            #print(astep,atime)
+            astep_idx0+=1
+            astep=int(astep_range[astep_idx0])-1
+            atime=int(target//(astep+1))-1
+            if astep_idx0>len(astep_range)-1:
+                raise ValueError("Impossible de trouver des valeurs ATIME et ASTEP pour ce temps d'intégration")
+        print(f"{atime=}, {astep=}")
+        """
+        target=(self.integration_time_ms/INTEGRATION_CYCLE_DURATION)
+        astep=359
+        atime=min(int(target/astep),255)
+        print(f"{atime=}, {astep=}")
+        return astep,atime
+
+    
     def set_integration_time(self):
         """
         set_integration_time allows to set integration time in milliseconds.
@@ -69,25 +91,13 @@ class AS7341Bridge:
 
         """
         """Définir le temps d'intégration du capteur en millisecondes."""
-        if self.integration_time_ms < 0 or self.integration_time_ms > 711:
-            raise ValueError("Le temps d'intégration doit être entre 0 et 711 ms")
+        if self.integration_time_ms < 0 or self.integration_time_ms > INTEGRATION_TIME_MS_MAX:
+            raise ValueError(f"Le temps d'intégration doit être entre 0 et {INTEGRATION_TIME_MS_MAX} ms")
         
-        # Calculer la valeur du registre ATIME correspondant
-        atime = int(self.integration_time_ms / INTEGRATION_TIME_BASE_MS) - 1
-        
-        # S'assurer que la valeur ATIME est dans les limites acceptables (0 à 255)
-        atime = max(0, min(atime, 255))
-        
-        self.bus.write_byte_data(self.address, AS7341_ATIME, atime)
-    
-    def _activate_bank(self, bank):
-        """Activer la banque A ou B pour la lecture."""
-        if bank == 'A':
-            self.bus.write_byte_data(self.address, AS7341_CFG0, 0x00)
-        elif bank == 'B':
-            self.bus.write_byte_data(self.address, AS7341_CFG0, 0x10)
-        else:
-            raise ValueError("La banque doit être 'A' ou 'B'")
+        astep,atime=self.get_optimal_registers()
+        self.spec.AS7341_ATIME_config(atime)
+        self.spec.AS7341_ASTEP_config(astep)
+        print(f"Integration time is : {INTEGRATION_CYCLE_DURATION*(atime+1)*(astep+1)} ms")
     
     def get_wavelengths(self):
         """Récupérer les longueurs d'onde correspondant aux canaux mesurés."""
@@ -96,26 +106,18 @@ class AS7341Bridge:
     def get_intensities(self):
         """Lire les données spectrales de tous les canaux."""
         spectrum = []
-
-        # Lire les canaux de la banque A
-        self._activate_bank('A')
-        time.sleep(0.01)  # Attendre un court instant pour que la banque soit active
-        for i in range(8):
-            # Lire deux octets (16 bits) pour chaque canal spectral
-            value = self.bus.read_word_data(self.address, AS7341_DATA_START + 2 * i)
-            spectrum.append(value)
-
-        # Lire les canaux de la banque B (NIR et CLEAR)
-        self._activate_bank('B')
-        time.sleep(0.01)  # Attendre un court instant pour que la banque soit active
-        # Mesure du canal NIR
-        value = self.bus.read_word_data(self.address, AS7341_DATA_START + 2 * 1)
-        spectrum.append(value)
-
-        return spectrum
+        self.spec.AS7341_ControlLed(True,10)
+        self.spec.AS7341_startMeasure(0)
+        self.spec.AS7341_ReadSpectralDataOne()
+        spectrum.extend([self.spec.channel1,self.spec.channel2,self.spec.channel3,self.spec.channel4])
+        self.spec.AS7341_startMeasure(1)
+        self.spec.AS7341_ReadSpectralDataTwo()
+        spectrum.extend([self.spec.channel5,self.spec.channel6,self.spec.channel7,self.spec.channel8,self.spec.NIR])
+        
+        return np.array(spectrum)
 
     def spec_close(self):
         """Fermer la connexion I2C."""
-        if self.bus is not None:
-            self.bus.close()
-            self.bus = None
+        if self.spec.i2c is not None:
+            self.spec.i2c.close()
+            self.spec.i2c = None
