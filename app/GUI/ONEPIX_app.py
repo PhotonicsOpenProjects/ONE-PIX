@@ -1439,10 +1439,14 @@ class OPApp(ctk.CTk):
         )
         fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string
         actual_time = time.strftime("%H-%M-%S")  # get the current time
+        camera_image_filename = f"camera_image_{fdate}_{actual_time}.png"
+        camera_save_path=f"../Hypercubes/ONE-PIX_app_{fdate}_{actual_time}/{camera_image_filename}"
+        # Save reconstructed acquisition with RGB image 
         self.acq_res.save_reconstructed_image(
             f"ONE-PIX_app_{fdate}_{actual_time}", "../Hypercubes"
         )
-
+        self.acq_config.hardware.camera.get_image(
+            tag=None, save_path=camera_save_path)
         if self.is_normalised:
             self.analysis.data_normalisation()
 
