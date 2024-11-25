@@ -47,7 +47,7 @@ with open(hardware_json_path) as f:
 hardware_params["integration_time_ms"] = test.hardware.spectrometer.integration_time_ms
 
 with open(hardware_json_path, "w") as file:
-    json.dump(acq_params, file, indent=4)
+    json.dump(hardware_params, file, indent=4)
 
 
 if not "References" in os.listdir(f"..{os.sep}..{os.sep}app"):
