@@ -80,7 +80,7 @@ spat_ref_normalized = (spat_ref_normalized - np.min(spat_ref_normalized)) / (
 )
 # Calculate the spectral reference (median + smoothing)
 spec_ref = np.median(raw_ref, axis=(0, 1))  # Compute the spectral median
-spec_ref-=np.median(spec_ref[:10])
+#spec_ref-=np.median(spec_ref[:10])
 #spec_ref = savgol_filter(spec_ref, window_length=7, polyorder=3)  # Optional: apply smoothing
 
 """
