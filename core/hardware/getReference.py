@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import sys
-import glob
 import time
 
 sys.path.append(f"..{os.sep}..{os.sep}")
@@ -12,7 +11,7 @@ from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction impo
 )
 import json
 from datetime import date
-import shutil
+from scipy.signal import savgol_filter
 
 
 # Normalisation datacube parameters setting
@@ -67,12 +66,36 @@ test.thread_acquisition(path=save_path, time_warning=False)
 rec = Reconstruction(test)
 rec.data_reconstruction()
 raw_ref = rec.imaging_method.reconstructed_image
-# normalised reference hypercube supposing vigneting is non spectrally dependant
-spat_ref = np.mean(raw_ref, 2)
-spat_ref = (spat_ref) / (np.max(spat_ref) - np.min(spat_ref))
-spec_ref = np.mean(raw_ref, (0, 1))
+# Calculate the spatial reference (median to handle outliers + normalization)
+spat_ref = np.median(raw_ref, axis=2)  # Use the spatial median to handle outliers
 
-ref = spat_ref[:, :, np.newaxis] * np.reshape(spec_ref, (1, 1, np.size(spec_ref)))
+# Robust normalization using IQR
+q1 = np.percentile(spat_ref, 25)  # 25th percentile
+q3 = np.percentile(spat_ref, 75)  # 75th percentile
+iqr = q3 - q1  # Interquartile range
+spat_ref_normalized = (spat_ref - q1) / iqr  # Robust normalization
+# Scale to [0, 1]
+spat_ref_normalized = (spat_ref_normalized - np.min(spat_ref_normalized)) / (
+    np.max(spat_ref_normalized) - np.min(spat_ref_normalized)
+)
+# Calculate the spectral reference (median + smoothing)
+spec_ref = np.median(raw_ref, axis=(0, 1))  # Compute the spectral median
+spec_ref-=np.median(spec_ref[:10])
+#spec_ref = savgol_filter(spec_ref, window_length=7, polyorder=3)  # Optional: apply smoothing
+
+import matplotlib.pyplot as plt
+plt.figure()
+plt.imshow(spat_ref_normalized)
+plt.show()
+
+plt.figure()
+plt.plot(spec_ref)
+plt.show()
+
+
+# Build the normalized reference
+ref = spat_ref_normalized[:, :, np.newaxis] * np.reshape(spec_ref, (1, 1, len(spec_ref)))
+
 header = rec.create_reconstruction_header()
 saver = Fis()
 saver.save_acquisition_envi(

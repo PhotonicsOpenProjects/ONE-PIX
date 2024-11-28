@@ -229,7 +229,7 @@ class OPApp(ctk.CTk):
 
     def get_normalisation_path(self):
         self.pop_up.destroy()
-        norm_path = tk.filedialog.askdirectory(initialdir=f"..{os.sep}Hypercubes")
+        norm_path = tk.filedialog.askdirectory(initialdir=f"..{os.sep}")
         with open(software_json_path) as f:
             software_json_object = json.load(f)
 
@@ -237,7 +237,7 @@ class OPApp(ctk.CTk):
         with open(software_json_path, "w") as file:
             json.dump(software_json_object, file, indent=4)
 
-        self.isNormalized = False
+        self.isNormalized = 'Done'
         self.launch_GUI()
 
     def use_existing_normalization(self):
@@ -556,7 +556,7 @@ class OPApp(ctk.CTk):
 
         with open(acquisition_json_path, "r") as file:
             acquisition_json_object = json.load(file)
-        acquisition_json_object["Normalisation"] = self.isNormalized
+        acquisition_json_object["Normalisation"] = True if self.isNormalized in ['Done', True] else False
 
         with open(acquisition_json_path, "w") as outfile:
             json.dump(acquisition_json_object, outfile, indent=4)
@@ -570,7 +570,7 @@ class OPApp(ctk.CTk):
 
         if self.GuiMode_choice.get() == self.GuiMode_choice_text[0]:  # if simple
             if self.acquisition_method == "Complete":
-                if self.isNormalized:
+                if self.isNormalized==True:
                     self.destroy()
                     os.system(
                         f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py"
@@ -580,7 +580,7 @@ class OPApp(ctk.CTk):
                 os.system("python modif_simple.py")
 
             elif self.acquisition_method == "Addressed":
-                if self.isNormalized:
+                if self.isNormalized==True:
                     self.destroy()
                     os.system(
                         f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py"
@@ -591,7 +591,7 @@ class OPApp(ctk.CTk):
 
         elif self.GuiMode_choice.get() == self.GuiMode_choice_text[1]:  # if advanced
             if self.acquisition_method == "Complete":
-                if self.isNormalized:
+                if self.isNormalized==True:
                     self.destroy()
                     os.system(
                         f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py"
@@ -600,7 +600,7 @@ class OPApp(ctk.CTk):
                     self.destroy()
                 os.system("python ONEPIX_app.py")
             elif self.acquisition_method == "Addressed":
-                if self.isNormalized:
+                if self.isNormalized==True:
                     self.destroy()
                     os.system(
                         f"python ..{os.sep}..{os.sep}core{os.sep}hardware{os.sep}getReference.py"

@@ -10,7 +10,7 @@ from tkinter.messagebox import showerror
 import sys
 import os
 import glob
-
+import traceback
 sys.path.append(f"..{os.sep}..{os.sep}")
 from core.Acquisition import Acquisition
 from core.Reconstruction import Reconstruction
@@ -71,7 +71,7 @@ class OPApp(ctk.CTk):
         self.config = Acquisition()
         # configure window
         # self.resizable(False, False)
-        self.title(f"ONEPIX GUI")
+        self.title(f"ONE-PIX HAS GUI")
         x = (self.monitor_sz.width - window_width) // 2 - 100
         y = (self.monitor_sz.height - window_height) // 2 - 100
         if self.config.hardware.is_raspberrypi():
@@ -511,16 +511,23 @@ class OPApp(ctk.CTk):
                         "errors"
                     ]["load_data_error"],
                 )
-            """"
+            
+            
+    def data_normalisation(self):
+        if self.config.normalisation:
             try:
-                if len(self.config.normalised_datacube)!=0: #Load Normalised data
-                    rawSpecs = np.load(glob.glob(os.path.abspath(f'{path}/spectra*normalised*'))[0]) 
-                else:
-                    rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
-            except Exception as e:
-                print(e)
-                rawSpecs = np.load(['/'.join([path, files]) for files in os.listdir(path) if files.startswith('spectra_')][0])
-            """
+                self.ref_analysis=Analysis(rec=None,data_path=self.config.normalisation_path)
+                self.ref_data=self.ref_analysis.reconstructed_data
+                self.analysis.data_normalisation(self.ref_data)
+                spectra=self.analysis.normalised_data
+                print("Normalisation OK")
+            except Exception:
+                print(traceback.format_exc())
+        else:
+            spectra = self.analysis.reconstructed_data
+        
+        return spectra
+
 
     def plotMask(self):
         self.a_vis.clear()
@@ -537,8 +544,9 @@ class OPApp(ctk.CTk):
             )
             mask = mask * customColormap[i].reshape(1, 1, -1)
             im += mask
-
-        spectra = self.analysis.reconstructed_data
+        
+        #Normalisation only activated when asked by user from the HUB.py GUI
+        spectra=self.data_normalisation()
 
         image = cv2.cvtColor(self.analysis.rgb_image, cv2.COLOR_BGR2RGB)
         customColormap = customColormap / 255

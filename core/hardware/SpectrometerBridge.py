@@ -2,6 +2,7 @@ import importlib
 import numpy as np
 import time
 import warnings
+import cv2
 
 class SpectrometerBridge:
     """
@@ -131,7 +132,7 @@ class SpectrometerBridge:
         self.spectro_flag = False
         if verbose:
             print(f"Final integration time (ms): {self.integration_time_ms}")
-    
+        cv2.destroyAllWindows()
         return self.integration_time_ms
 
     def thread_singlepixel_measure(self, event, spectra, dynamic_tint=False):

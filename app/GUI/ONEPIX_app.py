@@ -49,6 +49,7 @@ from skimage.measure import shannon_entropy as entropy
 import threading
 import screeninfo
 import webbrowser
+import traceback 
 
 screenWidth = screeninfo.get_monitors()[0].width
 
@@ -1374,6 +1375,19 @@ class OPApp(ctk.CTk):
             )
             self.acq_config.hardware.spectrometer.set_integration_time()
 
+    def data_normalisation(self):
+        if self.acq_config.normalisation:
+            try:
+                self.ref_analysis=Analysis(rec=None,data_path=self.acq_config.normalisation_path)
+                self.ref_data=self.ref_analysis.reconstructed_data
+                reconstructed_image=self.acq_res.imaging_method.reconstructed_image
+                self.analysis.data_normalisation(self.ref_data,data=reconstructed_image)
+                
+                print("Normalisation OK")
+            except Exception:
+                print(traceback.format_exc())
+       
+
     def thread_acquire_hyp(self):
         self.close_window_proj()
         self.process = threading.Thread(target=self.acquire_hyp)
@@ -1398,7 +1412,7 @@ class OPApp(ctk.CTk):
             )
             self.entry_integration_time.configure(state="disabled")
 
-            time.sleep(1)
+            time.sleep(0.1)
 
         # Start acquisition
         self.progressbar.start()
@@ -1447,8 +1461,8 @@ class OPApp(ctk.CTk):
         )
         self.acq_config.hardware.camera.get_image(
             tag=None, save_path=camera_save_path)
-        if self.is_normalised:
-            self.analysis.data_normalisation()
+        
+        self.data_normalisation()
 
         if len(self.analysis.normalised_data) != 0:
             self.switch_raw2norm.configure(state="normal")

@@ -1,10 +1,11 @@
 from core.ImagingMethodBridge import *
 import os
+
 import glob
 from tkinter import *
 from tkinter import filedialog
 import json
-
+import numpy as np
 
 class Analysis:
     def __init__(self, rec=None, data_path=None):
@@ -83,25 +84,11 @@ class Analysis:
     def load_data(self, path=None):
         self.imaging_method.image_analysis_method.load_reconstructed_data(path)
 
-    def data_normalisation(self):
-        self.normalised_data = []
-        try:
-            if self.normalisation_path != "":
-                self.load_data(self.normalisation_path)
-                ref_data = self.imaging_method.image_analysis_method.reconstructed_data
-                self.imaging_method.image_analysis_method.reconstructed_data = (
-                    self.reconstructed_data
-                )
-                self.normalised_data = (
-                    self.imaging_method.image_analysis_method.data_normalisation(
-                        ref_data
-                    )
-                )
-            else:
-                pass
-        except Exception as e:
-            print(e)
-
+    def data_normalisation(self,ref_data,data=None):
+        
+        self.normalised_data = self.imaging_method.image_analysis_method.data_normalisation(
+            ref_data,data)
+       
     def get_rgb_image(self, datacube, wavelengths):
         rgb_image = self.imaging_method.image_analysis_method.get_rgb_image(
             datacube, wavelengths

@@ -33,6 +33,15 @@ class Acquisition:
         ## get software configuration
         with open(self.hardware_config_path) as f:
             hardware_dict = json.load(f)
+        
+        self.software_config_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            f"..{os.sep}conf",
+            "software_config.json",
+        )
+        ## get software configuration
+        with open(self.software_config_path) as f:
+            software_dict = json.load(f)
 
         self.acquisition_config_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)),
@@ -47,6 +56,8 @@ class Acquisition:
         self.imaging_method_name = acquisition_dict["imaging_method"]
         self.spatial_res = acquisition_dict["spatial_res"]
         self.dynamic_tint=acquisition_dict["dynamic_tint"]
+        self.normalisation_path=software_dict["normalisation_path"]
+        self.normalisation=acquisition_dict["Normalisation"]
         self.width = hardware_dict["width"]
         self.height = hardware_dict["height"]
 

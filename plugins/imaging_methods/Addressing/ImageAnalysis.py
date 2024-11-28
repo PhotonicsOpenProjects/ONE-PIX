@@ -54,41 +54,61 @@ class Analysis:
         except Exception as e:
             print(e)
 
-    def data_normalisation(self, ref_data):
+      
 
+    def data_normalisation(self, ref_data,data=None):
+        """
+        Normalise les données en fonction d'une référence donnée.
+
+        :param ref_data: Cube de données de référence (dimensions [x, y, wl]).
+        """
         try:
-            nb_clusters = np.size(self.masks, 0)
-            print(f"{nb_clusters=}")
-            new_masks = np.zeros(
-                (nb_clusters, np.size(ref_data, 0), np.size(ref_data, 1))
-            )
-            for idx in range(nb_clusters):
-                new_masks[idx, :, :] = cv2.resize(
+            # Vérification des dimensions
+            ref_height, ref_width, ref_depth = ref_data.shape
+            if self.reconstructed_data.shape[1] != ref_depth:
+                raise ValueError(
+                    f"Les dimensions des longueurs d'ondes ne correspondent pas : "
+                    f"ref_data a {ref_depth} longueurs d'onde, "
+                    f"mais reconstructed_data en a {self.reconstructed_data.shape[1]}."
+                )
+
+            # Nombre de clusters
+            nb_clusters = self.clusters.shape[0]
+            # Exclure le dernier cluster (par exemple, pour le fond ou le "dark cluster")
+            masks_idx = list(range(nb_clusters - 1))
+
+
+            # Interpolation des clusters vers les dimensions spatiales du cube de référence
+            new_masks = np.zeros((len(masks_idx), ref_height, ref_width))
+
+            for i, idx in enumerate(masks_idx):
+                new_masks[i, :, :] = cv2.resize(
                     self.clusters[idx, :, :],
-                    np.shape(new_masks[idx, :, :]),
+                    (ref_width, ref_height),
                     interpolation=cv2.INTER_AREA,
                 )
 
-            ref_spec = np.zeros((nb_clusters, np.size(ref_data, 2)))
-            for idx in range(nb_clusters):
-                mask = (
-                    np.where(new_masks[idx, :, :], new_masks[idx, :, :], np.nan) / 255
+            # Calcul des spectres moyens pondérés par les masques
+            ref_spec = np.zeros((len(masks_idx), ref_depth))
+
+            for i, mask in enumerate(new_masks):
+                # Normalisation du masque entre 0 et 1
+                normalized_mask = np.where(mask > 0, mask / 255, np.nan)
+
+                # Calcul du spectre moyen pour chaque longueur d'onde
+                ref_spec[i, :] = np.nanmean(
+                    ref_data * normalized_mask[..., np.newaxis], axis=(0, 1)
                 )
-                for wl in range(np.size(ref_data, 2)):
-                    ref_spec[idx, wl] = np.nanmean(
-                        ref_data[:, :, wl].squeeze() * mask, axis=(0, 1)
-                    )
-
-            ref_spec -= np.repeat(
-                np.nanmean(ref_spec[:, :10], axis=1)[:, np.newaxis],
-                np.size(ref_data, 2),
-                axis=1,
-            )
-
-            normalised_data = self.spectra / ref_spec
+            
+            # Normalisation des données reconstruite avec les spectres de référence
+            self.normalised_data =(self.reconstructed_data) / (ref_spec)
+            
         except Exception as e:
-            print(e)
-        return normalised_data
+            print(f"Erreur dans data_normalisation : {e}")
+            raise
+
+
+        
 
     def plot_reconstructed_image(self, datacube, wavelengths):
         pass

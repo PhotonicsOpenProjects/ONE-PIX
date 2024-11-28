@@ -94,7 +94,7 @@ class Projection:
                 interpolation=cv2.INTER_LINEAR_EXACT,
             ),
         )
-        cv2.waitKey(750)
+        cv2.waitKey(5000)
         print("Finding the optimal integration time (ms):")
         acq_config.hardware.spectrometer.get_optimal_integration_time()
         acq_config.periode_pattern = int(
@@ -103,7 +103,7 @@ class Projection:
         )
         if acq_config.periode_pattern < 60:
             acq_config.periode_pattern = 60
-        cv2.destroyAllWindows()
+        #cv2.destroyAllWindows()
 
     def init_projection(self, patterns, patterns_order, interp_method):
         # Initialise cv2 display on the second monitor
@@ -119,7 +119,7 @@ class Projection:
             ),
         )
         cv2.waitKey(
-            750
+            3000
         )  # allows the projector to take the time to display the first pattern, particularly if it is white
 
     def thread_projection(self, event, patterns, patterns_order, interp_method):

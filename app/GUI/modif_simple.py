@@ -942,7 +942,7 @@ class OPApp(ctk.CTk):
         self.acq_res = Reconstruction(self.acq_config)
         self.acq_res.data_reconstruction()
 
-        # if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
+        #if len(self.acq_config.normalised_datacube)!=0:self.acq_res.hyperspectral_image=self.acq_config.normalised_datacube
         if self.acq_config.imaging_method_name == "FourierShift":
             self.acq_res.imaging_method.reconstructed_image = (
                 self.acq_res.imaging_method.reconstructed_image[1:, 1:, :]
