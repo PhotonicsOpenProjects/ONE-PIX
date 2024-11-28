@@ -83,6 +83,7 @@ spec_ref = np.median(raw_ref, axis=(0, 1))  # Compute the spectral median
 spec_ref-=np.median(spec_ref[:10])
 #spec_ref = savgol_filter(spec_ref, window_length=7, polyorder=3)  # Optional: apply smoothing
 
+"""
 import matplotlib.pyplot as plt
 plt.figure()
 plt.imshow(spat_ref_normalized)
@@ -91,7 +92,7 @@ plt.show()
 plt.figure()
 plt.plot(spec_ref)
 plt.show()
-
+"""
 
 # Build the normalized reference
 ref = spat_ref_normalized[:, :, np.newaxis] * np.reshape(spec_ref, (1, 1, len(spec_ref)))
