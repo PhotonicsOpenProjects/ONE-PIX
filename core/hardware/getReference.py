@@ -107,12 +107,10 @@ saver.save_acquisition_envi(
     save_path,
 )
 save_path = save_path + os.sep + f"reference_{fdate}_{actual_time}"
-# Notify in json file where to find the normalised datacube
-with open(software_json_path) as f:
-    software_params = json.load(f)
 
-acq_params["normalisation_path"] = os.path.abspath(save_path)
+soft_params["normalisation_path"] = os.path.abspath(save_path)
+
 with open(software_json_path, "w") as file:
-    json.dump(software_params, file)
+    json.dump(soft_params, file)
 
 # shutil.copy(glob.glob(save_path+os.sep+'ONE-PIX*'+os.sep+'*.txt')[0],os.path.abspath(save_path+os.sep+'reference'))
