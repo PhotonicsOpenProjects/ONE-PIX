@@ -109,13 +109,16 @@ class AS7341Bridge:
         Récupère les intensités des canaux mesurés en continu.
         """
         # Vérifier si la mesure est prête
-        time.sleep(self.integration_time_ms*1e-3)
-        if not self.spec.AS7341_MeasureComplete():
-            raise RuntimeError("La mesure n'est pas encore terminée.")
+        time.sleep((self.integration_time_ms+self.integration_time_ms*0.5)*1e-3)
+        while not self.spec.AS7341_MeasureComplete():
+            time.sleep(0.01)  # Attendre 10 ms avant de revérifie
         
         # Lire les données directement
         raw_data = self.spec.i2c.read_i2c_block_data(self.spec.address, AS7341_CH0_DATA_L, 10)  # 5 canaux x 2 octets
         intensities = np.frombuffer(bytearray(raw_data), dtype=np.uint16)
+        intensities[-1]=intensities[-1]/4
+        intensities = intensities*(50000/2000)
+        
         return intensities
 
     def spec_close(self):

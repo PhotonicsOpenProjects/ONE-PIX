@@ -1,0 +1,12 @@
+ONE-PIX_raw_acquisition_08_01_2025_14-38-42
+--------------------------------------------------------
+
+Imaging method: FourierSplit
+Acquisition duration: 211.075608 s
+Spectrometer AS7341 : AS7341
+Camera: Picamera
+Number of projected patterns: 924
+Height of pattern window: 600 pixels
+Width of pattern window: 800 pixels
+Number of spectral measures per pattern: 1  
+Integration time: 61 ms
