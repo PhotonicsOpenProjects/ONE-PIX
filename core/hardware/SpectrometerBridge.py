@@ -52,14 +52,12 @@ class SpectrometerBridge:
         self.spectrometer.set_integration_time()
 
     def get_wavelengths(self):
-        self.wavelengths = self.spectrometer.get_wavelengths()[
-            self.idx_wl_lim[0] : self.idx_wl_lim[1]
-        ]
+        self.wavelengths = self.spectrometer.get_wavelengths()[self.idx_wl_lim[0] : self.idx_wl_lim[1]+1]
         return self.wavelengths
 
     def get_intensities(self):
         spectrum = self.spectrometer.get_intensities()[
-            self.idx_wl_lim[0] : self.idx_wl_lim[1]
+            self.idx_wl_lim[0] : self.idx_wl_lim[1]+1
         ]
         return spectrum
 
@@ -96,11 +94,22 @@ class SpectrometerBridge:
             measurements = []
             for _ in range(repetitions):
                 measurements.append(self.get_intensities())
-    
+
+
             # Calculate mean of measurements and exclude the edges defined by delta_wl
             mean_measurement = np.mean(np.array(measurements), axis=0)[delta_wl:-delta_wl]
-            peak_intensity = max(mean_measurement)
-            delta_intensity = peak_intensity - max_counts
+            if mean_measurement :
+                peak_intensity = max(mean_measurement)
+                delta_intensity = peak_intensity - max_counts
+                
+            else :
+                
+                mean_measurement=np.max(np.asarray(measurements))
+                peak_intensity = mean_measurement
+                delta_intensity = peak_intensity - max_counts
+                
+                
+
     
             if verbose:
                 print(f"T{count}={self.integration_time_ms} ms with intensity peak at {round(peak_intensity)} counts")

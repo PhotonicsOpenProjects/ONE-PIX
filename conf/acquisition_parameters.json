@@ -1,6 +1,6 @@
 {
-    "imaging_method": "Addressing",
-    "spatial_res": 21,
-    "Normalisation": true,
+    "imaging_method": "FourierSplit",
+    "spatial_res": 32,
+    "Normalisation": false,
     "dynamic_tint": false
 }
