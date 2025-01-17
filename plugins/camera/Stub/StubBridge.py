@@ -23,5 +23,9 @@ class StubBridge:
         self.image = Image.fromarray(np.uint8((255 * np.random.rand(768, 1024))))
         self.image.save(save_path)
 
+    def get_image_var(self):
+        self.image = Image.fromarray(np.uint8((255 * np.random.rand(768, 1024))))
+        time.sleep(1)
+
     def close(self):
         print("stub camera disconnected")
