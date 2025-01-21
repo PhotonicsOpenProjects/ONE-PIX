@@ -5,9 +5,17 @@ Created on Tue Jan 21 10:15:25 2025
 @author: luguen
 """
 
+import os
+import sys
+sys.path.append(f"..{os.sep}..")
+
 import numpy as np
 import matplotlib.pyplot as plt
+from plugins.imaging_methods.Profilo.ImageReconstruction import ProfiloReconstruction
 
-raw_data=np.load(r"S:\Alternants\En-Cours\2022 Lisa Uguen\microscope hyperspectral\Topographie\objet\profilo.npy")
+rec=ProfiloReconstruction(r"C:\Users\grussias\Desktop\repo git\Photonics_bretagne\profilo.npy")
+depth_map=rec.reconstruction()
+
 plt.figure()
-plt.imshow(raw_data[0,:,:])
+plt.imshow(depth_map)
+plt.show()

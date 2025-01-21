@@ -2,6 +2,7 @@ import os
 import sys
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.append('..')
+import cv2
 
 import numpy as np
 from skimage.restoration import unwrap_phase
@@ -9,8 +10,6 @@ from skimage.restoration import unwrap_phase
 class ProfiloReconstruction:
 
     def __init__(self,raw_mesure=None):
-
-        self.ref_mes=np.load(os.path.join(root_path,"datas","ref_mes.npy"))
         if type(raw_mesure)==str:
             self.raw_measure=np.load(raw_mesure)
         else:
@@ -30,7 +29,11 @@ class ProfiloReconstruction:
 
         ZOBJ_moy=np.mean([ZOBJ, ZOBJ2], axis=0)
 
-        depth_map = ZOBJ_moy - self.ref_mes
+        se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+        background = cv2.morphologyEx(ZOBJ_moy, cv2.MORPH_OPEN, se)
+
+
+        depth_map = ZOBJ_moy - background
         return depth_map 
     
     def save_reconstructed_image(self,depth_map,save_path):
