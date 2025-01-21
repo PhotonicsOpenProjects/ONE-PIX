@@ -67,4 +67,29 @@ class BaslercameraBridge:
             print(f"Error closing Pylon camera: {e}")
             
             
+    def get_image_var(self):
+        try:
+            # Démarrage de la capture
+            self.camera.StartGrabbing(pylon.GrabStrategy_LatestImageOnly)
+            grab_result = self.camera.RetrieveResult(5000, pylon.TimeoutHandling_ThrowException)
     
+            if grab_result.GrabSucceeded():
+                # Convertir l'image en format compatible NumPy
+                converter = pylon.ImageFormatConverter()
+                converter.OutputPixelFormat = pylon.PixelType_BGR8packed
+                image = converter.Convert(grab_result)
+    
+                # Conversion en tableau NumPy
+                img_array = image.GetArray()
+                grab_result.Release()
+                self.camera.StopGrabbing()
+                return img_array
+            else:
+                grab_result.Release()
+                self.camera.StopGrabbing()
+                raise Exception("Image grab failed.")
+    
+        except Exception as e:
+            print(f"Error retrieving image: {e}")
+            return None
+

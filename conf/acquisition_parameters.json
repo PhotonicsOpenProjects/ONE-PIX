@@ -1,5 +1,5 @@
 {
-    "imaging_method": "Profilo",
+    "imaging_method": "FourierSplit",
     "spatial_res": 32,
     "Normalisation": false,
     "dynamic_tint": false
