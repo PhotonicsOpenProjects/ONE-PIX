@@ -2,6 +2,7 @@ from pypylon import pylon
 import os
 from datetime import date
 import time
+import numpy as np 
 
 class BaslercameraBridge:
 
@@ -48,6 +49,7 @@ class BaslercameraBridge:
 
                 # Sauvegarde de l'image
                 self.image = image.GetArray()
+                self.image=np.mean(self.image,axis=2)
                 import cv2
                 cv2.imwrite(save_path, img_array)
                 print(f"Image saved to {save_path}")
