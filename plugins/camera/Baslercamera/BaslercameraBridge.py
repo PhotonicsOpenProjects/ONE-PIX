@@ -47,7 +47,7 @@ class BaslercameraBridge:
                 image = converter.Convert(grab_result)
 
                 # Sauvegarde de l'image
-                img_array = image.GetArray()
+                self.image = image.GetArray()
                 import cv2
                 cv2.imwrite(save_path, img_array)
                 print(f"Image saved to {save_path}")
@@ -83,6 +83,7 @@ class BaslercameraBridge:
                 img_array = image.GetArray()
                 grab_result.Release()
                 self.camera.StopGrabbing()
+                self.image=img_array
                 return img_array
             else:
                 grab_result.Release()
