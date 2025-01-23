@@ -14,11 +14,8 @@ import matplotlib.pyplot as plt
 from plugins.imaging_methods.Profilo.ImageReconstruction import ProfiloReconstruction
 from plugins.imaging_methods.Profilo.ImageAnalysis import Analysis
 
-rec=ProfiloReconstruction(r"C:\Users\grussias\Desktop\repo git\Photonics_bretagne\profilo.npy")
-depth_map=rec.reconstruction()
+rec=ProfiloReconstruction(r"S:\Alternants\En-Cours\2022 Lisa Uguen\microscope hyperspectral\Topographie\objet\profilo.npy")
+hauteur=rec.reconstruction()
 an=Analysis()
-an.plot_reconstructed_image(depth_map)
+an.plot_reconstructed_image(hauteur)
 
-# plt.figure()
-# plt.imshow(depth_map)
-# plt.show()

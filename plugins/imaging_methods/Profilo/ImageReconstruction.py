@@ -3,7 +3,7 @@ import sys
 root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.append('..')
 import cv2
-
+import scipy.ndimage as ndimage
 import numpy as np
 from skimage.restoration import unwrap_phase
 
@@ -34,11 +34,25 @@ class ProfiloReconstruction:
 
 
         depth_map = ZOBJ_moy - background
-        return depth_map 
     
-    def save_reconstructed_image(self,depth_map,save_path):
+        OBJ_lisse = np.zeros_like(depth_map) #matrice vide
+
+        #boucle pour appliquer la modélisation polynomiale à chaque profil
+        for i in range(depth_map.shape[1]):
+            y = depth_map[:,i]
+            x = np.arange(len(y))
+            
+            # Ajustement d'un polynôme de degré 
+            coeffs = np.polyfit(x, y, deg=21)
+            y_lisse = np.polyval(coeffs, x)
+            OBJ_lisse[:, i] = y_lisse
+            
+        hauteur = OBJ_lisse*(-20000)+192 #hauteur en nm
+        return hauteur 
+    
+    def save_reconstructed_image(self,hauteur,save_path):
         depth_map_title="depthmap.npy"
-        np.save(save_path+"\\"+depth_map_title,depth_map)
+        np.save(save_path+"\\"+depth_map_title,hauteur)
 
 
 

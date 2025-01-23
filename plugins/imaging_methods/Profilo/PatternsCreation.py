@@ -49,7 +49,7 @@ class CreationPatterns:
 
     def creation_patterns(self):
     
-        frequency = 20  # Fréquence des sinus
+        frequency = 25  # Fréquence des sinus
         # Décalage de phase. 4 premiers : 1e set de patterns, 4 suivants : 2e set de patterns
         phase_shifts = [0, np.pi/2, np.pi,3*
         np.pi/2,np.pi/4, 3*np.pi/4, 5*np.pi/4,7*np.pi/4]
