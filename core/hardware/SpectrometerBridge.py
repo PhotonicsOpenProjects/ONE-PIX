@@ -98,7 +98,7 @@ class SpectrometerBridge:
 
             # Calculate mean of measurements and exclude the edges defined by delta_wl
             mean_measurement = np.mean(np.array(measurements), axis=0)[delta_wl:-delta_wl]
-            if mean_measurement :
+            if mean_measurement is not None and mean_measurement.size > 0:
                 peak_intensity = max(mean_measurement)
                 delta_intensity = peak_intensity - max_counts
                 
