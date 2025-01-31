@@ -1,6 +1,6 @@
 {
     "name_spectro": "Stub",
-    "name_camera": "Stub",
+    "name_camera": "Baslercamera",
     "integration_time_ms": 32.0,
     "height": 600,
     "width": 800,
