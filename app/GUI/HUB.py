@@ -25,6 +25,7 @@ import screeninfo
 path_to_GUI = os.getcwd()
 
 software_json_path = os.path.abspath(f"..{os.sep}..{os.sep}conf/software_config.json")
+hardware_json_path = os.path.abspath(f"..{os.sep}..{os.sep}conf/hardware_config.json")
 acquisition_json_path = os.path.abspath(
     f"..{os.sep}..{os.sep}conf/acquisition_parameters.json"
 )
@@ -140,8 +141,66 @@ class OPApp(ctk.CTk):
             height=40,
         )
         self.Exit_button.grid(
-            row=3, column=0, pady=(25, 2.5), padx=(25, 2.5), columnspan=2
+            row=3, column=0, pady=(25, 2.5), padx=(25, 2.5), columnspan=1
         )
+
+        # Bouton paramètres hardware
+        settings_icon = PIL.Image.open("./imgs/settings.png")  # Remplacez par l'icône réelle
+        settings_image = ctk.CTkImage(settings_icon, size=(20, 20))
+        self.hardware_settings_button = ctk.CTkButton(
+            self.Hub_frame, image=settings_image, text="", command=self.open_hardware_settings, width=22, height=22
+        )
+        self.hardware_settings_button.grid(row=3, column=0, pady=(25, 2.5), padx=(150, 2.5), columnspan=2)
+
+
+    def open_hardware_settings(self):
+        self.settings_window = ctk.CTkToplevel(self)
+        self.settings_window.title(self.hardware_settings_window_windowname)
+
+        with open(hardware_json_path, "r") as file:
+            self.hardware_config = json.load(file)
+
+        num_entries = len(self.hardware_config)
+        window_height = max(100 + num_entries * 40, 300)
+        self.settings_window.geometry(f"400x{window_height}")
+
+        self.entries = {}
+        row = 0
+        for key, value in self.hardware_config.items():
+            key_str = str(key)  # S'assurer que la clé est une chaîne
+            label = ctk.CTkLabel(self.settings_window, text=key_str)
+            label.grid(row=row, column=0, padx=10, pady=5)
+            entry = ctk.CTkEntry(self.settings_window)
+            entry.insert(0, json.dumps(value) if isinstance(value, list) else str(value))
+            entry.grid(row=row, column=1, padx=10, pady=5)
+            self.entries[key_str] = (entry, type(value))
+            row += 1
+
+        save_button = ctk.CTkButton(
+            self.settings_window, text=self.hardware_settings_window_save, command=self.save_hardware_settings
+        )
+        save_button.grid(row=row, column=0, columnspan=2, pady=10)
+    
+    def convert_value(self,value, target_type):
+        try:
+            if target_type == bool:
+                return value.lower() in ("true", "1", "yes")
+            elif target_type == list:
+                return json.loads(value.replace("'", "\""))  # Convertir une liste formatée en string en liste Python
+            return target_type(value)
+        except ValueError:
+            return value  # Fallback to string if conversion fails
+        
+    def save_hardware_settings(self):
+        for key, (entry, value_type) in self.entries.items():
+            new_value = entry.get()
+            self.hardware_config[key] = self.convert_value(new_value, value_type)
+        
+        with open(hardware_json_path, "w") as file:
+            json.dump(self.hardware_config, file, indent=4)
+        
+        self.settings_window.destroy()
+        showwarning(self.hardware_settings_window_success1,self.hardware_settings_window_success2)
 
     def CompleteLaunching(self):
         self.acquisition_method = "Complete"
@@ -676,6 +735,11 @@ class OPApp(ctk.CTk):
             "functions"
         ]["normalisation_specifications"]["normalize_yesButton"]
 
+        self.hardware_settings_window_success1=text["HUB"]["functions"]["hardware_settings_window"]["success1"]          
+        self.hardware_settings_window_success2=text["HUB"]["functions"]["hardware_settings_window"]["success2"]        
+        self.hardware_settings_window_save=text["HUB"]["functions"]["hardware_settings_window"]["save"]          
+        self.hardware_settings_window_windowname=text["HUB"]["functions"]["hardware_settings_window"]["window_name"]          
+        
         # =============================================================================
         #         help fields
         # =============================================================================
