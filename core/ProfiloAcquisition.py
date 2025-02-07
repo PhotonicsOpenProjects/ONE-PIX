@@ -4,6 +4,8 @@ import os
 import time
 import threading
 import numpy as np
+from datetime import date
+import time
 
 class Profilo_Acquisition :
 
@@ -121,6 +123,16 @@ class Profilo_Acquisition :
 
     
     def save_raw_data(self,save_path=None):
-        profilo_mes_title="profilo.npy"
-        np.save(save_path+"\\"+profilo_mes_title,self.camera_measure)
+        if save_path==None:
+            save_path= os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app", "Hypercubes")
+        
+            if os.path.isdir(save_path):
+                pass
+            else:
+                os.mkdir(save_path)
+                
+        fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time
+        profilo_mes_title=folder_name = f"ONE-PIX_raw_profilo_{fdate}_{actual_time}.npy"
+        np.save(os.path.join(save_path,profilo_mes_title),self.camera_measure)
 
