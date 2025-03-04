@@ -42,5 +42,7 @@ class CameraBridge:
         self.image = self.camera.image_capture(tag, save_path)
         self.close_camera()
 
+
+
     def close_camera(self):
         self.camera.close()

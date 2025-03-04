@@ -102,6 +102,7 @@ class Acquisition:
         else:
             pass
 
+
     def thread_acquisition(self, path=None, time_warning=True):
         """
         Runs the projection of a sequence of patterns and spectrometer measurements

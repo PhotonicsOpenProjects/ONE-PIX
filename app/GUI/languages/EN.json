@@ -245,6 +245,12 @@
 			"pop_upText":"Ensure that the calibration reference cover all the field of view during all the normalization process. It can take a few minutes",
 			"normalize_yesButton":"DONE",
 			"normalize_noButton":"CANCEL"
+			},
+		"hardware_settings_window":{
+			"success1":"Success",
+			"success2":"Hardware settings updated successfully.",
+			"save":"Save",
+			"window_name":"Hardware Settings"
 			}
 		},
 

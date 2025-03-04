@@ -1,7 +1,10 @@
 from picamera import PiCamera, PiCameraError
 import time
 from datetime import date
-
+import io
+import numpy as np 
+import time
+from PIL import Image
 
 class PicameraBridge:
 
@@ -31,6 +34,16 @@ class PicameraBridge:
             save_path = f"PiCam_{tag}_{fdate}_{actual_time}.png"
 
         self.camera.capture(save_path)
+        
+    def get_image_var(self):
+        """Capture l'image et la stocke dans une variable Python sous forme de tableau NumPy."""
+        stream = io.BytesIO()
+        self.camera.capture(stream, format='jpeg')
+        stream.seek(0)
+        img = Image.open(stream)
+        self.image=np.mean(np.asarray(img),axis=2)
+        time.sleep(1)
+        return np.array(img)
 
     def close(self):
         self.camera.close()
