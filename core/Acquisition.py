@@ -11,55 +11,42 @@ from tkinter.messagebox import askquestion
 from datetime import date
 
 
+
+
+
 class Acquisition:
     """
-    Class OPConfig is used to set up ONE-PIX acquisitions
+    Class Acquisition is used to set up ONE-PIX acquisitions.
 
-    :param str spectro_name:
-                Spectrometer concrete bridge implementation:
-
-    :param float integration_time_ms:
-                spectrometer integration time in milliseconds.
-
+    Allows parameters to be loaded from JSON files and optionally overridden 
+    by providing values at initialization.
     """
 
-    def __init__(self):
+    def __init__(self, **kwargs):
+        base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "conf")
 
-        self.hardware_config_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            f"..{os.sep}conf",
-            "hardware_config.json",
-        )
-        ## get software configuration
-        with open(self.hardware_config_path) as f:
-            hardware_dict = json.load(f)
-        
-        self.software_config_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            f"..{os.sep}conf",
-            "software_config.json",
-        )
-        ## get software configuration
-        with open(self.software_config_path) as f:
-            software_dict = json.load(f)
+        self.hardware_config_path = os.path.join(base_path, "hardware_config.json")
+        self.software_config_path = os.path.join(base_path, "software_config.json")
+        self.acquisition_config_path = os.path.join(base_path, "acquisition_parameters.json")
 
-        self.acquisition_config_path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            f"..{os.sep}conf",
-            "acquisition_parameters.json",
-        )
+        self.hardware_dict = self._load_json(self.hardware_config_path)
+        self.software_dict = self._load_json(self.software_config_path)
+        self.acquisition_dict = self._load_json(self.acquisition_config_path)
 
-        ## get software configuration
-        with open(self.acquisition_config_path) as f:
-            acquisition_dict = json.load(f)
+        params = {
+            "imaging_method_name": self.acquisition_dict.get("imaging_method"),
+            "spatial_res": self.acquisition_dict.get("spatial_res"),
+            "dynamic_tint": self.acquisition_dict.get("dynamic_tint"),
+            "normalisation_path": self.software_dict.get("normalisation_path"),
+            "normalisation": self.acquisition_dict.get("Normalisation"),
+            "width": self.hardware_dict.get("width"),
+            "height": self.hardware_dict.get("height"),
+        }
 
-        self.imaging_method_name = acquisition_dict["imaging_method"]
-        self.spatial_res = acquisition_dict["spatial_res"]
-        self.dynamic_tint=acquisition_dict["dynamic_tint"]
-        self.normalisation_path=software_dict["normalisation_path"]
-        self.normalisation=acquisition_dict["Normalisation"]
-        self.width = hardware_dict["width"]
-        self.height = hardware_dict["height"]
+        params.update(kwargs)
+
+        for key, value in params.items():
+            setattr(self, key, value)
 
         self.imaging_method = ImagingMethodBridge(
             self.imaging_method_name, self.spatial_res, self.height, self.width
@@ -67,6 +54,20 @@ class Acquisition:
         self.hardware = Hardware()
         self.is_init = False
 
+
+    @staticmethod
+    def _load_json(path):
+        """Charge un fichier JSON en gérant les erreurs."""
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            print(f"⚠️ Warning: {path} not found. Using empty config.")
+            return {}
+        
+    def update_hardware(self,**kwargs):
+        self.hardware = Hardware(**kwargs)
+        
     def init_measure(self):
         """
         This function allows to initialize the display window and the patterns to be displayed before the starts of threads.
@@ -95,6 +96,7 @@ class Acquisition:
                 self.est_duration = round(
                     (self.nb_patterns * self.hardware.periode_pattern) / (60 * 1000), 2
                 )
+                print("duration calculate :",self.est_duration)
                 self.is_init = True
             except Exception as e:
                 print(e)
