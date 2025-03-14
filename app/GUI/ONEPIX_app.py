@@ -1293,7 +1293,7 @@ class OPApp(ctk.CTk):
             self.button_co.configure(
                 text=self.widgets_text["specific_GUI"]["complete"]["Acquisition_tab"][
                     "functions"
-                ]["spec_disconnection"]["switch_spectro"],
+                ]["spec_disconnection"]["button_co"],
                 command=self.spec_connection,
             )
         else:

@@ -1,6 +1,6 @@
 {
     "name_spectro": "Stub",
-    "name_camera": "Picamera",
+    "name_camera": "Stub",
     "integration_time_ms": 32.0,
     "height": 600,
     "width": 800,
