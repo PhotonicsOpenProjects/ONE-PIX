@@ -93,7 +93,7 @@ class Acquisition:
                     dtype=np.float32,
                 )
                 self.est_duration = round(
-                    (self.nb_patterns * self.hardware.periode_pattern) / (60 * 1000), 2
+                    (self.nb_patterns * (self.hardware.periode_mes+self.hardware.periode_pattern)) / (60 * 1000), 2
                 )
                 self.is_init = True
             except Exception as e:

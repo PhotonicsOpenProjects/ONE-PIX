@@ -56,9 +56,9 @@ class Hardware:
 
         # Displaying infos
         self.interp_method = None
-        self.periode_pattern = int(self.repetition * self.integration_time_ms)
-        if self.periode_pattern < 60:
-            self.periode_pattern = 60
+        self.periode_pattern = 60
+        self.periode_mes = int(self.repetition * self.integration_time_ms)
+        
 
         self.spectrometer = SpectrometerBridge(
             self.name_spectro, self.integration_time_ms, self.wl_lim, self.repetition
