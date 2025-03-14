@@ -1,6 +1,6 @@
 {
     "imaging_method": "FourierSplit",
-    "spatial_res": 32,
+    "spatial_res": 11,
     "Normalisation": false,
     "dynamic_tint": false
 }

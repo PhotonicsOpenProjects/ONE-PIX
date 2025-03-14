@@ -10,7 +10,8 @@ import cv2
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 import spectral.io.envi as envi
-
+from scipy.interpolate import interp1d
+from pathlib import Path
 
 class FisAnalysis:
 
@@ -368,59 +369,55 @@ class FisAnalysis:
 
         return smoothed_datacube
 
-    def RGB_reconstruction(self, datacube, wavelengths):
+    def RGB_reconstruction(self, datacube, wavelengths, gamma=2.2):
         """
-        RGB_reconstruction allows to extract red, green and blue channels from a datacube
-        to create a false RGB image to represent it in the visible spectral range.
-
-        Parameters
-        ----------
-        datacube : array of floats
-            3D image data cube.
-        wavelengths : array of floats
-            1D sampled spectrometers wavelengths.
-
-        Returns
-        -------
-        image_rgb : array
-            3D array containing red, green and blue channels of the datacube.
-
+        Convertit une image hyperspectrale en une image en espace CIE XYZ et la transforme en sRGB.
+        
+        :param hsi_image: Image hyperspectrale sous forme (H, W, C)
+        :param wavelengths: Tableau des longueurs d'onde correspondant aux C canaux
+        :param cie_cmfs: Matrice des fonctions colorimétriques CIE 1931 (λ, X, Y, Z)
+        :param gamma: Correction gamma pour l'affichage
+        :return: Image RGB en uint8 (H, W, 3)
         """
+        # Récupérer le chemin absolu du script en cours d'exécution
+        script_dir = Path(__file__).parent  # Dossier où se trouve le script
+        cie_file = script_dir / "CIE1931-2deg-XYZ.csv"  # Fichier CMF attendu dans le même dossier
 
-        idx_blue_low = (np.abs(wavelengths - 400)).argmin()
-        idx_blue_high = (np.abs(wavelengths - 450)).argmin()
+        # Chargement des fonctions colorimétriques CIE 1931
+        cie_cmfs = np.loadtxt(cie_file, delimiter=",")
 
-        idx_green_low = (np.abs(wavelengths - 525)).argmin()
-        idx_green_high = (np.abs(wavelengths - 675)).argmin()
+        # Extraction des longueurs d'onde et des fonctions CMF
+        cmf_wavelengths, X_cmf, Y_cmf, Z_cmf = cie_cmfs[:, 0], cie_cmfs[:, 1], cie_cmfs[:, 2], cie_cmfs[:, 3]
 
-        idx_red_low = (np.abs(wavelengths - 600)).argmin()
-        idx_red_high = (np.abs(wavelengths - 650)).argmin()
+        # Interpolation des CMFs pour correspondre aux longueurs d'onde de l'image hyperspectrale
+        interp_X = interp1d(cmf_wavelengths, X_cmf, kind='linear', bounds_error=False, fill_value=0)
+        interp_Y = interp1d(cmf_wavelengths, Y_cmf, kind='linear', bounds_error=False, fill_value=0)
+        interp_Z = interp1d(cmf_wavelengths, Z_cmf, kind='linear', bounds_error=False, fill_value=0)
 
-        image_rgb = np.zeros((np.size(datacube, 0), np.size(datacube, 1), 3))
+        # Pondération des bandes spectrales par les CMFs
+        X = np.sum(datacube * interp_X(wavelengths), axis=-1)
+        Y = np.sum(datacube * interp_Y(wavelengths), axis=-1)
+        Z = np.sum(datacube * interp_Z(wavelengths), axis=-1)
 
-        image_rgb[:, :, 0] = np.mean(datacube[:, :, idx_red_low:idx_red_high], 2)
-        image_rgb[:, :, 1] = np.mean(datacube[:, :, idx_green_low:idx_green_high], 2)
-        image_rgb[:, :, 2] = np.mean(datacube[:, :, idx_blue_low:idx_blue_high], 2)
+        # Empiler les canaux pour obtenir une image XYZ
+        xyz_image = np.stack([X, Y, Z], axis=-1)
 
-        image_rgb[:, :, 0] = (
-            255
-            * (image_rgb[:, :, 0] - image_rgb[:, :, 0].min())
-            / (image_rgb[:, :, 0].max() - image_rgb[:, :, 0].min())
-        )
-        image_rgb[:, :, 1] = (
-            255
-            * (image_rgb[:, :, 1] - image_rgb[:, :, 1].min())
-            / (image_rgb[:, :, 1].max() - image_rgb[:, :, 1].min())
-        )
-        image_rgb[:, :, 2] = (
-            255
-            * (image_rgb[:, :, 2] - image_rgb[:, :, 2].min())
-            / (image_rgb[:, :, 2].max() - image_rgb[:, :, 2].min())
-        )
+        # Transformation de XYZ vers sRGB (D65 standard)
+        M_XYZ_to_sRGB = np.array([[ 3.2406, -1.5372, -0.4986],
+                                [-0.9689,  1.8758,  0.0415],
+                                [ 0.0557, -0.2040,  1.0570]])
+        
+        rgb_image = np.dot(xyz_image, M_XYZ_to_sRGB.T)
 
-        image_rgb = np.uint8(image_rgb)
+        # Normalisation et correction gamma
+        rgb_image -= rgb_image.min()
+        rgb_image /= rgb_image.max()
+        rgb_image = np.power(rgb_image, 1 / gamma)
 
-        return image_rgb
+        # Conversion en uint8 pour affichage
+        return (rgb_image * 255).astype(np.uint8)
+
+
 
     def clustering(self, datacube, components, n_cluster):
         """
