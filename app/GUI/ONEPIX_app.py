@@ -1914,7 +1914,11 @@ class OPApp(ctk.CTk):
 
             try:
                 self.clear_analysis_graph()
-                self.a_analysis.plot(wl, (spectra.squeeze() * norm_coeff).T)
+                #self.a_analysis.plot(wl, (spectra.squeeze() * norm_coeff).T)
+                
+                for idx in range(len(spectra)):
+                    self.a_analysis.plot(wl,np.squeeze(spectra[idx]*norm_coeff),color=self.colors[idx])
+
                 self.analysis_canvas.draw_idle()
                 self.a_analysis.set_axis_on()
                 self.a_analysis.grid(True, linestyle="--")
