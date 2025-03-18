@@ -239,4 +239,5 @@ class SpectrometerBridge:
 
         finally:
             # Ensure the spectrometer is closed properly
-            self.spec_close()
+            #self.spec_close()
+            pass

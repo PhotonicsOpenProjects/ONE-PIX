@@ -1,6 +1,6 @@
 {
-    "name_spectro": "Stub",
-    "name_camera": "Stub",
+    "name_spectro": "OceanInsight",
+    "name_camera": "Picamera",
     "integration_time_ms": 1.0,
     "height": 600,
     "width": 800,

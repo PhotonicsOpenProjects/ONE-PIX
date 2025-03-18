@@ -27,7 +27,6 @@ import datetime
 from datetime import date
 
 sys.path.append(f"..{os.sep}..{os.sep}")
-
 from core.Acquisition import Acquisition
 from core.Reconstruction import Reconstruction
 from core.Analysis import Analysis
@@ -1417,15 +1416,8 @@ class OPApp(ctk.CTk):
         # Start acquisition
         self.progressbar.start()
         self.acq_config.init_measure()
-        est_duration = round(
-            1.5
-            * self.acq_config.nb_patterns
-            * self.acq_config.hardware.periode_pattern
-            / (60 * 1000),
-            2,
-        )
         est_end = (
-            datetime.datetime.now() + datetime.timedelta(minutes=round(est_duration))
+            datetime.datetime.now() + datetime.timedelta(minutes=round(self.acq_config.est_duration))
         ).strftime("%H:%M:%S")
         est_end_label = self.widgets_text["specific_GUI"]["complete"][
             "Acquisition_tab"
