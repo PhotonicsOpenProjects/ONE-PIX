@@ -56,7 +56,6 @@ class CreationPatterns:
             3D array of split Hadamard patterns.
 
         """
-
         hadamard_matrix = hadamard(
             self.dim**2, dtype=np.int8
         )  # initialized an dim by dim Hadamard matrix
