@@ -55,10 +55,9 @@ class Hardware:
             setattr(self, key, value)
 
         # Calculer la période du pattern
-        self.periode_pattern = int(self.repetition * self.integration_time_ms)
-        if self.periode_pattern < 60:
-            self.periode_pattern = 60
-
+        self.periode_pattern=60
+        self.periode_mes=int(self.repetition*self.integration_time_ms)
+        
         # Initialisation des objets externes
         self.spectrometer = SpectrometerBridge(
             self.name_spectro, self.integration_time_ms, self.wl_lim, self.repetition
