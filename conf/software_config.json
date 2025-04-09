@@ -16,7 +16,7 @@
             1.0
         ]
     ],
-    "clustering_method": "Kmeans",
+    "clustering_method": "Otsu",
     "clustering_parameters": [
         2,
         5
