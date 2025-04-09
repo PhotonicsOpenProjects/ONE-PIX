@@ -1,11 +1,11 @@
-ONE-PIX_raw_acquisition_09_04_2025_14-33-57
+ONE-PIX_raw_acquisition_09_04_2025_15-05-02
 --------------------------------------------------------
 
 Imaging method: Addressing
-Acquisition duration: 3.357533 s
+Acquisition duration: 3.663547 s
 Spectrometer Stub : stub_spectrometer
 Camera: Stub
-Number of projected patterns: 3
+Number of projected patterns: 6
 Height of pattern window: 600 pixels
 Width of pattern window: 800 pixels
 Number of spectral measures per pattern: 2  
