@@ -84,6 +84,7 @@ class Acquisition:
         * actualised OPConfig class object.
         * self.pattern_lib.decorator.sequence : sequence of patterns
         """
+        print("is_init=",self.is_init)
         if not (self.is_init):
             try:
                 self.imaging_method.creation_patterns()
@@ -102,6 +103,7 @@ class Acquisition:
                 print(e)
                 self.is_init = False
         else:
+            print("already init")
             pass
 
 
@@ -123,9 +125,9 @@ class Acquisition:
         None
             The method updates the object's state with the acquired spectra and metadata.
         """
-
+        print("going to be init")
         self.init_measure()
-        
+        print("mesaure is init inthread acuqition")
         # Show time warning if necessary
         if time_warning:
             ans = askquestion(message=f"Estimated acquisition duration: {self.est_duration} min")

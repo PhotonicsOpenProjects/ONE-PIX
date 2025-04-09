@@ -20,11 +20,11 @@ class StubBridge:
         elif save_path is None:
             save_path = f"./StubCam_{tag}_{fdate}_{actual_time}.png"
 
-        self.image = Image.fromarray(np.uint8((255 * np.random.rand(768, 1024))))
+        self.image = Image.fromarray(np.uint8((255 * np.random.rand(768, 1024,3))))
         self.image.save(save_path)
 
     def get_image_var(self):
-        self.image = Image.fromarray(np.uint8((255 * np.random.rand(768, 1024))))
+        self.image = Image.fromarray(np.uint8((255 * np.random.rand(768, 1024,3))))
         time.sleep(1)
 
     def close(self):
