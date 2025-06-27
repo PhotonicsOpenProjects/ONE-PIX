@@ -16,7 +16,7 @@
             1.0
         ]
     ],
-    "clustering_method": "LabelMe",
+    "clustering_method": "Slic",
     "clustering_parameters": [
         2,
         5
