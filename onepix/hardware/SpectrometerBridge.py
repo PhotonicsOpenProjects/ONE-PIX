@@ -3,6 +3,7 @@ import numpy as np
 import time
 import warnings
 import cv2
+import os
 
 class SpectrometerBridge:
     """
@@ -18,25 +19,26 @@ class SpectrometerBridge:
     """
 
     def __init__(self, spectro_name, integration_time_ms, wl_lim, repetition):
-        # Concrete spectrum implementation dynamic instanciation
         try:
-            module_name = f"plugins.spectrometer.{spectro_name}."
-            className = spectro_name + "Bridge"
-            module = importlib.import_module(module_name + className)
-            classObj = getattr(module, className)
-            self.spectrometer = classObj(integration_time_ms)
+            # Chemin complet vers le module Python
+            module_path = f"plugins.spectrometer.{spectro_name}.{spectro_name}Bridge"
+            class_name = f"{spectro_name}Bridge"
+
+            module = importlib.import_module(module_path)
+
+            if not hasattr(module, class_name):
+                raise ImportError(f"Class '{class_name}' not found in module '{module_path}'")
+
+            class_obj = getattr(module, class_name)
+            self.spectrometer = class_obj(integration_time_ms)
             self.wl_lim = wl_lim
             self.repetition = repetition
-        except ModuleNotFoundError:
-            raise Exception(
-                'Concrete bridge "'
-                + spectro_name
-                + '" implementation has not been found.'
-            )
 
-        # Misc
-        self.DeviceName = ""
-        self.integration_time_ms = integration_time_ms
+            self.DeviceName = ""
+            self.integration_time_ms = integration_time_ms
+
+        except Exception as e:
+            raise Exception(f'Spectrometer bridge "{spectro_name}" could not be loaded: {e}')
 
     def spec_open(self):
         self.spectrometer.spec_open()

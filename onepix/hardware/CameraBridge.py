@@ -18,21 +18,23 @@ class CameraBridge:
                spectrometer integration time in milliseconds.
     """
 
+
+class CameraBridge:
     def __init__(self, camera_name):
-        # Concrete spectrum implementation dynamic instanciation1
         try:
-            className = camera_name + "Bridge"
-            module_name = f"plugins.camera.{camera_name}."
-            module = importlib.import_module(module_name + className)
-            classObj = getattr(module, className)
-            self.camera = classObj()
-        except ModuleNotFoundError:
-            raise Exception(
-                'Concrete bridge "'
-                + camera_name
-                + '" implementation has not been found.'
-            )
-        return
+            class_name = f"{camera_name}Bridge"
+            module_path = f"plugins.camera.{camera_name}.{class_name}"
+
+            # import dynamique du module contenant la classe
+            module = importlib.import_module(module_path)
+
+            # récupération de la classe et instanciation
+            class_obj = getattr(module, class_name)
+            self.camera = class_obj()
+
+        except Exception as e:
+            raise Exception(f'Camera bridge "{camera_name}" could not be loaded: {e}')
+
 
     def camera_open(self):
         self.camera.init_camera()

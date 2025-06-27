@@ -1,12 +1,7 @@
 import numpy as np
-import os
-import sys
-
-sys.path.append(f"..{os.sep}")
-from plugins.imaging_methods.FourierShift import PatternsCreation as shift
 import cv2
-import plugins.imaging_methods.FIS_common_functions.FIS_common_acquisition as FIS
-
+from plugins.imaging_methods.FourierShift import PatternsCreation as shift
+from plugins.imaging_methods.FIS_common_functions import FIS_common_acquisition as FIS
 
 class CreationPatterns:
     """Class FourierSplitPatterns allows to create a sequence of

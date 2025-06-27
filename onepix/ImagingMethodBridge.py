@@ -1,9 +1,7 @@
-import importlib
-
+import os
+import importlib.util
 
 class ImagingMethodBridge:
-    """ """
-
     def __init__(self, imaging_method=None, spatial_res=0, height=0, width=0):
         # Define width and height pixels numbers with a reduction coefficient to save memory
         self.pattern_reduction = [4, 3]
@@ -14,23 +12,19 @@ class ImagingMethodBridge:
 
     def creation_patterns(self):
         try:
-            # Import patterns creation module specific to the chosen imaging method
-            patterns_module = importlib.import_module(
-                f"plugins.imaging_methods.{self.imaging_method}." + "PatternsCreation"
-            )
-            self.pattern_creation_classObj = getattr(
-                patterns_module, "CreationPatterns"
-            )
-            self.pattern_creation_method = self.pattern_creation_classObj(
+            module_path = f"plugins.imaging_methods.{self.imaging_method}.PatternsCreation"
+            module = importlib.import_module(module_path)
+
+            class_obj = getattr(module, "CreationPatterns")
+            self.pattern_creation_method = class_obj(
                 self.spatial_res, self.height, self.width
             )
             self.patterns = self.pattern_creation_method.creation_patterns()
             self.patterns_order = self.pattern_creation_method.patterns_order
-        except ModuleNotFoundError:
+
+        except Exception as e:
             raise Exception(
-                'Concrete bridge "'
-                + self.imaging_method
-                + '" implementation has not been found.'
+                f'Concrete bridge "{self.imaging_method}" implementation has not been found: {e}'
             )
 
     def reconstruction(self, spectra, pattern_order):

@@ -4,8 +4,8 @@ import sys
 import time
 
 sys.path.append(f"..{os.sep}..{os.sep}")
-from core.Acquisition import Acquisition
-from core.Reconstruction import Reconstruction
+from onepix.Acquisition import Acquisition
+from onepix.Reconstruction import Reconstruction
 from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction import (
     FisCommonReconstruction as Fis,
 )

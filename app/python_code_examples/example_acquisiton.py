@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.append(f"..{os.sep}..")
+
 from onepix.Acquisition import Acquisition
 
 acq = Acquisition(imaging_method_name="FourierSplit")
