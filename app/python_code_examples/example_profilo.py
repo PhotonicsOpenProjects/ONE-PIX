@@ -4,11 +4,6 @@ Created on Mon Jan 20 15:07:02 2025
 
 @author: luguen
 """
-
-import os
-import sys
-
-sys.path.append(f"..{os.sep}..")
 from onepix.ProfiloAcquisition import Profilo_Acquisition
 from plugins.imaging_methods.Profilo.PatternsCreation import CreationPatterns
 spatial_res=100

@@ -1,11 +1,4 @@
-import os
-import sys
-
-sys.path.append(f"..{os.sep}..")
 from onepix.Acquisition import Acquisition
-
-
-
 
 acq = Acquisition(imaging_method_name="HadamardSplit",spatial_res=16)
 #acq = Acquisition(imaging_method_name='HadamardWalshSplit')

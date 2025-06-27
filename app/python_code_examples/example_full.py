@@ -1,7 +1,3 @@
-import os
-import sys
-
-sys.path.append(f"..{os.sep}..")
 from onepix.Acquisition import Acquisition
 from onepix.Reconstruction import Reconstruction
 from onepix.Analysis import Analysis

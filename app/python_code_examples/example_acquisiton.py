@@ -1,7 +1,3 @@
-import os
-import sys
-
-
 from onepix.Acquisition import Acquisition
 
 acq = Acquisition(imaging_method_name="FourierSplit")
