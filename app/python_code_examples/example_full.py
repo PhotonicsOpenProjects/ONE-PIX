@@ -2,9 +2,9 @@ import os
 import sys
 
 sys.path.append(f"..{os.sep}..")
-from core.Acquisition import Acquisition
-from core.Reconstruction import Reconstruction
-from core.Analysis import Analysis
+from onepix.Acquisition import Acquisition
+from onepix.Reconstruction import Reconstruction
+from onepix.Analysis import Analysis
 
 # Starting a new acquisition
 acq = Acquisition()

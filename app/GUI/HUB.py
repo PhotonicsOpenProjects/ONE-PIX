@@ -16,7 +16,7 @@ import sys
 import os
 
 sys.path.append(f"..{os.sep}..{os.sep}")
-from core.hardware.HardwareConfig import *
+from onepix.hardware.HardwareConfig import *
 
 import json
 

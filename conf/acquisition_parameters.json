@@ -1,6 +1,6 @@
 {
-    "imaging_method": "DCT",
-    "spatial_res": 31,
+    "imaging_method": "Addressing",
+    "spatial_res": 3,
     "Normalisation": false,
     "dynamic_tint": false
 }

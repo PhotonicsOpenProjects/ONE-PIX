@@ -27,10 +27,10 @@ import time
 
 sys.path.append(f"..{os.sep}..{os.sep}")
 
-from core.Acquisition import Acquisition
-from core.hardware.SpectrometerBridge import SpectrometerBridge
-from core.Reconstruction import Reconstruction
-from core.Analysis import Analysis
+from onepix.Acquisition import Acquisition
+from onepix.hardware.SpectrometerBridge import SpectrometerBridge
+from onepix.Reconstruction import Reconstruction
+from onepix.Analysis import Analysis
 from scipy.linalg import hadamard
 from plugins.imaging_methods.HadamardWalshSplit.custom_walsh_hadamard import *
 import numpy as np

@@ -12,10 +12,10 @@ import os
 import glob
 import traceback
 sys.path.append(f"..{os.sep}..{os.sep}")
-from core.Acquisition import Acquisition
-from core.Reconstruction import Reconstruction
-from core.Analysis import Analysis
-from core.hardware.coregistration_lib import *
+from onepix.Acquisition import Acquisition
+from onepix.Reconstruction import Reconstruction
+from onepix.Analysis import Analysis
+from onepix.hardware.coregistration_lib import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt

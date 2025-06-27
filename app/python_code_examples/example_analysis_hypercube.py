@@ -3,7 +3,7 @@ import sys
 from xml.dom.domreg import well_known_implementations
 
 sys.path.append(f"..{os.sep}..")
-from core.Analysis import Analysis
+from onepix.Analysis import Analysis
 import plugins.imaging_methods.FIS_common_functions.FIS_common_analysis as ts
 
 import matplotlib.pyplot as plt

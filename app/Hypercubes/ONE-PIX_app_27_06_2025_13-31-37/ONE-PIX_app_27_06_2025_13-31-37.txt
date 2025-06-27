@@ -1,0 +1,12 @@
+ONE-PIX_raw_acquisition_27_06_2025_13-31-37
+--------------------------------------------------------
+
+Imaging method: FourierSplit
+Acquisition duration: 4.704836 s
+Spectrometer Stub : stub_spectrometer
+Camera: Stub
+Number of projected patterns: 24
+Height of pattern window: 600 pixels
+Width of pattern window: 800 pixels
+Number of spectral measures per pattern: 1  
+Integration time: 1 ms

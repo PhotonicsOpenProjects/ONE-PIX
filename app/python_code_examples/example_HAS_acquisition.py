@@ -2,7 +2,7 @@ import os
 import sys
 
 sys.path.append(f"..{os.sep}..")
-from core.Acquisition import Acquisition
+from onepix.Acquisition import Acquisition
 
 acq = Acquisition(imaging_method_name="Addressing")
 print(acq.imaging_method_name)

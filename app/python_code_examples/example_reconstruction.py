@@ -2,7 +2,7 @@ import os
 import sys
 
 sys.path.append(f"..{os.sep}..")
-from core.Reconstruction import Reconstruction
+from onepix.Reconstruction import Reconstruction
 
 rec = Reconstruction()
 rec.data_reconstruction()

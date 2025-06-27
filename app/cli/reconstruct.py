@@ -4,7 +4,7 @@ import os
 import sys
 
 sys.path.append(f"..{os.sep}..")
-from core.Reconstruction import Reconstruction
+from onepix.Reconstruction import Reconstruction
 
 acquisition_json_path = "../../conf/acquisition_parameters.json"
 

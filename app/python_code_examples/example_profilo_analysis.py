@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from plugins.imaging_methods.Profilo.ImageReconstruction import ProfiloReconstruction
 from plugins.imaging_methods.Profilo.ImageAnalysis import Analysis
-from core.hardware.coregistration_lib import *
+from onepix.hardware.coregistration_lib import *
 
 
 rec=ProfiloReconstruction("put path of the raw measure of the sample here")
