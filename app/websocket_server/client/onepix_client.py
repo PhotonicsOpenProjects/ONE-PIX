@@ -38,6 +38,10 @@ class OnePixClient:
             self._error = data
             self._wait_event.set()
 
+        @self.sio.on("param_data")
+        def on_param_data(data):
+            print("Paramètre reçu :", data)
+
     def connect(self):
         self.sio.connect(self.server_url)
 
@@ -57,12 +61,13 @@ class OnePixClient:
     def read_param(self, key):
         self._reset()
         self.sio.emit('instruction', {
-            "action": "get_config",  # ou 'get_param' si tu implémentes
-            "name": "acquisition_parameters"
+            "action": "get_param",
+            "key": key
         })
         self._wait_event.wait(self.timeout)
-        if self._result and "config" in self._result:
-            return self._result["config"].get(key)
+        print(self._result)
+        if self._result:
+            return self._result.get("value")
         return None
 
     def run_measure(self):

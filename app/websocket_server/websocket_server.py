@@ -32,6 +32,35 @@ def on_instruction(data):
         emit('mesure', {'raw_data': acq.spectra.tolist()})
 
     # Mise à jour transparente d'une clé dans les fichiers JSON
+
+    elif action == "get_param":
+        key = data.get("key")
+        if not key:
+            emit("erreur", {"message": "Clé manquante pour lecture"})
+            return
+
+        value = None
+        found_in = None
+        for filename in os.listdir(CONF_DIR):
+            if not filename.endswith(".json"):
+                continue
+            path = os.path.join(CONF_DIR, filename)
+            try:
+                with open(path, "r") as f:
+                    config = json.load(f)
+                if key in config:
+                    value = config[key]
+                    found_in = filename
+                    break
+            except Exception as e:
+                print(f"Erreur lecture {filename} :", e)
+                continue
+
+        if found_in:
+            emit("param_data", {"key": key, "value": value, "file": found_in})
+        else:
+            emit("erreur", {"message": f"Clé '{key}' introuvable dans les fichiers de config"})
+
     elif action == "update_param":
         key = data.get("key")
         new_value = data.get("value")
