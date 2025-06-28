@@ -42,7 +42,7 @@ class Acquisition:
             "width": self.hardware_dict.get("width"),
             "height": self.hardware_dict.get("height"),
         }
-
+    
         params.update(kwargs)
 
         for key, value in params.items():

@@ -1,6 +1,6 @@
 {
-    "imaging_method": "DCT",
-    "spatial_res": 3,
-    "Normalisation": false,
-    "dynamic_tint": false
+  "imaging_method": "FourierSplit",
+  "spatial_res": 3,
+  "Normalisation": false,
+  "dynamic_tint": false
 }
