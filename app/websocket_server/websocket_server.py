@@ -29,7 +29,7 @@ def on_instruction(data):
     if action == "mesure":
         acq = Acquisition()
         acq.thread_acquisition(time_warning=False)
-        emit('mesure', {'raw_data': "mesure done"})
+        emit('mesure', {'raw_data': acq.spectra.tolist()})
 
     # Mise à jour transparente d'une clé dans les fichiers JSON
     elif action == "update_param":
