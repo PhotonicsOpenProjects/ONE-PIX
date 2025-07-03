@@ -1,9 +1,13 @@
+import os 
 import cv2
 import screeninfo
 import numpy as np
 import time
 from tkinter import *
 import PIL.Image, PIL.ImageTk
+
+if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
+    os.environ["DISPLAY"] = ":0"
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
