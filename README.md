@@ -55,16 +55,14 @@ This tutorial details all the steps required to install the ONE-PIX software on 
 
 For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
 
-### Installing ONE-PIX on a raspberry pi  
-All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it are available [here](imgs/ONE-PIX_install_on_rasp.md). 
-For other OS just continue to read this readme file. 
+### Installing ONE-PIX 
 
+This installation tutorial is fucntionnal for all OS (raspberry pi and windows 11). 
 
 ### Download git repository
 
 The first step of this installation is to clone the ONE-PIX directory from Github.
 
-From the Raspberry Pi, open a terminal and go to the desktop with the following command line:
 
 ```
 cd Desktop
@@ -81,15 +79,18 @@ sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
 To install ONE-PIX on the raspberry pi board just run the setup.sh for that go in ther install folder with this command  :
 
 ```
-cd ONE-PIX/install 
+cd ONE-PIX
 ```
 and run the installation script with this command :
 
 ```
-sudo chmod +x ./install.sh
-./install.sh
+pip install -e . 
+python install.py
 ```
+### additional step for raspberry pi 
 
+for Rabperry pi installation an  additional steps need to be done to finsish properly the installation rapsberry pi.
+check [here](imgs/ONE-PIX_install_on_rasp.md). 
 
 ### Spectrometer installation 
 
