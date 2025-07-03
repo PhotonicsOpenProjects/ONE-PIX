@@ -17,4 +17,5 @@ labelme
 opencv-python
 sympy
 sphinx-rtd-theme
-
+flask
+flask-socketio
