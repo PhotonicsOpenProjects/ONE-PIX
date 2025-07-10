@@ -1,13 +1,13 @@
 {
-    "name_spectro": "OceanInsight",
-    "name_camera": "Stub",
-    "integration_time_ms": 1.0,
-    "height": 600,
-    "width": 800,
-    "wl_lim": [
-        350,
-        800
-    ],
-    "spectro_scans2avg": 1,
-    "proj_position": "auto"
+  "name_spectro": "Stub",
+  "name_camera": "Stub",
+  "integration_time_ms": 2.0,
+  "height": 600,
+  "width": 800,
+  "wl_lim": [
+    350,
+    800
+  ],
+  "spectro_scans2avg": 1,
+  "proj_position": "auto"
 }
