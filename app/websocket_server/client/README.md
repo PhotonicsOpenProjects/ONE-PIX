@@ -135,7 +135,7 @@ The method `change_param(key, value)` allows dynamic modification of system sett
 | `name_camera`          | `"Stub"`         | Camera name used in ONE-PIX            |
 | `integration_time_ms`  | `"2.0"`          | Integration time (ms)                  |
 | `height`               | `"600"`          | height pattern window resolution       |
-| `width`                | `"800"`          | Image width  pattern window resolution |
+| `width`                | `"800"`          |  width pattern  window resolution |
 | `wl_lim`               | `"[350,800]"`    | Wavelength range (JSON string)         |
 | `spectro_scans2avg`    | `"1"`            | Number of scans to average for oen pattern measure  |
 | `proj_position`        | `"auto"`         | Projector position                     |
