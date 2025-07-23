@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onepix"
-version = "0.1.0"
+version = "2.0.0"
 description = "Core module of the ONE-PIX project"
 authors = [
-    { name = "Mathieur Ribes" },
+    { name = "Mathieu Ribes" },
     { name = "Gaspard Russias" },
     { name = "Antoine Fournier" }
 ]
