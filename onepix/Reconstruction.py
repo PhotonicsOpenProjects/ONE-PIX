@@ -8,6 +8,10 @@ from tkinter.filedialog import askdirectory
 
 from onepix.ImagingMethodBridge import *
 
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
+
 
 def get_header_data(path):
     """
@@ -38,7 +42,7 @@ def get_header_data(path):
 
         if x[0].strip() == "Integration time":
             acq_data["integration_time_ms"] = float(x[1].strip()[:-2])
-
+    logging.info("header data is loaded")
     return acq_data
 
 
@@ -72,6 +76,7 @@ class Reconstruction:
         self.imaging_method = ImagingMethodBridge(
             self.imaging_method_name, self.spatial_res, self.height, self.width
         )
+        logging.info("Reconstruction class is init")
 
     def load_raw_data(self):
         """
@@ -113,8 +118,10 @@ class Reconstruction:
             )
 
             os.chdir(chemin_script)
+            logging.info("raw data is loaded")
         except Exception as e:
-            print(e)
+            logging.error(f"error in load_raw_data : {e}")
+
 
     def nan_corr(self):
         """
@@ -142,6 +149,7 @@ class Reconstruction:
 
         """
         self.imaging_method.reconstruction(self.spectra, self.pattern_order)
+        logging.info("raw datas are reconstructed now")
 
     def save_reconstructed_image(self, filename, save_path):
         header = self.create_reconstruction_header()
@@ -152,6 +160,7 @@ class Reconstruction:
             filename,
             save_path,
         )
+        logging.info(f'reconstructed datas are saved at {save_path}')
 
     def create_reconstruction_header(self):
         fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string

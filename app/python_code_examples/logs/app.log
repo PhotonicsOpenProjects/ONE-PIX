@@ -11,3 +11,21 @@
 2025-07-23 16:14:36 - root - INFO - measure header is created
 2025-07-23 16:14:36 - root - INFO - measure is complete
 2025-07-23 16:14:36 - root - INFO - measure is saved
+2025-07-23 16:20:46 - root - ERROR - error in load_raw_data [WinError 123] La syntaxe du nom de fichier, de répertoire ou de volume est incorrecte: ''
+2025-07-23 16:20:58 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:20:58 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:20:58 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:21:01 - root - INFO - measure begin
+2025-07-23 16:21:04 - root - INFO - measure header is created
+2025-07-23 16:21:04 - root - INFO - measure is complete
+2025-07-23 16:21:04 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:21:04 - root - INFO - Reconstruction class is init
+2025-07-23 16:24:08 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:24:08 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:24:08 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:24:10 - root - INFO - measure begin
+2025-07-23 16:24:13 - root - INFO - measure header is created
+2025-07-23 16:24:13 - root - INFO - measure is complete
+2025-07-23 16:24:13 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:24:13 - root - INFO - Reconstruction class is init
+2025-07-23 16:24:13 - root - INFO - raw datas are reconstructed now

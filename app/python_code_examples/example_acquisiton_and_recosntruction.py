@@ -7,7 +7,8 @@ acq.thread_acquisition()
 rec=Reconstruction(acq)
 rec.data_reconstruction()
 hypercube=rec.imaging_method.reconstructed_image
-print(np.shape(hypercube))
+
+
 
 
 
