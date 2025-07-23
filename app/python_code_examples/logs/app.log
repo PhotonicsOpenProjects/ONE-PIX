@@ -1,0 +1,13 @@
+2025-07-23 16:03:01 - onepix.Acquisition - INFO - Acquisition class  init
+2025-07-23 16:08:01 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:08:01 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:09:42 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:09:42 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:09:42 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:14:31 - onepix.Acquisition - INFO - Acquisition class is init with parameters
+2025-07-23 16:14:31 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:14:31 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:14:32 - root - INFO - measure begin
+2025-07-23 16:14:36 - root - INFO - measure header is created
+2025-07-23 16:14:36 - root - INFO - measure is complete
+2025-07-23 16:14:36 - root - INFO - measure is saved

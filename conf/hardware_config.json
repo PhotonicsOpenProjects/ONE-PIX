@@ -1,7 +1,7 @@
 {
     "name_spectro": "Stub",
     "name_camera": "Stub",
-    "integration_time_ms": 2,
+    "integration_time_ms": 2.0,
     "height": 600,
     "width": 800,
     "wl_lim": [

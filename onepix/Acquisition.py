@@ -10,8 +10,9 @@ from tkinter import *
 from tkinter.messagebox import askquestion
 from datetime import date
 
-
-
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
 
 
 class Acquisition:
@@ -23,6 +24,7 @@ class Acquisition:
     """
 
     def __init__(self, **kwargs):
+        
         base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "conf")
 
         self.hardware_config_path = os.path.join(base_path, "hardware_config.json")
@@ -42,6 +44,7 @@ class Acquisition:
             "width": self.hardware_dict.get("width"),
             "height": self.hardware_dict.get("height"),
         }
+        
     
         params.update(kwargs)
 
@@ -53,6 +56,7 @@ class Acquisition:
         )
         self.hardware = Hardware()
         self.is_init = False
+        logger.info("Acquisition class is init with parameters")
 
 
     @staticmethod
@@ -62,11 +66,12 @@ class Acquisition:
             with open(path, "r") as f:
                 return json.load(f)
         except FileNotFoundError:
-            print(f"⚠️ Warning: {path} not found. Using empty config.")
+            logger.warning(f"⚠️ Warning: {path} not found. Using empty config.")
             return {}
         
     def update_hardware(self,**kwargs):
         self.hardware = Hardware(**kwargs)
+        logger.info("hardware is updated")
         
     def init_measure(self):
         """
@@ -84,7 +89,7 @@ class Acquisition:
         * actualised OPConfig class object.
         * self.pattern_lib.decorator.sequence : sequence of patterns
         """
-        print("is_init=",self.is_init)
+        
         if not (self.is_init):
             try:
                 self.imaging_method.creation_patterns()
@@ -97,13 +102,14 @@ class Acquisition:
                 self.est_duration = round(
                     (self.nb_patterns * (self.hardware.periode_mes+self.hardware.periode_pattern)) / (60 * 1000), 2
                 )
-                print("duration calculate :",self.est_duration)
+                logger.info(f"duration calculate : {self.est_duration}")
                 self.is_init = True
+                logger.info("measure is init")
             except Exception as e:
-                print(e)
+                logger.error(f"error during init_measure :{e}")
                 self.is_init = False
         else:
-            print("already init")
+            logger.info("measure is already init")
             pass
 
 
@@ -125,16 +131,14 @@ class Acquisition:
         None
             The method updates the object's state with the acquired spectra and metadata.
         """
-        print("going to be init")
-        self.init_measure()
-        print("mesaure is init inthread acuqition")
+        self.init_measure()   
         # Show time warning if necessary
         if time_warning:
             ans = askquestion(message=f"Estimated acquisition duration: {self.est_duration} min")
             if ans != "yes":
                 cv2.destroyAllWindows()
                 return  # Exit early if the user doesn't confirm the acquisition
-
+        
         # Begin acquisition process
         begin_acq = time.time()
         
@@ -159,6 +163,7 @@ class Acquisition:
 
         try:
             # Start threads
+            logging.info("measure begin")
             patterns_thread.start()
             spectrometer_thread.start()
 
@@ -170,10 +175,10 @@ class Acquisition:
             self.spectra = self.hardware.spectrometer.spectra
             self.duration = time.time() - begin_acq
             self.create_acquisition_header()
+            logging.info("measure is complete")
 
         except Exception as e:
-            # Handle any potential errors during the acquisition process
-            print(f"An error occurred during acquisition: {e}")
+            logging.error(f"An error occurred during acquisition: {e}")
             cv2.destroyAllWindows()
 
         finally:
@@ -209,7 +214,10 @@ class Acquisition:
             + "Integration time: %d ms" % self.hardware.spectrometer.integration_time_ms
             + "\n"
         )
+        logging.info("measure header is created")
 
     def save_raw_data(self, path=None):
         self.imaging_method.pattern_creation_method.save_raw_data(self)
+        logging.info("measure is saved")
+        
         
