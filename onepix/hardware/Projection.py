@@ -16,7 +16,7 @@ if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
 screenWidth = screeninfo.get_monitors()[0].width
 try:
     proj_shape = screeninfo.get_monitors()[1]
-    logging.info('your second screen will be use')
+    logging.info('your second screen will be use as projector')
 except IndexError:
     logging.warning('no double screen was detected Please use a projector to use ONE-PIX"')
 

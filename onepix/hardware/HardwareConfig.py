@@ -10,15 +10,15 @@ import logging
 from onepix.logging_config import root  
 logger = logging.getLogger(__name__)
 
-import screeninfo
+# import screeninfo
 
-screenWidth = screeninfo.get_monitors()[0].width
-try:
-    proj_shape = screeninfo.get_monitors()[1]
-    logging.info('your second screen will be use as a projector')
-except IndexError:
-    logging.warning('No double screen was detected : Please use a projector to use ONE-PIX')
-    # sys.exit()
+# screenWidth = screeninfo.get_monitors()[0].width
+# try:
+#     proj_shape = screeninfo.get_monitors()[1]
+#     logging.info('your second screen will be use as a projector')
+# except IndexError:
+#     logging.warning('No double screen was detected : Please use a projector to use ONE-PIX')
+#     # sys.exit()
 
 
 class Hardware:
@@ -104,5 +104,5 @@ class Hardware:
 
         self.spectrometer.set_integration_time()
         self.spectrometer.get_wavelengths()
-        logging.info(f"hardware is now init")
+        logging.info(f"all hardware  is now open and ready to use")
 

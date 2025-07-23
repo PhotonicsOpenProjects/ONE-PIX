@@ -81,3 +81,132 @@
 2025-07-23 17:16:50 - matplotlib - DEBUG - platform is win32
 2025-07-23 17:16:50 - matplotlib - DEBUG - CACHEDIR=C:\Users\grussias\.matplotlib
 2025-07-23 17:16:50 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\grussias\.matplotlib\fontlist-v390.json
+2025-07-23 17:18:42 - root - INFO - your second screen will be use
+2025-07-23 17:18:42 - root - INFO - your second screen will be use as a projector
+2025-07-23 17:18:42 - root - INFO - FourierSplit imaging method with 1 is init
+2025-07-23 17:18:42 - root - INFO - Stub spectrometer plugins is init 
+2025-07-23 17:18:42 - root - INFO - Stub  plugins camera is init 
+2025-07-23 17:18:42 - root - INFO - Projection system is init
+2025-07-23 17:18:42 - root - INFO - onepix Hardware class is init 
+2025-07-23 17:18:42 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 17:18:42 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 17:18:42 - root - INFO - Stub spectrometer plugins is open
+2025-07-23 17:18:42 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-23 17:18:42 - root - INFO - hardware is now init
+2025-07-23 17:18:42 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 17:18:42 - onepix.Acquisition - INFO - measure is init
+2025-07-23 17:18:45 - root - INFO - measure begin
+2025-07-23 17:18:48 - root - INFO - Projection system begin to project patterns
+2025-07-23 17:18:49 - root - INFO - Projection system finish to project patterns
+2025-07-23 17:18:49 - root - INFO - measure header is created
+2025-07-23 17:18:49 - root - INFO - measure is complete
+2025-07-23 17:18:49 - root - INFO - Stub camera is open
+2025-07-23 17:18:49 - root - INFO - Stub camera is close
+2025-07-23 17:18:49 - root - INFO - measure is saved
+2025-07-23 17:19:06 - root - INFO - your second screen will be use
+2025-07-23 17:19:06 - root - INFO - FourierSplit imaging method with 1 is init
+2025-07-23 17:19:06 - root - INFO - Stub spectrometer plugins is init 
+2025-07-23 17:19:07 - root - INFO - Stub  plugins camera is init 
+2025-07-23 17:19:07 - root - INFO - Projection system is init
+2025-07-23 17:19:07 - root - INFO - onepix Hardware class is init 
+2025-07-23 17:19:07 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 17:19:07 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 17:19:07 - root - INFO - Stub spectrometer plugins is open
+2025-07-23 17:19:07 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-23 17:19:07 - root - INFO - hardware is now init
+2025-07-23 17:19:07 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 17:19:07 - onepix.Acquisition - INFO - measure is init
+2025-07-23 17:19:08 - root - INFO - measure begin
+2025-07-23 17:19:12 - root - INFO - Projection system begin to project patterns
+2025-07-23 17:19:12 - root - INFO - Projection system finish to project patterns
+2025-07-23 17:19:12 - root - INFO - measure header is created
+2025-07-23 17:19:12 - root - INFO - measure is complete
+2025-07-23 17:19:12 - root - INFO - Stub camera is open
+2025-07-23 17:19:12 - root - INFO - Stub camera is close
+2025-07-23 17:19:12 - root - INFO - measure is saved
+2025-07-23 17:21:20 - root - INFO - your second screen will be use
+2025-07-23 17:21:20 - root - INFO - FourierSplit imaging method with 1 spatial res is init
+2025-07-23 17:21:20 - root - INFO - Stub spectrometer plugins is init 
+2025-07-23 17:21:20 - root - INFO - Stub  plugins camera is init 
+2025-07-23 17:21:20 - root - INFO - Projection system is init
+2025-07-23 17:21:20 - root - INFO - onepix Hardware class is init 
+2025-07-23 17:21:20 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 17:21:20 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 17:21:20 - root - INFO - Stub spectrometer plugins is open
+2025-07-23 17:21:20 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-23 17:21:20 - root - INFO - hardware is now init
+2025-07-23 17:21:20 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 17:21:20 - onepix.Acquisition - INFO - measure is init
+2025-07-23 17:21:22 - root - INFO - measure begin
+2025-07-23 17:21:25 - root - INFO - Projection system begin to project patterns
+2025-07-23 17:21:26 - root - INFO - Projection system finish to project patterns
+2025-07-23 17:21:26 - root - INFO - measure header is created
+2025-07-23 17:21:26 - root - INFO - measure is complete
+2025-07-23 17:21:26 - root - INFO - Stub camera is open
+2025-07-23 17:21:26 - root - INFO - Stub camera is close
+2025-07-23 17:21:26 - root - INFO - measure is saved
+2025-07-23 17:21:54 - root - INFO - your second screen will be use as projector
+2025-07-23 17:21:54 - root - INFO - FourierSplit imaging method with 1 spatial res is init
+2025-07-23 17:21:54 - root - INFO - Stub spectrometer plugins is init 
+2025-07-23 17:21:54 - root - INFO - Stub  plugins camera is init 
+2025-07-23 17:21:54 - root - INFO - Projection system is init
+2025-07-23 17:21:54 - root - INFO - onepix Hardware class is init 
+2025-07-23 17:21:54 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 17:21:54 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 17:21:54 - root - INFO - Stub spectrometer plugins is open
+2025-07-23 17:21:54 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-23 17:21:54 - root - INFO - hardware is now init
+2025-07-23 17:21:54 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 17:21:54 - onepix.Acquisition - INFO - measure is init
+2025-07-23 17:21:56 - root - INFO - measure begin
+2025-07-23 17:21:59 - root - INFO - Projection system begin to project patterns
+2025-07-23 17:21:59 - root - INFO - Projection system finish to project patterns
+2025-07-23 17:21:59 - root - INFO - measure header is created
+2025-07-23 17:21:59 - root - INFO - measure is complete
+2025-07-23 17:21:59 - root - INFO - Stub camera is open
+2025-07-23 17:21:59 - root - INFO - Stub camera is close
+2025-07-23 17:21:59 - root - INFO - measure is saved
+2025-07-23 17:23:18 - root - INFO - your second screen will be use as projector
+2025-07-23 17:23:18 - root - INFO - FourierSplit imaging method with 1 spatial res is init
+2025-07-23 17:23:18 - root - INFO - Stub spectrometer plugins is init 
+2025-07-23 17:23:18 - root - INFO - Stub  plugins camera is init 
+2025-07-23 17:23:18 - root - INFO - Projection system is init
+2025-07-23 17:23:18 - root - INFO - onepix Hardware class is init 
+2025-07-23 17:23:18 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 17:23:18 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 17:23:18 - root - INFO - Stub spectrometer plugins is open
+2025-07-23 17:23:18 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-23 17:23:18 - root - INFO - all hardware  is now open and ready to use
+2025-07-23 17:23:18 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 17:23:18 - onepix.Acquisition - INFO - measure is init
+2025-07-23 17:23:19 - root - INFO - measure begin
+2025-07-23 17:23:22 - root - INFO - Projection system begin to project patterns
+2025-07-23 17:23:22 - root - INFO - Projection system finish to project patterns
+2025-07-23 17:23:22 - root - INFO - measure header is created
+2025-07-23 17:23:22 - root - INFO - measure is complete
+2025-07-23 17:23:22 - root - INFO - Stub camera is open
+2025-07-23 17:23:23 - root - INFO - Stub camera is close
+2025-07-23 17:23:23 - root - INFO - measure is saved
+2025-07-23 17:24:58 - root - INFO - your second screen will be use as projector
+2025-07-23 17:24:58 - root - INFO - FourierSplit imaging method with 1 spatial res is init
+2025-07-23 17:24:58 - root - INFO - Stub spectrometer plugins is init 
+2025-07-23 17:24:58 - root - INFO - Stub  plugins camera is init 
+2025-07-23 17:24:58 - root - INFO - Projection system is init
+2025-07-23 17:24:58 - root - INFO - onepix Hardware class is init 
+2025-07-23 17:24:58 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 17:24:58 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 17:24:58 - root - INFO - Stub spectrometer plugins is open
+2025-07-23 17:24:58 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-23 17:24:58 - root - INFO - all hardware  is now open and ready to use
+2025-07-23 17:24:58 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 17:24:58 - onepix.Acquisition - INFO - measure is init
+2025-07-23 17:25:01 - root - INFO - measure begin
+2025-07-23 17:25:01 - root - INFO - Stub spectrometer begin to measure
+2025-07-23 17:25:04 - root - INFO - Projection system begin to project patterns
+2025-07-23 17:25:05 - root - INFO - Stub spectrometer begin to measure
+2025-07-23 17:25:05 - root - INFO - Projection system finish to project patterns
+2025-07-23 17:25:05 - root - INFO - measure header is created
+2025-07-23 17:25:05 - root - INFO - measure is complete
+2025-07-23 17:25:05 - root - INFO - Stub camera is open
+2025-07-23 17:25:05 - root - INFO - Stub camera is close
+2025-07-23 17:25:05 - root - INFO - measure is saved

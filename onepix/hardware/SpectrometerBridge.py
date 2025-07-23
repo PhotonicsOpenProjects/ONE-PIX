@@ -175,6 +175,7 @@ class SpectrometerBridge:
         """
 
         # Initial validation
+        logging.info(f"{self.spectro_name} spectrometer begin to measure")
         if spectra is None or not isinstance(spectra, np.ndarray):
             raise ValueError("The spectra parameter must be a valid NumPy array.")
 
@@ -242,6 +243,7 @@ class SpectrometerBridge:
                 else:
                     # Small sleep to avoid busy waiting
                     time.sleep(1e-6)
+            logging.info(f"{self.spectro_name} spectrometer begin to measure")
 
             
         except Exception as e:

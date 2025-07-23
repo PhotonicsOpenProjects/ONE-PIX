@@ -22,7 +22,7 @@ class BaslercameraBridge:
         self.camera.ExposureTime.SetValue(8170)  # Exemple d'exposition en microsecondes
         self.camera.Gain.SetValue(0.0)             # Gain minimal
         
-        print("Pylon camera is connected and initialized.")
+
 
 
 
@@ -52,7 +52,6 @@ class BaslercameraBridge:
                 self.image=np.mean(self.image,axis=2)
                 import cv2
                 cv2.imwrite(save_path, img_array)
-                print(f"Image saved to {save_path}")
 
             grab_result.Release()
             self.camera.StopGrabbing()
@@ -64,7 +63,6 @@ class BaslercameraBridge:
         try:
             if self.camera.IsOpen():
                 self.camera.Close()
-            print("Pylon camera is disconnected.")
         except Exception as e:
             print(f"Error closing Pylon camera: {e}")
             

@@ -14,7 +14,7 @@ class ImagingMethodBridge:
         self.width = width // self.pattern_reduction[1]
         self.spatial_res = spatial_res
         self.imaging_method = imaging_method
-        logging.info(f'{self.imaging_method} imaging method with {self.spatial_res} is init')
+        logging.info(f'{self.imaging_method} imaging method with {self.spatial_res} spatial res is init')
 
     def creation_patterns(self):
         try:
