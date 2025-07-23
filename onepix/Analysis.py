@@ -7,6 +7,10 @@ from tkinter import filedialog
 import json
 import numpy as np
 
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
+
 class Analysis:
     def __init__(self, rec=None, data_path=None):
         self.data_path = data_path
@@ -36,6 +40,7 @@ class Analysis:
             software_dict = json.load(f)
         self.normalisation_path = software_dict["normalisation_path"]
         self.normalised_data = []
+        logging.info("onepix Analysis Class is init")
 
     def read_header(self):
         """
@@ -83,16 +88,19 @@ class Analysis:
 
     def load_data(self, path=None):
         self.imaging_method.image_analysis_method.load_reconstructed_data(path)
+        logging.info(f"data are loaded from {path}")
 
     def data_normalisation(self,ref_data,data=None):
         
         self.normalised_data = self.imaging_method.image_analysis_method.data_normalisation(
             ref_data,data)
+        logging.info(f"data are now  normalized")
        
     def get_rgb_image(self, datacube, wavelengths):
         rgb_image = self.imaging_method.image_analysis_method.get_rgb_image(
             datacube, wavelengths
         )
+        logging.info(f"RGB image from datacube is created")
         return rgb_image
 
     def plot_rgb_image(self):

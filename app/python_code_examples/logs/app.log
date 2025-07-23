@@ -29,3 +29,34 @@
 2025-07-23 16:24:13 - onepix.Acquisition - INFO - Acquisition class is init with parameters
 2025-07-23 16:24:13 - root - INFO - Reconstruction class is init
 2025-07-23 16:24:13 - root - INFO - raw datas are reconstructed now
+2025-07-23 16:30:03 - matplotlib - DEBUG - matplotlib data path: C:\Users\grussias\AppData\Local\miniconda3\envs\onepix_module_env\lib\site-packages\matplotlib\mpl-data
+2025-07-23 16:30:03 - matplotlib - DEBUG - CONFIGDIR=C:\Users\grussias\.matplotlib
+2025-07-23 16:30:03 - matplotlib - DEBUG - interactive is False
+2025-07-23 16:30:03 - matplotlib - DEBUG - platform is win32
+2025-07-23 16:30:03 - matplotlib - DEBUG - CACHEDIR=C:\Users\grussias\.matplotlib
+2025-07-23 16:30:03 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\grussias\.matplotlib\fontlist-v390.json
+2025-07-23 16:30:11 - root - INFO - data are loaded from C:/Users/grussias/Desktop/repo git/POP/ONEPIX/onepix_dev/app/Hypercubes/ONE-PIX_app_23_07_2025_14-22-42
+2025-07-23 16:30:11 - root - INFO - onepix Analysis Class is init
+2025-07-23 16:30:11 - root - INFO - data are loaded from None
+2025-07-23 16:35:37 - root - INFO - your screen 1 will be use as a projector
+2025-07-23 16:35:37 - root - INFO - onepix Hardware class is init 
+2025-07-23 16:35:37 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 16:35:37 - root - INFO - hardware is now init
+2025-07-23 16:35:37 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:35:37 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:35:39 - root - INFO - measure begin
+2025-07-23 16:35:43 - root - INFO - measure header is created
+2025-07-23 16:35:43 - root - INFO - measure is complete
+2025-07-23 16:35:43 - root - INFO - measure is saved
+2025-07-23 16:42:47 - root - INFO - your screen 1 will be use as a projector
+2025-07-23 16:42:47 - root - INFO - FourierSplit imaging method with 1 is init
+2025-07-23 16:42:48 - root - INFO - onepix Hardware class is init 
+2025-07-23 16:42:48 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 16:42:48 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 16:42:48 - root - INFO - hardware is now init
+2025-07-23 16:42:48 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:42:48 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:42:50 - root - INFO - measure begin
+2025-07-23 16:42:53 - root - INFO - measure header is created
+2025-07-23 16:42:53 - root - INFO - measure is complete
+2025-07-23 16:42:53 - root - INFO - measure is saved

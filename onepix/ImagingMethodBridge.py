@@ -1,6 +1,11 @@
 import os
 import importlib.util
 
+
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
+
 class ImagingMethodBridge:
     def __init__(self, imaging_method=None, spatial_res=0, height=0, width=0):
         # Define width and height pixels numbers with a reduction coefficient to save memory
@@ -9,6 +14,7 @@ class ImagingMethodBridge:
         self.width = width // self.pattern_reduction[1]
         self.spatial_res = spatial_res
         self.imaging_method = imaging_method
+        logging.info(f'{self.imaging_method} imaging method with {self.spatial_res} is init')
 
     def creation_patterns(self):
         try:
@@ -21,10 +27,10 @@ class ImagingMethodBridge:
             )
             self.patterns = self.pattern_creation_method.creation_patterns()
             self.patterns_order = self.pattern_creation_method.patterns_order
-
+            logging.info(f'patterns of {self.imaging_method} are created ')
         except Exception as e:
             raise Exception(
-                f'Concrete bridge "{self.imaging_method}" implementation has not been found: {e}'
+                f'Concrete bridge "{self.imaging_method}" had an error during create patterns: {e}'
             )
 
     def reconstruction(self, spectra, pattern_order):

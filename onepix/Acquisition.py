@@ -56,7 +56,7 @@ class Acquisition:
         )
         self.hardware = Hardware()
         self.is_init = False
-        logger.info("Acquisition class is init with parameters")
+        logger.info("onepixAcquisition class is init")
 
 
     @staticmethod

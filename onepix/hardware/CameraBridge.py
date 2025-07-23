@@ -2,6 +2,10 @@ import importlib
 import sys
 import os
 
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
+
 sys.path.append(f"..{os.sep}..{os.sep}")
 
 
@@ -22,6 +26,7 @@ class CameraBridge:
 class CameraBridge:
     def __init__(self, camera_name):
         try:
+            self.camera_name=camera_name
             class_name = f"{camera_name}Bridge"
             module_path = f"plugins.camera.{camera_name}.{class_name}"
 
@@ -31,13 +36,14 @@ class CameraBridge:
             # récupération de la classe et instanciation
             class_obj = getattr(module, class_name)
             self.camera = class_obj()
-
+            logging.info(f"{camera_name} plugins is init ")
         except Exception as e:
             raise Exception(f'Camera bridge "{camera_name}" could not be loaded: {e}')
 
 
     def camera_open(self):
         self.camera.init_camera()
+        logging.info(f"{self.camera_name} camera is open")
 
     def get_image(self, tag=None, save_path=None):
         self.camera_open()
@@ -48,3 +54,4 @@ class CameraBridge:
 
     def close_camera(self):
         self.camera.close()
+        logging.info(f"{self.camera_name} camera is close")
