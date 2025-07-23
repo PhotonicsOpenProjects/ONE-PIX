@@ -25,7 +25,7 @@
     "max_width": 719,
     "IP": "ws://192.168.5.60:8000",
     "port": "8000",
-    "mode_choice": "Advanced",
-    "acquisition_method": "Addressed",
+    "mode_choice": "Simple",
+    "acquisition_method": "Complete",
     "normalisation_path": ""
 }
