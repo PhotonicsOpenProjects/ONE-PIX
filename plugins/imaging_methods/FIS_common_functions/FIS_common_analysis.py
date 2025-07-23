@@ -16,6 +16,7 @@ from pathlib import Path
 class FisAnalysis:
 
     def __init__(self):
+        print("FIS common analysis is loaded")
         return
 
     def get_header_data(self, path):

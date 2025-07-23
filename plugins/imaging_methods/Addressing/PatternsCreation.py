@@ -8,8 +8,8 @@ import cv2
 import numpy as np
 
 sys.path.append(f"..{os.sep}..{os.sep}..{os.sep}")
-from core.hardware.coregistration_lib import *
-from core.hardware.CameraBridge import *
+from onepix.hardware.coregistration_lib import *
+from onepix.hardware.CameraBridge import *
 import PIL.Image
 import screeninfo
 from datetime import date

@@ -2006,6 +2006,7 @@ class OPApp(ctk.CTk):
         choice_list = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"][
             "functions"
         ]["save_analysis_opt"]["data_choice"]
+        print(" in save data we have ",self.analysis.imaging_method_name)
         try:
             wl = self.res["wavelengths_clipped"]
         except KeyError:
@@ -2029,7 +2030,7 @@ class OPApp(ctk.CTk):
                     elif datacube == "reconstructed_image":
                         hyp_path = path + "/reconstructed_image_" + today
                         os.mkdir(hyp_path)
-                        self.analysis.py2envi(
+                        self.analysis.imaging_method.image_analysis_method.py2envi(
                             datacube,
                             self.res[datacube],
                             self.res["wavelengths"],
@@ -2038,9 +2039,9 @@ class OPApp(ctk.CTk):
                     else:
                         data_path = path + "/" + datacube + "_" + today
                         os.mkdir(data_path)
-                        self.analysis.py2envi(datacube, self.res[datacube], wl, data_path)
+                        self.analysis.imaging_method.image_analysis_method.py2envi(datacube, self.res[datacube], wl, data_path)
             else:
-                self.analysis.py2envi(
+                self.analysis.imaging_method.image_analysis_method.py2envi(
                     self.res["current_data_level"],
                     self.res[self.res["current_data_level"]],
                     wl,
