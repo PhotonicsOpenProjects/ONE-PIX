@@ -5,6 +5,10 @@ import warnings
 import cv2
 import os
 
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
+
 class SpectrometerBridge:
     """
     Allows to build a generic bridge based on a concrete one. Concrete
@@ -19,8 +23,10 @@ class SpectrometerBridge:
     """
 
     def __init__(self, spectro_name, integration_time_ms, wl_lim, repetition):
+
         try:
             # Chemin complet vers le module Python
+            self.spectro_name=spectro_name
             module_path = f"plugins.spectrometer.{spectro_name}.{spectro_name}Bridge"
             class_name = f"{spectro_name}Bridge"
 
@@ -36,7 +42,7 @@ class SpectrometerBridge:
 
             self.DeviceName = ""
             self.integration_time_ms = integration_time_ms
-
+            logging.info(f"{self.spectro_name} spectrometer plugins is init ")
         except Exception as e:
             raise Exception(f'Spectrometer bridge "{spectro_name}" could not be loaded: {e}')
 
@@ -48,10 +54,12 @@ class SpectrometerBridge:
             np.abs(wavelengths - self.wl_lim[0]).argmin(),
             np.abs(wavelengths - self.wl_lim[1]).argmin(),
         ]
+        logging.info(f'{self.spectro_name} spectrometer plugins is open')
 
     def set_integration_time(self):
         self.spectrometer.integration_time_ms = self.integration_time_ms
         self.spectrometer.set_integration_time()
+        logging.info(f'{self.spectro_name} integration time  is fix to  {self.integration_time_ms} ms')
 
     def get_wavelengths(self):
         self.wavelengths = self.spectrometer.get_wavelengths()[self.idx_wl_lim[0] : self.idx_wl_lim[1]+1]
@@ -65,6 +73,7 @@ class SpectrometerBridge:
 
     def spec_close(self):
         self.spectrometer.spec_close()
+        logging.info(f'{self.spectro_name} spectrometer plugins was close')
 
     def get_optimal_integration_time(self, verbose=True):
         """
@@ -114,7 +123,7 @@ class SpectrometerBridge:
 
     
             if verbose:
-                print(f"T{count}={self.integration_time_ms} ms with intensity peak at {round(peak_intensity)} counts")
+                logging.info(f"T{count}={self.integration_time_ms} ms with intensity peak at {round(peak_intensity)} counts")
     
             # Check if the peak intensity is within the tolerance range
             if abs(delta_intensity) < tolerance:
@@ -142,7 +151,7 @@ class SpectrometerBridge:
         # Reset spectro_flag and display final integration time
         self.spectro_flag = False
         if verbose:
-            print(f"Final integration time (ms): {self.integration_time_ms}")
+            logging.info(f"Final integration time (ms): {self.integration_time_ms}")
         cv2.destroyAllWindows()
         return self.integration_time_ms
 
@@ -195,12 +204,12 @@ class SpectrometerBridge:
                     
                     elif dynamic_tint and cnt==nb_patterns-1:
                         # Last iteration: Measure the dark image for each previously used integration time
-                        print("Measuring dark images for all previous integration times.")
+                        logging.info("Measuring dark images for all previous integration times.")
 
                         dark_spectra = np.zeros_like(self.spectra)  # Array to store dark spectra for each pattern
 
-                        for i, tint in enumerate(integration_times):
-                            print(f"Measuring dark spectrum for pattern {i+1} with integration time {tint} ms.")
+                        for i, tint in enumerate(integration_times):      
+                            logging.info(f"Measuring dark spectrum for pattern {i+1} with integration time {tint} ms.")
                             self.integration_time_ms = tint  # Set the same integration time as during the pattern acquisition
                             self.set_integration_time()
                             chronograms_dark = []
@@ -215,7 +224,7 @@ class SpectrometerBridge:
 
                         # Subtract the dark spectra from the measured spectra
                         self.spectra -= dark_spectra
-                        print("Dark spectrum subtraction complete.")
+                        logging.info("Dark spectrum subtraction complete.")
                     
                     else: # Measure without dynamic integration time
                         # Measure intensities for the current pattern
@@ -237,7 +246,7 @@ class SpectrometerBridge:
             
         except Exception as e:
             # Log error for debugging
-            print(f"An error occurred during spectrometer acquisition: {e}")
+            logging.error(f"An error occurred during spectrometer acquisition: {e}")
 
         finally:
             # Ensure the spectrometer is closed properly

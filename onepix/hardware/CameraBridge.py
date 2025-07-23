@@ -36,7 +36,7 @@ class CameraBridge:
             # récupération de la classe et instanciation
             class_obj = getattr(module, class_name)
             self.camera = class_obj()
-            logging.info(f"{camera_name} plugins is init ")
+            logging.info(f"{camera_name}  plugins camera is init ")
         except Exception as e:
             raise Exception(f'Camera bridge "{camera_name}" could not be loaded: {e}')
 

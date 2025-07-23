@@ -60,3 +60,24 @@
 2025-07-23 16:42:53 - root - INFO - measure header is created
 2025-07-23 16:42:53 - root - INFO - measure is complete
 2025-07-23 16:42:53 - root - INFO - measure is saved
+2025-07-23 16:54:37 - root - INFO - your screen 1 will be use as a projector
+2025-07-23 16:54:37 - root - INFO - FourierSplit imaging method with 1 is init
+2025-07-23 16:54:37 - root - INFO - Stub plugins is init 
+2025-07-23 16:54:37 - root - INFO - onepix Hardware class is init 
+2025-07-23 16:54:37 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-23 16:54:37 - root - INFO - patterns of FourierSplit are created 
+2025-07-23 16:54:37 - root - INFO - hardware is now init
+2025-07-23 16:54:37 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-23 16:54:37 - onepix.Acquisition - INFO - measure is init
+2025-07-23 16:54:42 - root - INFO - measure begin
+2025-07-23 16:54:45 - root - INFO - measure header is created
+2025-07-23 16:54:45 - root - INFO - measure is complete
+2025-07-23 16:54:45 - root - INFO - Stub camera is open
+2025-07-23 16:54:46 - root - INFO - Stub camera is close
+2025-07-23 16:54:46 - root - INFO - measure is saved
+2025-07-23 17:16:50 - matplotlib - DEBUG - matplotlib data path: C:\Users\grussias\AppData\Local\miniconda3\envs\onepix_module_env\lib\site-packages\matplotlib\mpl-data
+2025-07-23 17:16:50 - matplotlib - DEBUG - CONFIGDIR=C:\Users\grussias\.matplotlib
+2025-07-23 17:16:50 - matplotlib - DEBUG - interactive is False
+2025-07-23 17:16:50 - matplotlib - DEBUG - platform is win32
+2025-07-23 17:16:50 - matplotlib - DEBUG - CACHEDIR=C:\Users\grussias\.matplotlib
+2025-07-23 17:16:50 - matplotlib.font_manager - DEBUG - Using fontManager instance from C:\Users\grussias\.matplotlib\fontlist-v390.json

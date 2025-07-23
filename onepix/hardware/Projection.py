@@ -6,15 +6,19 @@ import time
 from tkinter import *
 import PIL.Image, PIL.ImageTk
 
+import logging
+from onepix.logging_config import root  
+logger = logging.getLogger(__name__)
+
 if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
     os.environ["DISPLAY"] = ":0"
 
 screenWidth = screeninfo.get_monitors()[0].width
 try:
     proj_shape = screeninfo.get_monitors()[1]
+    logging.info('your second screen will be use')
 except IndexError:
-    print("Please use a projector to use ONE-PIX")
-    # sys.exit()
+    logging.warning('no double screen was detected Please use a projector to use ONE-PIX"')
 
 
 class Projection:
@@ -38,7 +42,9 @@ class Projection:
 
         try:
             self.proj_shape = np.array([proj_shape.height, proj_shape.width])
+            logging.info('Projection system is init')
         except Exception as e:
+            logging.warning(f'error in Projection system during the init {e}')
             pass
 
     def create_fullscreen_window(self):
@@ -151,6 +157,7 @@ class Projection:
         delta_idx=4 if self.pattern_method=='FourierSplit' else 2
         """
         # Display each pattern from the sequence
+        logging.info("Projection system begin to project patterns")
         for count, pattern in enumerate(patterns):
             """ ""
             if  count in np.arange(white_idx,white_idx+delta_idx):
@@ -170,3 +177,4 @@ class Projection:
                 time.sleep(1e-6)
 
         cv2.destroyAllWindows()
+        logging.info("Projection system finish to project patterns")

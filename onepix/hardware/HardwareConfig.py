@@ -15,9 +15,9 @@ import screeninfo
 screenWidth = screeninfo.get_monitors()[0].width
 try:
     proj_shape = screeninfo.get_monitors()[1]
-    logging.info('your screen 1 will be use as a projector')
+    logging.info('your second screen will be use as a projector')
 except IndexError:
-    logging.warning('Please use a projector to use ONE-PIX')
+    logging.warning('No double screen was detected : Please use a projector to use ONE-PIX')
     # sys.exit()
 
 
