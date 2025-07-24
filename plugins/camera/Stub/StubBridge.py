@@ -16,13 +16,13 @@ class StubBridge:
             # Charger et redimensionner l'image
             self.image = Image.open(image_path).convert("RGB")
             self.image = self.image.resize((1024, 768))  # Largeur x Hauteur
-            print("Image 'lena.jpg' chargée et redimensionnée avec succès.")
         except FileNotFoundError:
             print(f"Erreur : le fichier 'lena.jpg' est introuvable à l'emplacement : {image_path}")
             self.image = None
 
     def init_camera(self):
-        print("stub camera connected")
+        pass
+
 
     def image_capture(self, tag, save_path):
         fdate = date.today().strftime("%d_%m_%Y")
@@ -42,4 +42,4 @@ class StubBridge:
         time.sleep(1)
 
     def close(self):
-        print("stub camera disconnected")
+        pass

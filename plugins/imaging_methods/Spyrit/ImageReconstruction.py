@@ -35,7 +35,7 @@ class Reconstruction:
         with open(spyrit_config_path) as f:
             spyrit_dict = json.load(f)
         self.cnn_path=spyrit_dict["cnn_path"]
-        print(self.cnn_path)
+
 
 
     def onepix2spyrit_mes(self):
@@ -91,12 +91,10 @@ class Reconstruction:
         Perm_rec = Permutation_Matrix(Ord_rec)    # from natural order to reconstrcution order 
         Perm_acq = Permutation_Matrix(Ord_acq).T  # from acquisition to natural order
         m = reorder(self.spectra, Perm_acq, Perm_rec)
-        print(np.shape(m))
         with torch.no_grad():
             m_torch = torch.Tensor(m[:2*1024,:]).to(device)
             rec_gpu = model.reconstruct_expe(m_torch.T)
             rec = rec_gpu.cpu().detach().numpy().squeeze()
-        print(np.shape(rec))
         self.datacube = rec
         self.datacube=self.datacube.T
         hyperspectral_image=self.datacube

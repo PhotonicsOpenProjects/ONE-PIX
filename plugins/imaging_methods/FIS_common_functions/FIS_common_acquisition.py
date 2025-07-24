@@ -12,7 +12,6 @@ class FisCommonAcquisition:
         root_path = os.getcwd()
         if path == None:
             path = f"..{os.sep}Hypercubes"
-        #print(path)
         if os.path.isdir(path):
             pass
         else:

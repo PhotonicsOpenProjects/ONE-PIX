@@ -22,7 +22,6 @@ class CreationPatterns:
 
         
         self.nb_patterns = 2*self.spatial_res**2
-        print(self.nb_patterns)
         # define white pattern index for display
         self.white_pattern_idx =0
 

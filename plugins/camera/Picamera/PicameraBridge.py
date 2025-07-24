@@ -22,7 +22,7 @@ class PicameraBridge:
         self.camera.awb_gains = g
         self.camera.vflip = True
         self.camera.hflip = True
-        print("Picamera is connected")
+
 
     def image_capture(self, tag, save_path):
         fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string
