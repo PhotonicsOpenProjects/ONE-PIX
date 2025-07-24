@@ -13,6 +13,46 @@ authors = [
 ]
 requires-python = ">=3.8"
 
+# ✅ Dépendances fixes pour prod
+dependencies = [
+    "numpy==2.0.2",
+    "pandas==2.3.0",
+    "scikit-learn==1.6.1",
+    "scikit-image==0.24.0",
+    "scipy==1.13.1",
+    "matplotlib==3.9.4",
+    "opencv-python==4.11.0.86",
+    "xarray==2024.7.0",
+    "tifffile==2024.8.30",
+    "customtkinter==5.2.2",
+    "imutils==0.5.4",
+    "screeninfo==0.8.1",
+    "spectral==0.24",
+    "seabreeze==2.10.1",
+    "spyndex==0.3.0",
+    "pyusb==1.3.1",
+    "flask==3.1.1",
+    "flask-socketio==5.5.1",
+    "sympy==1.14.0",
+    "labelme==5.8.2",
+    "sphinx-rtd-theme==3.0.2"
+]
+
+# 🔧 (optionnel) Dépendances supplémentaires pour les devs (tests, doc, debug)
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=24.0.0",
+    "ipython",
+    "jupyterlab",
+    "pip-tools"
+]
+docs = [
+    "sphinx",
+    "myst-parser",
+    "sphinx-autoapi"
+]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["onepix*", "plugins*"]
