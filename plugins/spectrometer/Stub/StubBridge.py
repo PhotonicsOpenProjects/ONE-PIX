@@ -21,7 +21,7 @@ class StubBridge:
         None.
         """
         self.DeviceName = "stub_spectrometer"
-        print("Stub_spectrometer is connected")
+
 
     def set_integration_time(self):
         """
@@ -64,5 +64,4 @@ class StubBridge:
         -------
         None.
         """
-        print("Stub_spectrometer is closed")
         self.DeviceName = ""

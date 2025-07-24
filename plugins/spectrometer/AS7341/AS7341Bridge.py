@@ -61,7 +61,6 @@ class AS7341Bridge:
             # Configurer le SMUX et démarrer les mesures en continu
             self.optimize_smux_for_selected_channels()
             self.spec.AS7341_startMeasure(0)  # Démarrage en continu
-            print("AS7341 initialisé et lancé en mode continu.")
         except Exception as e:
             print(f"Erreur lors de l'initialisation du capteur AS7341 : {e}")
             self.spec = None
@@ -77,7 +76,6 @@ class AS7341Bridge:
         atime = min(int(self.integration_time_ms / (astep * INTEGRATION_CYCLE_DURATION)), 255)
         self.spec.AS7341_ATIME_config(atime)
         self.spec.AS7341_ASTEP_config(astep)
-        print(f"Temps d'intégration configuré : {INTEGRATION_CYCLE_DURATION * (atime + 1) * (astep + 1)} ms")
 
     def optimize_smux_for_selected_channels(self):
         """
@@ -95,7 +93,6 @@ class AS7341Bridge:
             self.spec.Write_Byte(0x06, 0x00)  # Désactiver les autres
             self.spec.Write_Byte(0x07, 0x00)  # Désactiver les autres
             self.smux_configured = True
-            print("SMUX configuré pour les canaux sélectionnés.")
 
     def get_wavelengths(self):
         """
@@ -128,4 +125,3 @@ class AS7341Bridge:
         if self.spec and self.spec.i2c is not None:
             self.spec.i2c.close()
             self.spec.i2c = None
-            print("Connexion I2C fermée.")
