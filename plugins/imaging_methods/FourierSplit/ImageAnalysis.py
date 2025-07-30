@@ -33,3 +33,12 @@ class Analysis:
         plt.figure()
         plt.imshow(rgb_image)
         plt.show()
+
+    def save_analysed_image(
+        self, datacube, wavelengths, header, filename, save_path=None
+    ):
+        saver = FisAnalysis()
+        saver.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+
+
+

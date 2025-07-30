@@ -9,6 +9,11 @@ import numpy as np
 
 import logging
 from onepix.logging_config import root  
+
+from datetime import date
+import time
+
+
 logger = logging.getLogger(__name__)
 
 class Analysis:
@@ -107,3 +112,30 @@ class Analysis:
         self.imaging_method.image_analysis_method.plot_reconstructed_image(
             self.reconstructed_image, self.wavelengths
         )
+    def save_analysed_image(self, filename, save_path):
+        header = self.create_analysed_header()
+        self.imaging_method.image_analysis_method.save_analysed_image(
+            self.reconstructed_data,
+            self.wavelengths,
+            header,
+            filename,
+            save_path,
+        )
+        logging.info(f'reconstructed datas are saved at {save_path}')
+
+    def create_analysed_header(self):
+        fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time
+        header = (
+            f"ONE-PIX_analysed_data_{fdate}_{actual_time}"
+            + "\n"
+            + "--------------------------------------------------------"
+            + "\n"
+            + "\n"
+            + f"Imaging method: {self.imaging_method_name}"
+            + "\n"
+        )
+
+
+        return header
+    

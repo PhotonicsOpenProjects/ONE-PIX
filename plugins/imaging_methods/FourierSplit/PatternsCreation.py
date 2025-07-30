@@ -109,3 +109,10 @@ class CreationPatterns:
     def save_raw_data(self, acquisition_class, path=None):
         saver = FIS.FisCommonAcquisition(acquisition_class)
         saver.save_raw_data(path=None)
+
+
+    def save_analysed_image(
+        self, datacube, wavelengths, header, filename, save_path=None
+    ):
+        saver = FisImageAnalysis()
+        saver.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)

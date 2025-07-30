@@ -13,6 +13,9 @@ import spectral.io.envi as envi
 from scipy.interpolate import interp1d
 from pathlib import Path
 
+from datetime import date
+import time
+
 class FisAnalysis:
 
     def __init__(self):
@@ -533,7 +536,81 @@ class FisAnalysis:
 
         return datacube_rogn, wavelengths_rogn
 
-    def py2ms(self,save_gerbil_name, datacube, wavelengths):
+    def save_acquisition_envi(
+        self, datacube, wavelengths, header, save_envi_name=None, save_path=None
+    ):
+        """
+        This function allow to save the resulting acquisitions from one
+        OPConfig object into the Hypercube folder.
+
+        Parameters
+        ----------
+        config : class
+            OPConfig class object.
+
+        Returns
+        -------
+        None.
+
+        """
+        root_path = os.getcwd()
+        if save_path is None:
+            save_path = f"..{os.sep}Hypercubes"
+        if os.path.isdir(save_path):
+            pass
+        else:
+            os.mkdir(save_path)
+        os.chdir(save_path)
+
+        self.fdate = date.today().strftime(
+            "%d_%m_%Y"
+        )  # convert the current date in string
+        self.actual_time = time.strftime("%H-%M-%S")  # get the current time
+        folder_name = (
+            f"ONE-PIX_reconstructed_data_{self.fdate}_{self.actual_time}"
+            if save_envi_name is None
+            else save_envi_name
+        )
+        os.mkdir(folder_name)
+        os.chdir(folder_name)
+        self.save_path = folder_name
+        if save_envi_name is None:
+            save_envi_name = folder_name
+        # saving the acquired spatial spectra hypercube
+        self.py2envi(datacube, wavelengths, save_envi_name, save_path)
+        with open(folder_name + ".txt", "w+") as header_file:
+            header_file.write(header)
+        os.chdir(root_path)
+
+    def py2envi(self, datacube, wavelengths, save_envi_name, save_path=None):
+        """
+        py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
+        metadata can be improved !
+
+        Parameters
+        ----------
+        save_envi_name : TYPE
+            DESCRIPTION.
+        datacube : TYPE
+            DESCRIPTION.
+        wavelengths : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        None.
+
+        """
+        filename = save_envi_name + ".hdr"
+        path = os.getcwd()
+        if save_path == None:
+            save_path = filedialog.askdirectory(title="Open the save directory")
+
+        envi.save_image(
+            filename, datacube, dtype=np.float32, metadata={"wavelength": wavelengths}
+        )
+
+    def py2ms(self, datacube, wavelengths, save_gerbil_name):
         """
 
         py2ms allows to save ONE-PIX data into Gerbil format http://gerbilvis.org/
@@ -577,39 +654,3 @@ class FisAnalysis:
             fid.write("{0} {1}\n".format(filename, wavelengths[i]))
 
         fid.close()
-
-    def py2envi(self,save_envi_name, datacube, wavelengths, save_path=None):
-        """
-        py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
-        metadata can be improved !
-
-        Parameters
-        ----------
-        save_envi_name : TYPE
-            DESCRIPTION.
-        datacube : TYPE
-            DESCRIPTION.
-        wavelengths : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
-        """
-        if save_path == None:
-            save_path = filedialog.askdirectory(title="Open the save directory")
-        # foldername=save_path+'\\'+save_envi_name
-        filename = save_envi_name + ".hdr"
-        # os.mkdir(foldername)
-        path = os.getcwd()
-        os.chdir(save_path)
-        envi.save_image(
-            filename,
-            datacube,
-            dtype=np.float32,
-            metadata={
-                "wavelength": wavelengths,
-            },
-        )
-        os.chdir(path)
