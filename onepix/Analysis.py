@@ -113,6 +113,7 @@ class Analysis:
             self.reconstructed_image, self.wavelengths
         )
     def save_analysed_image(self, filename, save_path):
+        
         header = self.create_analysed_header()
         self.imaging_method.image_analysis_method.save_analysed_image(
             self.reconstructed_data,
@@ -121,7 +122,7 @@ class Analysis:
             filename,
             save_path,
         )
-        logging.info(f'reconstructed datas are saved at {save_path}')
+        logging.info(f'analysed datas are saved at {save_path}')
 
     def create_analysed_header(self):
         fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string

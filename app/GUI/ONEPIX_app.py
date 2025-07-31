@@ -1922,135 +1922,61 @@ class OPApp(ctk.CTk):
 
     def save_analysis_opt(self):
         if self.res == 0:
-            warning_text = self.widgets_text["specific_GUI"]["complete"][
-                "Analysis_tab"
-            ]["functions"]["warning"]["noData"]
+            warning_text = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"]["functions"]["warning"]["noData"]
             showwarning(warning_text[0], warning_text[1])
         else:
             self.d = ctk.CTkToplevel(self)
             self.d.maxsize(500, 400)
             self.d.attributes("-topmost", "true")
 
-            self.label_radio_group = ctk.CTkLabel(
-                master=self.d, text="Select data to be saved:"
-            )
-            self.label_radio_group.grid(
-                row=0, column=0, columnspan=1, padx=10, pady=10, sticky="w"
-            )
+            self.save_desc = ctk.CTkLabel(self.d, text="Select save path :", text_color="red")
+            self.save_desc.grid(column=0, row=0, padx=10, pady=10, rowspan=1, columnspan=1, sticky="w")
 
-            self.data_choice = ctk.CTkComboBox(
-                self.d,
-                values=self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"][
-                    "functions"
-                ]["save_analysis_opt"]["data_choice"],
-                state="readonly",
-            )
-            self.data_choice.set(
-                self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"][
-                    "functions"
-                ]["save_analysis_opt"]["data_choice"][0]
-            )  # index de l'élément sélectionné
-            self.data_choice.grid(
-                column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=2
-            )
+            self.explore_bouton = ctk.CTkButton(self.d, text="Parcourir", command=self.get_dir_analysis)
+            self.explore_bouton.grid(column=1, row=0, padx=10, pady=10, rowspan=1, columnspan=1)
 
-            self.save_desc = ctk.CTkLabel(
-                self.d, text="Select save path :", text_color="red"
-            )
-            self.save_desc.grid(
-                column=0, row=2, padx=10, pady=10, rowspan=1, columnspan=1, sticky="w"
-            )
+            self.CANCEL_save_bouton = ctk.CTkButton(self.d, text="Cancel", state="normal", command=self.d.destroy)
+            self.CANCEL_save_bouton.grid(column=2, row=2, padx=10, pady=10, rowspan=1, columnspan=1)
 
-            self.explore_bouton = ctk.CTkButton(
-                self.d, text="Parcourir", command=self.get_dir_analysis
-            )
-            self.explore_bouton.grid(
-                column=1, row=2, padx=10, pady=10, rowspan=1, columnspan=1
-            )
+            self.confirm_bouton = ctk.CTkButton(self.d, text="Confirm", state="disabled", command=self.save_analysis_data)
+            self.confirm_bouton.grid(column=1, row=2, padx=10, pady=10, rowspan=1, columnspan=1)
 
-            self.CANCEL_save_bouton = ctk.CTkButton(
-                self.d, text="Cancel", state="normal", command=self.d.destroy
-            )
-            self.CANCEL_save_bouton.grid(
-                column=2, row=4, padx=10, pady=10, rowspan=1, columnspan=1
-            )
-
-            self.confirm_bouton = ctk.CTkButton(
-                self.d,
-                text="Confirm",
-                state="disabled",
-                command=self.save_analysis_data,
-            )
-            self.confirm_bouton.grid(
-                column=1, row=4, padx=10, pady=10, rowspan=1, columnspan=1
-            )
 
     def get_dir_analysis(self):
         path = filedialog.askdirectory(
             title="Select save path :", parent=self.d, initialdir="../Hypercubes"
         )
+        print("deb path ", path)
         if path != "":
             self.save_desc.configure(text_color="white")
             self.confirm_bouton.configure(state="normal")
+            
             self.analysis_save_path = path
+            print("in get dir",self.analysis_save_path)
             # self.analysis_save_format = self.format_choice.get()
+
+    def get_last_key_with_prefix(self,prefix):
+        """
+        Trouve la dernière clé dans le dico qui commence par 'prefix'.
+        """
+        matching_keys = [k for k in self.res.keys() if k.startswith(prefix)]
+        
+        if matching_keys:
+            print(matching_keys[-1])
+            return self.res[matching_keys[-1]]
+        return None
 
     def save_analysis_data(self):
         today = datetime.datetime.now().strftime("%d_%m_%Y_%H-%M-%S")
         data_list = list(self.res.keys())
-        data_list.remove("wavelengths")
-        data_list.remove("current_data_level")
-        data_list.remove("pattern_method")
-        path = self.analysis_save_path + "/" + "ONE-PIX_analysis_" + today
-        os.mkdir(path)
-        choice_list = self.widgets_text["specific_GUI"]["complete"]["Analysis_tab"][
-            "functions"
-        ]["save_analysis_opt"]["data_choice"]
-        print(" in save data we have ",self.analysis.imaging_method_name)
-        try:
-            wl = self.res["wavelengths_clipped"]
-        except KeyError:
-            wl = self.res["wavelengths"]
-        try:
-            if (
-                choice_list.index(self.data_choice.get()) == 0
-            ):  # if data_choice == 'All'
-                for datacube in data_list:
-                    if datacube in ["rgb_image", "image_seg", "rgb_spectrum"]:
-                        plt.imsave(path + "/" + datacube + ".png", self.res[datacube])
-                    elif datacube in [
-                        "wavelengths",
-                        "wavelengths_clipped",
-                        "current_data_level",
-                        "spectra",
-                        "infos",
-                        "imaging_method_name",
-                    ]:
-                        pass
-                    elif datacube == "reconstructed_image":
-                        hyp_path = path + "/reconstructed_image_" + today
-                        os.mkdir(hyp_path)
-                        self.analysis.imaging_method.image_analysis_method.py2envi(
-                            datacube,
-                            self.res[datacube],
-                            self.res["wavelengths"],
-                            hyp_path,
-                        )
-                    else:
-                        data_path = path + "/" + datacube + "_" + today
-                        os.mkdir(data_path)
-                        self.analysis.imaging_method.image_analysis_method.py2envi(datacube, self.res[datacube], wl, data_path)
-            else:
-                self.analysis.imaging_method.image_analysis_method.py2envi(
-                    self.res["current_data_level"],
-                    self.res[self.res["current_data_level"]],
-                    wl,
-                    path,
-                )
-        except Exception as e:
-            print(f"error:{datacube}")
-            print(e)
+        print(data_list)
+        path = "ONE-PIX_analysis_" + today 
+        self.analysis.reconstructed_data=self.get_last_key_with_prefix('reconstructed_image')
+        self.analysis.wavelengths=self.get_last_key_with_prefix( 'wavelengths')
+        self.analysis.save_analysed_image(path, self.analysis_save_path )     
         self.d.destroy()
+
+    
 
     # =============================================================================
     #         VI's tab functions
