@@ -21,7 +21,11 @@ except IndexError:
     print("Please use a projector to use ONE-PIX")
 import importlib
 
-json_path = "../../conf/software_config.json"
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
+json_path = BASE_DIR.parent.parent.parent / "conf" / "software_config.json"
 
 
 class CreationPatterns:

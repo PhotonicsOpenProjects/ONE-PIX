@@ -2495,17 +2495,17 @@ class OPApp(ctk.CTk):
                 VAR, names, ids = zip(*sorted(zip(VAR, names, ids), reverse=True))
                 self.IDXS = {"id": np.asarray(ids[:nb]), "names": names[:nb]}
 
+    import re   
     def get_idx(
         self,
         idx_to_compute,
         C1=sp.constants.C1.default,
         C2=sp.constants.C2.default,
         L=sp.constants.L.default,
-        PAR=450,  # 450 ou 650 selon la chlorophyle étudiée
+        PAR=450,
         alpha=sp.constants.alpha.default,
         beta=sp.constants.beta.default,
         c=sp.constants.c.default,
-        # epsilon=sp.constants.epsilon.default,
         cexp=sp.constants.cexp.default,
         fdelta=sp.constants.fdelta.default,
         g=sp.constants.g.default,
@@ -2514,6 +2514,7 @@ class OPApp(ctk.CTk):
         lambdaG=507,
         lambdaN=1000,
         lambdaR=680,
+        lambdaS2=2200,
         nexp=sp.constants.nexp.default,
         omega=sp.constants.omega.default,
         p=sp.constants.p.default,
@@ -2521,109 +2522,100 @@ class OPApp(ctk.CTk):
         sla=sp.constants.sla.default,
         slb=sp.constants.slb.default,
     ):
+        import os
+        import numpy as np
+        import pandas as pd
+        import xarray as xr
+        import spyndex as sp
+        from scipy import interpolate
+        from tifffile import imread
+
         df = pd.read_csv(self.sat_path, delimiter=";", engine="c")
         df2 = df.dropna(axis=0, how="all").dropna(axis=1, how="all")
 
-        if self.data_path.endswith(".tif") or self.data_path.endswith(".tiff"):
+        if self.data_path.endswith((".tif", ".tiff")):
+            wl_file = next(
+                f for f in os.listdir(os.path.dirname(self.data_path)) if f.startswith("wavelengths")
+            )
             self.IM = {
-                "IM": tiff.imread(self.data_path),
-                "wl": np.load(
-                    [
-                        f
-                        for f in os.listdir(os.chdir(os.path.dirname(self.data_path)))
-                        if f.startswith("wavelengths")
-                    ][0]
-                ),
-                "folder_name": self.data_path.split("/")[-2][:],
+                "IM": imread(self.data_path),
+                "wl": np.load(os.path.join(os.path.dirname(self.data_path), wl_file)),
+                "folder_name": os.path.basename(os.path.dirname(self.data_path)),
             }
-
         elif self.data_path.endswith(".hdr"):
             self.analysis = Analysis(rec=None, data_path=self.folder_path)
             res = self.analysis.imaging_method.image_analysis_method.data_dict
-
             self.IM = {
                 "IM": res["reconstructed_image"].T,
                 "wl": res["wavelengths"],
-                "folder_name": self.data_path.split("/")[-2][:],
+                "folder_name": os.path.basename(self.folder_path),
             }
 
         bands = []
-        f = []
         for i in range(1, len(df2.columns)):
-            f.append(
-                interpolate.interp1d(df2["WL"], df2[df2.columns[i]])(self.IM["wl"])
-            )
-            bands.append((self.IM["IM"] * (f[i - 1].reshape(-1, 1, 1))).sum(axis=0))
+            f_interp = interpolate.interp1d(df2["WL"], df2[df2.columns[i]])
+            bands.append((self.IM["IM"] * f_interp(self.IM["wl"]).reshape(-1, 1, 1)).sum(axis=0))
         bands = np.asarray(bands).swapaxes(1, 2)
 
-        self.IM["bands"] = bands  # ajout des bandes spectrales dans le dictionnaire
-        self.IM["shown_bands"] = [
-            np.uint8(255 * (i - i.min()) / (i.max() - i.min()))
-            for i in self.IM["bands"]
-        ]
-
+        self.IM["bands"] = bands
+        self.IM["shown_bands"] = [np.uint8(255 * (b - b.min()) / (b.max() - b.min())) for b in bands]
         self.IM["bands_names"] = [
-            "Aerosols",
-            "Blue",
-            "Green",
-            "Red",
-            "Red Edge 1",
-            "Red Edge 2",
-            "Red Edge 3",
-            "NIR",
-            "NIR 2",
-            "Water Vapour",
-            "SWIR 1",
-            "SWIR 2",
+            "Aerosols", "Blue", "Green", "Red", "Red Edge 1", "Red Edge 2", "Red Edge 3",
+            "NIR", "NIR 2", "Water Vapour", "SWIR 1", "SWIR 2"
         ]
-
-        A, B, G, R, RE1, RE2, RE3, N, N2, WV, any, S1, S2 = list(
-            bands[np.arange(13), :, :]
-        )
-        bands = np.array([A, B, G, R, RE1, RE2, RE3, N, N2, WV, S1, S2])
 
         da = xr.DataArray(
-            bands, dims=("band", "x", "y"), coords={"band": self.IM["bands_names"]}
+            np.stack(bands[:12], axis=0),
+            dims=("band", "x", "y"),
+            coords={"band": self.IM["bands_names"]},
         )
 
-        idx = sp.computeIndex(
-            index=[f for f in idx_to_compute if not ("G1" in sp.indices[f].bands)],
-            A=da.sel(band="Aerosols"),
-            B=da.sel(band="Blue"),
-            G=da.sel(band="Green"),
-            R=da.sel(band="Red"),
-            RE1=da.sel(band="Red Edge 1"),
-            RE2=da.sel(band="Red Edge 2"),
-            RE3=da.sel(band="Red Edge 3"),
-            N=da.sel(band="NIR"),
-            N2=da.sel(band="NIR 2"),
-            WV=da.sel(band="Water Vapour"),
-            S1=da.sel(band="SWIR 1"),
-            S2=da.sel(band="SWIR 2"),
-            C1=C1,
-            C2=C2,
-            L=L,
-            PAR=PAR,
-            alpha=alpha,
-            beta=beta,
-            c=c,
-            # epsilon=epsilon,
-            cexp=cexp,
-            fdelta=fdelta,
-            g=g,
-            gamma=gamma,
-            k=k,
-            lambdaG=lambdaG,
-            lambdaN=lambdaN,
-            lambdaR=lambdaR,
-            nexp=nexp,
-            omega=omega,
-            p=p,
-            sigma=sigma,
-            sla=sla,
-            slb=slb,
-        )
-        self.IDXS = {"id": np.asarray(idx), "names": list(np.asarray(idx.index))}
+        # Préparer dictionnaires des paramètres
+        bands_dict = {b: da.sel(band=b) for b in da.band.values}
+        constants_dict = {
+            "C1": C1, "C2": C2, "L": L, "PAR": PAR,
+            "alpha": alpha, "beta": beta, "c": c, "cexp": cexp,
+            "fdelta": fdelta, "g": g, "gamma": gamma, "k": k,
+            "lambdaG": lambdaG, "lambdaN": lambdaN, "lambdaR": lambdaR,
+            "lambdaS2": lambdaS2, "nexp": nexp, "omega": omega,
+            "p": p, "sigma": sigma, "sla": sla, "slb": slb,
+        }
+
+        all_params = {**bands_dict, **constants_dict}
+
+        # Calculer les indices
+        valid_indices = [i for i in idx_to_compute if i in sp.indices and "G1" not in sp.indices[i].bands]
+
+        idx_results = []
+        idx_names = []
+
+        for name in valid_indices:
+            idx_obj = sp.indices[name]
+            
+            # Ce que Spyndex 0.7.0 fournit : uniquement les bandes nécessaires
+            required_vars = set(idx_obj.bands)
+
+            # Ajouter les constantes si elles sont connues à l’avance
+            known_constants = {
+                "C1", "C2", "L", "PAR", "alpha", "beta", "c", "cexp", "fdelta", "g",
+                "gamma", "k", "lambdaG", "lambdaN", "lambdaR", "lambdaS2", "nexp",
+                "omega", "p", "sigma", "sla", "slb"
+            }
+
+            # Ne garder que celles disponibles
+            available_constants = {k for k in known_constants if k in all_params}
+
+            required_vars.update(available_constants)
+
+            # Sélectionner les bons paramètres
+            filtered_params = {k: all_params[k] for k in required_vars if k in all_params}
+
+            result = sp.computeIndex(index=name, params=filtered_params)
+            idx_results.append(result.values)
+            idx_names.append(name)
+
+        self.IDXS = {"id": np.stack(idx_results), "names": idx_names}
+        return self.IDXS
 
     def open_languageConfig(self):
         print(os.path.abspath(os.curdir))
