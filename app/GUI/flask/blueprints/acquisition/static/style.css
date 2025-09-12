@@ -1,0 +1,164 @@
+/* 🎨 Palette */
+:root {
+    --bg-light: #f9f9f9;
+    --bg-dark: #2c3e50;
+    --bg-card: #ffffff;
+    --color-primary: #3498db;
+    --color-primary-hover: #2980b9;
+    --color-border: #ccc;
+    --color-text: #333;
+}
+
+/* 🌐 Global */
+body {
+    font-family: Arial, sans-serif;
+    background: var(--bg-light);
+    color: var(--color-text);
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+h1, h2 {
+    margin-bottom: 20px;
+}
+
+/* 🖼️ Layout principal */
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 50px;
+    margin-bottom: 30px;
+}
+
+/* 📌 Boutons */
+button, .btn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+button:hover, .btn:hover {
+    background: var(--color-primary-hover);
+    transform: translateY(-2px);
+}
+
+.settings-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 220px;
+}
+
+.run-btn {
+    margin-top: 20px;
+    font-size: 16px;
+    padding: 12px 20px;
+}
+
+/* 🖼️ Figure */
+.figure img {
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 📊 Tableau des paramètres */
+table {
+    border-collapse: collapse;
+    margin: auto;
+    width: 100%;
+    max-width: 700px;
+    background: var(--bg-card);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+th, td {
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #f2f2f2;
+    font-weight: bold;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+}
+
+/* 📦 Boutons de formulaire */
+.btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Tableau */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 700px;
+    margin: 20px auto;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+table, th, td {
+    border: 1px solid #ccc;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background: #eee;
+}
+
+/* Champs texte */
+input[type="text"] {
+    width: 100%;
+    padding: 6px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Boutons */
+.btn {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn:hover {
+    background: #2980b9;
+}
+
+.btn-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}

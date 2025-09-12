@@ -7,9 +7,11 @@ import numpy as np
 class Reconstruction:
     """Class to reconstruct a data cube from Fourier shifting ONE-PIX method."""
 
-    def __init__(self, spectra, pattern_order):
+    def __init__(self, spectra,wavelengths, pattern_order):
         self.spectra = spectra
+        self.wavelengths=wavelengths
         self.pattern_order = pattern_order
+        self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):
         """
@@ -77,8 +79,12 @@ class Reconstruction:
 
         return hyperspectral_image
 
+    def get_result_to_plot(self):
+        self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
+
+        return  self.result_to_plot
+
     def save_reconstructed_image(
         self, datacube, wavelengths, header, filename, save_path=None
     ):
-        saver = FisCommonReconstruction()
-        saver.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+        self.fis.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)

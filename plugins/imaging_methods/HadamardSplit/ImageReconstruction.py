@@ -8,9 +8,11 @@ from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction impo
 class Reconstruction:
     """Class to reconstruct a data cube from Hadamard splitting ONE-PIX method."""
 
-    def __init__(self, spectra, pattern_order):
+    def __init__(self, spectra,wavelengths, pattern_order):
         self.spectra = spectra
+        self.wavelengths=wavelengths
         self.pattern_order = pattern_order
+        self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):
         """
@@ -69,14 +71,18 @@ class Reconstruction:
         whole_spectrum = self.spectrum_reconstruction()
         dim = np.size(whole_spectrum, 0)
         H = hadamard(dim)
-        hyperspectral_image = np.zeros_like(whole_spectrum)
+        self.hyperspectral_image = np.zeros_like(whole_spectrum)
         for wl in range(np.size(whole_spectrum, 2)):
-            hyperspectral_image[:, :, wl] = abs(H @ whole_spectrum[:, :, wl] @ H)
+            self.hyperspectral_image[:, :, wl] = abs(H @ whole_spectrum[:, :, wl] @ H)
 
-        return hyperspectral_image
+        return self.hyperspectral_image
+    
+    def get_result_to_plot(self):
+        self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
+
+        return  self.result_to_plot
 
     def save_reconstructed_image(
-        self, datacube, wavelengths, header, filename, save_path
+        self, datacube, wavelengths, header, filename, save_path=None
     ):
-        saver = FisCommonReconstruction()
-        saver.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+        self.fis.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)

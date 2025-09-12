@@ -1,31 +1,12 @@
 {
-    "m": [
-        [
-            1.2192528106779095,
-            0.10624194071577223,
-            -193.26076662622387
-        ],
-        [
-            0.010482409338576745,
-            1.2264411584735375,
-            -70.68326364938557
-        ],
-        [
-            -6.807744113634598e-07,
-            0.00033200642769193014,
-            1.0
-        ]
-    ],
-    "clustering_method": "Kmeans",
-    "clustering_parameters": [
-        2,
-        5
-    ],
-    "max_height": 619,
-    "max_width": 719,
-    "IP": "ws://192.168.5.60:8000",
-    "port": "8000",
-    "mode_choice": "Advanced",
-    "acquisition_method": "Complete",
-    "normalisation_path": ""
+  "m": [[1.0670707577938816, 0.11801705341226244, -208.49048355498167], [-0.008166698481677033, 1.0820877161505171, -56.62593442369638], [-1.4661936193175802e-05, 0.00013456869465568104, 1.0]],
+  "clustering_method": "Kmeans",
+  "clustering_parameters": "[2, 5]",
+  "max_height": 558,
+  "max_width": 729,
+  "IP": "ws://192.168.5.60:8000",
+  "port": "8000",
+  "mode_choice": "Simple",
+  "acquisition_method": "FourierSplit",
+  "normalisation_path": ""
 }

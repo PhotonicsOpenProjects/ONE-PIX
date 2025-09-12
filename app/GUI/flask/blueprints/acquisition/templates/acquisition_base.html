@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Acquisition{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('acquisition.static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <a href="{{ url_for('acquisition.acquisition_page') }}">Accueil</a>
+        <a href="{{ url_for('acquisition.hardware_page') }}">Hardware</a>
+        <a href="{{ url_for('acquisition.software_page') }}">Software</a>
+        <a href="{{ url_for('acquisition.imaging_page') }}">Imaging</a>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -52,8 +52,11 @@ def get_header_data(path):
 class Reconstruction:
     """Class OPReconstruction to reconstruct datacubes according to a ONE-PIX method"""
 
-    def __init__(self, acquisition_dict=None):
+    def __init__(self, acquisition_dict=None,plot_result=False):
+
         self.acquisition_dict = acquisition_dict
+        if plot_result:
+            self.plot_result=plot_result
         if acquisition_dict is None:
             self.load_raw_data()
 
@@ -148,8 +151,15 @@ class Reconstruction:
         None.
 
         """
-        self.imaging_method.reconstruction(self.spectra, self.pattern_order)
+        self.imaging_method.reconstruction(self.spectra,self.wavelengths, self.pattern_order,plot_result=self.plot_result)
         logging.info("raw datas are reconstructed now")
+        if self.plot_result:
+            logging.info("plot result is created")
+
+
+    def create_plot_result(self):
+        self.imaging_method.create_plot_result()
+
 
     def save_reconstructed_image(self, filename, save_path):
         header = self.create_reconstruction_header()

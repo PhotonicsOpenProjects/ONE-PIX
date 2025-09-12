@@ -1,0 +1,31 @@
+{% extends "acquisition_base.html" %}
+
+{% block title %}Accueil Acquisition{% endblock %}
+
+{% block content %}
+<h1>Acquisition</h1>
+
+<div class="main-container">
+    <!-- Colonne gauche -->
+    <div class="settings-buttons">
+        <a href="{{ url_for('acquisition.hardware_page') }}"><button>Hardware settings</button></a>
+        <a href="{{ url_for('acquisition.software_page') }}"><button>Software settings</button></a>
+        <a href="{{ url_for('acquisition.imaging_page') }}"><button>Imaging method settings</button></a>
+    </div>
+
+    <!-- Colonne droite -->
+    <div class="figure">
+        <img id="acq-figure" alt="figure">
+    </div>
+</div>
+
+<!-- Bouton run acquisition -->
+<button class="run-btn" onclick="refreshFigure()">Run acquisition</button>
+
+<script>
+    function refreshFigure() {
+        const img = document.getElementById("acq-figure");
+        img.src = "{{ url_for('acquisition.run_acquisition') }}" + "?t=" + new Date().getTime();
+    }
+</script>
+{% endblock %}

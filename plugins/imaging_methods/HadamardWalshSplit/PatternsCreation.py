@@ -57,9 +57,8 @@ class CreationPatterns:
 
         """
 
-        had_walsh_matrix = np.int8(
-            walsh2_matrix(self.dim)
-        )  # initialized an dim by dim Walsh Hadamard matrix
+        had_walsh_matrix = walsh2_matrix(self.dim).astype(np.int16)
+          # initialized an dim by dim Walsh Hadamard matrix
         self.sequence = []
         for col in range(self.dim**2):
             self.sequence.append(

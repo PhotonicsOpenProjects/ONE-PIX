@@ -7,9 +7,11 @@ from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction impo
 class Reconstruction:
     """Class to reconstruct a data cube from Fourier splitting ONE-PIX method."""
 
-    def __init__(self, spectra, pattern_order):
+    def __init__(self, spectra,wavelengths, pattern_order):
         self.spectra = spectra
+        self.wavelengths=wavelengths
         self.pattern_order = pattern_order
+        self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):
         """
@@ -72,14 +74,19 @@ class Reconstruction:
         whole_spectrum = np.concatenate(
             (left_spectrum, half_spectrum), axis=1
         )  # concatenation of the left and right part of the spatial spectrum
-        hyperspectral_image = np.abs(
+        self.hyperspectral_image = np.abs(
             np.fft.ifftn(whole_spectrum, axes=(0, 1))
         )  # 0 calculation of the hyperspectral image
 
-        return hyperspectral_image
+        return  self.hyperspectral_image
+    
+    def get_result_to_plot(self):
+        self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
+
+        return  self.result_to_plot
+        
 
     def save_reconstructed_image(
         self, datacube, wavelengths, header, filename, save_path=None
     ):
-        saver = FisCommonReconstruction()
-        saver.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+        self.fis.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)

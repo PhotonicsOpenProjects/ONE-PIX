@@ -5,12 +5,63 @@ from datetime import date
 import time
 import spectral.io.envi as envi
 import cv2
+from scipy.interpolate import interp1d
+from pathlib import Path
 
 
 class FisCommonReconstruction:
     def __init__(self, acquisition_dict=None):
         self.acquisition_dict = acquisition_dict
         return
+    
+    def get_result_to_plot(self, datacube, wavelengths, gamma=2.2):
+        """
+        Convertit une image hyperspectrale en une image en espace CIE XYZ et la transforme en sRGB.
+        
+        :param hsi_image: Image hyperspectrale sous forme (H, W, C)
+        :param wavelengths: Tableau des longueurs d'onde correspondant aux C canaux
+        :param cie_cmfs: Matrice des fonctions colorimétriques CIE 1931 (λ, X, Y, Z)
+        :param gamma: Correction gamma pour l'affichage
+        :return: Image RGB en uint8 (H, W, 3)
+        """
+        # Récupérer le chemin absolu du script en cours d'exécution
+        script_dir = Path(__file__).parent  # Dossier où se trouve le script
+        cie_file = script_dir / "CIE1931-2deg-XYZ.csv"  # Fichier CMF attendu dans le même dossier
+
+        # Chargement des fonctions colorimétriques CIE 1931
+        cie_cmfs = np.loadtxt(cie_file, delimiter=",")
+
+        # Extraction des longueurs d'onde et des fonctions CMF
+        cmf_wavelengths, X_cmf, Y_cmf, Z_cmf = cie_cmfs[:, 0], cie_cmfs[:, 1], cie_cmfs[:, 2], cie_cmfs[:, 3]
+
+        # Interpolation des CMFs pour correspondre aux longueurs d'onde de l'image hyperspectrale
+        interp_X = interp1d(cmf_wavelengths, X_cmf, kind='linear', bounds_error=False, fill_value=0)
+        interp_Y = interp1d(cmf_wavelengths, Y_cmf, kind='linear', bounds_error=False, fill_value=0)
+        interp_Z = interp1d(cmf_wavelengths, Z_cmf, kind='linear', bounds_error=False, fill_value=0)
+
+        # Pondération des bandes spectrales par les CMFs
+        X = np.sum(datacube * interp_X(wavelengths), axis=-1)
+        Y = np.sum(datacube * interp_Y(wavelengths), axis=-1)
+        Z = np.sum(datacube * interp_Z(wavelengths), axis=-1)
+
+        # Empiler les canaux pour obtenir une image XYZ
+        xyz_image = np.stack([X, Y, Z], axis=-1)
+
+        # Transformation de XYZ vers sRGB (D65 standard)
+        M_XYZ_to_sRGB = np.array([[ 3.2406, -1.5372, -0.4986],
+                                [-0.9689,  1.8758,  0.0415],
+                                [ 0.0557, -0.2040,  1.0570]])
+        
+        rgb_image = np.dot(xyz_image, M_XYZ_to_sRGB.T)
+
+        # Normalisation et correction gamma
+        rgb_image -= rgb_image.min()
+        rgb_image /= rgb_image.max()
+        rgb_image = np.power(rgb_image, 1 / gamma)
+
+        # Conversion en uint8 pour affichage
+        return (rgb_image * 255).astype(np.uint8)
+
 
     def save_acquisition_envi(
         self, datacube, wavelengths, header, save_envi_name=None, save_path=None

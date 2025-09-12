@@ -1,0 +1,28 @@
+{% extends "acquisition_base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+  <h1>{{ title }}</h1>
+  <h2>Catégorie : {{ category }}</h2>
+
+  {% if data %}
+  <form method="POST" action="{{ url_for('acquisition.save_settings', category=category) }}">
+      <table>
+          <tr><th>Paramètre</th><th>Valeur</th></tr>
+          {% for key, value in data.items() %}
+          <tr>
+              <td>{{ key }}</td>
+              <td><input type="text" name="{{ key }}" value="{{ value }}"></td>
+          </tr>
+          {% endfor %}
+      </table>
+      <div class="btn-group">
+          <button type="submit" class="btn">Enregistrer</button>
+          <button type="button" class="btn" onclick="window.history.back()">Fermer</button>
+      </div>
+  </form>
+  {% else %}
+      <p>Aucune donnée disponible.</p>
+  {% endif %}
+{% endblock %}

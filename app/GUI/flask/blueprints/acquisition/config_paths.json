@@ -1,0 +1,5 @@
+{
+  "hardware": "../../../../../conf/hardware_config.json",
+  "software": "../../../../../conf/acquisition_parameters.json",
+  "imaging": "../../../conf/imaging_settings.json"
+}
