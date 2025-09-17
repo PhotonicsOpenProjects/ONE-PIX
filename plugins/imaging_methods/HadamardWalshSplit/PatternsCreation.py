@@ -9,15 +9,19 @@ class CreationPatterns:
     Hadamard split patterns and their order list.
     """
 
-    def __init__(self, spatial_res, height=0, width=0):
+    def __init__(self, height=0, width=0):
 
-        self.dim = 2 ** (round(np.log2(spatial_res)))
+        self.acquisition_results={}        # import users defined spatial infos
+        self.fis=FIS.FisCommonAcquisition()
+        self.spatial_res =self.fis.spatial_res
+
+        self.dim = 2 ** (round(np.log2(self.spatial_res)))
         self.nb_patterns = 2 * self.dim**2
         self.sequence = []
         self.pattern_order = []
         self.white_pattern_idx = 0
         self.interp_method = cv2.INTER_AREA
-        if self.dim != spatial_res:
+        if self.dim != self.spatial_res:
             print(
                 f"Warning: Hadamard sampling request for powers of 2 dimensions. The nearest eligible size is {self.dim}. "
             )
@@ -42,7 +46,7 @@ class CreationPatterns:
                 patterns_order.append("Hpos(%d,%d)" % (j, k))
                 patterns_order.append("Hneg(%d,%d)" % (j, k))
         freqs.append((j, k))
-
+        self.acquisition_results["patterns_order"]=patterns_order
         return patterns_order, freqs
 
     def creation_patterns(self):
@@ -56,6 +60,7 @@ class CreationPatterns:
             3D array of split Hadamard patterns.
 
         """
+        
 
         had_walsh_matrix = walsh2_matrix(self.dim).astype(np.int16)
           # initialized an dim by dim Walsh Hadamard matrix
@@ -96,6 +101,7 @@ class CreationPatterns:
         del had_walsh_matrix
 
         self.patterns_order, freqs = self.sequence_order()
+        self.acquisition_results["patterns"]=self.sequence
         return self.sequence
 
     def save_raw_data(self, acquisition_class, path=None):

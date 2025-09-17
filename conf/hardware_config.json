@@ -1,13 +1,13 @@
 {
   "name_spectro": "Stub",
-  "name_camera": "Stub",
-  "integration_time_ms": 2.0,
+  "name_camera": "Stub",  
   "height": 400,
   "width": 800,
   "wl_lim": [
     350,
     800
   ],
-  "spectro_scans2avg": 1,
-  "proj_position": "auto"
+  "proj_position": "auto",
+  "m": [[1.0670707577938816, 0.11801705341226244, -208.49048355498167], [-0.008166698481677033, 1.0820877161505171, -56.62593442369638], [-1.4661936193175802e-05, 0.00013456869465568104, 1.0]],
+   "normalisation_path": ""
 }

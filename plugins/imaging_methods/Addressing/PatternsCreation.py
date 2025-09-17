@@ -23,19 +23,19 @@ import importlib
 
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-
-json_path = BASE_DIR.parent.parent.parent / "conf" / "software_config.json"
-
-
 class CreationPatterns:
 
-    def __init__(self, spatial_res=0, height=0, width=0):
+    def __init__(self, height=0, width=0):
+        self.acquisition_results={}
         self.patterns_order = []
         self.interp_method = cv2.INTER_AREA
         self.nb_patterns = 0
+        base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        print("the base path is  :",base_path)
+        self.imaging_config_path = os.path.join(base_path, "Adressing_method_param.json")
+        print("the full path  base path is  :",self.imaging_config_path)
 
-        with open(json_path) as f:
+        with open(self.imaging_config_path) as f:
             acqui_dict = json.load(f)
         # Read segmentation parameters to apply the selected method
         self.clustering_method_name = acqui_dict["clustering_method"]
@@ -63,8 +63,10 @@ class CreationPatterns:
             self.patterns_order = self.clustering_method.patterns_order
             self.patterns_order.insert(0, "Background")
             self.patterns_order.append("Dark")
+            self.acquisition_results["patterns_order"]= self.patterns_order
         except Exception:
             self.patterns_order = [""] * self.nb_patterns
+            self.acquisition_results["patterns_order"]= self.patterns_order
 
     def creation_patterns(self):
         # parameters to connect by SSH to the GPU server and execute SCP command get/add
@@ -93,6 +95,7 @@ class CreationPatterns:
         self.RGB_img = np.asarray(self.RGB_img)
         self.RGB_img_cor = apply_corregistration(self.RGB_img)
         os.remove(RGB_path)
+        self.acquisition_results["rgb"]=self.RGB_img_cor
 
         # close black screen
         hide_full_frame()
@@ -109,6 +112,7 @@ class CreationPatterns:
         #(self.nb_patterns)
         self.sequence_order()
         # camera.close_camera()
+        self.acquisition_results["patterns"]=self.patterns
         return self.patterns
 
     def save_raw_data(self, acquisition_class, path=None):
@@ -151,7 +155,7 @@ class CreationPatterns:
             wavelengths_filename, acquisition_class.hardware.spectrometer.wavelengths
         )  # associated wavelengths
         np.save(
-            patterns_order_filename, acquisition_class.imaging_method.patterns_order
+            patterns_order_filename, acquisition_class.imaging_method.acquisition_results["patterns_order"]
         )
-        np.save(masks_filename, acquisition_class.imaging_method.patterns)
+        np.save(masks_filename, acquisition_class.imaging_method.acquisition_results["patterns"])
         os.chdir(root_path)

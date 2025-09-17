@@ -28,18 +28,15 @@ class Acquisition:
         base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "conf")
 
         self.hardware_config_path = os.path.join(base_path, "hardware_config.json")
-        self.software_config_path = os.path.join(base_path, "software_config.json")
         self.acquisition_config_path = os.path.join(base_path, "acquisition_parameters.json")
 
         self.hardware_dict = self._load_json(self.hardware_config_path)
-        self.software_dict = self._load_json(self.software_config_path)
         self.acquisition_dict = self._load_json(self.acquisition_config_path)
 
         params = {
-            "imaging_method_name": self.acquisition_dict.get("imaging_method"),
-            "spatial_res": self.acquisition_dict.get("spatial_res"),
+            "imaging_method_name":self.acquisition_dict.get("imaging_method"),
             "dynamic_tint": self.acquisition_dict.get("dynamic_tint"),
-            "normalisation_path": self.software_dict.get("normalisation_path"),
+            "normalisation_path":self.hardware_dict .get("normalisation_path"),
             "normalisation": self.acquisition_dict.get("Normalisation"),
             "width": self.hardware_dict.get("width"),
             "height": self.hardware_dict.get("height"),
@@ -50,9 +47,9 @@ class Acquisition:
 
         for key, value in params.items():
             setattr(self, key, value)
-
+        print(self.imaging_method_name)
         self.imaging_method = ImagingMethodBridge(
-            self.imaging_method_name, self.spatial_res, self.height, self.width
+            self.imaging_method_name, self.height, self.width
         )
         self.hardware = Hardware()
         self.is_init = False
@@ -93,7 +90,7 @@ class Acquisition:
         if not (self.is_init):
             try:
                 self.imaging_method.creation_patterns()
-                self.nb_patterns = len(self.imaging_method.patterns_order)
+                self.nb_patterns = len(self.imaging_method.acquisition_results["patterns_order"])
                 self.hardware.hardware_initialisation()
                 self.spectra = np.zeros(
                     (self.nb_patterns, len(self.hardware.spectrometer.wavelengths)),
@@ -150,8 +147,8 @@ class Acquisition:
             target=self.hardware.projection.thread_projection,
             args=(
                 event,
-                self.imaging_method.patterns,
-                self.imaging_method.patterns_order,
+                self.imaging_method.acquisition_results["patterns"],
+                self.imaging_method.acquisition_results["patterns_order"],
                 self.imaging_method.pattern_creation_method.interp_method,
             )
         )

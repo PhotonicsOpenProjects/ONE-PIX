@@ -8,9 +8,11 @@ class CreationPatterns:
     Fourier split patterns and their order list
     """
 
-    def __init__(self, spatial_res, height, width):
+    def __init__(self, height, width):
+        self.acquisition_results={}
         # import users defined spatial infos
-        self.spatial_res = spatial_res
+        self.fis=FIS.FisCommonAcquisition()
+        self.spatial_res =self.fis.spatial_res
         self.height = height
         self.width = width
 
@@ -51,6 +53,7 @@ class CreationPatterns:
                 pattern_order.append("posim(%d,%d)" % (self.spectrum_size + k, j))
                 pattern_order.append("negim(%d,%d)" % (self.spectrum_size + k, j))
                 freqs.append((j, k))
+                self.acquisition_results["patterns_order"]=pattern_order
         return pattern_order, freqs
 
     def creation_freq_patterns(self, freq):
@@ -103,7 +106,7 @@ class CreationPatterns:
 
         for freq in freqs:
             patterns.extend(self.creation_freq_patterns(freq))
-
+        self.acquisition_results["patterns"]=patterns
         return patterns
 
     def save_raw_data(self, acquisition_class, path=None):

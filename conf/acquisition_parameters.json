@@ -1,6 +1,7 @@
 {
-  "imaging_method": "DCT",
-  "spatial_res": 2,
+  "imaging_method": "Addressing",
+  "integration_time_ms": 2.0,
+  "spectro_scans2avg": 1,
   "Normalisation": false,
   "dynamic_tint": false
 }

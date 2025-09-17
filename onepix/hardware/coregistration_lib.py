@@ -21,9 +21,7 @@ except IndexError:
     # sys.exit()
 
 
-software_json_path = os.path.abspath(
-    hardware_path + f"{os.sep}..{os.sep}..{os.sep}conf/software_config.json"
-)
+
 hardware_json_path = os.path.abspath(
     hardware_path + f"{os.sep}..{os.sep}..{os.sep}conf/hardware_config.json"
 )
@@ -198,7 +196,7 @@ def get_perspective_transform(
 
     """
     # camera.camera_open()
-    with open(software_json_path) as f:
+    with open(hardware_json_path) as f:
         setup_dict = json.load(f)
     m = setup_dict["m"]
     max_width = setup_dict["max_width"]
@@ -245,14 +243,14 @@ def get_perspective_transform(
         m = cv2.getPerspectiveTransform(rect, dst)
         showinfo(message="Initialisation du vidéoprojecteur réussie.")
 
-        with open(software_json_path, "r") as file:
+        with open(hardware_json_path, "r") as file:
             setup_dict = json.load(file)
 
         setup_dict["m"] = m.tolist()
         setup_dict["max_width"] = max_width
         setup_dict["max_height"] = max_height
 
-        with open(software_json_path, "w") as f:
+        with open(hardware_json_path, "w") as f:
             json.dump(setup_dict, file, indent=4)
 
     else:
@@ -319,14 +317,14 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
 
     m = cv2.getPerspectiveTransform(rect, dst)
 
-    with open(software_json_path, "r") as file:
+    with open(hardware_json_path, "r") as file:
         setup_dict = json.load(file)
 
     setup_dict["m"] = m.tolist()
     setup_dict["max_width"] = max_width
     setup_dict["max_height"] = max_height
 
-    with open(software_json_path, "w") as file:
+    with open(hardware_json_path, "w") as file:
         json.dump(setup_dict, file, indent=4)
 
 
@@ -335,12 +333,12 @@ def apply_corregistration(img):
     Function allow to resize image of the pi with coregistration with the video projector
     """
 
-    with open(software_json_path) as f:
+    with open(hardware_json_path) as f:
         setup_dict = json.load(f)
     m = setup_dict["m"]
     m = np.asarray(m)
-    max_width = setup_dict["max_width"]
-    max_height = setup_dict["max_height"]
+    max_width = 619
+    max_height =  719
     if m.tolist() != []:
         wrap = cv2.resize(
             cv2.warpPerspective(img, m, (max_width, max_height)),

@@ -65,17 +65,19 @@ class Reconstruction:
             self.spectra = self.acquisition_dict["spectra"]
             self.pattern_order = self.acquisition_dict["patterns_order"]
             self.wavelengths = self.acquisition_dict["wavelengths"]
+            self.imaging_method_param=acquisition_dict
 
         else:  # if acquisition_dict is the acquisition class object
             self.imaging_method_name = self.acquisition_dict.imaging_method_name
             self.spectra = self.acquisition_dict.spectra
             self.pattern_order = self.acquisition_dict.imaging_method.patterns_order
             self.wavelengths = self.acquisition_dict.hardware.spectrometer.wavelengths
+            self.imaging_method_param=acquisition_dict
 
         self.spatial_res = 0
         self.height = 0
         self.width = 0
-
+        print(self.imaging_method_param)
         self.imaging_method = ImagingMethodBridge(
             self.imaging_method_name, self.spatial_res, self.height, self.width
         )
@@ -151,7 +153,7 @@ class Reconstruction:
         None.
 
         """
-        self.imaging_method.reconstruction(self.spectra,self.wavelengths, self.pattern_order,plot_result=self.plot_result)
+        self.imaging_method.reconstruction(self.spectra,self.wavelengths,self.pattern_order,self.imaging_method_param,plot_result=self.plot_result)
         logging.info("raw datas are reconstructed now")
         if self.plot_result:
             logging.info("plot result is created")
