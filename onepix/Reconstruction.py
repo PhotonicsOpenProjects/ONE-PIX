@@ -5,7 +5,7 @@ from datetime import date
 import time
 from tkinter import *
 from tkinter.filedialog import askdirectory
-
+import json
 from onepix.ImagingMethodBridge import *
 
 import logging
@@ -58,74 +58,55 @@ class Reconstruction:
         if plot_result:
             self.plot_result=plot_result
         if acquisition_dict is None:
-            self.load_raw_data()
+            self.acquisition_dict=self.load_acquisition_results()
+            print(list(self.acquisition_dict.keys()))
 
-        if type(self.acquisition_dict)() == {}:
-            self.imaging_method_name = self.acquisition_dict["imaging_method_name"]
-            self.spectra = self.acquisition_dict["spectra"]
-            self.pattern_order = self.acquisition_dict["patterns_order"]
-            self.wavelengths = self.acquisition_dict["wavelengths"]
-            self.imaging_method_param=acquisition_dict
+        
 
-        else:  # if acquisition_dict is the acquisition class object
-            self.imaging_method_name = self.acquisition_dict.imaging_method_name
-            self.spectra = self.acquisition_dict.spectra
-            self.pattern_order = self.acquisition_dict.imaging_method.patterns_order
-            self.wavelengths = self.acquisition_dict.hardware.spectrometer.wavelengths
-            self.imaging_method_param=acquisition_dict
+        self.imaging_method_name = self.acquisition_dict["imaging_method_name"]
+        print("imaging_method_name :", self.imaging_method_name )
+        self.spectra = self.acquisition_dict["spectra"]
+        self.pattern_order = self.acquisition_dict["patterns_order"]
+        self.wavelengths = self.acquisition_dict["wavelengths"]
+        self.imaging_method_param=acquisition_dict
+
 
         self.spatial_res = 0
         self.height = 0
         self.width = 0
-        print(self.imaging_method_param)
-        self.imaging_method = ImagingMethodBridge(
-            self.imaging_method_name, self.spatial_res, self.height, self.width
-        )
+        self.imaging_method = ImagingMethodBridge(self.imaging_method_name,self.height, self.width,plot_result=self.plot_result)
         logging.info("Reconstruction class is init")
 
-    def load_raw_data(self):
+
+    def load_acquisition_results(self):
         """
-        This function allows to load saved spectra with timers of the displays and spectrometers.
-        at runtime, a window appears to select the folder path in which the data are located.
-
-        Returns
-        -------
-        acq_data : dict
-            Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.
-
+        Cherche un fichier 'acquisition_results_*.json' dans folder_path,
+        et le charge en dict Python.
         """
+        # chemin complet du script
+        script_path = os.path.abspath(__file__)
+        script_dir = os.path.dirname(script_path)
+        parent_dir = os.path.dirname(script_dir)
+        measure_dir = os.path.join(parent_dir, "measure")
+        root = Tk()
+        root.withdraw()
+        root.attributes("-topmost", 1)
+        folder_path = askdirectory(
+            title="Select the folder containing the acquisitions",
+            initialdir=measure_dir,
+        )
+        for fname in os.listdir(folder_path):
+            if fname.startswith("acquisition_results_") and fname.endswith(".json"):
+                fpath = os.path.join(folder_path, fname)
+                print(fpath)
+                with open(fpath, "r", encoding="utf-8") as f:
+                    acquisition_results=json.load(f)
+                    print(list(acquisition_results.keys()))
 
-        try:
-            chemin_script = os.getcwd()
-            root = Tk()
-            root.withdraw()
-            root.attributes("-topmost", 1)
-            chemin_mesure = askdirectory(
-                title="Select the folder containing the acquisitions",
-                initialdir=chemin_script,
-            )
-            os.chdir(chemin_mesure)
-
-            header_name = glob.glob("*.txt")[0]
-            self.acquisition_dict = get_header_data(header_name)
-
-            list_nom_mesure = sorted(glob.glob("*.npy"), key=os.path.getmtime)
-
-            indice = [x for x, s in enumerate(list_nom_mesure) if "spectra" in s]
-            self.acquisition_dict["spectra"] = np.load(list_nom_mesure[indice[0]])
-
-            indice = [x for x, s in enumerate(list_nom_mesure) if "wavelengths" in s]
-            self.acquisition_dict["wavelengths"] = np.load(list_nom_mesure[indice[0]])
-
-            indice = [x for x, s in enumerate(list_nom_mesure) if "patterns_order" in s]
-            self.acquisition_dict["patterns_order"] = np.load(
-                list_nom_mesure[indice[0]]
-            )
-
-            os.chdir(chemin_script)
-            logging.info("raw data is loaded")
-        except Exception as e:
-            logging.error(f"error in load_raw_data : {e}")
+                    return acquisition_results
+        
+        # Si aucun fichier trouvé
+        raise FileNotFoundError("⚠️ Aucun fichier acquisition_results_*.json trouvé dans ce dossier")
 
 
     def nan_corr(self):

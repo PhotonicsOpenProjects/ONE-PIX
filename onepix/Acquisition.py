@@ -9,6 +9,10 @@ import numpy as np
 from tkinter import *
 from tkinter.messagebox import askquestion
 from datetime import date
+from onepix import utils as utils
+from pathlib import Path
+import orjson
+
 
 import logging
 from onepix.logging_config import root  
@@ -31,23 +35,23 @@ class Acquisition:
         self.acquisition_config_path = os.path.join(base_path, "acquisition_parameters.json")
 
         self.hardware_dict = self._load_json(self.hardware_config_path)
-        self.acquisition_dict = self._load_json(self.acquisition_config_path)
-
+        self.acquisition_results = self._load_json(self.acquisition_config_path)
         params = {
-            "imaging_method_name":self.acquisition_dict.get("imaging_method"),
-            "dynamic_tint": self.acquisition_dict.get("dynamic_tint"),
+            "imaging_method_name":self.acquisition_results.get("imaging_method_name"),
+            "dynamic_tint": self.acquisition_results.get("dynamic_tint"),
             "normalisation_path":self.hardware_dict .get("normalisation_path"),
-            "normalisation": self.acquisition_dict.get("Normalisation"),
+            "normalisation": self.acquisition_results.get("Normalisation"),
             "width": self.hardware_dict.get("width"),
             "height": self.hardware_dict.get("height"),
         }
         
     
         params.update(kwargs)
+        self.acquisition_results.update(kwargs)
+        
 
         for key, value in params.items():
             setattr(self, key, value)
-        print(self.imaging_method_name)
         self.imaging_method = ImagingMethodBridge(
             self.imaging_method_name, self.height, self.width
         )
@@ -92,6 +96,7 @@ class Acquisition:
                 self.imaging_method.creation_patterns()
                 self.nb_patterns = len(self.imaging_method.acquisition_results["patterns_order"])
                 self.hardware.hardware_initialisation()
+                self.acquisition_results["wavelengths"]=self.hardware.spectrometer.wavelengths
                 self.spectra = np.zeros(
                     (self.nb_patterns, len(self.hardware.spectrometer.wavelengths)),
                     dtype=np.float32,
@@ -172,6 +177,8 @@ class Acquisition:
             self.spectra = self.hardware.spectrometer.spectra
             self.duration = time.time() - begin_acq
             self.create_acquisition_header()
+            self.acquisition_results["spectra"]=self.spectra
+            self.acquisition_results= self.acquisition_results | self.imaging_method.acquisition_results
             logging.info("measure is complete")
 
         except Exception as e:
@@ -213,8 +220,31 @@ class Acquisition:
         )
         logging.info("measure header is created")
 
-    def save_raw_data(self, path=None):
-        self.imaging_method.pattern_creation_method.save_raw_data(self)
-        logging.info("measure is saved")
-        
+
+
+
+    def save_raw_data(self):
+        save_path = Path(__file__).resolve().parent.parent / "measure"
+        if os.path.isdir(save_path):
+            pass
+        else :
+            os.mkdir(save_path)
+
+        fdate = date.today().strftime("%d_%m_%Y")  # convert the current date in string
+        actual_time = time.strftime("%H-%M-%S")  # get the current time
+        folder_name = f"ONE-PIX_raw_acquisition_{fdate}_{actual_time}"
+        os.mkdir(os.path.join(save_path,folder_name))
+
+        results_filename = f"acquisition_results_{fdate}_{actual_time}.json"
+        with open(os.path.join(save_path, folder_name, results_filename), "wb") as f:
+            f.write(
+                orjson.dumps(
+                    self.acquisition_results,
+                    option=orjson.OPT_SERIALIZE_NUMPY,  # gère bien numpy
+                    default=utils.default
+                )
+            )
+
+
+
         

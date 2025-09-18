@@ -13,6 +13,7 @@ class ImagingMethodBridge:
         self.height = height // self.pattern_reduction[0]
         self.width = width // self.pattern_reduction[1]
         self.imaging_method = imaging_method
+
         logging.info(f'{self.imaging_method} imaging method is init')
 
     def creation_patterns(self):
