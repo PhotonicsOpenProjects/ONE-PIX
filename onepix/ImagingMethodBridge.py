@@ -31,9 +31,10 @@ class ImagingMethodBridge:
                 f'Concrete bridge "{self.imaging_method}" had an error during create patterns: {e}'
             )
 
-    def reconstruction(self, spectra,wavelengths, pattern_order,imaging_method_param,plot_result=False):
+    def reconstruction(self,acquisition_dict,plot_result=False):
         try:
             # Import reconstruction module specific to the chosen imaging method
+            
             reconstruction_module = importlib.import_module(
                 f"plugins.imaging_methods.{self.imaging_method}."
                 + "ImageReconstruction"
@@ -41,9 +42,7 @@ class ImagingMethodBridge:
             self.image_reconstruction_classObj = getattr(
                 reconstruction_module, "Reconstruction"
             )
-            self.image_reconstruction_method = self.image_reconstruction_classObj(
-                spectra,wavelengths, pattern_order,imaging_method_param
-            )
+            self.image_reconstruction_method = self.image_reconstruction_classObj(acquisition_dict)
             self.reconstructed_image = (
                 self.image_reconstruction_method.image_reconstruction()
             )

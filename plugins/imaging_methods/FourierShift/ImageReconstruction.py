@@ -7,10 +7,11 @@ import numpy as np
 class Reconstruction:
     """Class to reconstruct a data cube from Fourier shifting ONE-PIX method."""
 
-    def __init__(self, spectra,wavelengths, pattern_order):
-        self.spectra = spectra
-        self.wavelengths=wavelengths
-        self.pattern_order = pattern_order
+    def __init__(self, acquisition_dict):
+        self.reconstruction_results={}
+        self.spectra = np.asarray(acquisition_dict["spectra"])
+        self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
+        self.pattern_order = acquisition_dict["patterns_order"]
         self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):

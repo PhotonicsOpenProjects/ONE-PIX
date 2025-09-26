@@ -133,7 +133,7 @@ class Reconstruction:
         None.
 
         """
-        self.imaging_method.reconstruction(self.spectra,self.wavelengths,self.pattern_order,self.imaging_method_param,plot_result=self.plot_result)
+        self.imaging_method.reconstruction(self.acquisition_dict,plot_result=self.plot_result)
         logging.info("raw datas are reconstructed now")
         if self.plot_result:
             logging.info("plot result is created")

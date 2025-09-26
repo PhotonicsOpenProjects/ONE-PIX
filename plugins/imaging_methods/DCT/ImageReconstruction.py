@@ -8,10 +8,10 @@ from plugins.imaging_methods.FIS_common_functions.FIS_common_reconstruction impo
 class Reconstruction:
     """Class to reconstruct a data cube from Fourier splitting ONE-PIX method."""
 
-    def __init__(self, spectra,wavelengths, pattern_order):
-        self.spectra = spectra
-        self.wavelengths=wavelengths
-        self.pattern_order = pattern_order
+    def __init__(self, acquisition_dict):
+        self.spectra = np.asarray(acquisition_dict["spectra"])
+        self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
+        self.pattern_order = acquisition_dict["patterns_order"]
         self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):

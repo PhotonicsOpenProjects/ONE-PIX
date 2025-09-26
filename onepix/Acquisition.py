@@ -6,8 +6,6 @@ import json
 import time
 import threading
 import numpy as np
-from tkinter import *
-from tkinter.messagebox import askquestion
 from datetime import date
 from onepix import utils as utils
 from pathlib import Path
@@ -115,7 +113,7 @@ class Acquisition:
             pass
 
 
-    def thread_acquisition(self, path=None, time_warning=True):
+    def thread_acquisition(self, path=None):
         """
         Runs the projection of a sequence of patterns and spectrometer measurements
         in free-running mode, using threads for parallel execution. The resulting hyperspectral 
@@ -135,11 +133,6 @@ class Acquisition:
         """
         self.init_measure()   
         # Show time warning if necessary
-        if time_warning:
-            ans = askquestion(message=f"Estimated acquisition duration: {self.est_duration} min")
-            if ans != "yes":
-                cv2.destroyAllWindows()
-                return  # Exit early if the user doesn't confirm the acquisition
         
         # Begin acquisition process
         begin_acq = time.time()
