@@ -7,7 +7,7 @@ from onepix.logging_config import root
 logger = logging.getLogger(__name__)
 
 class ImagingMethodBridge:
-    def __init__(self, imaging_method=None,height=0, width=0):
+    def __init__(self, imaging_method=None,height=0, width=0,plot_result=False):
         # Define width and height pixels numbers with a reduction coefficient to save memory
         self.pattern_reduction = [4, 3]
         self.height = height // self.pattern_reduction[0]

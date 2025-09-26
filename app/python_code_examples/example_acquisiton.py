@@ -1,6 +1,6 @@
 from onepix.Acquisition import Acquisition
 
-acq = Acquisition()
+acq = Acquisition(imaging_method_name="FourierSplit")
 acq.thread_acquisition()
-acq.save_raw_data_new()
+acq.save_raw_data()
 

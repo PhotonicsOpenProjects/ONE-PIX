@@ -55,8 +55,7 @@ class Reconstruction:
     def __init__(self, acquisition_dict=None,plot_result=False):
 
         self.acquisition_dict = acquisition_dict
-        if plot_result:
-            self.plot_result=plot_result
+        self.plot_result=plot_result
         if acquisition_dict is None:
             self.acquisition_dict=self.load_acquisition_results()
             print(list(self.acquisition_dict.keys()))
