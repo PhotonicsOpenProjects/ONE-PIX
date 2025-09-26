@@ -9,6 +9,7 @@ class Reconstruction:
     """Class to reconstruct a data cube from Walsh Hadamard splitting ONE-PIX method."""
 
     def __init__(self, acquisition_dict):
+        self.reconstruction_results={}
         self.spectra = np.asarray(acquisition_dict["spectra"])
         self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
         self.pattern_order = acquisition_dict["patterns_order"]
@@ -76,10 +77,13 @@ class Reconstruction:
         for wl in range(np.size(whole_spectrum, 2)):
             self.hyperspectral_image[:, :, wl] = abs(H @ whole_spectrum[:, :, wl] @ H)
 
+        self.reconstruction_results["reconstructed_data"]=self.hyperspectral_image
+
         return self.hyperspectral_image
 
     def get_result_to_plot(self):
         self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
+        self.reconstruction_results["result2plot"]=self.result_to_plot
 
         return  self.result_to_plot
 

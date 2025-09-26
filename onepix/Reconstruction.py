@@ -55,6 +55,7 @@ class Reconstruction:
     def __init__(self, acquisition_dict=None,plot_result=False):
 
         self.acquisition_dict = acquisition_dict
+        self.reconstruction_results={}
         self.plot_result=plot_result
         if acquisition_dict is None:
             self.acquisition_dict=self.load_acquisition_results()
@@ -134,6 +135,7 @@ class Reconstruction:
 
         """
         self.imaging_method.reconstruction(self.acquisition_dict,plot_result=self.plot_result)
+        self.reconstruction_results=self.imaging_method.reconstruction_results
         logging.info("raw datas are reconstructed now")
         if self.plot_result:
             logging.info("plot result is created")

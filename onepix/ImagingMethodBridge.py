@@ -49,7 +49,7 @@ class ImagingMethodBridge:
             if plot_result:
                 logging.info('test to create plot result')
                 self.result_to_plot=self.image_reconstruction_method.get_result_to_plot()
-
+            self.reconstruction_results = self.image_reconstruction_method.reconstruction_results
         except ModuleNotFoundError:
             raise Exception(
                 'Concrete bridge "'

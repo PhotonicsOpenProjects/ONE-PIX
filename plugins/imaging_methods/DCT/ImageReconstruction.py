@@ -71,12 +71,12 @@ class Reconstruction:
         self.hyperspectral_image=np.zeros_like(spectrum)
         for wl in range(np.shape(spectrum)[2]):
             self.hyperspectral_image[:,:,wl]=idct(idct(spectrum[:,:,wl].T, norm='ortho').T, norm='ortho')
-
+        self.reconstruction_results["reconstructed_data"]=self.hyperspectral_image
         return self.hyperspectral_image
 
     def get_result_to_plot(self):
         self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
-
+        self.reconstruction_results["result2plot"]=self.result_to_plot
         return  self.result_to_plot
 
     def save_reconstructed_image(

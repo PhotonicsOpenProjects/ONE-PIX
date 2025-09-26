@@ -74,14 +74,15 @@ class Reconstruction:
         whole_spectrum = np.concatenate(
             (left_spectrum, half_spectrum), axis=1
         )  # concatenation of the left and right part of the spatial spectrum
-        hyperspectral_image = np.abs(
+        self.hyperspectral_image = np.abs(
             np.fft.ifftn(whole_spectrum, axes=(0, 1))
         )  # 0 calculation of the hyperspectral image
-
-        return hyperspectral_image
+        self.reconstruction_results["reconstructed_data"]=self.hyperspectral_image
+        return self.hyperspectral_image
 
     def get_result_to_plot(self):
         self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
+        self.reconstruction_results["result2plot"]=self.result_to_plot
 
         return  self.result_to_plot
 
