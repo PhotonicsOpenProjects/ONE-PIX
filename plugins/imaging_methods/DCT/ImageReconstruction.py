@@ -9,9 +9,11 @@ class Reconstruction:
     """Class to reconstruct a data cube from Fourier splitting ONE-PIX method."""
 
     def __init__(self, acquisition_dict):
+        self.reconstruction_results={}
         self.spectra = np.asarray(acquisition_dict["spectra"])
         self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
         self.pattern_order = acquisition_dict["patterns_order"]
+        
         self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):
