@@ -25,38 +25,55 @@ class Acquisition:
     by providing values at initialization.
     """
 
-    def __init__(self, **kwargs):
-        
-        base_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "conf")
+    def __init__(self, hardware_json_path=None, acquisition_json_path=None, **kwargs):
+        """
+        Args:
+            hardware_json_path (str | None): chemin du fichier hardware_config.json
+            acquisition_json_path (str | None): chemin du fichier acquisition_parameters.json
+        """
 
-        self.hardware_config_path = os.path.join(base_path, "hardware_config.json")
-        self.acquisition_config_path = os.path.join(base_path, "acquisition_parameters.json")
+        # 🧠 Chemin par défaut vers /conf
+        base_path = os.path.join(os.path.dirname(__file__), "..", "conf")
 
-        self.hardware_dict = self._load_json(self.hardware_config_path)
-        self.acquisition_results = self._load_json(self.acquisition_config_path)
+        # 💡 Si les chemins ne sont pas fournis, on prend les fichiers par défaut
+        if hardware_json_path is None:
+            hardware_json_path = os.path.join(base_path, "hardware_config.json")
+
+        if acquisition_json_path is None:
+            acquisition_json_path = os.path.join(base_path, "acquisition_parameters.json")
+
+        # ✅ On charge les fichiers JSON
+        self.hardware_config_path = hardware_json_path
+        self.acquisition_config_path = acquisition_json_path
+
+        self.hardware_dict = self._load_json(hardware_json_path)
+        self.acquisition_results = self._load_json(acquisition_json_path)
+
+        # ✅ On construit les paramètres initiaux
         params = {
-            "imaging_method_name":self.acquisition_results.get("imaging_method_name"),
+            "imaging_method_name": self.acquisition_results.get("imaging_method_name"),
             "dynamic_tint": self.acquisition_results.get("dynamic_tint"),
-            "normalisation_path":self.hardware_dict .get("normalisation_path"),
+            "normalisation_path": self.hardware_dict.get("normalisation_path"),
             "normalisation": self.acquisition_results.get("Normalisation"),
             "width": self.hardware_dict.get("width"),
             "height": self.hardware_dict.get("height"),
         }
-        
-    
+
+        # ⚙️ On laisse la possibilité de surcharger à la volée
         params.update(kwargs)
         self.acquisition_results.update(kwargs)
-        
 
         for key, value in params.items():
             setattr(self, key, value)
+
+        # 🧩 Initialisation des composants
         self.imaging_method = ImagingMethodBridge(
             self.imaging_method_name, self.height, self.width
         )
         self.hardware = Hardware()
         self.is_init = False
-        logger.info("onepixAcquisition class is init")
 
+        logger.info("✅ onepixAcquisition class is init")
 
     @staticmethod
     def _load_json(path):
@@ -212,8 +229,6 @@ class Acquisition:
             + "\n"
         )
         logging.info("measure header is created")
-
-
 
 
     def save_raw_data(self):

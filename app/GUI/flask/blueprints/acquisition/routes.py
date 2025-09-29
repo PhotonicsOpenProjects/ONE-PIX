@@ -53,7 +53,7 @@ def run_acquisition():
     
     acq.init_measure()
     acq.thread_acquisition()
-    rec=Reconstruction(acq,plot_result=True)
+    rec=Reconstruction(acq.acquisition_results,plot_result=True)
     rec.data_reconstruction()
     """Génère une mosaïque aléatoire au clic sur 'Run acquisition'"""
     fig, ax = plt.subplots(figsize=(4, 4))
