@@ -14,6 +14,7 @@ class Reconstruction:
         self.spectra = np.asarray(acquisition_dict["spectra"])
         self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
         self.pattern_order = acquisition_dict["patterns_order"]
+        
         self.fis=FisCommonReconstruction()
 
     def spectrum_reconstruction(self):

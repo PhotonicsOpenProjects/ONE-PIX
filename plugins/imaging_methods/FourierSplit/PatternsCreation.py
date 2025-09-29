@@ -9,10 +9,10 @@ class CreationPatterns:
     """
 
     def __init__(self, height, width):
-        self.acquisition_results={}
-        # import users defined spatial infos
+        self.acquisition_results={}        # import users defined spatial infos
         self.fis=FIS.FisCommonAcquisition()
         self.spatial_res =self.fis.spatial_res
+        self.spectrum_size=self.spatial_res//2
         self.height = height
         self.width = width
 
@@ -26,7 +26,7 @@ class CreationPatterns:
         self.white_pattern_idx = 4 * self.spectrum_size
 
         self.fourier_shift = shift.CreationPatterns(
-            self.spatial_res, self.height, self.width
+            self.height, self.width
         )
         self.interp_method = cv2.INTER_LINEAR_EXACT
 
@@ -114,8 +114,4 @@ class CreationPatterns:
         saver.save_raw_data(path=None)
 
 
-    def save_analysed_image(
-        self, datacube, wavelengths, header, filename, save_path=None
-    ):
-        saver = FisImageAnalysis()
-        saver.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+

@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 
-acq = Acquisition(imaging_method_name="Addressing")
-acq.thread_acquisition()
-acq.save_raw_data()
+# acq = Acquisition(imaging_method_name="Spyrit")
+# acq.thread_acquisition()
+# acq.save_raw_data()
 
 rec=Reconstruction(plot_result=True)
 rec.data_reconstruction()
@@ -15,6 +15,7 @@ plt.figure()
 plt.imshow(rec.reconstruction_results["result2plot"])
 plt.show()
 rec.save_reconstructed_image()
+
 
 
 

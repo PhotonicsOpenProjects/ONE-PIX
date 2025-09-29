@@ -7,7 +7,8 @@ class CreationPatterns:
     """ Class HadamardPatterns allows to create a sequence of 
         Hadamard split patterns and their order list.
     """
-    def __init__(self,spatial_res,height=0,width=0):
+    def __init__(self,height=0,width=0):
+        self.acquisition_results={}  
         spatial_res=32
         self.dim=2**(round(np.log2(spatial_res)))
         self.nb_patterns=2*self.dim**2
@@ -15,9 +16,7 @@ class CreationPatterns:
         self.pattern_order=[]
         self.white_pattern_idx=0
         self.interp_method=cv2.INTER_AREA
-        if self.dim != spatial_res:
-            print(f'Warning: Hadamard sampling request for powers of 2 dimensions. The nearest eligible size is {self.dim}. ')
-  
+        
     
     def sequence_order(self):
         """
@@ -39,7 +38,7 @@ class CreationPatterns:
                 patterns_order.append("Hpos(%d,%d)"%(j,k))
                 patterns_order.append("Hneg(%d,%d)"%(j,k))
         freqs.append((j,k))
-                
+        self.acquisition_results["patterns_order"]=patterns_order        
         return patterns_order,freqs
      
 
@@ -56,7 +55,7 @@ class CreationPatterns:
 
         """
         
-        had_walsh_matrix=np.int8(walsh2_matrix(self.dim)) # initialized an dim by dim Walsh Hadamard matrix
+        had_walsh_matrix=walsh2_matrix(self.dim).astype(np.int16) # initialized an dim by dim Walsh Hadamard matrix
         self.sequence=[]
         for col in range(self.dim**2):
             self.sequence.append(np.uint8(255*((1+(np.reshape(had_walsh_matrix[:,col],[self.dim,self.dim])))//2))) # reshape of the Patterns in 2D(dim X dim)
@@ -64,6 +63,7 @@ class CreationPatterns:
         del had_walsh_matrix
         
         self.patterns_order,freqs=self.sequence_order()
+        self.acquisition_results["patterns"]=self.sequence
         return self.sequence
 
     def save_raw_data(self,acquisition_class,path=None):

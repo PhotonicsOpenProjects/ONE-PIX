@@ -27,10 +27,11 @@ import json
 
 class Reconstruction:
     """ Class to reconstruct a data cube from Walsh Hadamard splitting ONE-PIX method."""
-    def __init__(self,spectra,pattern_order):
-    
-        self.spectra=spectra
-        self.pattern_order=pattern_order
+    def __init__(self,acquisition_dict):
+        self.reconstruction_results={}
+        self.reconstruction_results["wavelengths"]=acquisition_dict["wavelengths"]
+        self.spectra = np.asarray(acquisition_dict["spectra"])
+        self.pattern_order = acquisition_dict["patterns_order"]
         spyrit_config_path=os.path.dirname(os.path.abspath(__file__))+f"{os.sep}conf"+f"{os.sep}spyrit_config.json"
         with open(spyrit_config_path) as f:
             spyrit_dict = json.load(f)
@@ -43,17 +44,6 @@ class Reconstruction:
      
  
     def image_reconstruction(self):
-
-
-
-        # chemin_script = os.getcwd()
-        # root = Tk()
-        # root.withdraw()
-        # root.attributes('-topmost', 1)
-        # cnn_path = filedialog.askdirectory(title = "Select the folder containing cnn model", initialdir = chemin_script)
-        # os.chdir(cnn_path)
-
-
 
         Cov_rec = np.load(self.cnn_path+'\Cov_64x64.npy')
         title=self.cnn_path+'\cnn_32to64'
@@ -74,11 +64,6 @@ class Reconstruction:
         denoi = Unet()
         
         model = DCNet(noise, prep, Cov_rec, denoi)
-        
-        # or 
-        # denoi = nn.Identity()
-        # model = DCNet(noise, prep, Cov_rec, denoi)
-    
     
         device='cpu'
         load_net(title, model, device, strict = False)
@@ -98,8 +83,15 @@ class Reconstruction:
         self.datacube = rec
         self.datacube=self.datacube.T
         hyperspectral_image=self.datacube
+        self.reconstruction_results["reconstructed_data"]=self.hyperspectral_image
         return hyperspectral_image
+    
+    def get_result_to_plot(self):
+        self.result_to_plot=self.fis.get_result_to_plot(self.hyperspectral_image,self.wavelengths)
+        self.reconstruction_results["result2plot"]=self.result_to_plot
+        return  self.result_to_plot
 
-    def save_reconstructed_image(self,datacube,wavelengths,header,filename,save_path=None):
-        saver=FisCommonReconstruction()
-        saver.save_acquisition_envi(datacube,wavelengths,header,filename,save_path)
+    def save_reconstructed_image(
+        self, header, filename, save_path=None
+    ):
+        self.fis.save_acquisition_envi(self.reconstruction_results, header, filename, save_path)

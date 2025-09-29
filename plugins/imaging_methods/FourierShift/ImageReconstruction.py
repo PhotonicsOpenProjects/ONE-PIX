@@ -9,6 +9,7 @@ class Reconstruction:
 
     def __init__(self, acquisition_dict):
         self.reconstruction_results={}
+        self.reconstruction_results["wavelengths"]=acquisition_dict["wavelengths"]
         self.spectra = np.asarray(acquisition_dict["spectra"])
         self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
         self.pattern_order = acquisition_dict["patterns_order"]
@@ -87,6 +88,6 @@ class Reconstruction:
         return  self.result_to_plot
 
     def save_reconstructed_image(
-        self, datacube, wavelengths, header, filename, save_path=None
+        self, header, filename, save_path=None
     ):
-        self.fis.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+        self.fis.save_acquisition_envi(self.reconstruction_results, header, filename, save_path)
