@@ -74,6 +74,7 @@ class Reconstruction:
         for wl in range(np.shape(spectrum)[2]):
             self.hyperspectral_image[:,:,wl]=idct(idct(spectrum[:,:,wl].T, norm='ortho').T, norm='ortho')
         self.reconstruction_results["reconstructed_data"]=self.hyperspectral_image
+        self.reconstruction_results["wavelengths"]=wl
         return self.hyperspectral_image
 
     def get_result_to_plot(self):
@@ -84,4 +85,5 @@ class Reconstruction:
     def save_reconstructed_image(
         self, datacube, wavelengths, header, filename, save_path=None
     ):
-        self.fis.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+        self.reconstruction_results["reconstructed_data"]
+        self.fis.save_acquisition_envi(self.reconstruction_results, header, filename, save_path)

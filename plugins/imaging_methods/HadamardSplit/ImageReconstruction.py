@@ -10,6 +10,7 @@ class Reconstruction:
 
     def __init__(self, acquisition_dict):
         self.reconstruction_results={}
+        self.reconstruction_results["wavelengths"]=acquisition_dict["wavelengths"]
         self.spectra = np.asarray(acquisition_dict["spectra"])
         self.wavelengths=np.asarray(acquisition_dict["wavelengths"])
         self.pattern_order = acquisition_dict["patterns_order"]
@@ -76,6 +77,7 @@ class Reconstruction:
         for wl in range(np.size(whole_spectrum, 2)):
             self.hyperspectral_image[:, :, wl] = abs(H @ whole_spectrum[:, :, wl] @ H)
         self.reconstruction_results["reconstructed_data"]=self.hyperspectral_image
+        
         return self.hyperspectral_image
     
     def get_result_to_plot(self):
@@ -84,6 +86,6 @@ class Reconstruction:
         return  self.result_to_plot
 
     def save_reconstructed_image(
-        self, datacube, wavelengths, header, filename, save_path=None
+        self, header, filename, save_path=None
     ):
-        self.fis.save_acquisition_envi(datacube, wavelengths, header, filename, save_path)
+        self.fis.save_acquisition_envi(self.reconstruction_results, header, filename, save_path)

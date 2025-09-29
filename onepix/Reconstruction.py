@@ -59,12 +59,10 @@ class Reconstruction:
         self.plot_result=plot_result
         if acquisition_dict is None:
             self.acquisition_dict=self.load_acquisition_results()
-            print(list(self.acquisition_dict.keys()))
 
         
 
         self.imaging_method_name = self.acquisition_dict["imaging_method_name"]
-        print("imaging_method_name :", self.imaging_method_name )
         self.spectra = self.acquisition_dict["spectra"]
         self.pattern_order = self.acquisition_dict["patterns_order"]
         self.wavelengths = self.acquisition_dict["wavelengths"]
@@ -75,7 +73,7 @@ class Reconstruction:
         self.height = 0
         self.width = 0
         self.imaging_method = ImagingMethodBridge(self.imaging_method_name,self.height, self.width,plot_result=self.plot_result)
-        logging.info("Reconstruction class is init")
+        logging.info(f"{self.imaging_method_name} Reconstruction class  is init")
 
 
     def load_acquisition_results(self):
@@ -104,7 +102,7 @@ class Reconstruction:
                     print(list(acquisition_results.keys()))
 
                     return acquisition_results
-        
+        logging.info(f"Acquisition result are loaded")
         # Si aucun fichier trouvé
         raise FileNotFoundError("⚠️ Aucun fichier acquisition_results_*.json trouvé dans ce dossier")
 
@@ -145,11 +143,9 @@ class Reconstruction:
         self.imaging_method.create_plot_result()
 
 
-    def save_reconstructed_image(self, filename, save_path):
+    def save_reconstructed_image(self, filename=None, save_path=None):
         header = self.create_reconstruction_header()
         self.imaging_method.image_reconstruction_method.save_reconstructed_image(
-            self.imaging_method.reconstructed_image,
-            self.wavelengths,
             header,
             filename,
             save_path,

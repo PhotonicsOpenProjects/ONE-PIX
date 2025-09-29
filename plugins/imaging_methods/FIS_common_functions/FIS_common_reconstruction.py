@@ -64,7 +64,7 @@ class FisCommonReconstruction:
 
 
     def save_acquisition_envi(
-        self, datacube, wavelengths, header, save_envi_name=None, save_path=None
+        self, reconstruction_results, header, save_envi_name=None, save_path=None
     ):
         """
         This function allow to save the resulting acquisitions from one
@@ -80,14 +80,15 @@ class FisCommonReconstruction:
         None.
 
         """
-        root_path = os.getcwd()
-        if save_path is None:
-            save_path = f"..{os.sep}Hypercubes"
-        if os.path.isdir(save_path):
-            pass
-        else:
-            os.mkdir(save_path)
-        os.chdir(save_path)
+        datacube=reconstruction_results["reconstructed_data"]
+        wavelengths=reconstruction_results["wavelengths"]
+        if save_path==None:
+            save_path = Path(__file__).resolve().parent.parent.parent.parent / "measure"
+            print("save path: ",save_path)
+            if os.path.isdir(save_path):
+                pass
+            else :
+                os.mkdir(save_path)
 
         self.fdate = date.today().strftime(
             "%d_%m_%Y"
@@ -98,44 +99,73 @@ class FisCommonReconstruction:
             if save_envi_name is None
             else save_envi_name
         )
-        os.mkdir(folder_name)
-        os.chdir(folder_name)
-        self.save_path = folder_name
+        
+        self.final_path = os.path.join(save_path,folder_name)
+        os.mkdir(os.path.join(self.final_path))
         if save_envi_name is None:
             save_envi_name = folder_name
         # saving the acquired spatial spectra hypercube
-        self.py2envi(datacube, wavelengths, save_envi_name, save_path)
-        with open(folder_name + ".txt", "w+") as header_file:
+        self.py2envi(datacube, wavelengths, save_envi_name, self.final_path)
+        with open(os.path.join(self.final_path,folder_name) + ".txt", "w+") as header_file:
             header_file.write(header)
-        os.chdir(root_path)
 
-    def py2envi(self, datacube, wavelengths, save_envi_name, save_path=None):
+
+
+    def py2envi(self, datacube, wavelengths, save_envi_name="cube", save_path=None):
         """
-        py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
-        metadata can be improved !
+        Sauvegarde un cube hyperspectral au format ENVI dans un dossier 'measure'
+        situé à la racine du dossier 'onepix_dev' (3 niveaux au-dessus de plugins/).
 
-        Parameters
-        ----------
-        save_envi_name : TYPE
-            DESCRIPTION.
-        datacube : TYPE
-            DESCRIPTION.
-        wavelengths : TYPE
-            DESCRIPTION.
-
-        Returns
-        -------
-        None.
-
+        Exemple :
+        onepix_dev/
+        ├── plugins/
+        │   └── imaging_methods/
+        │       └── FIS_common_functions/
+        │           └── FIS_common_reconstruction.py  ← ce script
+        └── measure/
+            └── cube_xxx/
+                ├── cube_xxx.hdr
+                ├── cube_xxx.dat
         """
-        filename = save_envi_name + ".hdr"
-        path = os.getcwd()
-        if save_path == None:
-            save_path = filedialog.askdirectory(title="Open the save directory")
+        
+        # 🧠 Si wavelengths est un seul nombre, le transformer en liste
+        if isinstance(wavelengths, (int, float)):
+            wavelengths = [wavelengths]
 
+        # 📁 Dossier du script actuel
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # 📁 On remonte 4 niveaux pour atteindre onepix_dev/
+        repo_root = os.path.abspath(os.path.join(current_dir, "../../../../"))
+        
+        # 📁 Crée (si besoin) le dossier measure/ dans onepix_dev/
+        measure_dir = os.path.join(repo_root, "measure")
+        os.makedirs(measure_dir, exist_ok=True)
+        
+        # 📁 Si aucun chemin spécifique n’est donné, on crée un sous-dossier
+        if save_path is None:
+            if not save_envi_name:
+                save_envi_name = f"cube_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            save_path = os.path.join(measure_dir, save_envi_name)
+        
+        os.makedirs(save_path, exist_ok=True)
+        
+        # 📝 Nom complet du fichier HDR
+        hdr_path = os.path.join(save_path, save_envi_name + ".hdr")
+        
+        # 💾 Sauvegarde du cube ENVI
         envi.save_image(
-            filename, datacube, dtype=np.float32, metadata={"wavelength": wavelengths}
+            hdr_path,
+            datacube,
+            dtype=np.float32,
+            metadata={"wavelength": list(map(str, wavelengths))}
         )
+        
+        print(f"[OK] Cube ENVI sauvegardé dans : {save_path}")
+        print(f"    - Fichier HDR : {hdr_path}")
+        
+        # 🔁 Retourne le chemin pour d'autres usages
+        return save_path
 
     def py2ms(self, datacube, wavelengths, save_gerbil_name):
         """
