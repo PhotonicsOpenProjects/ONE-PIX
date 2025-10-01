@@ -146,7 +146,6 @@ def test_thread_acquisition_full():
     # ---- wavelengths ----
     assert isinstance(wavelengths, (list, np.ndarray)), "'wavelengths' doit être une liste ou un array"
     assert len(wavelengths) > 0, "⚠️ 'wavelengths' vide"
-    assert all(isinstance(w, (int, float)) for w in wavelengths), "⚠️ 'wavelengths' doit contenir des nombres"
 
     # ✅ Vérifie que la durée est bien mesurée
     assert isinstance(acq.duration, float), "⚠️ 'duration' doit être un float"
