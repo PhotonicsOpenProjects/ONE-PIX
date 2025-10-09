@@ -4,9 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt 
 
 
-# acq = Acquisition(imaging_method_name="Spyrit")
-# acq.thread_acquisition()
-# acq.save_raw_data()
+acq = Acquisition(imaging_method_name="spyrit")
+acq.thread_acquisition()
+acq.save_raw_data()
 
 rec=Reconstruction(plot_result=True)
 rec.data_reconstruction()
