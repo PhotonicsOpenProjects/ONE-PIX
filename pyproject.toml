@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "onepix"
-version = "2.0.0"
+version = "3.0.0"
 description = "Core module of the ONE-PIX project"
 authors = [
     { name = "Mathieu Ribes" },
@@ -35,6 +35,7 @@ dependencies = [
     "flask-socketio==5.5.1",
     "sympy==1.14.0",
     "labelme==5.8.2",
+    "orjson",
     "sphinx-rtd-theme==3.0.2"
 ]
 
