@@ -1,57 +1,100 @@
 import importlib
-import sys
-import os
-
+import importlib.metadata
 import logging
-from onepix.logging_config import root  
+
 logger = logging.getLogger(__name__)
 
-sys.path.append(f"..{os.sep}..{os.sep}")
-
 
 class CameraBridge:
     """
-    Allows to build a generic bridge based on a concrete one. Concrete
-    bridge provides correct implementation regarding spectrometer model
-    use. The generic bridge is an abstract layer that wrap concrete implementation.
+    Generic ONE-PIX camera bridge (plugin-based).
 
-    :param str spectro_name:
-               Spectrometer concrete bridge implementation:
-
-    :param float integration_time_ms:
-               spectrometer integration time in milliseconds.
+    Each concrete camera must be installed as a Python package
+    declaring an entry-point in 'onepix.cameras'.
     """
 
-
-class CameraBridge:
     def __init__(self, camera_name):
         try:
-            self.camera_name=camera_name
-            class_name = f"{camera_name}Bridge"
-            module_path = f"plugins.camera.{camera_name}.{class_name}"
+            self.camera_name = camera_name
 
-            # import dynamique du module contenant la classe
-            module = importlib.import_module(module_path)
+            logger.info(f"🎥 Initialisation de la caméra : {camera_name}")
 
-            # récupération de la classe et instanciation
-            class_obj = getattr(module, class_name)
-            self.camera = class_obj()
-            logging.info(f"{camera_name}  plugins camera is init ")
+            # 🔍 Resolve plugin package via entry-point
+            self.pkg_name = self._resolve_plugin_package(camera_name)
+            logger.info(f"📦 Plugin caméra détecté : {self.pkg_name}")
+
+            # 📦 Import plugin module
+            module = importlib.import_module(self.pkg_name)
+
+            # ------------------------------------------------------------------
+            # 🔎 Recherche intelligente du nom de classe
+            #    (comme SpectrometerBridge)
+            # ------------------------------------------------------------------
+            class_candidates = [
+                f"{camera_name}Bridge",
+                f"{camera_name.capitalize()}Bridge",
+                camera_name,
+                camera_name.capitalize(),
+                f"{camera_name}Camera",
+                f"{camera_name.capitalize()}Camera",
+                # Ajout CamelCase explicite pour les plugins OnePix
+                "StubCamera",
+                "CameraStub",
+            ]
+
+            cam_class = None
+            for cname in class_candidates:
+                if hasattr(module, cname):
+                    cam_class = getattr(module, cname)
+                    logger.info(f"Classe détectée pour la caméra : {cname}")
+                    break
+
+            if cam_class is None:
+                raise ImportError(
+                    f"Aucune classe compatible trouvée dans '{self.pkg_name}'. "
+                    f"Recherchées : {class_candidates}"
+                )
+
+            # ✔ Instanciation du plugin
+            self.camera = cam_class()
+            logger.info(f"{self.camera_name} camera plugin initialisé")
+
         except Exception as e:
             raise Exception(f'Camera bridge "{camera_name}" could not be loaded: {e}')
 
+    # -------------------------------------------------------------------------
+    # 🔍 Resolve plugin package from entry-points
+    # -------------------------------------------------------------------------
+    def _resolve_plugin_package(self, camera_name: str) -> str:
+        eps = importlib.metadata.entry_points()
 
+        if hasattr(eps, "select"):  # Python ≥ 3.10
+            eps_group = eps.select(group="onepix.cameras")
+        else:
+            eps_group = eps.get("onepix.cameras", [])
+
+        for ep in eps_group:
+            if ep.name.lower() == camera_name.lower():
+                return ep.value
+
+        raise ImportError(
+            f"❌ Aucun plugin caméra trouvé pour '{camera_name}'. "
+            "Vérifie qu’il est bien installé et qu'il déclare une entry-point dans 'onepix.cameras'."
+        )
+
+    # -------------------------------------------------------------------------
+    # 🎥 API standard ONE-PIX Camera
+    # -------------------------------------------------------------------------
     def camera_open(self):
         self.camera.init_camera()
-        logging.info(f"{self.camera_name} camera is open")
+        logger.info(f"{self.camera_name} camera is open")
 
     def get_image(self, tag=None, save_path=None):
         self.camera_open()
-        self.image = self.camera.image_capture(tag, save_path)
+        img = self.camera.image_capture(tag, save_path)
         self.close_camera()
-
-
+        return img
 
     def close_camera(self):
         self.camera.close()
-        logging.info(f"{self.camera_name} camera is close")
+        logger.info(f"{self.camera_name} camera is closed")
