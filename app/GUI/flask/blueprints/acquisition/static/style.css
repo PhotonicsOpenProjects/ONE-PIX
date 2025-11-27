@@ -60,10 +60,35 @@ h1, h2 {
     width: 220px;
 }
 
-/* Bouton Run */
+/* 🟥 Bouton RUN rouge */
 .run-btn {
-    display: block;
-    margin: 30px auto 0 auto;
+    background: #e74c3c !important;
+    border-radius: 6px;
+}
+
+.run-btn:hover {
+    background: #c0392b !important;
+    transform: translateY(-2px);
+}
+
+/* 🟩 Bouton SAVE vert */
+.save-btn {
+    background: #27ae60 !important;
+    padding: 12px 22px;
+    font-size: 16px;
+}
+
+.save-btn:hover {
+    background: #1e8449 !important;
+    transform: translateY(-2px);
+}
+
+/* 🔻 Ligne RUN + SAVE */
+.run-save-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
 }
 
 /* 🖼️ Figure box */
@@ -86,7 +111,7 @@ h1, h2 {
     object-fit: contain;
 }
 
-/* 📊 Tableau des paramètres */
+/* 📊 Tableau */
 table {
     border-collapse: collapse;
     margin: auto;
@@ -96,8 +121,11 @@ table {
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-th, td {
+table, th, td {
     border: 1px solid var(--color-border);
+}
+
+th, td {
     padding: 10px;
     text-align: left;
 }
@@ -107,6 +135,7 @@ th {
     font-weight: bold;
 }
 
+/* ✏️ Champs texte */
 input[type="text"] {
     width: 100%;
     padding: 6px;
@@ -114,7 +143,7 @@ input[type="text"] {
     border-radius: 4px;
 }
 
-/* 📦 Buttons group form */
+/* 📦 Groupes boutons formulaire */
 .btn-group {
     display: flex;
     justify-content: center;

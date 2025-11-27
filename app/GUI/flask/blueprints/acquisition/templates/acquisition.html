@@ -21,8 +21,13 @@
 
 </div>
 
-<!-- 🚀 Bouton Run Acquisition -->
-<button class="btn run-btn" onclick="refreshFigure()">Run acquisition</button>
+<div class="run-save-row">
+    <button class="btn run-btn" onclick="refreshFigure()">Run acquisition</button>
+
+    <a class="btn save-btn" href="{{ url_for('acquisition.save_measure') }}">
+        Save measure
+    </a>
+</div>
 
 <script>
     function refreshFigure() {
