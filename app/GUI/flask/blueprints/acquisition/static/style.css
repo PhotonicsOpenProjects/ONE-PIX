@@ -28,23 +28,27 @@ h1, h2 {
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    gap: 50px;
-    margin-bottom: 30px;
+    gap: 80px;
+    margin-top: 30px;
+    margin-bottom: 40px;
 }
 
-/* 📌 Boutons */
-button, .btn {
+/* 📌 Boutons bleus */
+.btn {
     background: var(--color-primary);
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 12px 22px;
+    font-size: 16px;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
     transition: background 0.2s, transform 0.1s;
 }
 
-button:hover, .btn:hover {
+.btn:hover {
     background: var(--color-primary-hover);
     transform: translateY(-2px);
 }
@@ -52,24 +56,34 @@ button:hover, .btn:hover {
 .settings-buttons {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
     width: 220px;
 }
 
+/* Bouton Run */
 .run-btn {
-    margin-top: 20px;
-    font-size: 16px;
-    padding: 12px 20px;
+    display: block;
+    margin: 30px auto 0 auto;
 }
 
-/* 🖼️ Figure */
-.figure img {
-    max-width: 400px;
-    width: 100%;
+/* 🖼️ Figure box */
+.figure-box {
+    width: 450px;
+    height: 450px;
+    background: white;
     border: 1px solid var(--color-border);
-    border-radius: 8px;
-    background: var(--bg-card);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.figure-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
 }
 
 /* 📊 Tableau des paramètres */
@@ -100,65 +114,10 @@ input[type="text"] {
     border-radius: 4px;
 }
 
-/* 📦 Boutons de formulaire */
+/* 📦 Buttons group form */
 .btn-group {
     display: flex;
     justify-content: center;
     gap: 12px;
-    margin-top: 20px;
-}
-
-/* Tableau */
-table {
-    border-collapse: collapse;
-    width: 100%;
-    max-width: 700px;
-    margin: 20px auto;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-table, th, td {
-    border: 1px solid #ccc;
-}
-
-th, td {
-    padding: 10px;
-    text-align: left;
-}
-
-th {
-    background: #eee;
-}
-
-/* Champs texte */
-input[type="text"] {
-    width: 100%;
-    padding: 6px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-/* Boutons */
-.btn {
-    background: #3498db;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn:hover {
-    background: #2980b9;
-}
-
-.btn-group {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
     margin-top: 20px;
 }

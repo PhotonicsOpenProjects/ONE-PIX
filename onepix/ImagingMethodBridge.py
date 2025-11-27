@@ -74,6 +74,7 @@ class ImagingMethodBridge:
         CreationPatterns = getattr(module, "CreationPatterns")
         self.pattern_creation_method = CreationPatterns(self.height, self.width)
         self.pattern_creation_method.creation_patterns()
+        self.config_path=self.pattern_creation_method.config_path
         self.acquisition_results = self.pattern_creation_method.acquisition_results
         logger.info(f"✅ Patterns créés avec {self.imaging_method}")
 

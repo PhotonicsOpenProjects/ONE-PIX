@@ -1,8 +1,12 @@
 import os
 import json
+from onepix.Acquisition import *
 
 BASE_DIR = os.path.dirname(__file__)
 CONFIG_PATHS_FILE = os.path.join(BASE_DIR, "config_paths.json")
+
+
+
 
 def _load_config_paths() -> dict:
     """Charge le mapping category -> chemin JSON"""
@@ -89,4 +93,25 @@ def software_settings():
     return load_settings("software")
 
 def imaging_method_settings():
-    return load_settings("imaging")
+    # 1. Charger le software_settings
+    sw = software_settings()
+    method = sw.get("imaging_method_name")
+
+    if not method:
+        print("⚠️ No imaging method selected in software settings")
+        return {}
+
+    # 2. Créer un mini Acquisition uniquement pour accéder au path
+    acq = Acquisition(imaging_method_name=method)
+    acq.init_measure()
+
+    # 3. Récupérer le chemin du JSON de l’addon
+    path = acq.imaging_method.config_path
+
+    if not path or not os.path.exists(path):
+        print(f"⚠️ Config path not found for imaging method {method}")
+        return {}
+
+    # 4. Charger le JSON du plugin
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)

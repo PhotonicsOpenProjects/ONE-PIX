@@ -6,21 +6,23 @@
 <h1>Acquisition</h1>
 
 <div class="main-container">
-    <!-- Colonne gauche -->
+
+    <!-- 🌙 Colonne gauche : boutons -->
     <div class="settings-buttons">
-        <a href="{{ url_for('acquisition.hardware_page') }}"><button>Hardware settings</button></a>
-        <a href="{{ url_for('acquisition.software_page') }}"><button>Software settings</button></a>
-        <a href="{{ url_for('acquisition.imaging_page') }}"><button>Imaging method settings</button></a>
+        <a href="{{ url_for('acquisition.hardware_page') }}" class="btn">Hardware settings</a>
+        <a href="{{ url_for('acquisition.software_page') }}" class="btn">Software settings</a>
+        <a href="{{ url_for('acquisition.imaging_page') }}" class="btn">Imaging method settings</a>
     </div>
 
-    <!-- Colonne droite -->
-    <div class="figure">
+    <!-- 📷 Colonne droite : figure dans un cadre blanc -->
+    <div class="figure-box">
         <img id="acq-figure" alt="figure">
     </div>
+
 </div>
 
-<!-- Bouton run acquisition -->
-<button class="run-btn" onclick="refreshFigure()">Run acquisition</button>
+<!-- 🚀 Bouton Run Acquisition -->
+<button class="btn run-btn" onclick="refreshFigure()">Run acquisition</button>
 
 <script>
     function refreshFigure() {
@@ -28,4 +30,5 @@
         img.src = "{{ url_for('acquisition.run_acquisition') }}" + "?t=" + new Date().getTime();
     }
 </script>
+
 {% endblock %}

@@ -13,6 +13,9 @@ from onepix.Analysis import *
 def acquisition_page():
     return render_template("acquisition.html")
 
+
+
+
 @bp.route("/hardware")
 def hardware_page():
     return render_template("settings_page.html",
