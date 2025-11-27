@@ -1,15 +1,19 @@
-from flask import render_template, Response, request, redirect, url_for,jsonify, send_file
-from . import bp, controllers as ctl  
+from flask import render_template, Response, request, redirect, url_for, jsonify, send_file
+from . import bp, controllers as ctl
 import io
 import matplotlib.pyplot as plt
 import numpy as np
 from onepix.Acquisition import *
 from onepix.Reconstruction import *
 from onepix.Analysis import *
+from pathlib import Path
+import json
+import orjson     # IMPORTANT !
 
 latest_results = None
 
 
+# --- JSON FIXER ---
 def json_default(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
@@ -28,6 +32,7 @@ def json_default(obj):
     return str(obj)
 
 
+# --- PAGES SETTINGS --- #
 @bp.route("/")
 def acquisition_page():
     return render_template("acquisition.html")
@@ -40,6 +45,7 @@ def hardware_page():
                            category="hardware",
                            data=ctl.hardware_settings())
 
+
 @bp.route("/software")
 def software_page():
     return render_template("settings_page.html",
@@ -47,25 +53,59 @@ def software_page():
                            category="software",
                            data=ctl.software_settings())
 
+
+# 🔥 Nouvelle page addon (remplace /imaging)
+@bp.route("/addon")
+def addon_page():
+    return render_template("settings_page.html",
+                           title="Addon settings",
+                           category="addon",
+                           data=ctl.addon_settings())
+
+
+# ⚠ L’ancienne route imaging → redirection
 @bp.route("/imaging")
 def imaging_page():
-    return render_template("settings_page.html",
-                           title="Imaging settings",
-                           category="imaging",
-                           data=ctl.imaging_method_settings())
+    return redirect(url_for("acquisition.addon_page"))
 
 
+# --- SAVE HARDWARE / SOFTWARE --- #
 @bp.route("/save/<category>", methods=["POST"])
 def save_settings(category):
-    # Récupère les nouvelles valeurs depuis le formulaire
     new_data = dict(request.form)
-
-    # Écrase le JSON avec les nouvelles valeurs
     ctl.save_settings(category, new_data)
-
-    # Redirige vers la page settings correspondante pour voir le résultat
     return redirect(url_for(f"acquisition.{category}_page"))
 
+
+# --- SAVE ADDON --- #
+@bp.route("/save_addon", methods=["POST"])
+def save_addon():
+    sw = ctl.software_settings()
+    method = sw.get("imaging_method_name")
+
+    acq = Acquisition(imaging_method_name=method)
+    acq.init_measure()
+
+    path = acq.imaging_method.config_path
+
+    new_data = dict(request.form)
+
+    with open(path, "r") as f:
+        old = json.load(f)
+
+    for k, v in new_data.items():
+        try:
+            old[k] = json.loads(v)
+        except:
+            old[k] = v
+
+    with open(path, "w") as f:
+        json.dump(old, f, indent=2)
+
+    return redirect(url_for("acquisition.addon_page"))
+
+
+# --- RUN ACQUISITION --- #
 @bp.route("/run")
 def run_acquisition():
     global latest_results
@@ -77,10 +117,8 @@ def run_acquisition():
     rec = Reconstruction(acq.acquisition_results, plot_result=True)
     rec.data_reconstruction()
 
-    # 🔥 On stocke ici les résultats pour SAVE
     latest_results = rec.reconstruction_results
 
-    # --- Génération image PNG ---
     fig, ax = plt.subplots(figsize=(4, 4))
     ax.imshow(rec.imaging_method.result_to_plot, cmap="viridis")
     ax.set_title("Résultat acquisition")
@@ -92,6 +130,8 @@ def run_acquisition():
 
     return Response(buf.getvalue(), mimetype="image/png")
 
+
+# --- SAVE MEASURE JSON --- #
 @bp.route("/save_measure")
 def save_measure():
     global latest_results

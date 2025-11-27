@@ -7,7 +7,14 @@
   <h2>Catégorie : {{ category }}</h2>
 
   {% if data %}
-  <form method="POST" action="{{ url_for('acquisition.save_settings', category=category) }}">
+
+  {# 🔥 FORMULAIRE ADAPTÉ EN FONCTION DE LA CATÉGORIE #}
+  {% if category == 'addon' %}
+      <form method="POST" action="{{ url_for('acquisition.save_addon') }}">
+  {% else %}
+      <form method="POST" action="{{ url_for('acquisition.save_settings', category=category) }}">
+  {% endif %}
+
       <table>
           <tr><th>Paramètre</th><th>Valeur</th></tr>
           {% for key, value in data.items() %}
@@ -17,12 +24,15 @@
           </tr>
           {% endfor %}
       </table>
+
       <div class="btn-group">
           <button type="submit" class="btn">Enregistrer</button>
           <button type="button" class="btn" onclick="window.history.back()">Fermer</button>
       </div>
+
   </form>
   {% else %}
       <p>Aucune donnée disponible.</p>
   {% endif %}
+
 {% endblock %}
