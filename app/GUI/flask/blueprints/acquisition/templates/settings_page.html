@@ -8,7 +8,6 @@
 
   {% if data %}
 
-  {# 🔥 FORMULAIRE ADAPTÉ EN FONCTION DE LA CATÉGORIE #}
   {% if category == 'addon' %}
       <form method="POST" action="{{ url_for('acquisition.save_addon') }}">
   {% else %}
@@ -17,12 +16,32 @@
 
       <table>
           <tr><th>Paramètre</th><th>Valeur</th></tr>
+
           {% for key, value in data.items() %}
           <tr>
               <td>{{ key }}</td>
-              <td><input type="text" name="{{ key }}" value="{{ value }}"></td>
+              <td>
+
+                  {% if plugins and key in plugins %}
+
+                      <select name="{{ key }}">
+                          {% for p in plugins[key] %}
+                              <option value="{{ p }}" {% if value == p %}selected{% endif %}>
+                                  {{ p }}
+                              </option>
+                          {% endfor %}
+                      </select>
+
+                  {% else %}
+
+                      <input type="text" name="{{ key }}" value="{{ value }}">
+
+                  {% endif %}
+
+              </td>
           </tr>
           {% endfor %}
+
       </table>
 
       <div class="btn-group">
@@ -31,6 +50,7 @@
       </div>
 
   </form>
+
   {% else %}
       <p>Aucune donnée disponible.</p>
   {% endif %}

@@ -5,8 +5,7 @@ bp = Blueprint(
     __name__,
     url_prefix="/acquisition",
     template_folder="templates",
-    static_folder="static",              # ✅ obligatoire
-    static_url_path="/acquisition/static"
+    static_folder="static"
 )
 
 from . import routes

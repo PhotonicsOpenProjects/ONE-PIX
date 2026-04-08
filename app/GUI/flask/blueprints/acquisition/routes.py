@@ -8,9 +8,28 @@ from onepix.Reconstruction import *
 from onepix.Analysis import *
 from pathlib import Path
 import json
-import orjson     # IMPORTANT !
+import orjson
+from importlib.metadata import entry_points
 
 latest_results = None
+
+
+# 🔥 GENERIC PLUGIN LOADER
+def get_entrypoints(group_name):
+    """Generic loader for plugins."""
+    try:
+        eps = entry_points()
+
+        if hasattr(eps, "select"):
+            eps = eps.select(group=group_name)
+        else:
+            eps = eps.get(group_name, [])
+
+        return [ep.name for ep in eps]
+
+    except Exception as e:
+        print(f"⚠️ Error loading {group_name}: {e}")
+        return []
 
 
 # --- JSON FIXER ---
@@ -40,30 +59,43 @@ def acquisition_page():
 
 @bp.route("/hardware")
 def hardware_page():
-    return render_template("settings_page.html",
-                           title="Hardware settings",
-                           category="hardware",
-                           data=ctl.hardware_settings())
+    return render_template(
+        "settings_page.html",
+        title="Hardware settings",
+        category="hardware",
+        data=ctl.hardware_settings(),
+        plugins={
+            "name_spectro": get_entrypoints("onepix.spectrometers"),
+            "name_camera": get_entrypoints("onepix.cameras"),  # 🔥 AJOUT CAMERA
+        }
+    )
 
 
 @bp.route("/software")
 def software_page():
-    return render_template("settings_page.html",
-                           title="Software settings",
-                           category="software",
-                           data=ctl.software_settings())
+    return render_template(
+        "settings_page.html",
+        title="Software settings",
+        category="software",
+        data=ctl.software_settings(),
+        plugins={
+            "imaging_method_name": get_entrypoints("onepix.imaging_methods")
+        }
+    )
 
 
-# 🔥 Nouvelle page addon (remplace /imaging)
+# 🔥 Nouvelle page addon
 @bp.route("/addon")
 def addon_page():
-    return render_template("settings_page.html",
-                           title="Addon settings",
-                           category="addon",
-                           data=ctl.addon_settings())
+    return render_template(
+        "settings_page.html",
+        title="Addon settings",
+        category="addon",
+        data=ctl.addon_settings()
+    )
 
 
-# ⚠ L’ancienne route imaging → redirection
+# ⚠ Redirection
 @bp.route("/imaging")
 def imaging_page():
     return redirect(url_for("acquisition.addon_page"))
