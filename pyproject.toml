@@ -39,6 +39,11 @@ dependencies = [
     "flask-socketio",
     "sympy==1.12",
     "orjson",
+    "onepix-fis-common-function",
+    "onepix-fouriersplit",
+    "onepix-fouriershift",
+    "onepix-stub-camera",
+    "onepix-stub-spectrometer",
     "sphinx-rtd-theme"
     # "labelme==5.2.1"  # à activer si besoin
 ]
