@@ -1,7 +1,7 @@
 {
   "imaging_method_name": "fouriersplit",
-  "integration_time_ms": 2.0,
-  "spectro_scans2avg": 1,
+  "integration_time_ms": 1.0,
+  "spectro_scans2avg": 5,
   "Normalisation": false,
   "dynamic_tint": false
 }

@@ -5,6 +5,7 @@ import time
 import warnings
 import cv2
 import logging
+import inspect
 
 from onepix.logging_config import root
 logger = logging.getLogger(__name__)
@@ -14,12 +15,15 @@ class SpectrometerBridge:
     """
     Generic ONE-PIX spectrometer bridge (plugin-based).
 
-    Each concrete spectrometer must be installed as a Python package
-    declaring an entry-point in 'onepix.spectrometers'.
+    Compatible with:
+    - entry points returning a module (Model)
+    - entry points returning a class (Model:Model)
+    - legacy plugins
 
-    Example in pyproject.toml of a plugin:
-        [project.entry-points."onepix.spectrometers"]
-        stub = "Stub"         # -> import Stub
+    Convention supportée :
+        model = "Model"
+        → module Model
+        → class Model
     """
 
     def __init__(self, spectro_name, integration_time_ms, wl_lim, repetition):
@@ -32,27 +36,20 @@ class SpectrometerBridge:
 
             logger.info(f"🧩 Initialisation du spectromètre : {spectro_name}")
 
-            # 🔍 Resolve plugin package via entry-point
+            # 🔍 Resolve plugin package
             self.pkg_name = self._resolve_plugin_package(spectro_name)
             logger.info(f"📦 Plugin détecté : {self.pkg_name}")
 
-            # 📦 Import plugin module
+            # 📦 Import module
             module = importlib.import_module(self.pkg_name)
 
-            # 🔍 Find bridge class (either <Name>Bridge or <Name>)
-            class_name = f"{spectro_name}Bridge"
-            if hasattr(module, class_name):
-                bridge_class = getattr(module, class_name)
-            elif hasattr(module, spectro_name):
-                bridge_class = getattr(module, spectro_name)
-            else:
-                raise ImportError(
-                    f"Aucune classe '{class_name}' ni '{spectro_name}' trouvée dans {self.pkg_name}"
-                )
+            # 🔥 Find correct class (robuste)
+            bridge_class = self._find_bridge_class(module)
 
-            # Instantiate concrete spectrometer
+            # Instantiate
             self.spectrometer = bridge_class(integration_time_ms)
-            logger.info(f"{self.spectro_name} spectrometer plugin initialisé")
+
+            logger.info(f"✅ {self.spectro_name} plugin initialisé ({bridge_class.__name__})")
 
         except Exception as e:
             raise Exception(f'Spectrometer bridge "{spectro_name}" could not be loaded: {e}')
@@ -62,6 +59,7 @@ class SpectrometerBridge:
     # -------------------------------------------------------------------------
     def _resolve_plugin_package(self, spectro_name: str) -> str:
         eps = importlib.metadata.entry_points()
+
         if hasattr(eps, "select"):  # Python ≥3.10
             eps_group = eps.select(group="onepix.spectrometers")
         else:
@@ -72,28 +70,72 @@ class SpectrometerBridge:
                 return ep.value
 
         raise ImportError(
-            f"❌ Aucun plugin trouvé pour le spectromètre '{spectro_name}'. "
-            "Vérifie qu’il est bien installé et déclare une entry point dans 'onepix.spectrometers'."
+            f"❌ Aucun plugin trouvé pour '{spectro_name}'. Vérifie l'installation et le pyproject.toml."
         )
 
     # -------------------------------------------------------------------------
-    # --- identical implementation from your working version ------------------
+    # 🔥 Find correct class inside module
+    # -------------------------------------------------------------------------
+    def _find_bridge_class(self, module):
+
+        name = self.spectro_name
+        class_name_bridge = f"{name}Bridge"
+
+        # 1. Bridge classique
+        if hasattr(module, class_name_bridge):
+            return getattr(module, class_name_bridge)
+
+        # 2. Nom exact
+        if hasattr(module, name):
+            return getattr(module, name)
+
+        # 3. Nom capitalisé (OceanInsight)
+        if hasattr(module, name.capitalize()):
+            return getattr(module, name.capitalize())
+
+        # 4. Nom CamelCase (oceaninsight → OceanInsight)
+        camel = "".join(part.capitalize() for part in name.split("_"))
+        if hasattr(module, camel):
+            return getattr(module, camel)
+
+        # 5. Fallback auto-détection
+        candidates = [
+            getattr(module, attr)
+            for attr in dir(module)
+            if inspect.isclass(getattr(module, attr))
+        ]
+
+        if len(candidates) == 1:
+            logger.warning(f"⚠️ Classe auto-détectée : {candidates[0].__name__}")
+            return candidates[0]
+
+        raise ImportError(
+            f"Aucune classe valide trouvée dans {module.__name__}. "
+            f"Classes dispo: {[c.__name__ for c in candidates]}"
+        )
+
+    # -------------------------------------------------------------------------
+    # 📡 API
     # -------------------------------------------------------------------------
     def spec_open(self):
         self.spectrometer.spec_open()
         self.DeviceName = self.spectrometer.DeviceName
+
         wavelengths = self.spectrometer.get_wavelengths()
-        self.wavelengths = wavelengths                      # <-- keep for compat
+        self.wavelengths = wavelengths
+
         self.idx_wl_lim = [
             np.abs(wavelengths - self.wl_lim[0]).argmin(),
             np.abs(wavelengths - self.wl_lim[1]).argmin(),
         ]
+
         logging.info(f'{self.spectro_name} spectrometer plugin is open')
 
     def set_integration_time(self):
         self.spectrometer.integration_time_ms = self.integration_time_ms
         self.spectrometer.set_integration_time()
-        logging.info(f'{self.spectro_name} integration time is fix to {self.integration_time_ms} ms')
+
+        logging.info(f'{self.spectro_name} integration time set to {self.integration_time_ms} ms')
 
     def get_wavelengths(self):
         self.wavelengths = self.spectrometer.get_wavelengths()[
@@ -102,16 +144,19 @@ class SpectrometerBridge:
         return self.wavelengths
 
     def get_intensities(self):
-        spectrum = self.spectrometer.get_intensities()[
+        return self.spectrometer.get_intensities()[
             self.idx_wl_lim[0]: self.idx_wl_lim[1] + 1
         ]
-        return spectrum
 
     def spec_close(self):
         self.spectrometer.spec_close()
-        logging.info(f'{self.spectro_name} spectrometer plugin was close')
+        logging.info(f'{self.spectro_name} spectrometer plugin closed')
 
+    # -------------------------------------------------------------------------
+    # ⚡ AUTO INTEGRATION TIME
+    # -------------------------------------------------------------------------
     def get_optimal_integration_time(self, verbose=True):
+
         repetitions = 2
         max_counts = 30000
         tolerance = 2500
@@ -120,6 +165,7 @@ class SpectrometerBridge:
         min_integration_time = 1
 
         self.set_integration_time()
+
         delta_wl = round(0.05 * np.size(self.get_wavelengths()))
         count = 0
 
@@ -127,41 +173,52 @@ class SpectrometerBridge:
             measurements = [self.get_intensities() for _ in range(repetitions)]
 
             mean_measurement = np.mean(np.array(measurements), axis=0)[delta_wl:-delta_wl]
-            if mean_measurement is not None and mean_measurement.size > 0:
+
+            if mean_measurement.size > 0:
                 peak_intensity = max(mean_measurement)
             else:
                 peak_intensity = np.max(np.asarray(measurements))
+
             delta_intensity = peak_intensity - max_counts
 
             if verbose:
-                logging.info(f"T{count}={self.integration_time_ms} ms with intensity peak at {round(peak_intensity)} counts")
+                logging.info(
+                    f"T{count}={self.integration_time_ms} ms | peak={round(peak_intensity)}"
+                )
 
             if abs(delta_intensity) < tolerance:
                 break
 
             if count >= max_iterations:
-                warnings.warn(f"Stopped after {count} iterations. Final integration time: {self.integration_time_ms} ms.")
+                warnings.warn(
+                    f"Stopped after {count} iterations. Final time: {self.integration_time_ms} ms."
+                )
                 break
 
             adjustment_factor = max_counts / peak_intensity
             self.integration_time_ms = int(self.integration_time_ms * adjustment_factor)
 
-            if self.integration_time_ms < min_integration_time:
-                self.integration_time_ms = min_integration_time
-            elif self.integration_time_ms > max_integration_time:
-                self.integration_time_ms = 1000
+            self.integration_time_ms = max(
+                min_integration_time,
+                min(self.integration_time_ms, max_integration_time)
+            )
 
             self.set_integration_time()
             count += 1
 
-        self.spectro_flag = False
         if verbose:
-            logging.info(f"Final integration time (ms): {self.integration_time_ms}")
+            logging.info(f"Final integration time: {self.integration_time_ms} ms")
+
         cv2.destroyAllWindows()
         return self.integration_time_ms
 
+    # -------------------------------------------------------------------------
+    # 🧵 THREAD ACQUISITION
+    # -------------------------------------------------------------------------
     def thread_singlepixel_measure(self, event, spectra, dynamic_tint=False):
+
         logging.info(f"{self.spectro_name} spectrometer begin to measure")
+
         if spectra is None or not isinstance(spectra, np.ndarray):
             raise ValueError("The spectra parameter must be a valid NumPy array.")
 
@@ -169,27 +226,23 @@ class SpectrometerBridge:
             cnt = 0
             self.spectra = spectra
             nb_patterns = np.size(spectra, 0)
-            coeff = 1
-            integration_times = []
+
             while cnt < nb_patterns:
+
                 if event.is_set():
-                    if dynamic_tint and cnt < nb_patterns - 1:
-                        self.get_optimal_integration_time()
-                        integration_times.append(self.integration_time_ms)
 
                     chronograms = []
                     for _ in range(self.repetition):
                         intensities = self.get_intensities()
-                        if intensities is None:
-                            raise RuntimeError("Failed to retrieve intensities from the spectrometer.")
-                        chronograms.append(coeff * intensities)
+                        chronograms.append(intensities)
+
                     self.spectra[cnt, :] = np.mean(chronograms, axis=0) / self.integration_time_ms
+
                     cnt += 1
                     event.clear()
+
                 else:
                     time.sleep(1e-6)
-            logging.info(f"{self.spectro_name} spectrometer acquisition complete")
+
         except Exception as e:
-            logging.error(f"An error occurred during spectrometer acquisition: {e}")
-        finally:
-            pass
+            logging.error(f"Acquisition error: {e}")

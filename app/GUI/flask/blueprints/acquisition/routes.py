@@ -181,5 +181,5 @@ def save_measure():
         io.BytesIO(json_bytes),
         mimetype="application/json",
         as_attachment=True,
-        download_name="measure.json"
+        attachment_filename="measure.json"
     )
