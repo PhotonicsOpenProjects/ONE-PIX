@@ -133,7 +133,7 @@ class Reconstruction:
 
         """
         self.imaging_method.reconstruction(self.acquisition_dict,plot_result=self.plot_result)
-        self.reconstruction_results=self.imaging_method.reconstruction_results
+        self.reconstruction_results = (self.imaging_method.reconstruction_results | {"imaging_method_name": self.imaging_method_name})
         logging.info("raw datas are reconstructed now")
         if self.plot_result:
             logging.info("plot result is created")

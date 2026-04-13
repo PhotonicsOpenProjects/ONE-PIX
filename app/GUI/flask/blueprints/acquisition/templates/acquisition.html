@@ -1,6 +1,6 @@
 {% extends "acquisition_base.html" %}
 
-{% block title %}Accueil Acquisition{% endblock %}
+{% block title %}Acquisition{% endblock %}
 
 {% block content %}
 <h1>Acquisition</h1>
@@ -14,26 +14,120 @@
         <a href="{{ url_for('acquisition.imaging_page') }}" class="btn">Imaging method settings</a>
     </div>
 
-    <!-- 📷 Colonne droite : figure dans un cadre blanc -->
+    <!-- 📷 Colonne droite : figure -->
     <div class="figure-box">
-        <img id="acq-figure" alt="figure">
+        <img id="acq-figure" alt="Acquisition result">
     </div>
 
 </div>
 
 <div class="run-save-row">
-    <button class="btn run-btn" onclick="refreshFigure()">Run acquisition</button>
 
-    <a class="btn save-btn" href="{{ url_for('acquisition.save_measure') }}">
-        Save measure
+    <!-- ▶ Run -->
+    <button id="runBtn" class="btn run-btn" onclick="refreshFigure()">
+        ▶ Run acquisition
+    </button>
+
+    <!-- ⏳ Loader -->
+    <div id="loader" class="spinner" style="display:none;"></div>
+
+    <!-- 💾 Download -->
+    <a class="btn save-btn" href="{{ url_for('acquisition.download_measure') }}">
+        ⬇ Download measure
     </a>
+
 </div>
 
+<div style="margin-top:15px;">
+
+    <!-- input caché -->
+    <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="loadMeasure(event)">
+
+    <!-- bouton visible -->
+    <button class="btn load-btn" onclick="document.getElementById('fileInput').click()">
+        📂 Load measure
+    </button>
+
+</div>
+
+<!-- 🎨 Spinner + style -->
+<style>
+.spinner {
+  border: 4px solid #eee;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.run-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>
+
+<!-- ⚡ Script acquisition -->
 <script>
-    function refreshFigure() {
-        const img = document.getElementById("acq-figure");
-        img.src = "{{ url_for('acquisition.run_acquisition') }}" + "?t=" + new Date().getTime();
-    }
+function refreshFigure() {
+    const btn = document.getElementById("runBtn");
+    const loader = document.getElementById("loader");
+    const img = document.getElementById("acq-figure");
+
+    if (btn.disabled) return;
+
+    btn.disabled = true;
+    btn.innerText = "Running...";
+    loader.style.display = "inline-block";
+
+    const url = "{{ url_for('acquisition.run_acquisition') }}" + "?t=" + new Date().getTime();
+    img.src = url;
+
+    img.onload = () => {
+        btn.disabled = false;
+        btn.innerText = "▶ Run acquisition";
+        loader.style.display = "none";
+    };
+
+    img.onerror = () => {
+        alert("Erreur acquisition");
+        btn.disabled = false;
+        btn.innerText = "▶ Run acquisition";
+        loader.style.display = "none";
+    };
+}
+</script>
+
+<!-- 📂 Script load measure -->
+<script>
+function loadMeasure(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("{{ url_for('acquisition.load_measure') }}", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.blob())
+    .then(blob => {
+        const imgUrl = URL.createObjectURL(blob);
+        document.getElementById("acq-figure").src = imgUrl;
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erreur chargement");
+    });
+}
 </script>
 
 {% endblock %}

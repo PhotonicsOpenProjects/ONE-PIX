@@ -1,0 +1,21 @@
+{% extends "acquisition_base.html" %}
+
+{% block title %}Download measure{% endblock %}
+
+{% block content %}
+
+<h1>Choisir une acquisition</h1>
+
+<div class="main-container">
+    <div class="settings-buttons">
+
+        {% for file in files %}
+            <a class="btn" href="{{ url_for('acquisition.download_measure_file', filename=file) }}">
+                {{ file }}
+            </a>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

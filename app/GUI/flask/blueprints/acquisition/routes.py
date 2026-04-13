@@ -1,44 +1,45 @@
-from flask import render_template, Response, request, redirect, url_for, jsonify, send_file
+from flask import render_template, Response, request, redirect, url_for, send_file
 from . import bp, controllers as ctl
+
 import io
-import matplotlib.pyplot as plt
-import numpy as np
-from onepix.Acquisition import *
-from onepix.Reconstruction import *
-from onepix.Analysis import *
-from pathlib import Path
 import json
 import orjson
+import logging
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+from pathlib import Path
 from importlib.metadata import entry_points
 
-latest_results = None
+from onepix.Acquisition import Acquisition
+from onepix.Reconstruction import Reconstruction
+
+logger = logging.getLogger(__name__)
 
 
-# 🔥 GENERIC PLUGIN LOADER
+# ----------------------------
+# UTILS
+# ----------------------------
 def get_entrypoints(group_name):
-    """Generic loader for plugins."""
     try:
         eps = entry_points()
-
         if hasattr(eps, "select"):
             eps = eps.select(group=group_name)
         else:
             eps = eps.get(group_name, [])
-
         return [ep.name for ep in eps]
-
     except Exception as e:
-        print(f"⚠️ Error loading {group_name}: {e}")
+        logger.warning(f"Error loading {group_name}: {e}")
         return []
 
 
-# --- JSON FIXER ---
 def json_default(obj):
     if isinstance(obj, np.ndarray):
         return obj.tolist()
-    if isinstance(obj, (np.integer, np.int_)):
+    if isinstance(obj, (np.integer,)):
         return int(obj)
-    if isinstance(obj, (np.floating, np.float_)):
+    if isinstance(obj, (np.floating,)):
         return float(obj)
     if isinstance(obj, np.bool_):
         return bool(obj)
@@ -51,7 +52,9 @@ def json_default(obj):
     return str(obj)
 
 
-# --- PAGES SETTINGS --- #
+# ----------------------------
+# PAGES
+# ----------------------------
 @bp.route("/")
 def acquisition_page():
     return render_template("acquisition.html")
@@ -66,7 +69,7 @@ def hardware_page():
         data=ctl.hardware_settings(),
         plugins={
             "name_spectro": get_entrypoints("onepix.spectrometers"),
-            "name_camera": get_entrypoints("onepix.cameras"),  # 🔥 AJOUT CAMERA
+            "name_camera": get_entrypoints("onepix.cameras"),
         }
     )
 
@@ -84,7 +87,6 @@ def software_page():
     )
 
 
-# 🔥 Nouvelle page addon
 @bp.route("/addon")
 def addon_page():
     return render_template(
@@ -95,13 +97,14 @@ def addon_page():
     )
 
 
-# ⚠ Redirection
 @bp.route("/imaging")
 def imaging_page():
     return redirect(url_for("acquisition.addon_page"))
 
 
-# --- SAVE HARDWARE / SOFTWARE --- #
+# ----------------------------
+# SAVE SETTINGS
+# ----------------------------
 @bp.route("/save/<category>", methods=["POST"])
 def save_settings(category):
     new_data = dict(request.form)
@@ -109,7 +112,6 @@ def save_settings(category):
     return redirect(url_for(f"acquisition.{category}_page"))
 
 
-# --- SAVE ADDON --- #
 @bp.route("/save_addon", methods=["POST"])
 def save_addon():
     sw = ctl.software_settings()
@@ -119,7 +121,6 @@ def save_addon():
     acq.init_measure()
 
     path = acq.imaging_method.config_path
-
     new_data = dict(request.form)
 
     with open(path, "r") as f:
@@ -137,23 +138,48 @@ def save_addon():
     return redirect(url_for("acquisition.addon_page"))
 
 
-# --- RUN ACQUISITION --- #
+# ----------------------------
+# RUN ACQUISITION
+# ----------------------------
 @bp.route("/run")
 def run_acquisition():
-    global latest_results
 
+    # 1. Acquisition
     acq = Acquisition()
     acq.init_measure()
     acq.thread_acquisition()
 
+    # 2. Reconstruction
     rec = Reconstruction(acq.acquisition_results, plot_result=True)
     rec.data_reconstruction()
 
-    latest_results = rec.reconstruction_results
+    # 3. Backup serveur
+    save_path = Path(__file__).resolve().parent.parent / "measure"
+    save_path.mkdir(exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.imshow(rec.imaging_method.result_to_plot, cmap="viridis")
-    ax.set_title("Résultat acquisition")
+    filename = f"reconstruction_{time.strftime('%d_%m_%Y_%H-%M-%S')}.json"
+    filepath = save_path / filename
+
+    with open(filepath, "wb") as f:
+        f.write(
+            orjson.dumps(
+                rec.reconstruction_results,
+                option=orjson.OPT_SERIALIZE_NUMPY,
+                default=json_default
+            )
+        )
+
+    logger.info(f"Saved: {filepath}")
+
+    # 4. Plot image
+    img = rec.reconstruction_results.get("result2plot")
+
+    if img is None:
+        return "No image to display", 500
+
+    fig, ax = plt.subplots()
+    ax.imshow(img, cmap="viridis")
+    ax.axis("off")
 
     buf = io.BytesIO()
     fig.savefig(buf, format="png")
@@ -163,23 +189,63 @@ def run_acquisition():
     return Response(buf.getvalue(), mimetype="image/png")
 
 
-# --- SAVE MEASURE JSON --- #
-@bp.route("/save_measure")
-def save_measure():
-    global latest_results
+# ----------------------------
+# LIST + DOWNLOAD MEASURES
+# ----------------------------
+@bp.route("/download_measure")
+def download_measure():
 
-    if latest_results is None:
-        return "No acquisition done yet", 400
+    save_path = Path(__file__).resolve().parent.parent / "measure"
+    files = sorted(save_path.glob("reconstruction_*.json"), reverse=True)
+    filenames = [f.name for f in files]
 
-    json_bytes = orjson.dumps(
-        latest_results,
-        option=orjson.OPT_SERIALIZE_NUMPY,
-        default=json_default
-    )
+    return render_template("download_measure.html", files=filenames)
+
+
+@bp.route("/download_measure/<filename>")
+def download_measure_file(filename):
+
+    save_path = Path(__file__).resolve().parent.parent / "measure"
+    filepath = save_path / filename
+
+    if not filepath.exists():
+        return "File not found", 404
 
     return send_file(
-        io.BytesIO(json_bytes),
+        filepath,
         mimetype="application/json",
         as_attachment=True,
-        attachment_filename="measure.json"
+        attachment_filename=filename
     )
+
+
+# ----------------------------
+# LOAD MEASURE
+# ----------------------------
+@bp.route("/load_measure", methods=["POST"])
+def load_measure():
+
+    file = request.files.get("file")
+    if not file:
+        return "No file", 400
+
+    data = json.load(file)
+
+    rec = Reconstruction(data, plot_result=False)
+    rec.data_reconstruction()
+
+    img = rec.reconstruction_results.get("result2plot")
+
+    if img is None:
+        return "No plottable data", 400
+
+    fig, ax = plt.subplots()
+    ax.imshow(img, cmap="viridis")
+    ax.axis("off")
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png")
+    buf.seek(0)
+    plt.close(fig)
+
+    return Response(buf.getvalue(), mimetype="image/png")
