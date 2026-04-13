@@ -1,5 +1,5 @@
 {
-  "imaging_method_name": "fouriersplit",
+  "imaging_method_name": "has",
   "integration_time_ms": 1.0,
   "spectro_scans2avg": 5,
   "Normalisation": false,

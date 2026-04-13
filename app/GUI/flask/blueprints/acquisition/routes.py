@@ -6,7 +6,12 @@ import json
 import orjson
 import logging
 import numpy as np
+
+import matplotlib
+matplotlib.use("Agg")  # 🔥 IMPORTANT
+
 import matplotlib.pyplot as plt
+
 import time
 
 from pathlib import Path
@@ -219,25 +224,36 @@ def download_measure_file(filename):
     )
 
 
-# ----------------------------
-# LOAD MEASURE
-# ----------------------------
-@bp.route("/load_measure", methods=["POST"])
+@bp.route("/load_measure", methods=["GET", "POST"])
 def load_measure():
 
-    file = request.files.get("file")
-    if not file:
-        return "No file", 400
+    save_path = Path(__file__).resolve().parent.parent / "measure"
 
-    data = json.load(file)
+    # 👉 GET = liste
+    if request.method == "GET":
+        files = sorted(save_path.glob("reconstruction_*.json"), reverse=True)
+        filenames = [f.name for f in files]
+        return render_template("load_measure.html", files=filenames)
 
-    rec = Reconstruction(data, plot_result=False)
-    rec.data_reconstruction()
+    # 👉 POST = chargement
+    filename = request.form.get("filename")
 
-    img = rec.reconstruction_results.get("result2plot")
+    if not filename:
+        return "No filename", 400
+
+    filepath = save_path / filename
+
+    if not filepath.exists():
+        return "File not found", 404
+
+    with open(filepath, "r") as f:
+        data = json.load(f)
+
+    # ✅ PAS DE Reconstruction ici
+    img = data.get("result2plot")
 
     if img is None:
-        return "No plottable data", 400
+        return "No result2plot in file", 400
 
     fig, ax = plt.subplots()
     ax.imshow(img, cmap="viridis")

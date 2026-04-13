@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Load Measure</title>
+
+```
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        padding: 20px;
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+    }
+
+    .settings-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    .btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        transition: background 0.2s;
+    }
+
+    .btn:hover {
+        background: #2980b9;
+    }
+
+    /* 🔒 Mode loading */
+    .loading .btn {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* 🌀 Spinner */
+    .spinner {
+        margin: 20px auto;
+        width: 40px;
+        height: 40px;
+        border: 4px solid #ddd;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    #loader {
+        display: none;
+    }
+</style>
+```
+
+</head>
+
+<body>
+
+<h2>Load a measure</h2>
+
+<div class="settings-buttons">
+    {% for f in files %}
+        <button class="btn" title="{{ f }}" onclick="loadMeasure(event, '{{ f }}')">
+            {{ f }}
+        </button>
+    {% endfor %}
+</div>
+
+<div id="loader">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+</div>
+
+<script>
+function loadMeasure(event, filename) {
+
+    const img = window.opener.document.getElementById("acq-figure");
+    const loader = document.getElementById("loader");
+
+    // 🔒 Active loading UI
+    document.body.classList.add("loading");
+    loader.style.display = "block";
+
+    // Change texte du bouton cliqué
+    event.target.innerText = "Chargement...";
+
+    fetch("{{ url_for('acquisition.load_measure') }}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "filename=" + encodeURIComponent(filename)
+    })
+    .then(res => res.blob())
+    .then(blob => {
+        const url = URL.createObjectURL(blob);
+        img.src = url;
+        window.close();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Erreur chargement");
+
+        // ❌ reset UI si erreur
+        document.body.classList.remove("loading");
+        loader.style.display = "none";
+        event.target.innerText = filename;
+    });
+}
+</script>
+
+</body>
+</html>
