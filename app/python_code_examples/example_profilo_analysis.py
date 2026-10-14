@@ -1,19 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 21 10:15:25 2025
-
-@authors: luguen grussias
-"""
-
-import os
-import sys
-sys.path.append(f"..{os.sep}..")
-
 import numpy as np
 import matplotlib.pyplot as plt
 from plugins.imaging_methods.Profilo.ImageReconstruction import ProfiloReconstruction
 from plugins.imaging_methods.Profilo.ImageAnalysis import Analysis
-from core.hardware.coregistration_lib import *
+from onepix.hardware.coregistration_lib import *
 
 
 rec=ProfiloReconstruction("put path of the raw measure of the sample here")

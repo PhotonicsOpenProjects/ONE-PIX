@@ -1,0 +1,496 @@
+/* ============================================================
+   ONE-PIX — Acquisition
+   Built on the shared design-system.css / components.css tokens.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Workstation grid: settings card + preview card
+   ---------------------------------------------------------- */
+
+.acquisition-grid {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.settings-item:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.settings-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--primary);
+}
+
+.settings-item-icon svg {
+  width: 17px;
+  height: 17px;
+}
+
+.settings-item-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-item-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.settings-item-sub {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
+/* Pre-flight warnings under the settings shortcuts */
+.preflight {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+.preflight-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+.preflight-item svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  margin-top: 1px;
+  color: var(--warning);
+}
+
+.preflight-item a {
+  display: inline-block;
+  margin-top: var(--space-1);
+  font-weight: 600;
+}
+
+.settings-item-chevron {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  color: var(--text-faint);
+}
+
+/* ----------------------------------------------------------
+   Preview / viewer
+   ---------------------------------------------------------- */
+
+.viewer-body {
+  padding: var(--space-4);
+}
+
+.figure-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.figure-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ----------------------------------------------------------
+   Run bar
+   ---------------------------------------------------------- */
+
+/* Same spacing as between the cards of the grid above it */
+#acqSpectraCard {
+  margin-top: var(--space-5);
+}
+
+.run-bar {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.run-bar .btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ----------------------------------------------------------
+   Settings sub-page (hardware / software / addon)
+   ---------------------------------------------------------- */
+
+.settings-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+
+.settings-field .field-hint {
+  margin-top: 2px;
+}
+
+/* Modified, not yet saved: a bar beside the field, "Modified" after
+   its label, and the saved value with a revert button underneath -
+   all set by settings_page.html's script. */
+.settings-field {
+  position: relative;
+}
+
+.settings-field.is-modified::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -10px;
+  width: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--warning);
+}
+
+.settings-field.is-modified .field-label::after {
+  content: " · " attr(data-modified);
+  color: var(--warning);
+}
+
+.settings-field.is-modified input:not([type="hidden"]):not(:focus),
+.settings-field.is-modified select:not(:focus),
+.settings-field.is-modified textarea:not(:focus) {
+  border-color: var(--warning);
+}
+
+.field-modified {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px var(--space-3);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.field-modified-before {
+  overflow-wrap: anywhere;
+}
+
+.field-modified-revert {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.field-modified-revert:hover {
+  text-decoration: underline;
+}
+
+.settings-dirty-count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-right: auto;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--warning);
+}
+
+.settings-dirty-count::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.field-help {
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* Number input with its unit (ms, nm, px) inside the right edge */
+.input-with-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-unit input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 44px;
+}
+
+.input-unit {
+  position: absolute;
+  right: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* [min, max] pair (e.g. spectral range) */
+.range-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+.range-input {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.range-input-label {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+/* Collapsed section for calibration outputs and other values most
+   users never need to touch */
+.settings-advanced {
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-4);
+}
+
+.settings-advanced summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.settings-advanced summary::-webkit-details-marker {
+  display: none;
+}
+
+.settings-advanced summary svg {
+  width: 15px;
+  height: 15px;
+  transition: transform var(--transition-fast);
+}
+
+.settings-advanced[open] summary svg {
+  transform: rotate(90deg);
+}
+
+.settings-advanced summary:hover {
+  color: var(--text);
+}
+
+.settings-advanced-warning {
+  margin: var(--space-3) 0 var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  color: var(--text);
+  font-size: var(--fs-sm);
+}
+
+.settings-field-json {
+  font-size: var(--fs-xs);
+  line-height: 1.5;
+}
+
+.settings-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ----------------------------------------------------------
+   Boolean settings — toggle switch
+   ---------------------------------------------------------- */
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--border-strong);
+  transition: background var(--transition-fast);
+}
+
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--transition-fast);
+}
+
+.switch[aria-pressed="true"] .switch-track {
+  background: var(--primary);
+}
+
+.switch[aria-pressed="true"] .switch-thumb {
+  transform: translateX(16px);
+}
+
+.switch-label {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+/* ----------------------------------------------------------
+   Hardware settings — spectrometer live tuning panel
+   ---------------------------------------------------------- */
+
+.tuning-card {
+  margin-top: var(--space-5);
+}
+
+.tuning-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.tuning-integration-field {
+  flex: 1;
+  min-width: 220px;
+}
+
+.tuning-integration-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.tuning-integration-controls input[type="range"] {
+  flex: 1;
+}
+
+.tuning-integration-controls input[type="number"] {
+  width: 90px;
+}
+
+.tuning-unit {
+  color: var(--text-faint);
+  font-size: var(--fs-sm);
+}
+
+.tuning-chart-box {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.tuning-chart {
+  width: 100%;
+  height: 320px;
+  display: none;
+}
+
+.tuning-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.tuning-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: var(--fs-lg);
+  font-weight: 600;
+}
+
+.tuning-apply-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+/* ----------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .acquisition-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .figure-box {
+    aspect-ratio: 16 / 10;
+  }
+}

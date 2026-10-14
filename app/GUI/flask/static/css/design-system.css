@@ -1,0 +1,293 @@
+/* ============================================================
+   ONE-PIX — Design system
+   Shared design tokens for all Flask blueprints (acquisition,
+   analysis, data_manager, plugins_manager). Loaded once from
+   global_base.html — do not duplicate into per-blueprint CSS.
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-sunken: #eef0f3;
+  --surface-overlay: rgba(255, 255, 255, 0.72);
+
+  /* Borders */
+  --border: #e1e4e9;
+  --border-strong: #c9ced6;
+
+  /* Text */
+  --text: #16191f;
+  --text-muted: #5a6270;
+  --text-faint: #88909c;
+  --text-on-primary: #ffffff;
+
+  /* Semantic colors */
+  --primary: #1f6feb;
+  --primary-hover: #1857c4;
+  --primary-soft: #e8f0fe;
+  --primary-border: #b6cffb;
+
+  --success: #1a8f5a;
+  --success-hover: #157548;
+  --success-soft: #e5f6ec;
+  --success-border: #a9ddc0;
+
+  --warning: #b5750f;
+  --warning-soft: #fbf0dc;
+  --warning-border: #eecd8d;
+
+  --danger: #d0342c;
+  --danger-hover: #ad2721;
+  --danger-soft: #fbe9e8;
+  --danger-border: #f0b6b2;
+
+  --focus-ring: rgba(31, 111, 235, 0.35);
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Shadow */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-md: 0 4px 12px rgba(16, 24, 40, 0.08);
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "Consolas", "Liberation Mono", monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-xxl: 28px;
+
+  /* Motion */
+  --transition-fast: 150ms ease;
+  --transition-base: 200ms ease;
+
+  /* Layout */
+  --nav-height: 56px;
+
+  /* Chart categorical series (data-viz skill's validated default
+     palette - 8 hues, fixed order, never reordered per-chart).
+     Used by spectra-chart.js for HAS per-cluster spectra plots. */
+  --chart-series-1: #2a78d6;
+  --chart-series-2: #eb6834;
+  --chart-series-3: #1baf7a;
+  --chart-series-4: #eda100;
+  --chart-series-5: #e87ba4;
+  --chart-series-6: #008300;
+  --chart-series-7: #6250d6;
+  --chart-series-8: #e34948;
+}
+
+/* ----------------------------------------------------------
+   Dark theme — used in a lab with a running projector, often in
+   a dimmed room, so this isn't just decorative. Applies when the
+   OS prefers dark AND the viewer hasn't explicitly picked "light"
+   (data-theme="light"), or unconditionally when they picked "dark"
+   (data-theme="dark") via the toggle in the nav.
+   ---------------------------------------------------------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0e13;
+    --surface: #151a21;
+    --surface-elevated: #1b212a;
+    --surface-sunken: #1f252e;
+    --surface-overlay: rgba(11, 14, 19, 0.78);
+
+    --border: #272e38;
+    --border-strong: #3a4250;
+
+    --text: #e8ebf0;
+    --text-muted: #9aa3b2;
+    --text-faint: #6b7483;
+    --text-on-primary: #ffffff;
+
+    --primary: #529bf7;
+    --primary-hover: #74b0f9;
+    --primary-soft: rgba(82, 155, 247, 0.16);
+    --primary-border: #3a618f;
+
+    --success: #3fc17c;
+    --success-hover: #5fd393;
+    --success-soft: rgba(63, 193, 124, 0.14);
+    --success-border: #2b7a51;
+
+    --warning: #e0a438;
+    --warning-soft: rgba(224, 164, 56, 0.14);
+    --warning-border: #8a661f;
+
+    --danger: #f06a61;
+    --danger-hover: #f58c84;
+    --danger-soft: rgba(240, 106, 97, 0.14);
+    --danger-border: #9c3a33;
+
+    --focus-ring: rgba(82, 155, 247, 0.4);
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+
+    --chart-series-1: #3987e5;
+    --chart-series-2: #d95926;
+    --chart-series-3: #199e70;
+    --chart-series-4: #c98500;
+    --chart-series-5: #d55181;
+    --chart-series-6: #008300;
+    --chart-series-7: #9085e9;
+    --chart-series-8: #e66767;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0e13;
+  --surface: #151a21;
+  --surface-elevated: #1b212a;
+  --surface-sunken: #1f252e;
+  --surface-overlay: rgba(11, 14, 19, 0.78);
+
+  --border: #272e38;
+  --border-strong: #3a4250;
+
+  --text: #e8ebf0;
+  --text-muted: #9aa3b2;
+  --text-faint: #6b7483;
+  --text-on-primary: #ffffff;
+
+  --primary: #529bf7;
+  --primary-hover: #74b0f9;
+  --primary-soft: rgba(82, 155, 247, 0.16);
+  --primary-border: #3a618f;
+
+  --success: #3fc17c;
+  --success-hover: #5fd393;
+  --success-soft: rgba(63, 193, 124, 0.14);
+  --success-border: #2b7a51;
+
+  --warning: #e0a438;
+  --warning-soft: rgba(224, 164, 56, 0.14);
+  --warning-border: #8a661f;
+
+  --danger: #f06a61;
+  --danger-hover: #f58c84;
+  --danger-soft: rgba(240, 106, 97, 0.14);
+  --danger-border: #9c3a33;
+
+  --focus-ring: rgba(82, 155, 247, 0.4);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+
+  --chart-series-1: #3987e5;
+  --chart-series-2: #d95926;
+  --chart-series-3: #199e70;
+  --chart-series-4: #c98500;
+  --chart-series-5: #d55181;
+  --chart-series-6: #008300;
+  --chart-series-7: #9085e9;
+  --chart-series-8: #e66767;
+}
+
+body {
+  transition: background var(--transition-base), color var(--transition-base);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* The browser's own [hidden] { display: none } loses to any component
+   rule that sets `display` (.field, .selection-bar, .btn svg, ...), so
+   toggling `el.hidden` silently did nothing on most components. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+p {
+  margin: 0;
+}
+
+code, pre, .mono {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: var(--primary);
+}
+
+::selection {
+  background: var(--primary-soft);
+}
+
+/* Scrollbars — subtle, not decorative */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--bg);
+}
+
+/* Focus visibility — keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+main {
+  display: block;
+}

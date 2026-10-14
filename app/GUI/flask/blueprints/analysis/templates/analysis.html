@@ -1,0 +1,1774 @@
+{% extends "global_base.html" %}
+
+{% block title %}
+{{ t('analysis.title') }}
+{% endblock %}
+
+{% block head %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('analysis.static', filename='analysis.css') }}"
+>
+
+{% endblock %}
+
+{% block app_content %}
+
+<div class="analysis-container">
+
+    <!-- ================================= -->
+    <!-- LEFT PANEL -->
+    <!-- ================================= -->
+
+    <div class="analysis-panel">
+
+        <div class="panel-header">
+            <div class="card-eyebrow">{{ t('analysis.eyebrow') }}</div>
+            <h1>{{ t('analysis.title') }}</h1>
+        </div>
+
+        <!-- ========================== -->
+        <!-- LOAD DATA -->
+        <!-- ========================== -->
+
+        <div class="panel-section">
+
+            <h3 class="panel-section-title"><span class="step-number" aria-hidden="true">1</span>{{ t('analysis.data_section_title') }}</h3>
+
+            <div class="field">
+                <label class="field-label" for="measureSelect">{{ t('analysis.reconstruction_label') }}</label>
+                <select id="measureSelect">
+                    <option>
+                        {{ t('analysis.loading_measures') }}
+                    </option>
+                </select>
+            </div>
+
+            <button
+                id="loadButton"
+                class="btn btn-outline btn-block"
+                onclick="loadMeasure()"
+            >
+                {{ t('analysis.load_button') }}
+            </button>
+
+            <span id="loadStatus" class="panel-status">
+            </span>
+
+        </div>
+
+        <!-- ========================== -->
+        <!-- PROCESSING PIPELINE -->
+        <!-- ========================== -->
+
+        <div class="panel-section">
+
+            <h3 class="panel-section-title"><span class="step-number" aria-hidden="true">2</span>{{ t('analysis.pipeline_section_title') }}</h3>
+            <p class="panel-section-hint">{{ t('analysis.pipeline_hint') }}</p>
+
+            <!-- ========================== -->
+            <!-- STEPS (populated by addPipelineStep(), one -->
+            <!-- .pipeline-step per step — see analysis.css) -->
+            <!-- ========================== -->
+
+            <div id="pipelineSteps"></div>
+
+            <button
+                id="addStepButton"
+                class="btn btn-ghost btn-block"
+                type="button"
+                title="{{ t('analysis.add_step_tooltip') }}"
+                onclick="addPipelineStep()"
+            >
+                {{ t('analysis.add_step_button') }}
+            </button>
+
+        </div>
+
+        <!-- ========================== -->
+        <!-- ACTIONS -->
+        <!-- ========================== -->
+
+        <div class="panel-section panel-actions">
+
+            <h3 class="panel-section-title"><span class="step-number" aria-hidden="true">3</span>{{ t('analysis.actions_section_title') }}</h3>
+
+            <button
+                id="processButton"
+                class="btn btn-primary btn-block"
+                disabled
+                title="{{ t('analysis.specific_tooltip_no_result') }}"
+                onclick="applyProcessing()"
+            >
+                {{ t('analysis.apply_button') }}
+            </button>
+
+            <button
+                id="saveButton"
+                class="btn btn-outline btn-block"
+                disabled
+                title="{{ t('analysis.specific_tooltip_no_result') }}"
+                onclick="saveAnalysis()"
+            >
+                {{ t('analysis.save_button') }}
+            </button>
+
+            <button
+                id="specificAnalysisButton"
+                class="btn btn-outline btn-block"
+                type="button"
+                disabled
+                title="{{ t('analysis.specific_tooltip_no_result') }}"
+                onclick="openSpecificAnalysis()"
+            >
+                {{ t('analysis.specific_button') }}
+            </button>
+
+            <span id="saveStatus" class="panel-status">
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================================= -->
+    <!-- RIGHT PANEL — VIEWER -->
+    <!-- ================================= -->
+
+    <!-- Right column: the viewer, with the spectra card underneath
+         (this column scrolls on its own, like the left panel) -->
+    <div class="analysis-main">
+
+    <div class="viewer-panel card">
+
+        <div class="viewer-toolbar">
+            <span class="viewer-toolbar-title">{{ t('analysis.viewer_title') }}</span>
+
+            <div class="viewer-toolbar-actions">
+                <button id="viewerZoomOutBtn" class="btn btn-icon btn-ghost" type="button" aria-label="{{ t('analysis.viewer_zoom_out') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                </button>
+                <span id="viewerZoomLabel" class="viewer-zoom-label">100%</span>
+                <button id="viewerZoomInBtn" class="btn btn-icon btn-ghost" type="button" aria-label="{{ t('analysis.viewer_zoom_in') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                </button>
+                <button id="viewerResetBtn" class="btn btn-icon btn-ghost" type="button" aria-label="{{ t('analysis.viewer_reset') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+                </button>
+                <button id="viewerFullscreenBtn" class="btn btn-icon btn-ghost" type="button" aria-label="{{ t('analysis.viewer_fullscreen') }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="figure-box" id="analysisFigureBox">
+
+            <!-- IMAGE RESULT -->
+
+            <img id="resultFigure">
+
+            <!-- EMPTY PLACEHOLDER -->
+
+            <div
+                id="emptyFigure"
+                class="empty-figure"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17 8 9l4 5 4-8 5 11"></path>
+                </svg>
+                <div class="empty-state-title">{{ t('analysis.empty_title') }}</div>
+                <div class="empty-state-sub">{{ t('analysis.empty_sub') }}</div>
+            </div>
+
+            <!-- LOADING OVERLAY -->
+
+            <div
+                id="loadingOverlay"
+                class="loading-overlay"
+            >
+
+                <div class="spinner spinner-lg"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================= -->
+    <!-- ANALYSIS RESULTS (values computed by analysis steps, only
+         shown when the pipeline had one - see GET /analysis/outputs) -->
+    <!-- ============================= -->
+
+    <div class="card" id="analysisOutputsCard" hidden>
+        <div class="card-header">
+            <div>
+                <h2>{{ t('analysis.outputs_title') }}</h2>
+                <div class="page-sub" id="analysisOutputsSub"></div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="analysisOutputsExport">
+                {{ t('analysis.outputs_export') }}
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-wrap analysis-outputs" id="analysisOutputsTable"></div>
+        </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- SPECTRA (interactive, only shown when the imaging method has
+         per-cluster spectra to plot - see GET /analysis/spectra) -->
+    <!-- ============================= -->
+
+    <div class="card" id="analysisSpectraCard" hidden>
+        <div class="card-header">
+            <h2>{{ t('analysis.spectra_card_title') }}</h2>
+            <button type="button" class="btn btn-outline btn-sm" id="analysisSpectraViewToggle">
+                {{ t('analysis.spectra_view_table') }}
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="analysisSpectraChart" class="spectra-chart"></div>
+            <div id="analysisSpectraLegend" class="spectra-legend"></div>
+            <div id="analysisSpectraTable" hidden></div>
+        </div>
+    </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ================================= -->
+<!-- REFLECTANCE REFERENCE DIALOG -->
+<!-- ================================= -->
+
+<dialog id="referenceDialog" class="reference-dialog">
+
+    <div class="reference-dialog-header">
+        <h2>{{ t('analysis.reference_dialog_title') }}</h2>
+        <button type="button" class="btn btn-icon btn-ghost" id="referenceDialogClose" aria-label="{{ t('analysis.reference_dialog_close') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <div class="reference-dialog-tabs">
+        <button type="button" class="reference-dialog-tab is-active" data-tab="zone">{{ t('analysis.reference_tab_zone') }}</button>
+        <button type="button" class="reference-dialog-tab" data-tab="hypercube">{{ t('analysis.reference_tab_hypercube') }}</button>
+    </div>
+
+    <!-- ZONE TAB -->
+    <div class="reference-dialog-panel" data-panel="zone">
+
+        <p class="reference-dialog-hint">{{ t('analysis.reference_zone_hint') }}</p>
+
+        <div class="reference-zone-box" id="referenceZoneBox">
+            <div class="reference-zone-imgwrap" id="referenceZoneImgwrap">
+                <img id="referenceZoneImage" alt="" draggable="false">
+                <div id="referenceZoneSelection" class="reference-zone-selection" hidden></div>
+            </div>
+            <div id="referenceZoneEmpty" class="empty-state">
+                <div class="empty-state-sub">{{ t('analysis.reference_zone_unavailable') }}</div>
+            </div>
+        </div>
+
+        <div class="reference-dialog-actions">
+            <span id="referenceZoneStatus" class="panel-status"></span>
+            <button type="button" class="btn btn-primary" id="referenceZoneConfirm" disabled>
+                {{ t('analysis.reference_capture') }}
+            </button>
+        </div>
+
+    </div>
+
+    <!-- HYPERCUBE TAB -->
+    <div class="reference-dialog-panel" data-panel="hypercube" hidden>
+
+        <p class="reference-dialog-hint">{{ t('analysis.reference_hypercube_hint') }}</p>
+
+        <div class="field">
+            <label class="field-label" for="referenceHypercubeSelect">{{ t('analysis.reconstruction_label') }}</label>
+            <select id="referenceHypercubeSelect"></select>
+        </div>
+
+        <div class="reference-dialog-actions">
+            <span id="referenceHypercubeStatus" class="panel-status"></span>
+            <button type="button" class="btn btn-primary" id="referenceHypercubeConfirm">
+                {{ t('analysis.reference_capture') }}
+            </button>
+        </div>
+
+    </div>
+
+</dialog>
+
+
+<script>
+
+let isUIBusy = false;
+let hasLoadedResult = false;
+let specificAnalysisUrl = null;
+
+// =====================================
+// UI LOCK
+// =====================================
+
+function setUIBusy(isBusy) {
+
+    isUIBusy = isBusy;
+
+    document
+    .getElementById(
+        "loadingOverlay"
+    ).style.display =
+        isBusy ? "flex" : "none";
+
+    const elements = document.querySelectorAll(
+        "button, select, input"
+    );
+
+    elements.forEach(el => {
+
+        el.disabled = isBusy;
+    });
+
+    updateSpecificAnalysisButton();
+}
+
+
+function updateSpecificAnalysisButton() {
+
+    ["processButton", "saveButton"].forEach(id => {
+        const actionButton = document.getElementById(id);
+        actionButton.disabled = isUIBusy || !hasLoadedResult;
+        actionButton.title = hasLoadedResult
+            ? ""
+            : ONEPIX.t("analysis.specific_tooltip_no_result");
+    });
+
+    const button = document.getElementById(
+        "specificAnalysisButton"
+    );
+
+    if (isUIBusy) {
+
+        button.disabled = true;
+        return;
+    }
+
+    button.disabled =
+        !hasLoadedResult ||
+        specificAnalysisUrl === null;
+
+    if (!hasLoadedResult) {
+
+        button.title =
+            ONEPIX.t("analysis.specific_tooltip_no_result");
+    }
+
+    else if (specificAnalysisUrl === null) {
+
+        button.title =
+            ONEPIX.t("analysis.specific_tooltip_no_url");
+    }
+
+    else {
+
+        button.title =
+            ONEPIX.t("analysis.specific_tooltip_open");
+    }
+}
+
+
+async function refreshSpecificAnalysisAvailability() {
+
+    specificAnalysisUrl = null;
+
+    if (!hasLoadedResult) {
+
+        updateSpecificAnalysisButton();
+        return;
+    }
+
+    try {
+
+        const response = await fetch(
+            "/analysis/specific-target"
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+
+            specificAnalysisUrl = data.url;
+        }
+
+    } catch(error) {
+
+        console.error(error);
+    }
+
+    updateSpecificAnalysisButton();
+}
+
+
+// =====================================
+// LOAD MEASURES
+// =====================================
+
+function populateMeasureSelect(select, filenames) {
+
+    select.innerHTML = "";
+
+    filenames.forEach(filename => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value = filename;
+
+        option.textContent = filename;
+
+        select.appendChild(option);
+    });
+}
+
+
+async function loadMeasures() {
+
+    const response = await fetch(
+        "/analysis/measures"
+    );
+
+    const data = await response.json();
+
+    populateMeasureSelect(
+        document.getElementById("measureSelect"),
+        data
+    );
+
+    return data;
+}
+
+
+// =====================================
+// LOAD SELECTED MEASURE
+// =====================================
+
+async function loadMeasure() {
+
+    setUIBusy(true);
+
+    const filename =
+        document.getElementById(
+            "measureSelect"
+        ).value;
+
+    try {
+
+        const response = await fetch(
+            "/analysis/load",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                    filename: filename
+                })
+            }
+        );
+
+        const status =
+            document.getElementById(
+                "loadStatus"
+            );
+
+        if (!response.ok) {
+
+            status.innerText =
+                ONEPIX.t("analysis.load_failed");
+
+            ONEPIX.toast(ONEPIX.t("analysis.toast_load_failed"), "error");
+
+            hasLoadedResult = false;
+            specificAnalysisUrl = null;
+            updateSpecificAnalysisButton();
+
+            return;
+        }
+
+        const blob =
+            await response.blob();
+
+        const url =
+            URL.createObjectURL(blob);
+
+        document
+        .getElementById(
+            "resultFigure"
+        ).src = url;
+
+        document
+        .getElementById(
+            "emptyFigure"
+        ).style.display = "none";
+
+        status.innerText =
+            ONEPIX.t("analysis.load_success");
+
+        ONEPIX.toast(ONEPIX.t("analysis.toast_load_success_prefix") + filename, "success");
+
+        hasLoadedResult = true;
+
+        await refreshSpecificAnalysisAvailability();
+        await refreshSpectraChart();
+        await refreshZoneMap();
+        await refreshAnalysisOutputs();
+
+    } catch(error) {
+
+        console.error(error);
+
+        ONEPIX.toast(ONEPIX.t("analysis.toast_load_failed"), "error");
+
+        hasLoadedResult = false;
+        specificAnalysisUrl = null;
+        updateSpecificAnalysisButton();
+
+    } finally {
+
+        setUIBusy(false);
+    }
+}
+
+
+// =====================================
+// PROCESSING PIPELINE (multi-step)
+//
+// The backend's Pipeline (spectra_core) already accepts an ordered
+// list of [plugin, params] steps and chains them (transforms must
+// come before analyses — enforced server-side). Each step here owns
+// its own <select> and params container; nothing is shared globally
+// so steps can be added/removed freely.
+// =====================================
+
+let availablePlugins = null;
+let pipelineSteps = [];
+let pipelineStepSeq = 0;
+
+
+async function fetchAvailablePlugins() {
+
+    if (availablePlugins) return availablePlugins;
+
+    const response = await fetch(
+        "/analysis/plugins"
+    );
+
+    availablePlugins = await response.json();
+
+    return availablePlugins;
+}
+
+
+function populatePluginSelect(select) {
+
+    select.innerHTML = "";
+
+    const transformGroup =
+        document.createElement(
+            "optgroup"
+        );
+
+    transformGroup.label =
+        ONEPIX.t("analysis.transforms_group");
+
+    availablePlugins.transforms.forEach(name => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value = name;
+
+        option.textContent = name;
+
+        transformGroup.appendChild(
+            option
+        );
+    });
+
+    select.appendChild(
+        transformGroup
+    );
+
+    const analysisGroup =
+        document.createElement(
+            "optgroup"
+        );
+
+    analysisGroup.label =
+        ONEPIX.t("analysis.analyses_group");
+
+    availablePlugins.analyses.forEach(name => {
+
+        const option =
+            document.createElement(
+                "option"
+            );
+
+        option.value = name;
+
+        option.textContent = name;
+
+        analysisGroup.appendChild(
+            option
+        );
+    });
+
+    select.appendChild(
+        analysisGroup
+    );
+}
+
+
+async function loadStepParams(step) {
+
+    const plugin = step.select.value;
+
+    const response = await fetch(
+        `/analysis/plugin/${plugin}`
+    );
+
+    const data = await response.json();
+
+    step.paramsContainer.innerHTML = "";
+
+    data.params.forEach(param => {
+
+        if (param.name === "reference_path") {
+
+            step.paramsContainer.appendChild(
+                buildReferencePicker(param)
+            );
+
+            return;
+        }
+
+        if (param.choices) {
+
+            step.paramsContainer.appendChild(
+                buildChoiceParam(param)
+            );
+
+            return;
+        }
+
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "analysis-section";
+
+        const label =
+            document.createElement("label");
+
+        label.textContent =
+            param.name;
+
+        const input =
+            document.createElement("input");
+
+        input.value =
+            param.default;
+
+        input.dataset.paramName =
+            param.name;
+
+        input.dataset.type =
+            param.type;
+
+        wrapper.appendChild(
+            label
+        );
+
+        wrapper.appendChild(
+            input
+        );
+
+        step.paramsContainer.appendChild(
+            wrapper
+        );
+    });
+}
+
+
+// =====================================
+// CHOICE PARAMETERS
+// =====================================
+// A parameter whose annotation lists its values (Literal[...], see
+// routes.py's param_choices()) is picked from them instead of typed:
+// a dropdown for one value, checkboxes for several. Either way the
+// submitted value is JSON (data-type "json"), so a list stays a list.
+
+function buildChoiceParam(param) {
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "analysis-section choice-param";
+
+    const label = document.createElement("label");
+    label.textContent = param.name;
+    wrapper.appendChild(label);
+
+    if (!param.multiple) {
+
+        const select = document.createElement("select");
+        select.dataset.paramName = param.name;
+        select.dataset.type = "json";
+
+        // No default: leave the choice to the plugin.
+        if (param.default === null || param.default === "") {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = ONEPIX.t("analysis.param_default_option");
+            select.appendChild(option);
+        }
+
+        param.choices.forEach(choice => {
+            const option = document.createElement("option");
+            option.value = JSON.stringify(choice);
+            option.textContent = String(choice);
+            option.selected = choice === param.default;
+            select.appendChild(option);
+        });
+
+        wrapper.appendChild(select);
+        return wrapper;
+    }
+
+    const value = document.createElement("input");
+    value.type = "hidden";
+    value.dataset.paramName = param.name;
+    value.dataset.type = "json";
+
+    const initial = Array.isArray(param.default) ? param.default : [];
+    const group = document.createElement("div");
+    group.className = "param-choices";
+    group.setAttribute("role", "group");
+    group.setAttribute("aria-label", param.name);
+
+    const boxes = param.choices.map(choice => {
+        const chip = document.createElement("label");
+        chip.className = "param-choice";
+
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = initial.includes(choice);
+
+        chip.appendChild(box);
+        chip.appendChild(document.createTextNode(String(choice)));
+        group.appendChild(chip);
+        return box;
+    });
+
+    const hint = document.createElement("div");
+    hint.className = "param-choices-hint";
+
+    // Nothing checked sends null: the plugin then uses its own default.
+    function sync() {
+        const picked = param.choices.filter((_, i) => boxes[i].checked);
+        value.value = JSON.stringify(picked.length ? picked : null);
+        hint.textContent = picked.length
+            ? ONEPIX.t("analysis.param_choices_count", { n: picked.length, total: param.choices.length })
+            : ONEPIX.t("analysis.param_choices_none");
+    }
+
+    boxes.forEach(box => box.addEventListener("change", sync));
+
+    const actions = document.createElement("div");
+    actions.className = "param-choices-actions";
+
+    [["analysis.param_select_all", true], ["analysis.param_select_none", false]].forEach(([key, checked]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "param-choices-action";
+        button.textContent = ONEPIX.t(key);
+        button.addEventListener("click", () => {
+            boxes.forEach(box => { box.checked = checked; });
+            sync();
+        });
+        actions.appendChild(button);
+    });
+
+    actions.appendChild(hint);
+    sync();
+
+    wrapper.appendChild(value);
+    wrapper.appendChild(group);
+    wrapper.appendChild(actions);
+    return wrapper;
+}
+
+
+// =====================================
+// REFLECTANCE REFERENCE PICKER
+// =====================================
+// A "reference_path" plugin parameter (currently only
+// reflectance_normalization) isn't something a user should type by
+// hand - it's a path to a small JSON file the backend writes after
+// capturing a reference spectrum. This renders a small status +
+// two buttons instead of a raw text input; the actual value still
+// lives in a plain <input type="hidden">, so applyProcessing()'s
+// existing "read every <input> in paramsContainer" logic needs no
+// changes to pick it up.
+
+function buildReferencePicker(param) {
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "analysis-section reference-picker";
+
+    const label = document.createElement("label");
+    label.textContent = param.name;
+
+    const hidden = document.createElement("input");
+    hidden.type = "hidden";
+    hidden.value = param.default || "";
+    hidden.dataset.paramName = param.name;
+    hidden.dataset.type = param.type;
+
+    const status = document.createElement("span");
+    status.className = "reference-picker-status";
+
+    const actions = document.createElement("div");
+    actions.className = "reference-picker-actions";
+
+    const zoneBtn = document.createElement("button");
+    zoneBtn.type = "button";
+    zoneBtn.className = "btn btn-outline btn-sm";
+    zoneBtn.textContent = ONEPIX.t("analysis.reference_pick_zone");
+
+    const hypercubeBtn = document.createElement("button");
+    hypercubeBtn.type = "button";
+    hypercubeBtn.className = "btn btn-outline btn-sm";
+    hypercubeBtn.textContent = ONEPIX.t("analysis.reference_pick_hypercube");
+
+    function refreshStatus() {
+        status.textContent = hidden.value
+            ? hidden.value.split("/").pop()
+            : ONEPIX.t("analysis.reference_none");
+        status.classList.toggle("is-set", !!hidden.value);
+    }
+
+    refreshStatus();
+
+    zoneBtn.addEventListener("click", () => {
+        openReferenceDialog("zone", path => {
+            hidden.value = path;
+            refreshStatus();
+        });
+    });
+
+    hypercubeBtn.addEventListener("click", () => {
+        openReferenceDialog("hypercube", path => {
+            hidden.value = path;
+            refreshStatus();
+        });
+    });
+
+    actions.appendChild(zoneBtn);
+    actions.appendChild(hypercubeBtn);
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(hidden);
+    wrapper.appendChild(status);
+    wrapper.appendChild(actions);
+
+    return wrapper;
+}
+
+
+// =====================================
+// REFERENCE DIALOG
+// =====================================
+
+const referenceDialog = document.getElementById("referenceDialog");
+let referenceDialogOnPick = null;
+let referenceZoneRect = null;
+let referenceZonePreviewUrl = null;
+
+function setReferenceDialogTab(tabName) {
+
+    referenceDialog
+        .querySelectorAll(".reference-dialog-tab")
+        .forEach(tab => tab.classList.toggle(
+            "is-active",
+            tab.dataset.tab === tabName
+        ));
+
+    referenceDialog
+        .querySelectorAll(".reference-dialog-panel")
+        .forEach(panel => {
+            panel.hidden = panel.dataset.panel !== tabName;
+        });
+}
+
+async function openReferenceDialog(tab, onPick) {
+
+    referenceDialogOnPick = onPick;
+
+    setReferenceDialogTab(tab);
+
+    document.getElementById("referenceZoneStatus").textContent = "";
+    document.getElementById("referenceHypercubeStatus").textContent = "";
+
+    referenceDialog.showModal();
+
+    if (tab === "zone") {
+        await loadReferenceZonePreview();
+    } else {
+        const filenames = await loadMeasures();
+        populateMeasureSelect(
+            document.getElementById("referenceHypercubeSelect"),
+            filenames
+        );
+    }
+}
+
+function closeReferenceDialog() {
+    referenceDialog.close();
+    if (referenceZonePreviewUrl) {
+        URL.revokeObjectURL(referenceZonePreviewUrl);
+        referenceZonePreviewUrl = null;
+    }
+}
+
+document.getElementById("referenceDialogClose")
+    .addEventListener("click", closeReferenceDialog);
+
+referenceDialog.addEventListener("click", ev => {
+    // Click on the <dialog> backdrop itself (not its content) closes it.
+    if (ev.target === referenceDialog) closeReferenceDialog();
+});
+
+referenceDialog
+    .querySelectorAll(".reference-dialog-tab")
+    .forEach(tab => tab.addEventListener(
+        "click",
+        () => setReferenceDialogTab(tab.dataset.tab)
+    ));
+
+// ---- ZONE TAB ----
+
+async function loadReferenceZonePreview() {
+
+    const img = document.getElementById("referenceZoneImage");
+    const box = document.getElementById("referenceZoneBox");
+    const empty = document.getElementById("referenceZoneEmpty");
+    const confirmBtn = document.getElementById("referenceZoneConfirm");
+
+    referenceZoneRect = null;
+    confirmBtn.disabled = true;
+    document.getElementById("referenceZoneSelection").hidden = true;
+
+    const response = await fetch("/analysis/reference/preview");
+
+    if (!response.ok) {
+        img.hidden = true;
+        box.classList.add("is-empty");
+        empty.hidden = false;
+        return;
+    }
+
+    box.classList.remove("is-empty");
+    empty.hidden = true;
+    img.hidden = false;
+
+    const blob = await response.blob();
+
+    if (referenceZonePreviewUrl) URL.revokeObjectURL(referenceZonePreviewUrl);
+    referenceZonePreviewUrl = URL.createObjectURL(blob);
+    img.src = referenceZonePreviewUrl;
+}
+
+(function setupReferenceZoneDrag() {
+
+    const box = document.getElementById("referenceZoneBox");
+    const img = document.getElementById("referenceZoneImage");
+    const selection = document.getElementById("referenceZoneSelection");
+    const confirmBtn = document.getElementById("referenceZoneConfirm");
+
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    function clientToImageXY(clientX, clientY) {
+        const rect = img.getBoundingClientRect();
+        const x = Math.min(Math.max(clientX - rect.left, 0), rect.width);
+        const y = Math.min(Math.max(clientY - rect.top, 0), rect.height);
+        return { x, y, rect };
+    }
+
+    function drawSelection(x0, y0, x1, y1) {
+        selection.hidden = false;
+        selection.style.left = Math.min(x0, x1) + "px";
+        selection.style.top = Math.min(y0, y1) + "px";
+        selection.style.width = Math.abs(x1 - x0) + "px";
+        selection.style.height = Math.abs(y1 - y0) + "px";
+    }
+
+    img.addEventListener("mousedown", ev => {
+        if (img.hidden) return;
+        const { x, y } = clientToImageXY(ev.clientX, ev.clientY);
+        dragging = true;
+        startX = x;
+        startY = y;
+        drawSelection(x, y, x, y);
+        confirmBtn.disabled = true;
+        ev.preventDefault();
+    });
+
+    window.addEventListener("mousemove", ev => {
+        if (!dragging) return;
+        const { x, y } = clientToImageXY(ev.clientX, ev.clientY);
+        drawSelection(startX, startY, x, y);
+    });
+
+    window.addEventListener("mouseup", ev => {
+        if (!dragging) return;
+        dragging = false;
+
+        const { x, y, rect } = clientToImageXY(ev.clientX, ev.clientY);
+
+        const left = Math.min(startX, x);
+        const top = Math.min(startY, y);
+        const right = Math.max(startX, x);
+        const bottom = Math.max(startY, y);
+
+        if (right - left < 3 || bottom - top < 3) {
+            selection.hidden = true;
+            referenceZoneRect = null;
+            confirmBtn.disabled = true;
+            return;
+        }
+
+        const scaleX = img.naturalWidth / rect.width;
+        const scaleY = img.naturalHeight / rect.height;
+
+        referenceZoneRect = {
+            x0: Math.round(left * scaleX),
+            y0: Math.round(top * scaleY),
+            x1: Math.round(right * scaleX),
+            y1: Math.round(bottom * scaleY),
+        };
+
+        confirmBtn.disabled = false;
+    });
+})();
+
+document.getElementById("referenceZoneConfirm")
+    .addEventListener("click", async () => {
+
+        if (!referenceZoneRect) return;
+
+        const status = document.getElementById("referenceZoneStatus");
+        status.textContent = ONEPIX.t("analysis.reference_capturing");
+
+        try {
+
+            const response = await fetch("/analysis/reference/zone", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(referenceZoneRect),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                status.textContent = data.error || ONEPIX.t("analysis.reference_error");
+                return;
+            }
+
+            if (referenceDialogOnPick) referenceDialogOnPick(data.reference_path);
+
+            closeReferenceDialog();
+
+        } catch (err) {
+            status.textContent = String(err);
+        }
+    });
+
+// ---- HYPERCUBE TAB ----
+
+document.getElementById("referenceHypercubeConfirm")
+    .addEventListener("click", async () => {
+
+        const filename = document.getElementById("referenceHypercubeSelect").value;
+        const status = document.getElementById("referenceHypercubeStatus");
+
+        if (!filename) {
+            status.textContent = ONEPIX.t("analysis.reference_no_file");
+            return;
+        }
+
+        status.textContent = ONEPIX.t("analysis.reference_capturing");
+
+        try {
+
+            const response = await fetch("/analysis/reference/hypercube", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ filename }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                status.textContent = data.error || ONEPIX.t("analysis.reference_error");
+                return;
+            }
+
+            if (referenceDialogOnPick) referenceDialogOnPick(data.reference_path);
+
+            closeReferenceDialog();
+
+        } catch (err) {
+            status.textContent = String(err);
+        }
+    });
+
+
+function renumberPipelineSteps() {
+
+    pipelineSteps.forEach((step, index) => {
+
+        step.badgeEl.textContent = index + 1;
+
+        step.removeBtn.hidden =
+            pipelineSteps.length <= 1;
+    });
+}
+
+
+async function addPipelineStep() {
+
+    await fetchAvailablePlugins();
+
+    const stepId = ++pipelineStepSeq;
+
+    const stepEl =
+        document.createElement("div");
+
+    stepEl.className = "pipeline-step";
+
+    stepEl.innerHTML = `
+        <div class="pipeline-step-badge"></div>
+        <div class="pipeline-step-body">
+            <div class="field">
+                <label class="field-label">${ONEPIX.t("analysis.method_label")}</label>
+                <select></select>
+            </div>
+            <div class="pipeline-params"></div>
+        </div>
+        <button type="button" class="btn btn-icon btn-ghost pipeline-step-remove"
+                aria-label="${ONEPIX.t("analysis.remove_step")}"
+                title="${ONEPIX.t("analysis.remove_step")}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+    `;
+
+    const step = {
+        id: stepId,
+        stepEl: stepEl,
+        badgeEl: stepEl.querySelector(".pipeline-step-badge"),
+        select: stepEl.querySelector("select"),
+        paramsContainer: stepEl.querySelector(".pipeline-params"),
+        removeBtn: stepEl.querySelector(".pipeline-step-remove")
+    };
+
+    populatePluginSelect(step.select);
+
+    step.select.addEventListener(
+        "change",
+        () => loadStepParams(step)
+    );
+
+    step.removeBtn.addEventListener(
+        "click",
+        () => removePipelineStep(stepId)
+    );
+
+    document
+    .getElementById("pipelineSteps")
+    .appendChild(stepEl);
+
+    pipelineSteps.push(step);
+
+    renumberPipelineSteps();
+
+    await loadStepParams(step);
+}
+
+
+function removePipelineStep(stepId) {
+
+    if (pipelineSteps.length <= 1) return;
+
+    const index = pipelineSteps.findIndex(
+        step => step.id === stepId
+    );
+
+    if (index === -1) return;
+
+    pipelineSteps[index].stepEl.remove();
+
+    pipelineSteps.splice(index, 1);
+
+    renumberPipelineSteps();
+}
+
+
+// =====================================
+// APPLY PROCESSING
+// =====================================
+
+async function applyProcessing() {
+
+    setUIBusy(true);
+
+    try {
+
+        const steps = pipelineSteps.map(step => {
+
+            const plugin = step.select.value;
+
+            const params = {};
+
+            // Only the elements carrying a parameter (not, e.g., the
+            // checkboxes a choice parameter is edited with).
+            step.paramsContainer
+            .querySelectorAll("[data-param-name]")
+            .forEach(input => {
+
+                const name =
+                    input.dataset.paramName;
+
+                const type =
+                    input.dataset.type;
+
+                let value =
+                    input.value;
+
+                if (
+                    type === "json"
+                ) {
+
+                    value =
+                        value === "" ? null : JSON.parse(value);
+                }
+
+                else if (
+                    type.includes("int")
+                ) {
+
+                    value =
+                        parseInt(value);
+                }
+
+                else if (
+                    type.includes("float")
+                ) {
+
+                    value =
+                        parseFloat(value);
+                }
+
+                else if (
+                    type === "bool"
+                ) {
+
+                    value =
+                        value === "true";
+                }
+
+                params[name] = value;
+            });
+
+            return [plugin, params];
+        });
+
+        const payload = {
+            steps: steps
+        };
+
+        const response = await fetch(
+            "/analysis/run",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify(
+                    payload
+                )
+            }
+        );
+
+        if (!response.ok) {
+
+            ONEPIX.toast(
+                ONEPIX.t("analysis.toast_process_failed"),
+                "error"
+            );
+
+            return;
+        }
+
+        const blob =
+            await response.blob();
+
+        const url =
+            URL.createObjectURL(blob);
+
+        document
+        .getElementById(
+            "resultFigure"
+        ).src = url;
+
+        document
+        .getElementById(
+            "emptyFigure"
+        ).style.display = "none";
+
+        ONEPIX.toast(
+            ONEPIX.t("analysis.toast_process_success"),
+            "success"
+        );
+
+        await refreshSpectraChart();
+        await refreshZoneMap();
+        await refreshAnalysisOutputs();
+
+    } catch(error) {
+
+        console.error(error);
+
+        ONEPIX.toast(
+            ONEPIX.t("analysis.toast_process_failed"),
+            "error"
+        );
+
+    } finally {
+
+        setUIBusy(false);
+    }
+}
+
+
+// =====================================
+// INTERACTIVE SPECTRA CHART
+// =====================================
+
+(function setupSpectraViewToggle() {
+    const toggle = document.getElementById("analysisSpectraViewToggle");
+    const chartEl = document.getElementById("analysisSpectraChart");
+    const legendEl = document.getElementById("analysisSpectraLegend");
+    const tableEl = document.getElementById("analysisSpectraTable");
+
+    toggle.addEventListener("click", function () {
+        const showingTable = !tableEl.hidden;
+
+        tableEl.hidden = showingTable;
+        chartEl.hidden = !showingTable;
+        legendEl.hidden = !showingTable;
+
+        toggle.textContent = showingTable
+            ? ONEPIX.t("analysis.spectra_view_table")
+            : ONEPIX.t("analysis.spectra_view_chart");
+    });
+})();
+
+async function refreshSpectraChart() {
+
+    const card = document.getElementById("analysisSpectraCard");
+
+    try {
+
+        const res = await fetch("/analysis/spectra");
+        const data = await res.json();
+
+        if (!data.available) {
+            card.hidden = true;
+            return;
+        }
+
+        // Visible before drawing, so Plotly measures the card's width.
+        card.hidden = false;
+
+        ONEPIX.renderSpectraChart(
+            {
+                chart: document.getElementById("analysisSpectraChart"),
+                legend: document.getElementById("analysisSpectraLegend"),
+                table: document.getElementById("analysisSpectraTable"),
+            },
+            data,
+            { x: ONEPIX.t("analysis.spectra_xaxis"), y: ONEPIX.t("analysis.spectra_yaxis") }
+        );
+
+    } catch (err) {
+        console.error("Erreur chargement spectres :", err);
+        card.hidden = true;
+    }
+}
+
+
+// =====================================
+// ANALYSIS RESULTS
+// =====================================
+// What analysis steps computed (e.g. spectral indices): one row per
+// zone - named and colored like the zone map and the chart - or per
+// spectrum, or a min/mean/max summary for per-pixel results.
+
+let analysisOutputs = null;
+
+function formatOutput(value) {
+    if (typeof value !== "number") return "—";
+    const size = Math.abs(value);
+    if (size >= 1e5 || (size > 0 && size < 1e-3)) return value.toExponential(3);
+    return String(Number(value.toPrecision(4)));
+}
+
+function outputRowLabel(data, i) {
+    return data.kind === "zones"
+        ? ONEPIX.spectraSeriesLabel(data.rows[i], i)
+        : ONEPIX.t("analysis.outputs_spectrum", { n: i + 1 });
+}
+
+function buildOutputsTable(data) {
+    const table = document.createElement("table");
+    table.className = "data-table";
+
+    const headRow = table.createTHead().insertRow();
+    const headers = data.kind === "summary"
+        ? [ONEPIX.t("analysis.outputs_output"), ONEPIX.t("analysis.outputs_min"),
+           ONEPIX.t("analysis.outputs_mean"), ONEPIX.t("analysis.outputs_max")]
+        : [ONEPIX.t(data.kind === "zones" ? "analysis.outputs_zone" : "analysis.outputs_spectrum_column")]
+            .concat(data.names);
+    headers.forEach((text, i) => {
+        const th = document.createElement("th");
+        th.textContent = text;
+        if (i > 0) th.className = "num";
+        headRow.appendChild(th);
+    });
+
+    const body = table.createTBody();
+
+    if (data.kind === "summary") {
+        data.names.forEach((name, j) => {
+            const row = body.insertRow();
+            row.insertCell().textContent = name;
+            data.values.forEach((stat) => {
+                const cell = row.insertCell();
+                cell.className = "num";
+                cell.textContent = formatOutput(stat[j]);
+            });
+        });
+        return table;
+    }
+
+    data.values.forEach((values, i) => {
+        const row = body.insertRow();
+        const label = row.insertCell();
+        const wrap = document.createElement("span");
+        wrap.className = "outputs-label";
+
+        if (data.kind === "zones") {
+            const swatch = document.createElement("span");
+            swatch.className = "outputs-swatch";
+            swatch.style.background = ONEPIX.spectraSeriesColor(i);
+            wrap.appendChild(swatch);
+
+            // Same as clicking the zone in the chart's legend.
+            row.classList.add("is-clickable");
+            row.addEventListener("click", () => {
+                const item = document.getElementById("analysisSpectraLegend").children[i];
+                if (item) item.click();
+            });
+        }
+
+        wrap.appendChild(document.createTextNode(outputRowLabel(data, i)));
+        label.appendChild(wrap);
+
+        values.forEach((value) => {
+            const cell = row.insertCell();
+            cell.className = "num";
+            cell.textContent = formatOutput(value);
+        });
+    });
+
+    return table;
+}
+
+async function refreshAnalysisOutputs() {
+
+    const card = document.getElementById("analysisOutputsCard");
+
+    try {
+
+        const res = await fetch("/analysis/outputs");
+        const data = await res.json();
+
+        analysisOutputs = data.available ? data : null;
+        card.hidden = !data.available;
+        if (!data.available) return;
+
+        document.getElementById("analysisOutputsSub").textContent = ONEPIX.t(
+            "analysis.outputs_sub_" + data.kind, { n: data.count }
+        );
+
+        document.getElementById("analysisOutputsTable").replaceChildren(buildOutputsTable(data));
+
+    } catch (err) {
+        console.error("Analysis results:", err);
+        card.hidden = true;
+    }
+}
+
+// Full precision, as shown in the table otherwise.
+document.getElementById("analysisOutputsExport").addEventListener("click", () => {
+    const data = analysisOutputs;
+    if (!data) return;
+
+    const quote = (text) => /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+    const number = (value) => typeof value === "number" ? String(value) : "";
+    let lines;
+
+    if (data.kind === "summary") {
+        lines = [["output", "min", "mean", "max"].join(",")].concat(
+            data.names.map((name, j) => [quote(name)].concat(data.values.map((stat) => number(stat[j]))).join(","))
+        );
+    } else {
+        lines = [[data.kind === "zones" ? "zone" : "spectrum"].concat(data.names.map(quote)).join(",")].concat(
+            data.values.map((values, i) => [quote(outputRowLabel(data, i))].concat(values.map(number)).join(","))
+        );
+    }
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], { type: "text/csv" }));
+    link.download = "analysis_results.csv";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+});
+
+
+// =====================================
+// ZONE MAP
+// =====================================
+// Zone-based results (one spectrum per zone): the viewer shows each
+// zone in its spectrum's color, with its name - see zone-map.js.
+
+async function refreshZoneMap() {
+
+    const img = document.getElementById("resultFigure");
+
+    try {
+
+        const res = await fetch("/analysis/zones");
+        const data = await res.json();
+
+        if (!data.available) {
+            ONEPIX.clearZoneMap(img);
+            return;
+        }
+
+        await ONEPIX.renderZoneMap(img, "/analysis/zones", data, {
+            // Same as clicking that zone in the chart's legend.
+            onZoneClick: (zone) => {
+                const item = document.getElementById("analysisSpectraLegend").children[zone];
+                if (item) item.click();
+            },
+        });
+
+    } catch (err) {
+        console.error("Zone map:", err);
+        ONEPIX.clearZoneMap(img);
+    }
+}
+
+
+// =====================================
+// SAVE ANALYSIS
+// =====================================
+
+async function saveAnalysis() {
+
+    setUIBusy(true);
+
+    try {
+
+        const response = await fetch(
+            "/analysis/save",
+            {
+                method: "POST"
+            }
+        );
+
+        const data =
+            await response.json();
+
+        const status =
+            document.getElementById(
+                "saveStatus"
+            );
+
+        if (!response.ok) {
+
+            status.innerText =
+                ONEPIX.t("analysis.save_failed");
+
+            ONEPIX.toast(ONEPIX.t("analysis.toast_save_failed"), "error");
+
+            return;
+        }
+
+        status.innerText =
+            ONEPIX.t("analysis.save_success_prefix") + data.filename;
+
+        ONEPIX.toast(ONEPIX.t("analysis.toast_save_success_prefix") + data.filename, "success");
+
+        // refresh measure list
+        loadMeasures();
+
+    } catch(error) {
+
+        console.error(error);
+
+        ONEPIX.toast(ONEPIX.t("analysis.toast_save_failed"), "error");
+
+    } finally {
+
+        setUIBusy(false);
+    }
+}
+
+
+// =====================================
+// OPEN METHOD SPECIFIC ANALYSIS
+// =====================================
+
+async function openSpecificAnalysis() {
+
+    if (
+        !hasLoadedResult ||
+        specificAnalysisUrl === null
+    ) {
+
+        return;
+    }
+
+    setUIBusy(true);
+
+    try {
+
+        window.location.href = specificAnalysisUrl;
+
+    } catch(error) {
+
+        console.error(error);
+
+        ONEPIX.toast(
+            ONEPIX.t("analysis.toast_specific_failed"),
+            "error"
+        );
+
+    } finally {
+
+        setUIBusy(false);
+    }
+}
+
+
+// =====================================
+// VIEWER CONTROLS
+// (client-side only — CSS transform + Fullscreen API,
+// no backend calls, does not affect data loading/processing)
+// =====================================
+
+let viewerZoom = 1;
+
+function applyViewerZoom() {
+
+    document.getElementById("resultFigure").style.transform =
+        `scale(${viewerZoom})`;
+
+    document.getElementById("viewerZoomLabel").textContent =
+        Math.round(viewerZoom * 100) + "%";
+}
+
+document.getElementById("viewerZoomInBtn").addEventListener("click", () => {
+
+    viewerZoom = Math.min(4, viewerZoom + 0.25);
+    applyViewerZoom();
+});
+
+document.getElementById("viewerZoomOutBtn").addEventListener("click", () => {
+
+    viewerZoom = Math.max(0.5, viewerZoom - 0.25);
+    applyViewerZoom();
+});
+
+document.getElementById("viewerResetBtn").addEventListener("click", () => {
+
+    viewerZoom = 1;
+    applyViewerZoom();
+});
+
+document.getElementById("viewerFullscreenBtn").addEventListener("click", () => {
+
+    const box = document.getElementById("analysisFigureBox");
+
+    if (!document.fullscreenElement) {
+
+        box.requestFullscreen?.();
+
+    } else {
+
+        document.exitFullscreen?.();
+    }
+});
+
+
+// =====================================
+// INIT
+// =====================================
+
+loadMeasures();
+
+addPipelineStep();
+
+updateSpecificAnalysisButton();
+
+</script>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- spectra-chart.js adds renderSpectraChart to window.ONEPIX, so it
+     must load after onepix-ui.js (in global_base.html's <head>), which
+     replaces window.ONEPIX outright rather than merging into it. -->
+<script src="{{ url_for('static', filename='js/vendor/plotly-basic.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/spectra-chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/zone-map.js') }}"></script>
+{% endblock %}

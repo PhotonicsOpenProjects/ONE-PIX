@@ -1,0 +1,783 @@
+/* ============================================================
+   ONE-PIX — Shared components
+   Buttons, inputs, badges, cards, panels, tables, status states,
+   spinner, toasts, empty states. Built on design-system.css tokens.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Buttons
+   ---------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.btn:hover {
+  border-color: var(--text-faint);
+  background: var(--surface-sunken);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+/* Primary — the main call to action on a page */
+.btn-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--text-on-primary);
+}
+
+.btn-primary:hover {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+/* Success — completion / positive action */
+.btn-success {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--text-on-primary);
+}
+
+.btn-success:hover {
+  border-color: var(--success-hover);
+  background: var(--success-hover);
+}
+
+/* Danger — destructive action */
+.btn-danger {
+  border-color: var(--danger);
+  background: var(--danger);
+  color: var(--text-on-primary);
+}
+
+.btn-danger:hover {
+  border-color: var(--danger-hover);
+  background: var(--danger-hover);
+}
+
+/* Outline / ghost — secondary actions */
+.btn-outline {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.btn-outline:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.btn-ghost:hover {
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.btn-lg {
+  height: 44px;
+  padding: 0 var(--space-6);
+  font-size: var(--fs-md);
+  border-radius: var(--radius-md);
+}
+
+.btn-sm {
+  height: 28px;
+  padding: 0 var(--space-3);
+  font-size: var(--fs-xs);
+  border-radius: var(--radius-sm);
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ----------------------------------------------------------
+   Inputs / selects / labels
+   ---------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-faint);
+}
+
+.field-hint {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.field-error {
+  font-size: var(--fs-xs);
+  color: var(--danger);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input[type="password"],
+select,
+textarea {
+  width: 100%;
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+textarea {
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  resize: vertical;
+}
+
+input:hover,
+select:hover {
+  border-color: var(--text-faint);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+input:disabled,
+select:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+input.has-error,
+select.has-error {
+  border-color: var(--danger);
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+label {
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+/* ----------------------------------------------------------
+   Page shell — generic page header used by acquisition,
+   data_manager, plugins_manager (analysis has its own layout).
+   ---------------------------------------------------------- */
+
+.page-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.page-header h1 {
+  font-size: var(--fs-xxl);
+  margin-top: var(--space-1);
+}
+
+.page-sub {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  max-width: 56ch;
+}
+
+/* ----------------------------------------------------------
+   Cards / panels
+   ---------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.card-header h2,
+.card-header h3 {
+  font-size: var(--fs-md);
+}
+
+.card-body {
+  padding: var(--space-5);
+}
+
+.card-eyebrow {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+
+/* ----------------------------------------------------------
+   Badges / pills / status
+   ---------------------------------------------------------- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 22px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* A badge that carries its own .status-dot (live state) shouldn't also
+   draw the decorative ::before dot - it rendered as two dots. */
+.badge:has(> .status-dot)::before {
+  display: none;
+}
+
+.badge-neutral { background: var(--surface-sunken); color: var(--text-muted); }
+.badge-primary { background: var(--primary-soft); color: var(--primary-hover); }
+.badge-success { background: var(--success-soft); color: var(--success-hover); }
+.badge-warning { background: var(--warning-soft); color: var(--warning); }
+.badge-danger  { background: var(--danger-soft);  color: var(--danger-hover); }
+
+/* Status dot alone, for compact inline state */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex: none;
+}
+
+.status-dot.is-idle    { background: var(--text-faint); }
+.status-dot.is-busy    { background: var(--warning); animation: onepix-pulse 1.2s ease-in-out infinite; }
+.status-dot.is-success { background: var(--success); }
+.status-dot.is-error   { background: var(--danger); }
+
+@keyframes onepix-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ----------------------------------------------------------
+   Tables
+   ---------------------------------------------------------- */
+
+.table-wrap {
+  overflow: auto;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-sm);
+}
+
+.data-table th,
+.data-table td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-sunken);
+  color: var(--text-faint);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.data-table tbody tr:hover {
+  background: var(--surface-sunken);
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ----------------------------------------------------------
+   Spinner / loading
+   ---------------------------------------------------------- */
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: onepix-spin 0.7s linear infinite;
+  flex: none;
+}
+
+.spinner-lg {
+  width: 34px;
+  height: 34px;
+  border-width: 3px;
+}
+
+@keyframes onepix-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  background: var(--surface-overlay);
+  backdrop-filter: blur(1px);
+  border-radius: inherit;
+  z-index: 20;
+}
+
+.loading-overlay.is-page {
+  position: fixed;
+  border-radius: 0;
+}
+
+.loading-overlay-label {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.loading-overlay-progress {
+  width: 180px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.loading-overlay-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--primary);
+  border-radius: inherit;
+  transition: width 0.2s ease;
+}
+
+/* ----------------------------------------------------------
+   Empty states
+   ---------------------------------------------------------- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-7) var(--space-5);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.empty-state svg {
+  width: 32px;
+  height: 32px;
+  color: var(--text-faint);
+  opacity: 0.7;
+}
+
+.empty-state-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.empty-state-sub {
+  font-size: var(--fs-sm);
+  color: var(--text-faint);
+  max-width: 34ch;
+}
+
+/* ----------------------------------------------------------
+   Toasts
+   ---------------------------------------------------------- */
+
+#onepix-toast-region {
+  position: fixed;
+  bottom: var(--space-5);
+  right: var(--space-5);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 360px;
+  pointer-events: none;
+}
+
+.onepix-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.onepix-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.onepix-toast .status-dot {
+  margin-top: 5px;
+}
+
+.onepix-toast-msg {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.onepix-toast.toast-error   { border-color: var(--danger-border); }
+.onepix-toast.toast-success { border-color: var(--success-border); }
+.onepix-toast.toast-warning { border-color: var(--warning-border); }
+
+/* ----------------------------------------------------------
+   Reference dialog / clickable-image box - shared between the
+   analysis page's reference picker (zone/hypercube tabs - see
+   analysis.css for those tab-specific bits) and the HAS coregistration
+   panel's corner-click dialog (acquisition blueprint).
+   ---------------------------------------------------------- */
+
+.reference-dialog {
+  width: min(640px, 92vw);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-md);
+}
+
+.reference-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.reference-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border);
+}
+
+.reference-dialog-header h2 {
+  font-size: var(--fs-md);
+}
+
+.reference-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+.reference-dialog-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.reference-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.reference-zone-box {
+  position: relative;
+  min-height: 240px;
+  /* A square photo (e.g. this camera's 512x512 capture) scaled to the
+     wrapper's up-to-560px width below renders just as tall - 50vh
+     clipped it on any viewport under ~1100px tall, forcing a scroll
+     that looked like the photo had been cropped rather than just
+     scrolled. 80vh comfortably fits a square image on typical screens
+     without needing to scroll to see the rest of it. */
+  max-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* Hugs the <img> at its rendered size exactly (inline-block, no
+   flex-centering gap around it) so an absolutely-positioned overlay
+   inside this (a drag-selection rectangle, numbered click markers) -
+   positioned inside this wrapper, not inside .reference-zone-box -
+   lines up with coordinates computed from the image's own
+   getBoundingClientRect(). Positioning the overlay relative to the
+   box instead would be off by however much centering padding sits
+   between the box's edge and a smaller-than-box image. */
+.reference-zone-imgwrap {
+  /* A definite-width block (not inline-block - a percentage width on
+     the <img> inside wouldn't resolve against a shrink-to-fit parent,
+     which would quietly undo the upscaling below) sized against
+     .reference-zone-box, the flex container that actually has a real
+     width to resolve against. */
+  position: relative;
+  display: block;
+  width: min(100%, 560px);
+  line-height: 0;
+}
+
+.reference-zone-box img {
+  /* These images are often native-small (a reconstruction downsampled
+     by pattern_reduction, or a camera photo at a modest resolution) -
+     fill the wrapper's width instead of rendering at that tiny native
+     size, and keep upscaled pixels crisp rather than blurring them
+     smooth, so corner/region selection stays precise. */
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  user-select: none;
+  /* Without this, a click that drifts by a pixel or two before
+     mouseup (easy to do by hand when placing a point) lets the
+     browser start its own native image-drag instead - the whole
+     photo visibly picks up and follows the cursor rather than a
+     point/corner getting placed. draggable="false" on the <img>
+     itself is the primary fix (Firefox/Chrome); this covers Safari,
+     which instead honors -webkit-user-drag. */
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+.reference-zone-box.is-empty {
+  min-height: 160px;
+}
+
+/* ----------------------------------------------------------
+   Utility
+   ---------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ----------------------------------------------------------
+   Interactive spectra chart (Plotly) - acquisition and analysis
+   pages, shown only when the imaging method's result has
+   per-cluster spectra to plot (see GET .../spectra).
+   ---------------------------------------------------------- */
+
+.spectra-chart {
+  width: 100%;
+  height: 360px;
+}
+
+.spectra-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.spectra-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: none;
+  background: none;
+  padding: var(--space-1) 0;
+  font-size: var(--fs-sm);
+  color: var(--text);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.spectra-legend-item:hover {
+  opacity: 0.75;
+}
+
+.spectra-legend-item.is-dimmed {
+  opacity: 0.35;
+}
+
+.spectra-legend-swatch {
+  width: 16px;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  flex: none;
+}
+
+.spectra-legend-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.spectra-table-scroll {
+  max-height: 360px;
+}
+
+/* ----------------------------------------------------------
+   Zone map tooltip (static/js/zone-map.js) - names the zone under
+   the cursor on a zone-based result's image. Positioned inside the
+   image's own container (which must be position: relative).
+   ---------------------------------------------------------- */
+
+.zone-tooltip {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  max-width: 260px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-md);
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+.zone-tooltip-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.zone-tooltip-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.zone-tooltip-detail {
+  margin-top: 2px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}

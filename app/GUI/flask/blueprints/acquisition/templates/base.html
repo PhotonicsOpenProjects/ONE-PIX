@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>ONE-PIX</title>
+
+    <style>
+
+        body {
+            margin: 0;
+            font-family: Arial;
+        }
+
+        .navbar {
+
+            background-color: #222;
+
+            padding: 15px;
+        }
+
+        .navbar a {
+
+            color: white;
+
+            text-decoration: none;
+
+            margin-right: 20px;
+
+            font-weight: bold;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="navbar">
+
+        <a href="/acquisition">
+            Acquisition
+        </a>
+
+        <a href="/analysis">
+            Analysis
+        </a>
+
+    </div>
+
+    <div class="content">
+
+        {% block content %}
+        {% endblock %}
+
+    </div>
+
+</body>
+
+</html>

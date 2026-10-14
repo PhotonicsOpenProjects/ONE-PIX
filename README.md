@@ -1,141 +1,282 @@
-
 <p align="center">
 <img src="imgs/logo.png" alt="logo" width="200"/>
 </p>
 
-# ONE-PIX kit project   #
+# ONE-PIX
 
-## Introduction 
+<p align="center">
+Open-source modular hyperspectral single-pixel imaging ecosystem
+</p>
 
-The ONE-PIX kit is an hyperspectral camera using single pixel imaging principle to measure hypercubes in the visible region. It can be enhanced towards the infrared region. This modular kit can be used with different spectrometers and optical elements for the collection. To date, it can measure scenes exposed to ambient light, but it has been primarily tested and developed for use in dimly lit indoor environments.
+<p align="center">
+Acquisition • Reconstruction • Spectral Analysis • Plugin-Based Architecture
+</p>
 
-This kit is ideal for getting started with hyperspectral imaging or single pixel imaging. Thus it is a tool for teachers and students to discover non conventional imaging. It is also an economic tool to produce low cost hypercubes of tailored scenes or to reproduce academical results within the robotic vision field. 
-To learn more about single pixel imaging theory used for hyperspectral imaging, you can read our [article. ](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7070961/)
+---
 
-This kit was developed with the primary need in mind to be able to be assembled on a standard fablab with laser cutting. Little wiring (all low voltage) and no soldering is required. You should find a fablab in your neighbourhood capable (and enthusiastic) of helping you build this cool instrument, especially if they can have some fun with it afterwards.
+<p align="center">
+<a href="https://one-pix.readthedocs.io/">Documentation</a> •
+<a href="https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki">Wiki</a> •
+<a href="https://github.com/PhotonicsOpenProjects/ONE-PIX">GitHub</a> •
+<a href="https://github.com/PhotonicsOpenProjects/ONE-PIX/issues">Issues</a>
+</p>
+
+## Introduction
+
+The ONE-PIX project is an open-source hyperspectral camera based on single-pixel imaging principles. It enables the acquisition of hyperspectral datacubes in the visible range and can be extended toward infrared wavelengths depending on the hardware configuration.
+
+Designed as a highly modular ecosystem, ONE-PIX supports multiple imaging methods, spectrometers, cameras and processing workflows through a plugin-based architecture. The project aims to provide an extensible platform for research, education and experimentation around computational imaging and hyperspectral acquisition.
+
+The ONE-PIX ecosystem can be used for:
+
+- hyperspectral imaging research
+- computational imaging experiments
+- rapid prototyping of custom imaging systems
+- teaching and discovery of single-pixel imaging
+- low-cost hyperspectral acquisition
+- development of custom spectral processing pipelines
+
+The project was originally developed to remain accessible and reproducible using affordable hardware and open-source software. It can run on Raspberry Pi devices for embedded acquisitions or on standard computers for higher performance workflows and advanced processing pipelines.
+
+To learn more about the single-pixel imaging theory used for hyperspectral imaging, you can read our [article](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7070961/).
 
 ### Working principle
 
-The ONE-PIX kit contains a video projector and a fibered spectrometer with superimposed fields of view. Both are connected and controlled by a Raspberry Pi board.
- 
+The ONE-PIX system uses a video projector and a single-pixel detector such as a spectrometer with superimposed fields of view.
+
 <p align="center">
 <img src="imgs/principle.png" alt="ONE-PIX principle" width="500"/>
 </p>
 
-For more information about the single pixel imaging you can go [here](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/2.-Theoretical-principles)
+During acquisition, a sequence of structured light patterns is projected onto the scene. For each projected pattern, the detector measures the integrated reflected spectrum of the scene. Reconstruction algorithms then recover the spatial and spectral information from these measurements to generate a hyperspectral datacube.
 
-ONE-PIX technology involves projecting a series of patterns onto a scene to be imaged. A spectrometer measures the average reflected spectrum of the scene for each projection. An algorithm then reconstructs the hypercube of the scene from all the spectra measured during the acquisition. 
-The Raspberry Pi board ensures the synchronization between patterns projections and the spectrometer measurements.
-
-### Architecture of the ONE-PIX kit repository 
-
-This repository contains scripts and software embedded on the Raspberry Pi and all the information to install and use it properly. 
-
-An other [ONE-PIX_hardware](https://github.com/PhotonicsOpenProjects/ONE-PIX_hardware) repository contains all the files and information to build a case containing all the components of the ONE-PIX kit and their 3D printed attachments.
+The acquisition workflow is orchestrated by the ONE-PIX core framework, while imaging methods, hardware drivers and analysis pipelines can be extended independently through the modular plugin ecosystem.
 
 
-## ONE-PIX software Installation
+## Quick Installation
 
+### Requirements
 
-The installation of the ONE-PIX software is achievable as the hardware installation is fully completed..
-To do so, you can follow the [hardware building tutorial](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/4.-ONE%E2%80%90PIX--Hardware) .
-You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/)
+`onepix` is compatible with Python 3.9 and 3.10.
 
-the ONE-PIX kit has been tested and is functional in the following environments: 
+Make sure you are using `pip >= 21.0` to install dependencies correctly.
 
-|Tested OS| Tested python version|remark|
-|---|---|---|
-|[Rasbian bullseye version 11 (32-Bit)](https://www.raspberrypi.com/software/operating-systems/) |3.9|tested on raspberry pi 4B + with 8 Go RAM|
-|Windows 11|3.11.6| impossible to carry out [HAS measurements](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/3.-ONE%E2%80%90PIX-measures-principles#has-method) and no RGB capture at all |
+Lower or higher versions of Python and `pip` have not been tested and are therefore not officially supported.
 
-Here we assume that The ONE-PIX soft was developed to use a raspberry pi with Raspberry Pi OS.
-However it possible use directly your PC with python for more advanced performance. 
+### Clone the repository
 
-This tutorial details all the steps required to install the ONE-PIX software on a Raspberry Pi 4 board. 
-
-For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
-
-### Installing ONE-PIX on a raspberry pi  
-All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it are available [here](imgs/ONE-PIX_install_on_rasp.md). 
-For other OS just continue to read this readme file. 
-
-
-### Download git repository
-
-The first step of this installation is to clone the ONE-PIX directory from Github.
-
-From the Raspberry Pi, open a terminal and go to the desktop with the following command line:
-
-```
-cd Desktop
+```bash
+git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
+cd ONE-PIX
 ```
 
-Download the ONE-PIX software from git 
+### Create a Python environment (recommended)
 
-```
-sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
-```
+Linux / macOS:
 
-### ONE-PIX installation 
-
-To install ONE-PIX on the raspberry pi board just run the setup.sh for that go in ther install folder with this command  :
-
-```
-cd ONE-PIX/install 
-```
-and run the installation script with this command :
-
-```
-sudo chmod +x ./install.sh
-./install.sh
+```bash
+python -m venv .venv
+source .venv/bin/activate
 ```
 
+Windows:
 
-### Spectrometer installation 
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
 
-The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins/spectrometer) of plugins. For each of them, Raspberry pi board installation instructions are detailed in each associated README file. 
-For example you can see the [OceanInsight](plugins/spectrometer/OceanInsight/README.md) or [Avantes](plugins/spectrometer/Avantes/README.md) installation instructions to achieve before measure with your ONE-PIX  
+### Install ONE-PIX
 
-If you want to implement a new model of spectrometer  you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
+```bash
+python install.py
+```
+
+The installation script automatically detects the current platform and installs the appropriate dependencies and hardware configuration.
+
+On standard desktop systems (Windows/Linux/macOS), the installer deploys:
+
+- the ONE-PIX core framework
+- default imaging methods
+- analysis pipeline dependencies
+- scientific Python packages
+
+On Raspberry Pi systems, the installer additionally configures the embedded acquisition environment required for hardware operation, including:
+
+- OpenCV system dependencies
+- USB and spectrometer communication
+- display and projector management
+- embedded acquisition configuration
+
+For more information about Raspberry Pi hardware setup and acquisition configuration, please refer to the dedicated installation guides and wiki documentation.
 
 
-The installation is now complete. 
-Now you can follow the [tutorial measure hyperspectral image](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide) to measure your first hyperspectral datacube ! 
+## Quick Usage
 
+### Launch the graphical interface
 
-###  Measuring and analysing hypercubes 
+The easiest way to use ONE-PIX is through the Flask-based graphical interface.
 
-The software architecture of the ONE-PIX kit offers different ways to measure, reconstruct and analyze hyperspectral images. 
+From the root repository directory, launch the GUI with:
 
-<p align="center">
-<img src="imgs/archi onepix refactoring.png" alt="ONE-PIX software architecture" width="600"/ >
-</p>
+```bash
+python app/GUI/flask/run.py
+```
 
+The graphical interface provides access to:
 
-- The fastest way to measure and analyze hyperspectral images without write any line of code is to use the [GUI interface](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide)
-- For more advanced acquisitions,use directly [command line interfaces](app/cli) or [python script examples](app/python_code_examples) and adapt them on your usecase  with help in the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
- 
-## Contributing 
+- hyperspectral acquisitions
+- reconstruction workflows
+- hardware configuration
+- imaging method selection
+- spectral analysis tools
 
-### Mounting experience
+---
 
-If you use it from a already assemble kit, and do not found a detail on the manual, tell us !
-If you assemble it by yourself and found some simpliest or smartest way to do it, please share !
-If you encounter difficulties, have suggestions or even just cheers the developpers, do not hesitate again !
+### Python API
 
-### Use Cases
+Advanced users can directly interact with the ONE-PIX Python API to build custom acquisition, reconstruction and analysis workflows.
 
-Any questions, pedagogical or in a front of science, very applied or meta-conceptual are interesting for us and other users. A brief description and welcome message on this repository will be greatly apreciated. If we are curious enough we will contact you.
+```python
+from onepix.Acquisition import Acquisition
+from onepix.Reconstruction import Reconstruction
+from onepix.Analysis import Analysis
 
-### New functions
+# Acquisition
+acq = Acquisition(
+    imaging_method_name="has"
+)
 
-As you will rapidly catch-it : this simple set-up has an infinity of potential developements, applications and usages. Feel free to play with it once it works at your place. 
-If you find new tricks, feel free to share it with us and the community. We will dedicate ourselves (on the limits of our daily hours) to make the best effort to integrate and promote to the community every contribution with the greater respect to your credits. 
+acq.thread_acquisition()
 
-### Your version
+# Reconstruction
+rec = Reconstruction(
+    acquisition_dict=acq.acquisition_results
+)
 
-If you tried a new sensors, an other mechanical plan, you can freely create your own forks but if you consider it could be usefull to keep consistency with other develepment and insturmental choice, we can discuss on intégrating also , spectormeter wrappers or even more crazy evolution in the main.
+rec.data_reconstruction()
 
-## Important remarks
+# Analysis
+ana = Analysis(
+    reconstruction_dict=rec.reconstruction_results
+)
 
-:bulb: **Tip:** Do not forget to have fun... because we had some making it for you !
+ana.data_analysis()
+```
+
+More complete acquisition and analysis workflows are available in:
+
+- `app/python_code_examples/`
+- the API documentation
+- the project wiki
+
+## ONE-PIX Central Framework
+
+The ONE-PIX repository is the central framework of the ecosystem. It provides the core orchestration layer used to manage hyperspectral acquisitions, reconstructions and analysis workflows independently from the underlying hardware or imaging methods.
+
+The core framework is responsible for:
+
+- acquisition workflow orchestration
+- reconstruction workflow management
+- analysis pipeline integration
+- hardware abstraction
+- imaging method management
+- configuration handling
+- graphical interface integration
+- plugin interoperability
+
+ONE-PIX is designed around a modular architecture where imaging methods, hardware drivers and processing pipelines can evolve independently while remaining compatible through shared interfaces and standardized data structures.
+
+The framework can operate on both embedded acquisition systems such as Raspberry Pi devices and standard desktop environments for advanced reconstruction and spectral processing workflows.
+
+## Ecosystem Architecture
+
+| Component | Role |
+|---|---|
+| [ONE-PIX](https://github.com/PhotonicsOpenProjects/ONE-PIX) | Central framework orchestrating acquisition, reconstruction and analysis workflows |
+| [onepix_plugins](https://gitlab.com/photonics-open-projects/onepix_plugins) | Main plugin ecosystem containing imaging methods, spectrometers, RGB cameras and analysis plugin families |
+| [onepix_plugins_manager](https://gitlab.com/photonics-open-projects/onepix_plugins_manager) | Command-line plugin installation and ecosystem management system |
+| Imaging Method Plugins | Plugins implementing acquisition, reconstruction and analysis workflows for single-pixel imaging methods |
+| Spectrometer Plugins | Plugins implementing spectrometer hardware interfaces |
+| RGB Camera Plugins | Plugins implementing RGB and auxiliary camera interfaces |
+| pipeline-analysis | Abstract spectral processing and analysis framework |
+| Analysis Plugins | Spectral processing and machine learning plugin family compatible with the analysis pipeline ecosystem |
+
+## Core Architecture
+
+ONE-PIX is organized around a modular workflow architecture separating:
+
+- hyperspectral acquisition
+- image reconstruction
+- spectral analysis
+- hardware management
+- imaging method integration
+
+This architecture allows imaging methods, hardware interfaces and analysis workflows to evolve independently while remaining interoperable inside the ONE-PIX ecosystem.
+
+The framework supports interchangeable spectrometers, RGB cameras and single-pixel imaging strategies through a modular plugin-based ecosystem.
+
+### Repository Architecture
+
+```text
+ONE-PIX/
+├── app/
+├── onepix/
+├── conf/
+├── install/
+├── autodoc/
+├── imgs/
+└── logs/
+```
+
+| Directory | Role |
+|---|---|
+| app/ | User-facing applications including the Flask GUI, Python API examples and remote control services |
+| onepix/ | Central acquisition, reconstruction and analysis framework |
+| conf/ | JSON configuration files for acquisition parameters, hardware setup and calibration data |
+| install/ | Platform-specific installation scripts and dependencies |
+| autodoc/ | Documentation generation sources |
+| imgs/ | README and documentation assets |
+| logs/ | Acquisition and execution logs |
+
+## Documentation
+
+The ONE-PIX ecosystem documentation is primarily available through the project Wiki.
+
+The Wiki contains detailed guides and technical documentation for:
+
+- hardware installation
+- Raspberry Pi setup
+- acquisition workflows
+- imaging methods
+- plugin development
+- spectral analysis pipelines
+- calibration procedures
+- remote control interfaces
+- troubleshooting
+- advanced API usage
+
+### Documentation Links
+
+- [Project Wiki](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki)
+- [API Documentation](https://one-pix.readthedocs.io/)
+- [Issues & Support](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
+
+## Contributing
+
+ONE-PIX is an open and modular ecosystem designed for experimentation, research and community-driven development.
+
+Contributions are welcome at multiple levels of the ecosystem, including:
+
+- new imaging methods
+- spectrometer integrations
+- RGB camera integrations
+- spectral analysis plugins
+- processing pipelines
+- hardware improvements
+- documentation and tutorials
+- bug fixes and performance improvements
+
+The plugin-based architecture allows contributors to develop and distribute independent packages without modifying the central ONE-PIX framework.
+
+For contribution guidelines, plugin development and technical discussions, please refer to the project Wiki and GitHub Issues.

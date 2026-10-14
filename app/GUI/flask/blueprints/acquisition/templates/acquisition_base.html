@@ -1,0 +1,19 @@
+{% extends "global_base.html" %}
+
+{% block title %}
+Acquisition
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet"
+      href="{{ url_for('acquisition.static', filename='style.css') }}">
+{% endblock %}
+
+{% block app_content %}
+
+<div class="page-shell">
+    {% block content %}
+    {% endblock %}
+</div>
+
+{% endblock %}

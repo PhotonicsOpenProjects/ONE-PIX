@@ -1,0 +1,506 @@
+/* ============================================================
+   ONE-PIX — Analysis workspace
+   Built on the shared design-system.css / components.css tokens.
+   ============================================================ */
+
+.analysis-container {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+  height: calc(100vh - var(--nav-height));
+  padding: var(--space-5);
+}
+
+/* ----------------------------------------------------------
+   Left panel — data / pipeline / actions
+   ---------------------------------------------------------- */
+
+.analysis-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  height: 100%;
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+
+.panel-header h1 {
+  font-size: var(--fs-xl);
+  margin-top: var(--space-1);
+}
+
+.panel-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-xs);
+}
+
+.panel-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+}
+
+/* 1 / 2 / 3 workflow order of the left panel's sections */
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: var(--fs-xs);
+  letter-spacing: 0;
+}
+
+.panel-section-hint {
+  margin-top: calc(-1 * var(--space-2));
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.panel-status {
+  min-height: 16px;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.panel-actions {
+  gap: var(--space-2);
+}
+
+/* ----------------------------------------------------------
+   Processing pipeline
+   ---------------------------------------------------------- */
+
+#pipelineSteps {
+  display: flex;
+  flex-direction: column;
+}
+
+.pipeline-step {
+  position: relative;
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding-top: var(--space-4);
+}
+
+.pipeline-step:first-child {
+  padding-top: 0;
+}
+
+/* Connector arrow above every step but the first */
+.pipeline-step:not(:first-child)::before {
+  content: "↓";
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 24px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: var(--fs-sm);
+  line-height: 1;
+}
+
+.pipeline-step-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+}
+
+.pipeline-step-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pipeline-step-remove {
+  flex: none;
+  margin-top: 1px;
+}
+
+.pipeline-params {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* One parameter row, created dynamically by loadStepParams() —
+   element class name is fixed in analysis.html's <script>, do not rename. */
+.analysis-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.analysis-section label {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.analysis-section input {
+  width: 120px;
+  flex: none;
+}
+
+/* ----------------------------------------------------------
+   Reflectance reference picker (reference_path parameter)
+   ---------------------------------------------------------- */
+
+.reference-picker {
+  flex-wrap: wrap;
+}
+
+.reference-picker-status {
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reference-picker-status.is-set {
+  color: var(--success-hover);
+}
+
+.reference-picker-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex: none;
+}
+
+/* ----------------------------------------------------------
+   Reference dialog tabs (zone / hypercube selection) - the dialog
+   chrome itself (.reference-dialog, .reference-dialog-header/-panel/
+   -hint/-actions) and the clickable-image box
+   (.reference-zone-box/-imgwrap) live in the shared components.css
+   now: the HAS coregistration panel (acquisition blueprint) reuses
+   that same image-click dialog pattern and isn't on a page that loads
+   this stylesheet. Only what's actually specific to this tabbed
+   zone/hypercube picker (the tabs themselves, and the drag-rectangle
+   selection box) stays here.
+   ---------------------------------------------------------- */
+
+.reference-dialog-tabs {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-5) 0;
+}
+
+.reference-dialog-tab {
+  height: 32px;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reference-dialog-tab.is-active {
+  border-color: var(--border);
+  background: var(--surface-sunken);
+  color: var(--text);
+}
+
+.reference-zone-selection {
+  position: absolute;
+  border: 2px dashed var(--primary);
+  background: var(--primary-soft);
+  pointer-events: none;
+}
+
+/* ----------------------------------------------------------
+   Right panel — viewer
+   ---------------------------------------------------------- */
+
+/* Right column: the viewer, with the spectra card underneath. Scrolls
+   on its own, like the left panel. */
+.analysis-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  height: 100%;
+  min-width: 0;
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+
+.viewer-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Fills the column on its own; once the spectra card is shown, it
+   keeps a comfortable height and the column scrolls to the card. */
+.analysis-main .viewer-panel {
+  height: auto;
+  flex: 1 0 auto;
+  min-height: max(380px, 55vh);
+}
+
+.analysis-main > .card {
+  flex: none;
+}
+
+.viewer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  flex: none;
+}
+
+.viewer-toolbar-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.viewer-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.viewer-zoom-label {
+  min-width: 42px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+.figure-box {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: var(--surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.figure-box img#resultFigure {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform var(--transition-base);
+}
+
+.figure-box img#resultFigure:not([src]),
+.figure-box img#resultFigure[src=""] {
+  display: none;
+}
+
+.empty-figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  color: var(--text-faint);
+  text-align: center;
+  padding: var(--space-5);
+}
+
+.empty-figure svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.7;
+}
+
+.empty-figure .empty-state-title {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.empty-figure .empty-state-sub {
+  font-size: var(--fs-sm);
+  color: var(--text-faint);
+  max-width: 34ch;
+}
+
+/* ----------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------- */
+
+@media (max-width: 980px) {
+  .analysis-container {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .analysis-panel {
+    height: auto;
+    overflow-y: visible;
+  }
+
+  .viewer-panel,
+  .analysis-main .viewer-panel {
+    height: 60vh;
+    min-height: 0;
+    flex: none;
+  }
+
+  .analysis-main {
+    height: auto;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+}
+
+/* ----------------------------------------------------------
+   Analysis results card (values computed by analysis steps)
+   ---------------------------------------------------------- */
+
+.analysis-outputs {
+  max-height: 360px;
+}
+
+.analysis-outputs .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.analysis-outputs tr.is-clickable {
+  cursor: pointer;
+}
+
+.outputs-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.outputs-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+}
+
+/* ----------------------------------------------------------
+   Choice parameters (several values: checkbox chips)
+   ---------------------------------------------------------- */
+
+/* Name above the menu or chips, not beside them like other params -
+   and undo .analysis-section's label/input sizing on the chips. */
+.analysis-section.choice-param {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.analysis-section.choice-param select {
+  width: 100%;
+}
+
+.analysis-section .param-choice {
+  flex: none;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.analysis-section .param-choice input {
+  width: auto;
+  height: auto;
+  padding: 0;
+  box-shadow: none;
+  accent-color: var(--primary);
+}
+
+.param-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.param-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2) 2px var(--space-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  user-select: none;
+}
+
+.analysis-section .param-choice:has(input:checked) {
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+}
+
+.analysis-section .param-choice input {
+  margin: 0;
+}
+
+.param-choices-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin-top: var(--space-1);
+  font-size: var(--fs-xs);
+}
+
+.param-choices-action {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.param-choices-action:hover {
+  text-decoration: underline;
+}
+
+.param-choices-hint {
+  color: var(--text-faint);
+}

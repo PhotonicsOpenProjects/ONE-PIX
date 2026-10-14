@@ -1,31 +1,3 @@
 {
-    "m": [
-        [
-            1.0937227207084395,
-            0.02804414660950343,
-            -413.4563272197571
-        ],
-        [
-            0.01400014418649397,
-            1.0920123313632741,
-            -186.9435388743481
-        ],
-        [
-            4.620509783993512e-05,
-            0.0001335009362292131,
-            1.0
-        ]
-    ],
-    "clustering_method": "Slic",
-    "clustering_parameters": [
-        2,
-        5
-    ],
-    "max_height": 304,
-    "max_width": 414,
-    "IP": "ws://192.168.5.60:8000",
-    "port": "8000",
-    "mode_choice": "Advanced",
-    "acquisition_method": "Complete",
-    "normalisation_path": ""
+  "normalisation_path": ""
 }

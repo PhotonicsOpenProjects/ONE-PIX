@@ -1,0 +1,238 @@
+/* ============================================================
+   ONE-PIX — Plugins Manager
+   Built on the shared design-system.css / components.css tokens.
+   Note: .pill / .pill.off / .pill.update, .version-next,
+   .version-available and #statusPill[data-state] are set by
+   plugins_manager.js — keep these selectors even when restyling.
+   ============================================================ */
+
+.plugins-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+#metaLine {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.plugins-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) minmax(320px, 420px);
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+.panel {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.panel h2 {
+  border-left: 3px solid var(--primary);
+  padding-left: var(--space-2);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--text);
+}
+
+.plugins-panel,
+.output-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.plugins-panel {
+  min-height: 620px;
+}
+
+/* Fixed height, whatever pip prints: the log scrolls inside it instead
+   of growing the page, and it stays in view while the list scrolls. */
+.output-panel {
+  align-self: start;
+  position: sticky;
+  top: var(--space-5);
+  height: min(620px, calc(100vh - 2 * var(--space-5)));
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-title-row h2 {
+  border: none;
+  padding: 0;
+  font-size: var(--fs-md);
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text);
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+#statusPill[data-state="ready"] {
+  background: var(--success-soft);
+  color: var(--success-hover);
+}
+
+#statusPill[data-state="error"] {
+  background: var(--danger-soft);
+  color: var(--danger-hover);
+}
+
+#statusPill[data-state="running"],
+#statusPill[data-state="loading"] {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+td.path,
+td.package {
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+}
+
+/* Installed / missing pill — class set directly by plugins_manager.js */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--success-soft);
+  color: var(--success-hover);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+td.version {
+  white-space: nowrap;
+}
+
+.pill.off {
+  background: var(--surface-sunken);
+  color: var(--text-faint);
+}
+
+.pill.update {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+/* Newer version an update would install, after the installed one */
+.version-next {
+  color: var(--warning);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Version available for a plugin that isn't installed */
+.version-available {
+  color: var(--text-faint);
+}
+
+pre#output {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: var(--space-4);
+  overflow: auto;
+  background: #14161b;
+  color: #e7e9ee;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1120px) {
+  .plugins-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .output-panel {
+    grid-column: 1 / -1;
+    position: static;
+    height: 360px;
+  }
+}
+
+@media (max-width: 760px) {
+  .plugins-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .header-actions .btn {
+    flex: 1;
+  }
+
+  .plugins-layout {
+    grid-template-columns: 1fr;
+    padding: var(--space-3);
+  }
+
+  .plugins-panel {
+    min-height: 380px;
+  }
+
+  .output-panel {
+    height: 380px;
+  }
+}

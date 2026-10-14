@@ -1,0 +1,506 @@
+{% extends "acquisition_base.html" %}
+
+{% block title %}{{ t('acquisition.title') }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <div class="card-eyebrow">{{ t('acquisition.eyebrow') }}</div>
+        <h1>{{ t('acquisition.title') }}</h1>
+        <p class="page-sub">{{ t('acquisition.subtitle') }}</p>
+    </div>
+
+    <span id="acqStatusBadge" class="badge badge-neutral">
+        <span class="status-dot is-idle"></span>
+        <span id="acqStatusLabel">{{ t('acquisition.status_ready') }}</span>
+    </span>
+</div>
+
+<div class="acquisition-grid">
+
+    <!-- ============================= -->
+    <!-- SETTINGS -->
+    <!-- ============================= -->
+
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ t('acquisition.settings_card_title') }}</h2>
+        </div>
+
+        <div class="settings-list">
+
+            <a class="settings-item" href="{{ url_for('acquisition.hardware_page') }}">
+                <span class="settings-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="7" width="18" height="12" rx="2"></rect>
+                        <circle cx="12" cy="13" r="3"></circle>
+                        <path d="M8 7 9.5 4h5L16 7"></path>
+                    </svg>
+                </span>
+                <span class="settings-item-text">
+                    <span class="settings-item-title">{{ t('acquisition.hardware_title') }}</span>
+                    <span class="settings-item-sub">
+                        {%- if overview and overview.spectrometer -%}
+                            {{ overview.spectrometer }} · {{ overview.camera }}
+                            {%- if overview.wl_lim and overview.wl_lim|length == 2 %} · {{ overview.wl_lim[0] }}–{{ overview.wl_lim[1] }} nm{% endif %}
+                        {%- else -%}
+                            {{ t('acquisition.hardware_sub') }}
+                        {%- endif -%}
+                    </span>
+                </span>
+                <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 6 6 6-6 6"></path>
+                </svg>
+            </a>
+
+            <a class="settings-item" href="{{ url_for('acquisition.software_page') }}">
+                <span class="settings-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="14" rx="2"></rect>
+                        <line x1="8" y1="21" x2="16" y2="21"></line>
+                        <line x1="12" y1="18" x2="12" y2="21"></line>
+                    </svg>
+                </span>
+                <span class="settings-item-text">
+                    <span class="settings-item-title">{{ t('acquisition.software_title') }}</span>
+                    <span class="settings-item-sub">
+                        {%- if overview and overview.imaging_method -%}
+                            {{ overview.imaging_method|upper }} · {{ overview.integration_time_ms }} ms
+                            {%- if overview.scans %} · {{ t('acquisition.summary_scans').replace('{n}', overview.scans|string) }}{% endif %}
+                        {%- else -%}
+                            {{ t('acquisition.software_sub') }}
+                        {%- endif -%}
+                    </span>
+                </span>
+                <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 6 6 6-6 6"></path>
+                </svg>
+            </a>
+
+            <a class="settings-item" href="{{ url_for('acquisition.imaging_page') }}">
+                <span class="settings-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 17 8 9l4 5 4-8 5 11"></path>
+                    </svg>
+                </span>
+                <span class="settings-item-text">
+                    <span class="settings-item-title">{{ t('acquisition.imaging_title') }}</span>
+                    <span class="settings-item-sub">
+                        {%- if overview and overview.imaging_summary -%}
+                            {{ overview.imaging_summary }}
+                        {%- else -%}
+                            {{ t('acquisition.imaging_sub') }}
+                        {%- endif -%}
+                    </span>
+                </span>
+                <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 6 6 6-6 6"></path>
+                </svg>
+            </a>
+
+        </div>
+
+        {% if overview and overview.warnings %}
+        <div class="preflight" role="status">
+            {% for warning in overview.warnings %}
+            <div class="preflight-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                <div>
+                    <p>{{ warning.message }}</p>
+                    {% if warning.fix == 'hardware' %}
+                    <a href="{{ url_for('acquisition.hardware_page') }}">{{ t('acquisition.preflight_fix_hardware') }}</a>
+                    {% else %}
+                    <a href="{{ url_for('acquisition.addon_page') }}">{{ t('acquisition.preflight_fix') }}</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ============================= -->
+    <!-- PREVIEW -->
+    <!-- ============================= -->
+
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ t('acquisition.preview_card_title') }}</h2>
+        </div>
+
+        <div class="viewer-body">
+            <div class="figure-box" id="figureBox">
+
+                <img id="acq-figure" alt="{{ t('acquisition.title') }}" hidden>
+
+                <div class="empty-state" id="acqEmptyState">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                        <circle cx="9" cy="9" r="2"></circle>
+                        <path d="m21 15-5-5L5 21"></path>
+                    </svg>
+                    <div class="empty-state-title">{{ t('acquisition.empty_title') }}</div>
+                    <div class="empty-state-sub">{{ t('acquisition.empty_sub') }}</div>
+                </div>
+
+                <div id="loader" class="loading-overlay">
+                    <div class="spinner spinner-lg"></div>
+                    <div class="loading-overlay-label" id="loaderLabel">{{ t('acquisition.loading_label') }}</div>
+                    <div class="loading-overlay-progress">
+                        <div class="loading-overlay-progress-fill" id="loaderProgressFill"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================= -->
+<!-- SPECTRA (interactive, only shown when the imaging method has
+     per-cluster spectra to plot - see GET /acquisition/spectra) -->
+<!-- ============================= -->
+
+<div class="card" id="acqSpectraCard" hidden>
+    <div class="card-header">
+        <h2>{{ t('acquisition.spectra_card_title') }}</h2>
+        <button type="button" class="btn btn-outline btn-sm" id="acqSpectraViewToggle">
+            {{ t('acquisition.spectra_view_table') }}
+        </button>
+    </div>
+    <div class="card-body">
+        <div id="acqSpectraChart" class="spectra-chart"></div>
+        <div id="acqSpectraLegend" class="spectra-legend"></div>
+        <div id="acqSpectraTable" hidden></div>
+    </div>
+</div>
+
+<!-- ===================================== -->
+<!-- RUN -->
+<!-- ===================================== -->
+
+<div class="run-bar">
+    <button id="runBtn" class="btn btn-primary btn-lg run-toggle-btn" onclick="onRunButtonClick()">
+        <svg id="runBtnIconPlay" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"></path>
+        </svg>
+        <svg id="runBtnIconStop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+        </svg>
+        <span id="runBtnLabel">{{ t('acquisition.run_button') }}</span>
+    </button>
+</div>
+
+<script>
+
+function setAcqStatus(state, label) {
+
+    const badge = document.getElementById("acqStatusBadge");
+    const dot = badge.querySelector(".status-dot");
+    const text = document.getElementById("acqStatusLabel");
+
+    badge.classList.remove("badge-neutral", "badge-warning", "badge-success", "badge-danger");
+    dot.classList.remove("is-idle", "is-busy", "is-success", "is-error");
+
+    const map = {
+        idle:    ["badge-neutral", "is-idle"],
+        busy:    ["badge-warning", "is-busy"],
+        success: ["badge-success", "is-success"],
+        error:   ["badge-danger", "is-error"]
+    };
+
+    const classes = map[state] || map.idle;
+
+    badge.classList.add(classes[0]);
+    dot.classList.add(classes[1]);
+    text.textContent = label;
+}
+
+let progressTimer = null;
+
+function startProgressPolling() {
+
+    const label = document.getElementById("loaderLabel");
+    const fill = document.getElementById("loaderProgressFill");
+    const baseLabel = ONEPIX.t("acquisition.loading_label");
+
+    stopProgressPolling();
+
+    const poll = async () => {
+
+        try {
+
+            const res = await fetch("{{ url_for('acquisition.acquisition_progress_route') }}");
+
+            if (!res.ok) return;
+
+            const data = await res.json();
+
+            if (data.total > 0) {
+                fill.style.width = data.percent + "%";
+                label.textContent = baseLabel + " " + data.current + "/" + data.total + " (" + data.percent + "%)";
+            } else {
+                fill.style.width = "0%";
+                label.textContent = baseLabel;
+            }
+
+        } catch (e) {
+            // Silently ignore - the /run request itself surfaces real errors.
+        }
+    };
+
+    poll();
+    progressTimer = setInterval(poll, 500);
+}
+
+function stopProgressPolling() {
+
+    if (progressTimer) {
+        clearInterval(progressTimer);
+        progressTimer = null;
+    }
+
+    document.getElementById("loaderProgressFill").style.width = "0%";
+    document.getElementById("loaderLabel").textContent = ONEPIX.t("acquisition.loading_label");
+}
+
+// The Run button doubles as the Cancel button: one control, three
+// visual states, so there's never a second button to hunt for when a
+// measurement needs to be stopped.
+let acqRunning = false;
+
+function setRunButtonState(state) {
+
+    const btn = document.getElementById("runBtn");
+    const label = document.getElementById("runBtnLabel");
+    const iconPlay = document.getElementById("runBtnIconPlay");
+    const iconStop = document.getElementById("runBtnIconStop");
+
+    btn.classList.remove("btn-primary", "btn-danger");
+
+    if (state === "idle") {
+        btn.disabled = false;
+        btn.classList.add("btn-primary");
+        iconPlay.hidden = false;
+        iconStop.hidden = true;
+        label.textContent = ONEPIX.t("acquisition.run_button");
+    } else if (state === "running") {
+        btn.disabled = false;
+        btn.classList.add("btn-danger");
+        iconPlay.hidden = true;
+        iconStop.hidden = false;
+        label.textContent = ONEPIX.t("acquisition.cancel_button");
+    } else if (state === "cancelling") {
+        btn.disabled = true;
+        btn.classList.add("btn-danger");
+        iconPlay.hidden = true;
+        iconStop.hidden = false;
+        label.textContent = ONEPIX.t("acquisition.cancel_button_busy");
+    }
+}
+
+function onRunButtonClick() {
+    if (acqRunning) {
+        cancelMeasurement();
+    } else {
+        refreshFigure();
+    }
+}
+
+async function cancelMeasurement() {
+
+    setRunButtonState("cancelling");
+
+    try {
+        const res = await fetch("{{ url_for('acquisition.cancel_acquisition') }}", { method: "POST" });
+        const data = await res.json();
+
+        if (!data.cancelled) {
+            ONEPIX.toast(ONEPIX.t("acquisition.toast_cancel_noop"), "warning");
+            setRunButtonState(acqRunning ? "running" : "idle");
+        }
+        // On success the button stays in "cancelling" until
+        // refreshFigure()'s finally block resolves it once /run
+        // actually returns.
+    } catch (err) {
+        console.error("Erreur annulation :", err);
+        setRunButtonState(acqRunning ? "running" : "idle");
+    }
+}
+
+(function setupSpectraViewToggle() {
+    const toggle = document.getElementById("acqSpectraViewToggle");
+    const chartEl = document.getElementById("acqSpectraChart");
+    const legendEl = document.getElementById("acqSpectraLegend");
+    const tableEl = document.getElementById("acqSpectraTable");
+
+    toggle.addEventListener("click", function () {
+        const showingTable = !tableEl.hidden;
+
+        tableEl.hidden = showingTable;
+        chartEl.hidden = !showingTable;
+        legendEl.hidden = !showingTable;
+
+        toggle.textContent = showingTable
+            ? ONEPIX.t("acquisition.spectra_view_table")
+            : ONEPIX.t("acquisition.spectra_view_chart");
+    });
+})();
+
+async function refreshSpectraChart() {
+
+    const card = document.getElementById("acqSpectraCard");
+
+    try {
+        const res = await fetch("{{ url_for('acquisition.acquisition_spectra') }}");
+        const data = await res.json();
+
+        if (!data.available) {
+            card.hidden = true;
+            return;
+        }
+
+        // Visible before drawing, so Plotly measures the card's width.
+        card.hidden = false;
+
+        ONEPIX.renderSpectraChart(
+            {
+                chart: document.getElementById("acqSpectraChart"),
+                legend: document.getElementById("acqSpectraLegend"),
+                table: document.getElementById("acqSpectraTable"),
+            },
+            data,
+            { x: ONEPIX.t("acquisition.spectra_xaxis"), y: ONEPIX.t("acquisition.spectra_yaxis") }
+        );
+
+    } catch (err) {
+        console.error("Erreur chargement spectres :", err);
+        card.hidden = true;
+    }
+}
+
+// Zone-based results (one spectrum per zone): the figure shows each
+// zone in its spectrum's color, with its name - see zone-map.js.
+async function refreshZoneMap() {
+
+    const img = document.getElementById("acq-figure");
+    const url = "{{ url_for('acquisition.acquisition_zones') }}";
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.available) {
+            ONEPIX.clearZoneMap(img);
+            return;
+        }
+
+        await ONEPIX.renderZoneMap(img, url, data, {
+            onZoneClick: (zone) => {
+                const item = document.getElementById("acqSpectraLegend").children[zone];
+                if (item) item.click();
+            },
+        });
+
+    } catch (err) {
+        console.error("Zone map:", err);
+        ONEPIX.clearZoneMap(img);
+    }
+}
+
+async function refreshFigure() {
+
+    const loader = document.getElementById("loader");
+    const img = document.getElementById("acq-figure");
+    const emptyState = document.getElementById("acqEmptyState");
+
+    if (acqRunning) return;
+
+    acqRunning = true;
+    setRunButtonState("running");
+    loader.style.display = "flex";
+    setAcqStatus("busy", ONEPIX.t("acquisition.status_busy"));
+    startProgressPolling();
+
+    const url =
+        "{{ url_for('acquisition.run_acquisition') }}"
+        + "?t="
+        + new Date().getTime();
+
+    try {
+
+        const response = await fetch(url);
+
+        if (response.status === 499) {
+
+            ONEPIX.toast(ONEPIX.t("acquisition.toast_cancelled"), "warning");
+
+            setAcqStatus("idle", ONEPIX.t("acquisition.status_ready"));
+
+            return;
+        }
+
+        if (!response.ok) {
+
+            const text = await response.text();
+
+            console.error("Erreur Flask :", text);
+
+            ONEPIX.toast(ONEPIX.t("acquisition.toast_error_prefix") + text, "error", 6000);
+
+            setAcqStatus("error", ONEPIX.t("acquisition.status_error"));
+
+            return;
+        }
+
+        const blob = await response.blob();
+
+        img.src = URL.createObjectURL(blob);
+        img.hidden = false;
+        emptyState.style.display = "none";
+
+        setAcqStatus("success", ONEPIX.t("acquisition.status_success"));
+
+        ONEPIX.toast(ONEPIX.t("acquisition.toast_success"), "success");
+
+        // The zone map's clicks go through the chart's legend.
+        refreshSpectraChart().then(refreshZoneMap);
+
+    }
+
+    catch (err) {
+
+        console.error("Erreur JS :", err);
+
+        ONEPIX.toast(ONEPIX.t("acquisition.toast_error_prefix") + err, "error", 6000);
+
+        setAcqStatus("error", ONEPIX.t("acquisition.status_error"));
+    }
+
+    finally {
+
+        stopProgressPolling();
+        acqRunning = false;
+        setRunButtonState("idle");
+        loader.style.display = "none";
+    }
+}
+
+</script>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- spectra-chart.js adds renderSpectraChart to window.ONEPIX, so it
+     must load after onepix-ui.js (in global_base.html's <head>), which
+     replaces window.ONEPIX outright rather than merging into it. -->
+<script src="{{ url_for('static', filename='js/vendor/plotly-basic.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/spectra-chart.js') }}"></script>
+<script src="{{ url_for('static', filename='js/zone-map.js') }}"></script>
+{% endblock %}

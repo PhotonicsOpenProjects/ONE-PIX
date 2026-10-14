@@ -1,9 +1,6 @@
-import os
-import sys
+from onepix.Acquisition import Acquisition
 
-sys.path.append(f"..{os.sep}..")
-from core.Acquisition import Acquisition
-
-acq = Acquisition(imaging_method_name="FourierSplit")
+acq = Acquisition(imaging_method_name="fouriersplit")
+acq.init_measure()      
 acq.thread_acquisition()
 acq.save_raw_data()

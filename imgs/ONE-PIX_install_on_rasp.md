@@ -29,39 +29,6 @@ To install the Raspbian OS on the SD card you can follow steps on this link [her
 To remote control your raspberry pi you can follow this tutorial [here](https://www.realvnc.com/en/blog/how-to-setup-vnc-connect-raspberry-pi/#:~:text=You%20can%20even%20create%20and,will%20be%20able%20to%20connect. )
 
 
-
-### Download the ONE-PIX git repository
-
-The first step of this installation is to clone the ONE-PIX directory from GitHub.
-
-From the Raspberry Pi, open a terminal and go to the desktop with the following command line:
-
-```
-cd Desktop
-```
-
-Download the ONE-PIX software from git 
-
-```
-sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
-```
-
-
-### Clone and install the ONE-PIX repo on your rasp 
-
-
-To install ONE-PIX on the raspberry pi board just run the setup.sh for that go in ther install folder with this command  :
-
-```
-cd ONE-PIX/install 
-```
-and run the installation script with this command :
-
-```
-sudo chmod +x ./install.sh
-./install.sh 
-```
-
 ## Configure the Raspberry Pi 
 
 ### Activate Raspberry Pi camera 

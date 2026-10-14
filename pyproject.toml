@@ -1,0 +1,80 @@
+[build-system]
+requires = [
+    "setuptools>=61.0",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "onepix"
+version = "3.0.0"
+description = "Core module of the ONE-PIX project"
+
+authors = [
+    { name = "Mathieu Ribes" },
+    { name = "Gaspard Russias" },
+    { name = "Antoine Fournier" }
+]
+
+requires-python = ">=3.8,<=3.14"
+
+dependencies = [
+    "numpy>=1.22.4,<3",
+    "scikit-learn>=1.0.2,<2",
+    "scipy>=1.13.1,<2",
+    "matplotlib>=3.8.4,<4",
+
+    "opencv-python",
+    "imutils==0.5.4",
+    "screeninfo==0.8.1",
+
+    "spectral==0.22.4",
+    "flask==3.1.3",
+    # 5.3.6 crashes on every connection attempt against Flask 3.1.x
+    # (AttributeError: can't set attribute 'session' in
+    # flask_socketio's _handle_event) - discovered while adding
+    # connect-time auth (SEC-6); 5.6.1 is the first version verified
+    # working against this Flask pin.
+    "flask-socketio==5.6.1",
+    "orjson",
+
+    "onepix-fis-common-function",
+    "onepix-fouriersplit",
+    "onepix-fouriershift",
+    "onepix-stub-camera",
+    "onepix-stub-spectrometer",
+    "analysis-pipeline",
+    "basic-treatments",
+
+]
+
+[project.optional-dependencies]
+
+dev = [
+    "pytest>=7.0.0",
+    "black>=24.0.0",
+    "ipython",
+    "jupyterlab",
+    "pip-tools"
+]
+
+docs = [
+    "sphinx",
+    "myst-parser",
+    "sphinx-autoapi"
+]
+
+# Optional analysis blueprints: not required for acquisition/reconstruction,
+# soft-loaded by app/GUI/flask/run.py (a missing plugin is logged and
+# skipped, never crashes app startup). Not yet published to PyPI, hence
+# the direct git reference rather than a bare package name.
+analysis-plugins = [
+    "onepix-spectral-indices @ git+https://gitlab.com/photonics-open-projects/onepix_plugins/analysis/onepix_spectral_indices.git",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "onepix*",
+    "plugins*"
+]

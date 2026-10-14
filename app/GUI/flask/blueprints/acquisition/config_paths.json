@@ -1,0 +1,4 @@
+{
+  "hardware": "../../../../../conf/hardware_config.json",
+  "software": "../../../../../conf/acquisition_parameters.json"
+}

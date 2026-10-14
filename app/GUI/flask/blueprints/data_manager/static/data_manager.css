@@ -1,0 +1,204 @@
+/* ============================================================
+   ONE-PIX — Data Manager
+   Built on the shared design-system.css / components.css tokens.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Toolbar
+   ---------------------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 280px;
+  height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-faint);
+}
+
+.search-field svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+
+.search-field input {
+  border: none;
+  height: auto;
+  padding: 0;
+  flex: 1;
+}
+
+.search-field input:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+/* ----------------------------------------------------------
+   Drop zone / file list
+   ---------------------------------------------------------- */
+
+.drop-zone {
+  position: relative;
+  padding: var(--space-4);
+  min-height: 160px;
+  border: 2px dashed transparent;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.drop-zone.is-drag-over {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.drop-zone-hint {
+  display: none;
+  position: absolute;
+  inset: var(--space-3);
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: var(--primary-soft);
+  color: var(--primary-hover);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.drop-zone.is-drag-over .drop-zone-hint {
+  display: flex;
+}
+
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.file-item:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xs);
+}
+
+.file-item .file-type {
+  min-width: 128px;
+  flex: none;
+  justify-content: center;
+  text-transform: capitalize;
+}
+
+.file-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  word-break: break-word;
+}
+
+.file-date {
+  flex: none;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.file-size {
+  min-width: 80px;
+  flex: none;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--text-faint);
+}
+
+/* ----------------------------------------------------------
+   Selection bar
+   ---------------------------------------------------------- */
+
+.selection-bar {
+  position: sticky;
+  bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  max-width: 1180px;
+  margin: var(--space-4) auto 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-md);
+}
+
+.selection-bar span {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.selection-bar-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ----------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .search-field {
+    width: 100%;
+    order: -1;
+  }
+
+  .file-item {
+    flex-wrap: wrap;
+  }
+
+  .file-size {
+    text-align: left;
+  }
+
+  .selection-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .selection-bar-actions {
+    justify-content: stretch;
+  }
+
+  .selection-bar-actions .btn {
+    flex: 1;
+  }
+}

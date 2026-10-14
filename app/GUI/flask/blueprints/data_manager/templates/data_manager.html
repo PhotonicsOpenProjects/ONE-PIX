@@ -1,0 +1,177 @@
+{% extends "global_base.html" %}
+
+{% block title %}
+{{ t('data.title') }}
+{% endblock %}
+
+{% block head %}
+
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'data_manager.static',
+        filename='data_manager.css'
+    ) }}"
+>
+
+{% endblock %}
+
+{% block app_content %}
+
+<div class="page-shell">
+
+    <div class="page-header">
+        <div>
+            <div class="card-eyebrow">{{ t('data.eyebrow') }}</div>
+            <h1>{{ t('data.title') }}</h1>
+            <p class="page-sub">{{ t('data.subtitle') }}</p>
+        </div>
+    </div>
+
+    <div class="card">
+
+        <!-- ============================== -->
+        <!-- TOOLBAR -->
+        <!-- ============================== -->
+
+        <div class="toolbar">
+
+            <div class="search-field">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" id="fileSearch" placeholder="{{ t('data.search_placeholder') }}">
+            </div>
+
+            <div class="toolbar-spacer"></div>
+
+            <button
+                class="btn btn-outline"
+                onclick="selectAllFiles()"
+            >
+                {{ t('data.select_all') }}
+            </button>
+
+            <button
+                class="btn btn-outline"
+                onclick="deselectAllFiles()"
+            >
+                {{ t('data.deselect') }}
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="openUploadDialog()"
+            >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 16V4M6 10l6-6 6 6M4 20h16"></path>
+                </svg>
+                {{ t('data.upload') }}
+            </button>
+
+            <!-- HIDDEN FILE INPUT -->
+
+            <input
+                type="file"
+                id="uploadInput"
+                multiple
+                accept=".json"
+                hidden
+            >
+
+        </div>
+
+        <!-- ============================== -->
+        <!-- FILE LIST -->
+        <!-- ============================== -->
+
+        <div id="dropZone" class="drop-zone">
+
+            <div
+                id="fileList"
+                class="file-list"
+            >
+            </div>
+
+            <div id="fileListEmpty" class="empty-state" hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"></path>
+                </svg>
+                <div class="empty-state-title">{{ t('data.empty_title') }}</div>
+                <div class="empty-state-sub">{{ t('data.empty_sub') }}</div>
+            </div>
+
+            <div class="drop-zone-hint">{{ t('data.drop_hint') }}</div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================= -->
+<!-- SELECTION BAR -->
+<!-- ================================= -->
+
+<div id="selectionBar" class="selection-bar" hidden>
+
+    <span id="selectionCount">{{ t('data.selection_count_plural').replace('{n}', '0') }}</span>
+
+    <div class="selection-bar-actions">
+
+        <button
+            id="downloadBtn"
+            class="btn btn-success"
+            onclick="downloadSelected()"
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 4v12M6 10l6 6 6-6M4 20h16"></path>
+            </svg>
+            {{ t('data.download') }}
+        </button>
+
+        <button
+            id="removeBtn"
+            class="btn btn-danger"
+            onclick="removeSelected()"
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"></path>
+            </svg>
+            {{ t('data.remove') }}
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================================= -->
+<!-- LOADING OVERLAY -->
+<!-- ================================= -->
+
+<div
+    id="loadingOverlay"
+    class="loading-overlay is-page"
+>
+
+    <div class="spinner spinner-lg"></div>
+
+</div>
+
+
+<!-- ================================= -->
+<!-- SCRIPT -->
+<!-- ================================= -->
+
+<script src="{{
+    url_for(
+        'data_manager.static',
+        filename='data_manager.js'
+    )
+}}">
+</script>
+
+{% endblock %}

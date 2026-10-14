@@ -1,0 +1,36 @@
+2025-07-24 09:13:10 - root - INFO - your second screen will be use as projector
+2025-07-24 09:13:10 - root - INFO - FourierSplit imaging method with 1 spatial res is init
+2025-07-24 09:13:10 - root - INFO - Stub spectrometer plugins is init 
+2025-07-24 09:13:10 - root - INFO - Stub  plugins camera is init 
+2025-07-24 09:13:10 - root - INFO - Projection system is init
+2025-07-24 09:13:10 - root - INFO - onepix Hardware class is init 
+2025-07-24 09:13:10 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-24 09:13:10 - root - INFO - patterns of FourierSplit are created 
+2025-07-24 09:13:10 - root - INFO - Stub spectrometer plugins is open
+2025-07-24 09:13:10 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-24 09:13:10 - root - INFO - all hardware  is now open and ready to use
+2025-07-24 09:13:10 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-24 09:13:10 - onepix.Acquisition - INFO - measure is init
+2025-07-24 09:14:33 - root - INFO - your second screen will be use as projector
+2025-07-24 09:14:33 - root - INFO - FourierSplit imaging method with 1 spatial res is init
+2025-07-24 09:14:33 - root - INFO - Stub spectrometer plugins is init 
+2025-07-24 09:14:33 - root - INFO - Stub  plugins camera is init 
+2025-07-24 09:14:33 - root - INFO - Projection system is init
+2025-07-24 09:14:33 - root - INFO - onepix Hardware class is init 
+2025-07-24 09:14:33 - onepix.Acquisition - INFO - onepixAcquisition class is init
+2025-07-24 09:14:33 - root - INFO - patterns of FourierSplit are created 
+2025-07-24 09:14:33 - root - INFO - Stub spectrometer plugins is open
+2025-07-24 09:14:33 - root - INFO - Stub integration time  is fix to  2.0 ms
+2025-07-24 09:14:33 - root - INFO - all hardware  is now open and ready to use
+2025-07-24 09:14:33 - onepix.Acquisition - INFO - duration calculate : 0.0
+2025-07-24 09:14:33 - onepix.Acquisition - INFO - measure is init
+2025-07-24 09:14:36 - root - INFO - measure begin
+2025-07-24 09:14:36 - root - INFO - Stub spectrometer begin to measure
+2025-07-24 09:14:39 - root - INFO - Projection system begin to project patterns
+2025-07-24 09:14:39 - root - INFO - Stub spectrometer begin to measure
+2025-07-24 09:14:39 - root - INFO - Projection system finish to project patterns
+2025-07-24 09:14:39 - root - INFO - measure header is created
+2025-07-24 09:14:39 - root - INFO - measure is complete
+2025-07-24 09:14:39 - root - INFO - Stub camera is open
+2025-07-24 09:14:40 - root - INFO - Stub camera is close
+2025-07-24 09:14:40 - root - INFO - measure is saved

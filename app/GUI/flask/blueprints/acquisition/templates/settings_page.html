@@ -1,0 +1,421 @@
+{% extends "acquisition_base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% macro render_field(key, value, meta, advanced) %}
+    {%- set label_key = 'settings_field.' ~ key ~ '.label' -%}
+    {%- set help_key = 'settings_field.' ~ key ~ '.help' -%}
+    {%- set label = t(label_key) -%}
+    {%- set help = t(help_key) -%}
+    {%- set has_help = help != help_key -%}
+    <div class="field settings-field">
+        <label class="field-label" for="f_{{ key }}" title="{{ key }}">{{ key.replace('_', ' ').strip()|title if label == label_key else label }}</label>
+
+        {% if plugins and key in plugins %}
+
+            <select name="{{ key }}" id="f_{{ key }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
+                {% for p in plugins[key] %}
+                    <option value="{{ p }}" {% if value == p %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+
+        {% elif value is sameas true or value is sameas false %}
+
+            <input type="hidden" name="{{ key }}" id="f_{{ key }}" value="{{ 'true' if value else 'false' }}">
+            <button type="button" class="switch" data-target="f_{{ key }}" aria-pressed="{{ 'true' if value else 'false' }}" aria-label="{{ key.replace('_', ' ').strip()|title if label == label_key else label }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
+                <span class="switch-track"><span class="switch-thumb"></span></span>
+                <span class="switch-label"></span>
+            </button>
+
+        {% elif meta.get('widget') == 'range' and value is iterable and value is not string and value|length == 2 %}
+
+            {# Edited as two number inputs; the hidden input carries the
+               JSON list actually submitted (kept in sync by the script
+               below), so the saved format is unchanged. #}
+            <input type="hidden" name="{{ key }}" id="f_{{ key }}" value='{{ value|tojson }}'>
+            <div class="range-inputs" data-target="f_{{ key }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
+                {% for bound in [t('acquisition_settings.range_from'), t('acquisition_settings.range_to')] %}
+                <label class="range-input">
+                    <span class="range-input-label">{{ bound }}</span>
+                    <span class="input-with-unit">
+                        <input type="number" step="any" value="{{ value[loop.index0] }}" data-range-index="{{ loop.index0 }}">
+                        {% if meta.get('unit') %}<span class="input-unit">{{ meta.get('unit') }}</span>{% endif %}
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+
+        {% elif value is number %}
+
+            <span class="input-with-unit">
+                <input type="number" step="any" name="{{ key }}" id="f_{{ key }}" value="{{ value }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
+                {% if meta.get('unit') %}<span class="input-unit">{{ meta.get('unit') }}</span>{% endif %}
+            </span>
+
+        {% elif value is iterable and value is not string %}
+
+            <textarea class="mono settings-field-json" rows="3" name="{{ key }}" id="f_{{ key }}" spellcheck="false" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>{{ value | tojson }}</textarea>
+
+        {% else %}
+
+            <input type="text" name="{{ key }}" id="f_{{ key }}" value="{{ value }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
+
+        {% endif %}
+
+        {% if has_help %}<span class="field-help" id="h_{{ key }}">{{ help }}</span>{% endif %}
+        {% if advanced %}<span class="field-hint mono">{{ key }}</span>{% endif %}
+    </div>
+{% endmacro %}
+
+{% block content %}
+
+<div class="page-header">
+    <div>
+        {% set category_names = {
+            'hardware': t('acquisition.hardware_title'),
+            'software': t('acquisition.software_title'),
+            'addon': t('acquisition.imaging_title'),
+        } %}
+        <div class="card-eyebrow">{{ t('acquisition_settings.breadcrumb_prefix') }} · {{ category_names.get(category, category) }}</div>
+        <h1>{{ title }}</h1>
+    </div>
+
+    <a class="btn btn-outline" href="{{ url_for('acquisition.acquisition_page') }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 6-6 6 6 6"></path>
+        </svg>
+        {{ t('acquisition_settings.back') }}
+    </a>
+</div>
+
+{% if data %}
+
+{% if category == 'addon' %}
+<form method="POST" action="{{ url_for('acquisition.save_addon') }}" class="card">
+{% else %}
+<form method="POST" action="{{ url_for('acquisition.save_settings', category=category) }}" class="card">
+{% endif %}
+
+    {% set meta_all = field_meta|default({}) %}
+    {% set ns = namespace(has_advanced=false) %}
+    {% for key in data %}
+        {% if (meta_all.get(key) or {}).get('advanced') %}{% set ns.has_advanced = true %}{% endif %}
+    {% endfor %}
+
+    <div class="card-body">
+        <div class="settings-form-grid">
+            {% for key, value in data.items() %}
+                {% if not (meta_all.get(key) or {}).get('advanced') %}
+                    {{ render_field(key, value, meta_all.get(key) or {}, false) }}
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if ns.has_advanced %}
+        <details class="settings-advanced">
+            <summary>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg>
+                {{ t('acquisition_settings.advanced_title') }}
+                <span class="badge badge-warning" id="settingsAdvancedDirty" hidden></span>
+            </summary>
+            <p class="settings-advanced-warning">{{ t('acquisition_settings.advanced_warning') }}</p>
+            <div class="settings-form-grid">
+                {% for key, value in data.items() %}
+                    {% if (meta_all.get(key) or {}).get('advanced') %}
+                        {{ render_field(key, value, meta_all.get(key) or {}, true) }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
+    </div>
+
+    <div class="card-header settings-form-actions">
+        <span class="settings-dirty-count" id="settingsDirtyCount" role="status" hidden></span>
+        <button type="button" class="btn btn-outline" id="settingsCancelBtn" disabled>{{ t('acquisition_settings.cancel') }}</button>
+        <button type="submit" class="btn btn-outline" id="settingsSaveBtn" disabled>{{ t('acquisition_settings.save') }}</button>
+    </div>
+
+</form>
+
+{% else %}
+
+<div class="card">
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <div class="empty-state-title">{{ t('acquisition_settings.empty_title') }}</div>
+    </div>
+</div>
+
+{% endif %}
+
+{% if category == 'hardware' %}
+{% include "hardware_tuning_panel.html" %}
+{% include "coregistration_calibration_panel.html" %}
+{% endif %}
+
+{# Panels shipped by the selected imaging method's own plugin (its
+   AcquisitionGUI.SETTINGS_PANELS - see gui_plugins.py). #}
+{% for panel in settings_panels|default([]) %}
+{% include panel %}
+{% endfor %}
+
+{% endblock %}
+
+{% block scripts %}
+{% if request.args.get('saved') %}
+<script>
+    ONEPIX.toast(ONEPIX.t('acquisition_settings.saved_toast'), 'success');
+    // Drop ?saved=1 so a reload doesn't confirm the save a second time.
+    history.replaceState(null, '', window.location.pathname);
+</script>
+{% endif %}
+{% if data %}
+<script>
+(function () {
+    var form = document.querySelector('form.card');
+    var saveBtn = document.getElementById('settingsSaveBtn');
+    var cancelBtn = document.getElementById('settingsCancelBtn');
+    if (!form || !saveBtn) return;
+
+    // Boolean fields render as a .switch button wrapping a hidden
+    // "true"/"false" input, instead of a native checkbox - a native
+    // checkbox that's unchecked submits nothing at all, which would
+    // silently drop the key from the saved JSON (save_settings()
+    // writes out exactly what it receives, it doesn't merge).
+    var switchSyncs = {};
+    Array.prototype.forEach.call(form.querySelectorAll('.switch'), function (btn) {
+        var hidden = document.getElementById(btn.dataset.target);
+        var label = btn.querySelector('.switch-label');
+        if (!hidden) return;
+
+        function sync() {
+            var on = hidden.value === 'true';
+            btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+            if (label) {
+                label.textContent = ONEPIX.t(on ? 'acquisition_settings.toggle_on' : 'acquisition_settings.toggle_off');
+            }
+        }
+
+        sync();
+        switchSyncs[hidden.name] = sync;
+
+        btn.addEventListener('click', function () {
+            hidden.value = hidden.value === 'true' ? 'false' : 'true';
+            sync();
+            hidden.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    });
+
+    // Two-number [min, max] fields: the visible inputs write the JSON
+    // list into the hidden input that's actually submitted.
+    var rangeSyncs = {};
+    Array.prototype.forEach.call(form.querySelectorAll('.range-inputs'), function (group) {
+        var hidden = document.getElementById(group.dataset.target);
+        var inputs = group.querySelectorAll('input[data-range-index]');
+
+        function write() {
+            hidden.value = JSON.stringify(Array.prototype.map.call(inputs, function (input) {
+                return input.value === '' ? null : Number(input.value);
+            }));
+        }
+
+        function read() {
+            var values = JSON.parse(hidden.value);
+            inputs.forEach(function (input, i) { input.value = values[i]; });
+        }
+
+        write();
+        rangeSyncs[hidden.name] = read;
+
+        inputs.forEach(function (input) {
+            input.addEventListener('input', write);
+        });
+    });
+
+    var initialValues = {};
+    new FormData(form).forEach(function (value, key) {
+        initialValues[key] = value;
+    });
+
+    // "2" and "2.0", or JSON differing only in spacing, are the same
+    // value - only a real change counts as one.
+    function sameValue(name, a, b) {
+        if (a === b) return true;
+        var el = form.elements[name];
+        if (el && el.type === 'number' && a !== '' && b !== '') return Number(a) === Number(b);
+        try {
+            return JSON.stringify(JSON.parse(a)) === JSON.stringify(JSON.parse(b));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function modifiedNames() {
+        var names = [];
+        new FormData(form).forEach(function (value, key) {
+            if (!sameValue(key, initialValues[key], value)) names.push(key);
+        });
+        return names;
+    }
+
+    function isDirty() {
+        return modifiedNames().length > 0;
+    }
+
+    // The saved value, as the field shows it: On/Off, "350 - 900 nm",
+    // the option text, a shortened JSON...
+    function displayValue(name, value) {
+        var el = form.elements[name];
+        var field = el.closest('.settings-field');
+        var unitEl = field.querySelector('.input-unit');
+        var unit = unitEl ? ' ' + unitEl.textContent.trim() : '';
+
+        if (switchSyncs[name]) {
+            return ONEPIX.t(value === 'true' ? 'acquisition_settings.toggle_on' : 'acquisition_settings.toggle_off');
+        }
+        if (rangeSyncs[name]) {
+            try {
+                var bounds = JSON.parse(value);
+                return bounds[0] + ' – ' + bounds[1] + unit;
+            } catch (e) { /* shown as is below */ }
+        }
+        if (el.tagName === 'SELECT') {
+            var option = Array.prototype.find.call(el.options, function (o) { return o.value === value; });
+            return option ? option.textContent.trim() : value;
+        }
+        if (value === '') return ONEPIX.t('acquisition_settings.modified_empty');
+
+        var text = value + (el.type === 'number' ? unit : '');
+        return text.length > 60 ? text.slice(0, 57) + '…' : text;
+    }
+
+    // Under each field: what it was before, and a button putting it
+    // back - filled in and shown only while the field is modified.
+    var fieldNotes = {};
+    Object.keys(initialValues).forEach(function (name) {
+        var el = form.elements[name];
+        var field = el && el.closest ? el.closest('.settings-field') : null;
+        if (!field) return;
+
+        var note = document.createElement('div');
+        note.className = 'field-modified';
+        note.hidden = true;
+
+        var before = document.createElement('span');
+        before.className = 'field-modified-before';
+        before.textContent = ONEPIX.t('acquisition_settings.modified_before', {
+            value: displayValue(name, initialValues[name]),
+        });
+
+        var revert = document.createElement('button');
+        revert.type = 'button';
+        revert.className = 'field-modified-revert';
+        revert.textContent = ONEPIX.t('acquisition_settings.modified_revert');
+        revert.addEventListener('click', function () {
+            revertField(name);
+            updateState();
+        });
+
+        note.appendChild(before);
+        note.appendChild(revert);
+        field.appendChild(note);
+        field.querySelector('.field-label').dataset.modified = ONEPIX.t('acquisition_settings.modified_badge');
+
+        fieldNotes[name] = { field: field, note: note, before: before };
+    });
+
+    function revertField(name) {
+        var el = form.elements[name];
+        if (!el) return;
+        el.value = initialValues[name];
+        if (switchSyncs[name]) switchSyncs[name]();
+        if (rangeSyncs[name]) rangeSyncs[name]();
+        // Anything reacting to this field's value (e.g. a plugin's
+        // panel gated on a dropdown) must follow.
+        if (el.tagName === 'SELECT') el.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    var dirtyCount = document.getElementById('settingsDirtyCount');
+    var advancedDirty = document.getElementById('settingsAdvancedDirty');
+
+    function updateState() {
+        var modified = modifiedNames();
+        var dirty = modified.length > 0;
+
+        saveBtn.disabled = !dirty;
+        cancelBtn.disabled = !dirty;
+        saveBtn.classList.toggle('btn-primary', dirty);
+        saveBtn.classList.toggle('btn-outline', !dirty);
+
+        var advancedCount = 0;
+        Object.keys(fieldNotes).forEach(function (name) {
+            var entry = fieldNotes[name];
+            var isModified = modified.indexOf(name) !== -1;
+            entry.field.classList.toggle('is-modified', isModified);
+            entry.note.hidden = !isModified;
+            if (isModified && entry.field.closest('.settings-advanced')) advancedCount++;
+        });
+
+        dirtyCount.hidden = !dirty;
+        dirtyCount.textContent = modified.length === 1
+            ? ONEPIX.t('acquisition_settings.unsaved_one')
+            : ONEPIX.t('acquisition_settings.unsaved_many', { n: modified.length });
+
+        if (advancedDirty) {
+            advancedDirty.hidden = advancedCount === 0;
+            advancedDirty.textContent = advancedCount === 1
+                ? ONEPIX.t('acquisition_settings.unsaved_one')
+                : ONEPIX.t('acquisition_settings.unsaved_many', { n: advancedCount });
+        }
+    }
+
+    form.addEventListener('input', updateState);
+    form.addEventListener('change', updateState);
+
+    // Cancel reverts unsaved edits in place (it used to call
+    // history.back(), which could leave the app entirely).
+    cancelBtn.addEventListener('click', function () {
+        Object.keys(initialValues).forEach(revertField);
+        updateState();
+    });
+
+    // A coregistration calibration (Hardware page) rewrites
+    // corregistration_array / max_width / max_height on disk. Show the
+    // new values and make them the form's baseline - otherwise its next
+    // Save, or Cancel, would put the old calibration back. Other
+    // unsaved edits are left as they are.
+    document.addEventListener('onepix:coregistration-saved', function (event) {
+        var fields = event.detail || {};
+        Object.keys(fields).forEach(function (name) {
+            var el = form.elements[name];
+            if (!el) return;
+            var value = fields[name];
+            el.value = (value !== null && typeof value === 'object') ? JSON.stringify(value) : String(value);
+            initialValues[name] = el.value;
+            if (fieldNotes[name]) {
+                fieldNotes[name].before.textContent = ONEPIX.t('acquisition_settings.modified_before', {
+                    value: displayValue(name, el.value),
+                });
+            }
+        });
+        updateState();
+    });
+
+    var submitting = false;
+    form.addEventListener('submit', function () { submitting = true; });
+
+    window.addEventListener('beforeunload', function (event) {
+        if (!submitting && isDirty()) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

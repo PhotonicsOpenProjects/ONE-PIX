@@ -1,0 +1,288 @@
+<!-- ============================================================
+     Projector<->camera coregistration calibration. Included from
+     settings_page.html on the Hardware page: it describes how the
+     camera sees the projection area - a property of the setup, not of
+     an imaging method - so it's available whichever method is
+     selected (HAS needs it; any method using the camera can).
+
+     The whole point of this panel: no physical access to this
+     device's own screen is needed. The server projects the reference
+     pattern and photographs it (the one step that does need the real
+     hardware); the four corners are then clicked on that photo right
+     here in the browser, not in a local matplotlib window - see
+     app/GUI/flask/blueprints/acquisition/routes.py's
+     coregistration_capture()/coregistration_corners().
+     ============================================================ -->
+
+<div class="card tuning-card" id="coregCard">
+
+    <div class="card-header">
+        <div>
+            <h2>{{ t('acquisition_settings.coreg.title') }}</h2>
+            <div class="page-sub">{{ t('acquisition_settings.coreg.subtitle') }}</div>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <button id="coregStartBtn" class="btn btn-primary" type="button">
+            {{ t('acquisition_settings.coreg.start_button') }}
+        </button>
+
+        <span id="coregStatus" class="panel-status"></span>
+
+    </div>
+
+</div>
+
+<dialog id="coregDialog" class="reference-dialog">
+
+    <div class="reference-dialog-header">
+        <h2>{{ t('acquisition_settings.coreg.dialog_title') }}</h2>
+        <button type="button" class="btn btn-icon btn-ghost" id="coregDialogClose" aria-label="{{ t('analysis.reference_dialog_close') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <div class="reference-dialog-panel">
+
+        <p class="reference-dialog-hint" id="coregClickHint">
+            {{ t('acquisition_settings.coreg.click_tl') }}
+        </p>
+
+        <div class="reference-zone-box" id="coregImageBox">
+            <div class="reference-zone-imgwrap" id="coregImgwrap">
+                <img id="coregImage" alt="" draggable="false">
+                <div id="coregPoints"></div>
+            </div>
+        </div>
+
+        <div class="reference-dialog-actions">
+            <button type="button" class="btn btn-outline" id="coregResetBtn">
+                {{ t('acquisition_settings.coreg.reset_button') }}
+            </button>
+            <span id="coregDialogStatus" class="panel-status"></span>
+            <button type="button" class="btn btn-primary" id="coregConfirmBtn" disabled>
+                {{ t('acquisition_settings.coreg.confirm_button') }}
+            </button>
+        </div>
+
+    </div>
+
+</dialog>
+
+<script>
+(function () {
+    var startBtn = document.getElementById("coregStartBtn");
+    var status = document.getElementById("coregStatus");
+
+    var dialog = document.getElementById("coregDialog");
+    var img = document.getElementById("coregImage");
+    var imgwrap = document.getElementById("coregImgwrap");
+    var pointsLayer = document.getElementById("coregPoints");
+    var clickHint = document.getElementById("coregClickHint");
+    var resetBtn = document.getElementById("coregResetBtn");
+    var confirmBtn = document.getElementById("coregConfirmBtn");
+    var dialogStatus = document.getElementById("coregDialogStatus");
+    var closeBtn = document.getElementById("coregDialogClose");
+
+    // Keys only, not the translated text itself - resolving
+    // ONEPIX.t() has to wait until it's actually called (inside a
+    // function, further down), not at this IIFE's own top level: that
+    // runs immediately as the page parses, before onepix-ui.js (which
+    // defines window.ONEPIX, loaded later in global_base.html's body)
+    // has executed.
+    var CORNER_LABEL_KEYS = [
+        "acquisition_settings.coreg.click_tl",
+        "acquisition_settings.coreg.click_tr",
+        "acquisition_settings.coreg.click_br",
+        "acquisition_settings.coreg.click_bl",
+    ];
+
+    function cornerLabel(index) {
+        return ONEPIX.t(CORNER_LABEL_KEYS[index]);
+    }
+
+    var points = [];
+    var previewUrl = null;
+    // True from a successful capture until the corners are confirmed
+    // (or the attempt is cancelled) - the server has the old
+    // calibration cleared and backed up for exactly that long (see
+    // routes.py's coregistration_capture()), so closing the dialog or
+    // leaving the page while this is true must tell it to restore
+    // that backup instead of leaving corregistration_array cleared.
+    var hasPendingCapture = false;
+
+    function cancelPending(useBeacon) {
+        if (!hasPendingCapture) return;
+        hasPendingCapture = false;
+
+        var url = "{{ url_for('acquisition.coregistration_cancel') }}";
+
+        if (useBeacon && navigator.sendBeacon) {
+            navigator.sendBeacon(url);
+        } else {
+            fetch(url, { method: "POST" }).catch(function () {});
+        }
+    }
+
+    window.addEventListener("pagehide", function () {
+        cancelPending(true);
+    });
+
+    function resetPoints() {
+        points = [];
+        pointsLayer.innerHTML = "";
+        confirmBtn.disabled = true;
+        clickHint.textContent = cornerLabel(0);
+    }
+
+    function addPointMarker(x, y, index) {
+        var marker = document.createElement("div");
+        marker.className = "coreg-point";
+        marker.style.left = x + "px";
+        marker.style.top = y + "px";
+        marker.textContent = index + 1;
+        pointsLayer.appendChild(marker);
+    }
+
+    img.addEventListener("click", function (ev) {
+        if (points.length >= 4) return;
+
+        var rect = img.getBoundingClientRect();
+        var x = ev.clientX - rect.left;
+        var y = ev.clientY - rect.top;
+
+        addPointMarker(x, y, points.length);
+
+        var scaleX = img.naturalWidth / rect.width;
+        var scaleY = img.naturalHeight / rect.height;
+
+        points.push([Math.round(x * scaleX), Math.round(y * scaleY)]);
+
+        if (points.length < 4) {
+            clickHint.textContent = cornerLabel(points.length);
+        } else {
+            clickHint.textContent = ONEPIX.t("acquisition_settings.coreg.click_done");
+            confirmBtn.disabled = false;
+        }
+    });
+
+    resetBtn.addEventListener("click", resetPoints);
+
+    function closeDialog() {
+        cancelPending(false);
+        dialog.close();
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+        }
+    }
+
+    closeBtn.addEventListener("click", closeDialog);
+
+    dialog.addEventListener("click", function (ev) {
+        if (ev.target === dialog) closeDialog();
+    });
+
+    startBtn.addEventListener("click", function () {
+
+        startBtn.disabled = true;
+        status.textContent = ONEPIX.t("acquisition_settings.coreg.capturing");
+
+        fetch("{{ url_for('acquisition.coregistration_capture') }}", { method: "POST" })
+            .then(function (res) {
+                if (!res.ok) {
+                    return res.json().then(function (data) {
+                        throw new Error((data && data.error) || ONEPIX.t("acquisition_settings.coreg.capture_failed"));
+                    });
+                }
+                return res.blob();
+            })
+            .then(function (blob) {
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                previewUrl = URL.createObjectURL(blob);
+                img.src = previewUrl;
+
+                // The server has now cleared and backed up the old
+                // calibration - closing this dialog (or leaving the
+                // page) without confirming must restore it.
+                hasPendingCapture = true;
+
+                resetPoints();
+                dialogStatus.textContent = "";
+                status.textContent = "";
+
+                dialog.showModal();
+            })
+            .catch(function (err) {
+                status.textContent = err.message;
+                ONEPIX.toast(err.message, "error");
+            })
+            .finally(function () {
+                startBtn.disabled = false;
+            });
+    });
+
+    confirmBtn.addEventListener("click", function () {
+
+        if (points.length !== 4) return;
+
+        confirmBtn.disabled = true;
+        dialogStatus.textContent = ONEPIX.t("acquisition_settings.coreg.saving");
+
+        fetch("{{ url_for('acquisition.coregistration_corners') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ points: points }),
+        })
+            .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+            .then(function (result) {
+                // The server already resolved its own pending state
+                // either way (saved the new calibration, or restored
+                // the backup on a validation error) - this must agree,
+                // or closeDialog() would try to cancel a save that
+                // already succeeded, undoing it.
+                hasPendingCapture = false;
+
+                if (!result.ok) {
+                    dialogStatus.textContent = (result.data && result.data.error) || ONEPIX.t("acquisition_settings.coreg.save_failed");
+                    confirmBtn.disabled = false;
+                    return;
+                }
+
+                ONEPIX.toast(ONEPIX.t("acquisition_settings.coreg.saved"), "success");
+                // The settings form on the same page shows these fields
+                // too (see settings_page.html) - hand it the new values.
+                document.dispatchEvent(new CustomEvent("onepix:coregistration-saved", {
+                    detail: (result.data && result.data.fields) || {},
+                }));
+                closeDialog();
+            })
+            .catch(function (err) {
+                dialogStatus.textContent = String(err);
+                confirmBtn.disabled = false;
+            });
+    });
+})();
+</script>
+
+<style>
+.coreg-point {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    margin-left: -11px;
+    margin-top: -11px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--text-on-primary);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px var(--surface);
+}
+</style>

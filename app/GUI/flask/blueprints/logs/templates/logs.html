@@ -1,0 +1,240 @@
+{% extends "global_base.html" %}
+
+{% block title %}{{ t('logs.title') }}{% endblock %}
+
+{% block head %}
+<style>
+.logs-box {
+    background: #14161b;
+    color: #e7e9ee;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    max-height: 65vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+}
+
+.log-line {
+    display: block;
+}
+
+.log-line.is-hidden {
+    display: none;
+}
+
+.log-level-error   { color: #ff8882; }
+.log-level-warning { color: #f0b54c; }
+.log-level-debug   { color: #8b94a3; }
+
+.logs-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.logs-toolbar-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.logs-search {
+    width: 220px;
+}
+
+.logs-level-chips {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.logs-level-chip {
+    height: 26px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.logs-level-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.logs-level-chip.is-active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+}
+
+.logs-empty {
+    color: var(--text-faint);
+    font-size: var(--fs-sm);
+    padding: var(--space-3) 0;
+}
+</style>
+{% endblock %}
+
+{% block app_content %}
+<div class="page-shell">
+
+    <div class="page-header">
+        <div>
+            <div class="card-eyebrow">{{ t('logs.eyebrow') }}</div>
+            <h1>{{ t('logs.title') }}</h1>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ t('logs.card_title') }}</h2>
+
+            <div class="logs-toolbar">
+                <input type="search" id="logsFilter" class="logs-search" placeholder="{{ t('logs.filter_placeholder') }}">
+
+                <div class="logs-level-chips" id="logsLevelChips">
+                    <button type="button" class="logs-level-chip is-active" data-level="all">{{ t('logs.level_all') }}</button>
+                    <button type="button" class="logs-level-chip" data-level="error">{{ t('logs.level_error') }}</button>
+                    <button type="button" class="logs-level-chip" data-level="warning">{{ t('logs.level_warning') }}</button>
+                    <button type="button" class="logs-level-chip" data-level="info">{{ t('logs.level_info') }}</button>
+                    <button type="button" class="logs-level-chip" data-level="debug">{{ t('logs.level_debug') }}</button>
+                </div>
+
+                <label class="logs-toolbar-check">
+                    <input type="checkbox" id="logsAutoRefresh" checked>
+                    {{ t('logs.auto_refresh') }}
+                </label>
+            </div>
+        </div>
+        <div class="card-body">
+            <pre id="logsBox" class="logs-box"></pre>
+            <div id="logsEmpty" class="logs-empty" hidden>{{ t('logs.filter_empty') }}</div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var box = document.getElementById("logsBox");
+    var emptyNotice = document.getElementById("logsEmpty");
+    var autoRefresh = document.getElementById("logsAutoRefresh");
+    var filterInput = document.getElementById("logsFilter");
+    var levelChips = document.getElementById("logsLevelChips");
+    var timer = null;
+    var activeLevel = "all";
+
+    var LEVEL_PATTERNS = {
+        error: / - (ERROR|CRITICAL) - /,
+        warning: / - WARNING - /,
+        debug: / - DEBUG - /,
+    };
+
+    function levelClassFor(line) {
+        if (LEVEL_PATTERNS.error.test(line)) return "log-level-error";
+        if (LEVEL_PATTERNS.warning.test(line)) return "log-level-warning";
+        if (LEVEL_PATTERNS.debug.test(line)) return "log-level-debug";
+        return "";
+    }
+
+    function matchesLevel(line, level) {
+        if (level === "all") return true;
+        if (level === "info") {
+            return !LEVEL_PATTERNS.error.test(line) && !LEVEL_PATTERNS.warning.test(line) && !LEVEL_PATTERNS.debug.test(line);
+        }
+        return LEVEL_PATTERNS[level] && LEVEL_PATTERNS[level].test(line);
+    }
+
+    function render(lines) {
+        var query = filterInput.value.trim().toLowerCase();
+        var visibleCount = 0;
+
+        box.textContent = "";
+        var frag = document.createDocumentFragment();
+
+        lines.forEach(function (line) {
+            var levelOk = matchesLevel(line, activeLevel);
+            var textOk = !query || line.toLowerCase().indexOf(query) !== -1;
+            var visible = levelOk && textOk;
+            if (visible) visibleCount++;
+
+            var span = document.createElement("span");
+            span.className = "log-line " + levelClassFor(line) + (visible ? "" : " is-hidden");
+            span.textContent = line;
+            frag.appendChild(span);
+        });
+
+        box.appendChild(frag);
+        emptyNotice.hidden = visibleCount !== 0;
+    }
+
+    var lastLines = [];
+
+    function fetchLogs() {
+        fetch("{{ url_for('logs.logs_tail') }}?lines=400")
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                var atBottom = box.scrollTop + box.clientHeight >= box.scrollHeight - 10;
+                lastLines = data.lines || [];
+                render(lastLines);
+                if (atBottom) box.scrollTop = box.scrollHeight;
+            })
+            .catch(function () {});
+    }
+
+    function startPolling() {
+        stopPolling();
+        timer = setInterval(fetchLogs, 2000);
+    }
+
+    function stopPolling() {
+        if (timer) {
+            clearInterval(timer);
+            timer = null;
+        }
+    }
+
+    autoRefresh.addEventListener("change", function () {
+        if (autoRefresh.checked) {
+            fetchLogs();
+            startPolling();
+        } else {
+            stopPolling();
+        }
+    });
+
+    filterInput.addEventListener("input", function () { render(lastLines); });
+
+    levelChips.addEventListener("click", function (ev) {
+        var chip = ev.target.closest(".logs-level-chip");
+        if (!chip) return;
+        activeLevel = chip.dataset.level;
+        Array.prototype.forEach.call(levelChips.querySelectorAll(".logs-level-chip"), function (c) {
+            c.classList.toggle("is-active", c === chip);
+        });
+        render(lastLines);
+    });
+
+    fetchLogs();
+    startPolling();
+    box.scrollTop = box.scrollHeight;
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,156 @@
+/* ============================================================
+   ONE-PIX — App shell
+   Top navigation bar shared by every page.
+   ============================================================ */
+
+.app-shell-nav {
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  padding: 0 var(--space-5);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-shell-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: var(--fs-md);
+  letter-spacing: -0.01em;
+}
+
+.app-shell-logo {
+  height: 38px;
+  width: 38px;
+  border-radius: 8px;
+  flex: none;
+  object-fit: contain;
+}
+
+.app-shell-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: 100%;
+}
+
+.app-shell-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 100%;
+  padding: 0 var(--space-3);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.app-shell-link svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.app-shell-link:hover {
+  color: var(--text);
+}
+
+.app-shell-link.is-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.app-shell-spacer {
+  flex: 1;
+}
+
+.app-shell-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin-right: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.app-shell-theme-toggle:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+  background: var(--surface-sunken);
+}
+
+.app-shell-theme-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.app-shell-lang select {
+  height: 30px;
+  width: auto;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.app-shell-lang select:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.app-shell-main {
+  min-height: calc(100vh - var(--nav-height));
+}
+
+@media (max-width: 760px) {
+  .app-shell-nav {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+  }
+
+  .app-shell-links {
+    gap: 0;
+  }
+
+  /* Visually hidden, not display:none - icon-only links keep their
+     accessible name for screen readers. */
+  .app-shell-link span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .app-shell-link {
+    padding: 0 var(--space-2);
+  }
+
+  .app-shell-link svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .app-shell-theme-toggle {
+    margin-right: 0;
+  }
+}

@@ -1,0 +1,126 @@
+{% extends "global_base.html" %}
+
+{% block title %}
+{{ t('plugins.title') }}
+{% endblock %}
+
+{% block head %}
+<link
+    rel="stylesheet"
+    href="{{ url_for(
+        'plugins_manager.static',
+        filename='plugins_manager.css'
+    ) }}"
+>
+{% endblock %}
+
+{% block app_content %}
+<header class="plugins-header">
+    <div>
+        <div class="card-eyebrow">{{ t('plugins.eyebrow') }}</div>
+        <h1>{{ t('plugins.title') }}</h1>
+        <p id="metaLine">{{ t('plugins.meta_loading') }}</p>
+    </div>
+
+    <div class="header-actions">
+        <button id="refreshButton" class="btn btn-outline" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+            {{ t('plugins.refresh') }}
+        </button>
+        <button data-action="install" class="btn btn-success" type="button">{{ t('plugins.install') }}</button>
+        <button data-action="update" class="btn btn-primary" type="button">{{ t('plugins.update') }}</button>
+        <button data-action="uninstall" class="btn btn-danger" type="button">{{ t('plugins.uninstall') }}</button>
+    </div>
+</header>
+
+<main class="plugins-layout">
+    <aside class="panel sidebar">
+        <h2>{{ t('plugins.filters_title') }}</h2>
+
+        <div class="field">
+            <label class="field-label" for="categoryFilter">{{ t('plugins.category_label') }}</label>
+            <select id="categoryFilter">
+                <option value="">{{ t('plugins.all') }}</option>
+                {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="scopeSelect">{{ t('plugins.scope_label') }}</label>
+            <select id="scopeSelect">
+                <option value="selected">{{ t('plugins.scope_selection') }}</option>
+                <option value="filtered">{{ t('plugins.scope_filtered') }}</option>
+                <option value="all">{{ t('plugins.scope_all') }}</option>
+            </select>
+        </div>
+
+        <label class="check">
+            <input id="installedFilter" type="checkbox">
+            {{ t('plugins.installed_only') }}
+        </label>
+
+        <label class="check">
+            <input id="updatesFilter" type="checkbox">
+            {{ t('plugins.updates_only') }}
+        </label>
+
+        <h2>{{ t('plugins.mode_title') }}</h2>
+
+        <div class="field">
+            <label class="field-label" for="installMode">{{ t('plugins.install_source_label') }}</label>
+            <select id="installMode">
+                <option value="pypi">{{ t('plugins.source_pypi') }}</option>
+                <option value="dev">{{ t('plugins.source_dev') }}</option>
+            </select>
+        </div>
+    </aside>
+
+    <section class="panel plugins-panel">
+        <div class="panel-title-row">
+            <h2>{{ t('plugins.plugins_title') }}</h2>
+            <div class="stats">
+                <span id="pluginCount" class="badge badge-neutral">{{ t('plugins.plugin_count_plural').replace('{n}', '0') }}</span>
+                <span id="updatesCount" class="badge badge-neutral">{{ t('plugins.updates_checking') }}</span>
+                <span id="selectedCount" class="badge badge-primary">{{ t('plugins.selected_count').replace('{n}', '0') }}</span>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input id="selectAll" type="checkbox" aria-label="{{ t('plugins.all') }}">
+                        </th>
+                        <th>{{ t('plugins.th_plugin') }}</th>
+                        <th>{{ t('plugins.th_category') }}</th>
+                        <th>{{ t('plugins.th_package') }}</th>
+                        <th>{{ t('plugins.th_version') }}</th>
+                        <th>{{ t('plugins.th_status') }}</th>
+                        <th>{{ t('plugins.th_path') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="pluginsBody"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="panel output-panel">
+        <div class="panel-title-row">
+            <h2>{{ t('plugins.console_title') }}</h2>
+            <span id="statusPill" class="badge badge-neutral">{{ t('plugins.status_ready') }}</span>
+        </div>
+        <pre id="output">{{ t('plugins.console_ready') }}</pre>
+    </section>
+</main>
+
+<script src="{{
+    url_for(
+        'plugins_manager.static',
+        filename='plugins_manager.js'
+    )
+}}">
+</script>
+{% endblock %}
