@@ -1,7 +1,9 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import os
+
 from scipy.signal import savgol_filter
 from tkinter import filedialog
 from tkinter import *
@@ -75,20 +77,21 @@ def spikes_correction(res):
     """
     
     fig,ax=plt.subplots()
-    plt.imshow(np.log10(abs(np.mean(res.whole_spectrum,2))))
-    plt.title('Spectral frequencies spikes correction. Press escape key to end')
+    whole_spectrum=np.fft.fftshift(np.fft.fft2(res["hyperspectral_image"],axes=(0,1)))
+    plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
+    plt.title('Spectral frequencies spikes correction. Pacq_datas escape key to end')
     p=plt.ginput(-1)
     p=np.round(p).astype(np.int32)
     plt.clf()
-    
+
     for pixel in p:
-        if pixel[0]==np.size(res.whole_spectrum,1)-1:
-            res.whole_spectrum[pixel[1],pixel[0],:]=res.whole_spectrum[pixel[1],pixel[0]-2,:]
+        if pixel[0]==np.size(whole_spectrum,1)-1:
+            whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]-2,:]
         else:
-            res.whole_spectrum[pixel[1],pixel[0],:]=res.whole_spectrum[pixel[1],pixel[0]+1,:]
-    plt.imshow(np.log10(abs(np.mean(res.whole_spectrum,2))))
+            whole_spectrum[pixel[1],pixel[0],:]=whole_spectrum[pixel[1],pixel[0]+1,:]
+    plt.imshow(np.log10(abs(np.mean(whole_spectrum,2))))
     plt.show()
-    res.image_reconstruction()
+    res["hyperspectral_image"]=abs(np.fft.ifft2(whole_spectrum,axes=(0,1)))
     return res
 
 
@@ -117,35 +120,35 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
     # Display Hypercube spectral mean to visualise an image
     rgb_image=RGB_reconstruction(datacube,wavelengths)
     fig,ax=plt.subplots()
-    plt.subplot(1,2,1)
-    plt.imshow(rgb_image)
+#     plt.subplot(1,2,1)
+    ax.imshow(rgb_image)
     
     
     # Selection of pixel(s) or region of interest
     if mode=='single':
         tick=np.arange(n)+1
         # Select pixel(s)
-        p=plt.ginput(n)
-        p=np.round(p).astype(np.int)
+        p=fig.ginput(n)
+        p=np.round(p).astype(np.int32)
         # Display results
         plt.plot(p[:,0],p[:,1],'x',color='red')
         for i, txt in enumerate(tick):
             plt.annotate(txt, (p[i,0]+1, p[i,1]+1),color='r',bbox=dict(boxstyle="circle"))
         spec=datacube[p[:,1],p[:,0],:]
-        
-        plt.subplot(1,2,2)
-        
-        plt.plot(wavelengths,np.transpose(spec))
-        plt.xlabel('Wavelengths (nm)')
-        plt.ylabel('Intensity (counts)')
-        plt.legend(tick)
-        fig.canvas.draw()
         plt.show(block=False)
-        
+#         plt.subplot(1,2,2)
+#         
+#         plt.plot(wavelengths,np.transpose(spec))
+#         plt.xlabel('Wavelengths (nm)')
+#         plt.ylabel('Intensity (counts)')
+#         plt.legend(tick)
+#         fig.canvas.draw()
+#         plt.show(block=False)
+#         plt.pause(0.001)
     elif mode=='mean':
         # Select 2 corner pixels of rectangle area
         p=plt.ginput(2)
-        p=np.round(p).astype(np.int)
+        p=np.round(p).astype(np.int32)
         spec=datacube[p[0,1]:p[1,1],p[0,0]:p[1,0],:] # 2D spatial mean of the selected area
         
         # Display results
@@ -160,8 +163,8 @@ def select_disp_spectra(datacube,wavelengths,n,mode):
     else:
         print("mode='single' to display each spectrum or mode='mean' to display the mean of the spectra from the selected area")
 
-    plt.show()
-    
+    plt.close()
+    del fig,ax
     return spec
 
  
@@ -267,7 +270,7 @@ def clustering(datacube,components,n_cluster):
     pca = PCA(components) 
     principalComponents = pca.fit_transform(image_reshape)
     
-    kmeans = KMeans(n_cluster,random_state=0).fit(principalComponents)
+    kmeans = KMeans(n_cluster,n_init=10,random_state=0).fit(principalComponents)
     image_seg=np.reshape(kmeans.labels_,(np.size(datacube,0),np.size(datacube,1))) 
     
     return image_seg  
@@ -394,7 +397,7 @@ def py2ms(save_gerbil_name,datacube,wavelengths):
     fid.close()
     
 
-def py2envi(save_envi_name,datacube,wavelengths):
+def py2envi(save_envi_name,datacube,wavelengths,save_path=None):
     """
     py2ms allows to save ONE-PIX data into ENVI format https://www.l3harrisgeospatial.com/docs/enviheaderfiles.html
     metadata can be improved !
@@ -413,17 +416,16 @@ def py2envi(save_envi_name,datacube,wavelengths):
     None.
 
     """
-    save_path= filedialog.askdirectory(title = "Open the save directory")
-    foldername=save_path+'\\'+save_envi_name
-    filename=foldername+'\\'+save_envi_name+'.hdr'
-    os.mkdir(foldername)
+    if save_path==None:save_path= filedialog.askdirectory(title = "Open the save directory")
+    # foldername=save_path+'\\'+save_envi_name
+    filename=save_envi_name+'.hdr'
+    # os.mkdir(foldername)
+    path=os.getcwd()
+    os.chdir(save_path)
+    envi.save_image(filename, datacube,dtype=np.float32,metadata={'wavelength':wavelengths,})
+    os.chdir(path)
     
-    envi.save_image(filename, datacube,dtype=np.float64,metadata={'wavelength':wavelengths,})
-    
-    
-    
-    
-    
+
     
     
     

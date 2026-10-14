@@ -1,23 +1,26 @@
-# -*- coding: utf-8 -*-
 """
-Created on Fri Oct  8 17:09:58 2021
-@author: mribes & grussias
+ONEPIX_acquisition allows to launch ONE-PIX measures according to the json parameters file.
 """
+
 from src.AcquisitionConfig import *
 begin_script=time.time()
 
 """
-ONEPIX data initialisation
+ONE-PIX data initialisation
 """
 json_path="./acquisition_param_ONEPIX.json"
-acquisition_config = OPConfig(json_path)
-OP_init(acquisition_config)
-print(f"Estimated acquisition duration : {acquisition_config.pattern_lib.nb_patterns*acquisition_config.periode_pattern/(60*1000)} min ")
+print(json_path)
+config = OPConfig(json_path)
+
+# Automatic integration time setting comment to keep json's file value
+config.OP_init() 
+est_dur=round(1.5*config.pattern_lib.nb_patterns*config.periode_pattern/(60*1000),2)
+print(f"Estimated acquisition duration : {est_dur} min ")
+
 """
-Start ONEPIX acquisition  
+Start ONE-PIX acquisition  
 """
 print("Start acquisition")
-acquisition_config=thread_acquisition(acquisition_config)
-duree_script=time.time()-begin_script
-print(f"ONEPIX acquisition completed in {duree_script/60} min")
-
+config.thread_acquisition()
+duration=time.time()-begin_script
+print(f"ONE-PIX acquisition completed in {duration/60} min")

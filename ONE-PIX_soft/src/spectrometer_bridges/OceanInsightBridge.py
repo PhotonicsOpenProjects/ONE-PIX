@@ -10,6 +10,7 @@ class OceanInsightBridge:
         self.integration_time_ms=integration_time_ms
         self.spec=[]
         self.DeviceName=''
+       
         
     def spec_open(self):
         """
@@ -21,9 +22,12 @@ class OceanInsightBridge:
 
         """
         try:
-            self.spec=Spectrometer.spec=Spectrometer.from_first_available()
+            self.spec=Spectrometer.from_first_available()
+            self.spec.close()
             self.spec.open() #open the communication with the spectrometer
             self.DeviceName=str(self.spec.serial_number)
+        
+            
         except seabreeze.cseabreeze.SeaBreezeError as e:
             raise Exception ('No Ocean Insight device was detected : %s'%e)
             
@@ -38,6 +42,7 @@ class OceanInsightBridge:
         None.
 
         """
+        self.integration_time_ms=int(self.integration_time_ms)
         if self.integration_time_ms*1e3<self.spec.integration_time_micros_limits[0]:
             raise Exception('Spectrometer saturation at lower integration time. Adapt your acquisition configuration to reduce the optical intensity collected')
             
@@ -81,11 +86,4 @@ class OceanInsightBridge:
 
         """
         self.spec.close()
-    
-    
-    
-    
-    
-    
-    
     

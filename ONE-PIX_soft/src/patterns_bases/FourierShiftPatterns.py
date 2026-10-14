@@ -9,7 +9,9 @@ class FourierShiftPatterns:
         if (self.spatial_res%2==0):
             self.spatial_res=self.spatial_res+1
         self.spectrum_size=(self.spatial_res-1)//2
-        self.nb_patterns=2*(self.spectrum_size+1)*(2*self.spectrum_size+1)        
+        self.nb_patterns=2*(self.spectrum_size+1)*(2*self.spectrum_size+1)
+        self.white_pattern_idx=2*self.spectrum_size
+        self.sequence=[]        
 
 
     def sequence_order(self):

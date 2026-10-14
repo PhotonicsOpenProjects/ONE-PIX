@@ -3,7 +3,7 @@ import numpy as np
 class BlackAndWhitePatterns:
     """ Class BlackAndWhitePatterns allows to create B&W patterns and their order list"""
     
-    def __init__(self,nb_patterns,height,width):
+    def __init__(self,nb_patterns,height=600,width=800):
         """
 
         Parameters
@@ -47,7 +47,7 @@ class BlackAndWhitePatterns:
         return self.pattern_order
     
   
-    def creation_sequence(self):
+    def creation_patterns(self):
         """
         This function allows to create a sequence containing alternate white and black patterns
 
@@ -58,8 +58,8 @@ class BlackAndWhitePatterns:
 
         """
    
-        self.sequence=np.zeros((self.height,self.width,self.nb_patterns),dtype=np.float32)
-        self.sequence[:,:,0::2]=1
+        self.sequence=np.zeros((self.height,self.width,self.nb_patterns),dtype=np.uint8)
+        self.sequence[:,:,0::2]=255
         self.sequence=np.split(self.sequence,self.nb_patterns,axis=2)
-        
-        return self.sequence
+        self.pattern_order=self.sequence_order()
+        return self.pattern_order,[]

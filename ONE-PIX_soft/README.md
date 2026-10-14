@@ -3,7 +3,16 @@
 
 The installation of the ONE-PIX software is achievable as the hardware installation is fully completed..
 To do so, you can follow the [hardware building tutorial](/hardware_build/hardware_building_tutorial.pdf) .
-You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/en/perfos-rto/services/)
+You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/)
+
+the ONE-PIX kit has been tested and is functional in the following environments: 
+|Tested OS| Tested python version|remark
+|---|---|---|
+|[Rasbian bullseye version 11 (32-Bit)](https://www.raspberrypi.com/software/operating-systems/) |3.9|tested on raspberry pi 4B + with 8 Go RAM|
+|Windows 11|3.11.6| impossible to carry out [HAS measurements](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/3.-ONE%E2%80%90PIX-measures-principles#has-method) and no RGB capture at all |
+
+Here we assume that The ONE-PIX soft was developed to use a raspberry pi with Raspberry Pi OS.
+However it possible use directly your PC with python for more advanced performance. 
 
 This tutorial details all the steps required to install the ONE-PIX software on a Raspberry Pi 4 board. 
 
@@ -16,8 +25,7 @@ We recommend to use The ONE-PIX with a remote control Desktop.It allow you to ru
 </p>
  
 
-Here we assume that The ONE-PIX soft was developed to use a raspberry pi with Raspbian OS.
-However it possible use directly your PC with python for more advanced performance. 
+
 
 To install the Raspbian OS on the SD card you can follow steps on this link [here](https://www.raspberrypi.org/documentation/installation/installing-images/ )
 
@@ -38,23 +46,18 @@ cd Desktop
 Download the ONE-PIX software from git 
 
 ```
-sudo git clone url
+sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
 ```
 
 ## Requirements installation
 
-A folder ONE-PIX _soft was created on the desktop.
-with the terminal go in this folder 
+A ONE-PIX folder was created on the desktop.
 
-```
-cd Desktop/ONE-PIX/ONE-PIX_soft
-```
-
-You need to install Python packages to run ONE-PIX _soft. 
+You need to install Python packages to run ONE-PIX_soft. 
 For that, just run the following command:
 
 ```
-pip install -r requirements.txt
+pip install -r ./ONE-PIX/ONE-PIX_soft/requirements.txt
 ```
 
 ## Dependencies installation
@@ -90,22 +93,16 @@ You need to configure USB rules to allow data tranferts from your spectrometer.
 
 If the spectrometer used is this [list of tested spectrometer](../ONE-PIX_soft/doc/tested_spectrometers.pdf) follow steps for your model. 
 
-Else, the spectrometer used is not in this list, you need to see [how to implement a new spectrometer](../ONE-PIX_soft/doc/implement_untested_spectrometer.pdf)
+Else, the spectrometer used is not in this list, you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
 
 ### Ocean Insight spectrometers 
 
 To configure Ocean Insight USB rules you need to copy the file the 10-oceanoptics.rules file stored in the [DLL folder](../ONE-PIX_soft/src/DLL) and paste it in the /etc/udev/rules.d folder of the Rapsberry pi.
 
-For that go to the DLL folder
+For that copy/paste the 10-oceanoptics.rules in /etc/udev/rules.d folder with this command line:
 
 ```
-cd src/DLL
-```
-
-and copy/paste the 10-oceanoptics.rules in /etc/udev/rules.d folder with this command line:
-
-```
-sudo cp 10-oceanoptics.rules   /etc/udev/rules.d
+sudo cp ~/Desktop/ONE-PIX/ONE-PIX_soft/src/DLL/10-oceanoptics.rules   /etc/udev/rules.d
 ```
 
 ### Avantes spectrometers
@@ -117,12 +114,13 @@ To do so, go to this file with this command line:
 ```
 cd /etc/udev/rules.d
 ```
-and add text in the file with these lines: 
+and add text in the file ussing these commands: 
 
 ```
-sed -i '13 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0667", MODE="0666"' 99-com.rules
-sed -i '14 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0668", MODE="0666"' 99-com.rules
-sed -i '15 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0669", MODE="0666"' 99-com.rules 
+sudo sed -i '13 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0667", MODE="0666"' 99-com.rules
+sudo sed -i '14 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0668", MODE="0666"' 99-com.rules
+sudo sed -i '15 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0669", MODE="0666"' 99-com.rules
+sudo sed -i '16 i SUBSYSTEM=="usb", ATTRS{idVendor}=="1992", ATTRS{idProduct}=="0670", MODE="0666"' 99-com.rules 
 
 ```
 Finally, save and close the rules.d file.
@@ -149,7 +147,7 @@ You need to supress your existing boot/config.txt and replace it by  preconfigur
 For that use these command lines : 
 ```
 sudo rm /boot/config.txt
-sudo cp config.txt /boot
+sudo cp ~/Desktop/ONE-PIX/ONE-PIX_soft/src/DLL/config.txt /boot
 ```
 # Finalisation and checking of the installation
 
@@ -183,12 +181,14 @@ set the resolution of the screen 1 with 1024x768 pix and the screen 2 in 600x800
 
 click one the green ticks to validate changes.
 
+:warning: **Warning:** For long acquisition it may be necessary to deactivate the sleepmode. you can follow this [tutorial](https://pimylifeup.com/raspberry-pi-screensaver/)
+
 <p align="center">
 <img src="imgs\double_screen.png" alt="vnc vnc viewer double screen" width="500"/>
 </p>
 
 The installation is now complete. 
-Now you can follow the tutorial [tutorial measure hyperspectral image](/ONE-PIX_soft/doc/tutorial_measure_hyperspectral_image.pdf) to measure your first hyperspectral datacube ! 
+Now you can follow the [tutorial measure hyperspectral image](/ONE-PIX_soft/doc/tutorial_measure_hyperspectral_image.pdf) to measure your first hyperspectral datacube ! 
 
 
 

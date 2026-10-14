@@ -6,40 +6,11 @@ import tkinter as Tk
 from tkinter import filedialog
 from tkinter import *
 import importlib
-
+from sklearn import mixture
+import spectral.io.envi as envi
+import time
 #%% Raw data pre-treatment
-def time_aff_corr(chronograms,time_spectro,time_aff):
-    """
-    This function automatically corrects the display times according to the 
-    measurements of the initialization B&W sequence.
 
-    Parameters
-    ----------
-    chronograms : array of floats
-        3D array of spectra stored in chronological order.
-    time_spectro : array of floats
-        1D array of time values for each measured spectrum.
-    time_aff : array of floats
-        1D array of time values of the beginning and the end of projection for each pattern.
-
-    Returns
-    -------
-    time_aff : array of floats
-        corrected array of time values.
-
-    """
-    data=chronograms[:,1000]
-    delta=round((np.mean(abs(time_aff[0::2]-time_aff[1::2]))/(time_spectro[1]-time_spectro[0]))/2)
-    idx=np.abs(time_spectro-time_aff[0]).argmin()
-    
-    value=np.mean(data[idx-delta:idx])
-    var=np.std(data[idx-delta:idx].astype(np.float64))
-
-    start_idx=idx+np.argmax(data[idx:]>value+5*var)+1
-    delay=time_spectro[start_idx]-time_aff[0]
-    time_aff=time_aff+delay
-    
-    return time_aff
 
 def get_header_data(path):
     """
@@ -63,58 +34,13 @@ def get_header_data(path):
        for line in file.readlines():
            header.append(line.split(':'))
     acq_data=dict()
+    acq_data['Acquisition_name']=header[0][0][8:]
     for x in header:
         if x[0].strip()=='Acquisition method':
             acq_data['pattern_method']=x[1].strip()
         
         if x[0].strip()=='Integration time':
             acq_data['integration_time_ms']=float(x[1].strip()[:-2])
-    
-    return acq_data
-
-
-def load_chronograms():
-    """
-    This function allows to load saved chronograms with timers of the displays and spectrometers.
-    at runtime, a window appears to select the folder path in which the data are located. 
-
-    Returns
-    -------
-    acq_data : dict
-        Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.
-
-    """
-    
-    
-    chemin_script = os.getcwd()
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', 1)
-    chemin_mesure = filedialog.askdirectory(title = "ouvrir le dossier contenant les mesures", initialdir = chemin_script)
-    os.chdir(chemin_mesure)
-    
-    header_name=glob.glob('*.txt')[0]
-    acq_data=get_header_data(header_name)
-    
-    list_nom_mesure = sorted(glob.glob('*.npy'),key=os.path.getmtime)
-    
-    indice=[x for x, s in enumerate(list_nom_mesure) if "display_time" in s]
-    acq_data['time_aff']=np.load(list_nom_mesure[indice[0]])
-    
-    indice=[x for x, s in enumerate(list_nom_mesure) if "time_spectro" in s]
-    acq_data['time_spectro']=np.load(list_nom_mesure[indice[0]])
-    
-    indice=[x for x, s in enumerate(list_nom_mesure) if "chronograms" in s]
-    acq_data['chronograms']=np.load(list_nom_mesure[indice[0]])
-    
-    indice=[x for x, s in enumerate(list_nom_mesure) if "pattern_order" in s]
-    acq_data['pattern_order']=np.load(list_nom_mesure[indice[0]])
-    
-    indice=[x for x, s in enumerate(list_nom_mesure) if "wavelength" in s]
-    acq_data['wavelengths']=np.load(list_nom_mesure[indice[0]])
-    
-    os.chdir(chemin_script)
-    acq_data['time_aff']=time_aff_corr(acq_data['chronograms'],acq_data['time_spectro'],acq_data['time_aff'])
     
     return acq_data
 
@@ -157,109 +83,53 @@ def load_spectra():
     
     return acq_data
 
-def load_analysed_data():
+def load_hypercube(opt=None):
     """
-    This function allows to reload already reconstructed data cubes.
+    This function allows to load saved spectra with timers of the displays and spectrometers.
+    at runtime, a window appears to select the folder path in which the data are located. 
 
     Returns
     -------
-    data_cube : array of floats
-        3D array of spectra constituting an image data cube.
-    wavelengths : array of floats
-         wavelengths sampled by the spectrometer.
+    acq_data : dict
+        Dictionary containing data extracted from files saved after acquisition to reconstruct data cubes.
 
     """
-    chemin_script = os.getcwd()
-    root = Tk()
-    root.withdraw()
-    root.attributes('-topmost', 1)
-    chemin_mesure = filedialog.askopenfilename(title = "Select the file containing the analsed data", initialdir = chemin_script)
-    #os.chdir(chemin_mesure)
-    data=np.load(chemin_mesure,allow_pickle=True)
-    data_cube=data.item().get('data_cube')
-    wavelengths=data.item().get('wavelengths')
-    return data_cube,wavelengths
-
-def preview_chronogram(display_time,time_spectro,chronograms,wavelength):
-    """
-    This function displays the most intense spectrum of the chronograms and the
-    chronogram at the most intense wavelength. Purple vertical bars are timers of displays.
-
-    Parameters
-    ----------
-    display_time : array of floats
-        times of displayed patterns.
-    time_spectro : array of floats
-        times of each spectrometer's measures.
-    chronograms : aray of floats
-        array with all spectras saved in the chronological order .
-    wavelength : array of floats
-        1d array of sampled wavelengths of the spectrometer.
-
-    Returns
-    -------
-    None.
-
-    """
+   
+    # root = Tk()
+    # root.withdraw()
+    # root.attributes('-topmost', 1)
+    res={"hyperspectral_image":[],"wavelengths":[]}
     
-    chronograms=chronograms[:,10:]
-    wavelength=wavelength[10:]
-    spectre_moy=np.mean(chronograms,0)   
-    ind_wl_max=np.argmax(spectre_moy)
-    ind_max_chrono=np.argmax(chronograms[:,ind_wl_max])
-    
-    plt.figure()
-    plt.subplot(1,2,1)
-    plt.plot(time_spectro,chronograms[:,ind_wl_max],'-*')
-    for i in display_time:
-        plt.axvline(x=i,c='purple', ls='--')
-    plt.subplot(1,2,2)
-    plt.plot(wavelength,chronograms[ind_max_chrono,:])
-
-
-def calculate_pattern_spectrum(display_time,delay_proj,time_spectro,chronograms,target):
-    """
-    This function calculates from chronograms each pattern mean spectrum.
-
-    Parameters
-    ----------
-    display_time : array of floats
-        times of displayed patterns.
-    delay_proj : TYPE
-        DESCRIPTION.
-    time_spectro : array of floats
-        times of each spectrometer's measures.
-    chronograms : aray of floats
-        array with all spectras saved in the chronological order .
-    target : int
-        number of spectra to ignore for the mean spectrum calculation.
-
-    Returns
-    -------
-    spectre_pattern : array of floats
-        2D array of spectra for each displayed pattern.
-
-    """
-    
-    #chronograms=chronograms-np.reshape(np.tile(np.mean(chronograms[:,-100:],1),np.size(chronograms,1)),np.shape(chronograms))
-    display_time=display_time+delay_proj
-    indice_spectro=[]
-    for i in display_time:
-        indice_spectro.append(np.abs(time_spectro-i).argmin())
-    spectre_pattern=[]
-    for j in range(0,np.size(indice_spectro),2):
-        value=chronograms[indice_spectro[j]+target:indice_spectro[j+1]-target,:]
-        
-        if np.size(value)==0: 
-            spectre_pattern.append(np.zeros_like(spectre_pattern[-1]))
-            
+    if opt==None:
+        if os.path.isdir('./Hypercubes'):
+            data_folder='./Hypercubes'
+        elif '../Hypercubes':
+            data_folder='../Hypercubes'
         else:
-            spectre_pattern.append(np.mean(value,0))
+            data_folder=os.getcwd()    
+
+        meas_path = filedialog.askdirectory(title = "Select the folder containing the acquisitions",initialdir=data_folder)
+    elif opt=='last':
+        root_path=os.getcwd()
+        path=os.path.join(root_path,'Hypercubes')
+        meas_path=max(glob.glob(os.path.join(path, '*/')), key=os.path.getmtime)
+       
+    else:
+        meas_path=opt
+        
+    hyp_filename=glob.glob(f'{meas_path}/*.hdr')[0]
+    try:
+        info_filename=glob.glob(f'{meas_path}/*.txt')[0]
+        res['pattern_method']=get_header_data(info_filename)['pattern_method']
+    except:
+        pass
+    res['infos']='ONE_PIX_analysis'+meas_path.split('/')[-1][19:]
+    data=envi.open(hyp_filename)
+    res["hyperspectral_image"]=data.load()
+    res["wavelengths"]=np.array(data.bands.centers)
+       
     
-    spectre_pattern=np.asarray(spectre_pattern)
-    spectre_pattern=spectre_pattern-np.reshape(np.tile(np.mean(spectre_pattern[:,-100:],1),np.size(spectre_pattern,1)),np.shape(spectre_pattern))
-    spectre_pattern[0,:]=spectre_pattern[4,:]
-    return spectre_pattern
+    return res
 
 
 
