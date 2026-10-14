@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing Guide &mdash; ONE-PIX kit 28/06/2022 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> ONE-PIX kit
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Support:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#adding-a-new-spectrometer">Adding a new spectrometer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-a-new-pattern-basis-or-method">Adding a new pattern basis or method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-a-new-reconstruction-method">Adding a new reconstruction method</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ONE-PIX kit</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Contributing Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing-guide">
+<h1>Contributing Guide<a class="headerlink" href="#contributing-guide" title="Permalink to this headline"></a></h1>
+<p>If you want to contribute to ONE-PIX kit, please create a pull request on Github.
+Documentation improvements are very welcome!
+Extending ONE-PIX kit can be performed in several ways. Look at the guides below.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>You can pull request your contributions and their associated documentation.</p>
+</div>
+<section id="adding-a-new-spectrometer">
+<h2>Adding a new spectrometer<a class="headerlink" href="#adding-a-new-spectrometer" title="Permalink to this headline"></a></h2>
+<p>To add a new spectrometer device with basic spectrometer Python functionalities, you need to
+get its API necessary informations to open and close the communication with the device, get spectra
+intensities and sampled wavelengths and set the integration times.</p>
+<p>Add a new spectrometer class python file to <cite>ONE-PIX_soft/src/spectrometer_bridges</cite> with the file name:
+&lt;Spectrometer_name&gt;Bridge.py</p>
+<p>Fulfilling these lines allows to use your device with the ONE-PIX kit.</p>
+</section>
+<section id="adding-a-new-pattern-basis-or-method">
+<h2>Adding a new pattern basis or method<a class="headerlink" href="#adding-a-new-pattern-basis-or-method" title="Permalink to this headline"></a></h2>
+<p>You can also add new pattern bases or new methods for hyperspectral compressive imaging:
+Add a new pattern method class python file to <cite>ONE-PIX_soft/src/pattern_bases</cite> with the file name:
+&lt;Pattern_method&gt;Basis.py</p>
+</section>
+<section id="adding-a-new-reconstruction-method">
+<h2>Adding a new reconstruction method<a class="headerlink" href="#adding-a-new-reconstruction-method" title="Permalink to this headline"></a></h2>
+<p>Finally, if needed, you can add a reconstruction method to transform your acquisitions made from
+a new basis.</p>
+<p>To do so, add a new reconstruction method class python file to <cite>ONE-PIX_soft/src/reconstruction_methods</cite> with the file name:
+&lt;Reconstruction_method&gt;Reconstruction.py</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Mathieu Ribes, Gaspard Russias.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
