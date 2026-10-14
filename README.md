@@ -1,8 +1,10 @@
+
 <p align="center">
 <img src="imgs/logo.png" alt="logo" width="200"/>
 </p>
 
 # ONE-PIX kit project   #
+
 ## Introduction 
 
 The ONE-PIX kit is an hyperspectral camera using single pixel imaging principle to measure hypercubes in the visible region. It can be enhanced towards the infrared region. This modular kit can be used with different spectrometers and optical elements for the collection. To date, it can measure scenes exposed to ambient light, but it has been primarily tested and developed for use in dimly lit indoor environments.
@@ -20,56 +22,98 @@ The ONE-PIX kit contains a video projector and a fibered spectrometer with super
 <img src="imgs/principle.png" alt="ONE-PIX principle" width="500"/>
 </p>
 
-For more information about the single pixel imaging you can go [here](ONE-PIX_soft/doc/Single%20Pixel%20Imaging%20tutorial/Single%20Pixel%20Imaging.ipynb)
+For more information about the single pixel imaging you can go [here](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/2.-Theoretical-principles)
 
 ONE-PIX technology involves projecting a series of patterns onto a scene to be imaged. A spectrometer measures the average reflected spectrum of the scene for each projection. An algorithm then reconstructs the hypercube of the scene from all the spectra measured during the acquisition. 
 The Raspberry Pi board ensures the synchronization between patterns projections and the spectrometer measurements.
+
 ### Architecture of the ONE-PIX kit repository 
 
-The ONE-PIX kit project contains two folders :
+This repository contains scripts and software embedded on the Raspberry Pi and all the information to install and use it properly. 
 
-- A [hardware build folder](hardware_build) contains all the files and information to build a case containing all the components of the ONE-PIX kit and their 3D printed attachments.
-- A [ONE-PIX Software folder](ONE-PIX_soft) contains the scripts and software embedded on the Raspberry Pi and all the information to install and use it properly. 
-## Steps to produce one ONE-PIX kit
-
-These followings steps are presented in chronological order to create a ONE-PIX kit. 
-
-### Build your own hardware ONE-PIX kit
-
-Every informations and files to build your own hardware kit are avalaible in the [hardware build folder](hardware_build)
-
-<p align="center">
-<img src="imgs/ONEPIX_kit.JPG" alt="ONE-PIX kit photo" width="300"/>
-</p>
-
-This folder contains:
-
-- The [material needed list](hardware_build/materials_needed.pdf) file containing raw materials and equipments needed to build the ONE-PIX kit hardware.
-- The [hardware building tutorial](hardware_build/hardware_building_tutorial.pdf) file containing details steps to build the ONE-PIX kit.
-- [STL files ready to 3D_printing](hardware_build/STL_file_ready_to_3D_printing) folder containing every files to 3D print components fixation parts of the kit.
-- [plans of box sides ready to cut](hardware_build/plan_of_box_sides_ready_to_cut) folder containing every files to  laser cut sides of the ONE-PIX kit case.
-- The [CAO files to modify hardware](hardware_build/CAO_files_to_modify_hardware) folder containting the complet CAO of the ONE-PIX kit if you want to adapt the hardware to your application.
+An other [ONE-PIX_hardware](https://github.com/PhotonicsOpenProjects/ONE-PIX_hardware) repository contains all the files and information to build a case containing all the components of the ONE-PIX kit and their 3D printed attachments.
 
 
-> **_NOTE:_** You can also buy a premounted and adapted ONE-PIX kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/). 
-> Keep in mind that it is also the best way to help us maintaining the forge, integrating contribution and even propose one day industrial implementation of this technology for the broader audience and usage possible.
+## ONE-PIX software Installation
 
 
-### Install ONE-PIX software on the Raspberry Pi 
+The installation of the ONE-PIX software is achievable as the hardware installation is fully completed..
+To do so, you can follow the [hardware building tutorial](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/4.-ONE%E2%80%90PIX--Hardware) .
+You can also buy an already premounted ONE-PIX  kit [here](https://www.photonics-bretagne.com/fr/product/imageur-hyperspectral-one-pix-pop/)
 
-To install the ONE-PIX kit software you need to follow steps discribed in [Readme installation](ONE-PIX_soft/README.md) before measuring hyperspectral images.
+the ONE-PIX kit has been tested and is functional in the following environments: 
+
+|Tested OS| Tested python version|remark|
+|---|---|---|
+|[Rasbian bullseye version 11 (32-Bit)](https://www.raspberrypi.com/software/operating-systems/) |3.9|tested on raspberry pi 4B + with 8 Go RAM|
+|Windows 11|3.11.6| impossible to carry out [HAS measurements](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/3.-ONE%E2%80%90PIX-measures-principles#has-method) and no RGB capture at all |
+
+Here we assume that The ONE-PIX soft was developed to use a raspberry pi with Raspberry Pi OS.
+However it possible use directly your PC with python for more advanced performance. 
+
+This tutorial details all the steps required to install the ONE-PIX software on a Raspberry Pi 4 board. 
+
 For troubleshooting in installation you can go to the [issue section](https://github.com/PhotonicsOpenProjects/ONE-PIX/issues)
+
+### Installing ONE-PIX on a raspberry pi  
+All instructions and tips to configure your raspberry pi board and install the ONE-PIX on it are available [here](imgs/ONE-PIX_install_on_rasp.md). 
+For other OS just continue to read this readme file. 
+
+
+### Download git repository
+
+The first step of this installation is to clone the ONE-PIX directory from Github.
+
+From the Raspberry Pi, open a terminal and go to the desktop with the following command line:
+
+```
+cd Desktop
+```
+
+Download the ONE-PIX software from git 
+
+```
+sudo git clone https://github.com/PhotonicsOpenProjects/ONE-PIX.git
+```
+
+### ONE-PIX installation 
+
+To install ONE-PIX on the raspberry pi board just run the setup.sh for that go in ther install folder with this command  :
+
+```
+cd ONE-PIX/install 
+```
+and run the installation script with this command :
+
+```
+sudo chmod +x ./install.sh
+./install.sh
+```
+
+
+### Spectrometer installation 
+
+The ONE-PIX kit is compatible with many spectrometers model. All models already tested with ONE-PIX has a concrete implementation in the [spectrometers subfolder](plugins/spectrometer) of plugins. For each of them, Raspberry pi board installation instructions are detailed in each associated README file. 
+For example you can see the [OceanInsight](plugins/spectrometer/OceanInsight/README.md) or [Avantes](plugins/spectrometer/Avantes/README.md) installation instructions to achieve before measure with your ONE-PIX  
+
+If you want to implement a new model of spectrometer  you need to see [adding a new spectrometer](https://one-pix.readthedocs.io/en/latest/contributing.html#adding-a-new-spectrometer) API section.
+
+
+The installation is now complete. 
+Now you can follow the [tutorial measure hyperspectral image](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide) to measure your first hyperspectral datacube ! 
+
 
 ###  Measuring and analysing hypercubes 
 
 The software architecture of the ONE-PIX kit offers different ways to measure, reconstruct and analyze hyperspectral images. 
 
 <p align="center">
-<img src="imgs/software_architecture.png" alt="ONE-PIX software architecture" width="400"/ >
+<img src="imgs/archi onepix refactoring.png" alt="ONE-PIX software architecture" width="600"/ >
 </p>
 
-- The fastest way to measure and analyze hyperspectral images is to use the [GUI interface](ONE-PIX_soft/doc/ONE-PIX_GUI_user_manual.pdf)
-- For more advanced acquisitions,use directly ONEPIX_acquisition.py and ONEPIX_reconstruction.py [Python examples scripts](ONE-PIX_soft) and improve them with using the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
+
+- The fastest way to measure and analyze hyperspectral images without write any line of code is to use the [GUI interface](https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki/1.-Quickstart-Guide)
+- For more advanced acquisitions,use directly [command line interfaces](app/cli) or [python script examples](app/python_code_examples) and adapt them on your usecase  with help in the [API](https://one-pix.readthedocs.io/en/latest/introduction.html).
  
 ## Contributing 
 
