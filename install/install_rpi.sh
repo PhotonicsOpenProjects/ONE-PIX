@@ -63,7 +63,8 @@ python3 -m pip install \
     onepix-fouriersplit \
     onepix-fouriershift \
     onepix-stub-camera \
-    onepix-stub-spectrometer
+    onepix-stub-spectrometer \
+    "onepix-plugins-manager @ git+https://gitlab.com/photonics-open-projects/onepix_plugins/onepix_plugins_manager.git"
 
 echo -e "\n\e[32mOptional Raspberry Pi boot config"
 echo -e "_________________________________________________\e[0m"
