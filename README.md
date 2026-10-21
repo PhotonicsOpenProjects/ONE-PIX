@@ -133,42 +133,36 @@ The graphical interface provides access to:
 
 ### Run as a systemd service on Raspberry Pi
 
-After installing all dependencies, open a terminal **in the Raspberry Pi desktop**,
-activate the Python environment used to run ONE-PIX, and run from the repository root:
+After installing dependencies, run from the repository root (also works over SSH):
 
 ```bash
 bash install/install_service.sh
-# Or explicitly select the Python environment:
+# Or select the Python environment explicitly:
 bash install/install_service.sh "$PWD/.venv/bin/python"
 ```
 
-Run without `sudo`. This installs a user service in
-`~/.config/systemd/user/onepix.service`, enables it for `graphical-session.target`,
-and starts it immediately. Stop any manually launched ONE-PIX instance first so
-port 5000 is available. The installer checks the selected Python dependencies and
-display access; it does not install missing packages.
-
-ONE-PIX needs a working graphical session for monitor detection and projection,
-including X11 or XWayland (`DISPLAY`). It cannot start on a headless boot with this
-configuration. Automatic startup requires a desktop that activates the systemd
-user `graphical-session.target` and imports its display environment. Check with
-`systemctl --user is-active graphical-session.target`. If your desktop does not
-provide this integration, run the installer from a desktop terminal after login
-to start the service and refresh its display environment. For unattended startup,
-configure desktop automatic login and verify this integration on your Pi.
-Enabling user lingering alone does not create a graphical session.
+The script requests sudo, adapts `install/onepix.service` to the current user,
+repository location and selected Python, installs it in
+`/etc/systemd/system/onepix.service`, enables startup at boot and restarts it.
+Run as your application user, with the usual Python environment activated.
+From the `install` directory, use `bash install_service.sh`.
+Stop any manually launched instance first to free port 5000. A previous user
+service is disabled automatically when running the installer without sudo.
 
 ```bash
-systemctl --user status onepix
-journalctl --user -u onepix -f
-systemctl --user restart onepix
-systemctl --user stop onepix
-# Disable automatic startup and stop:
-systemctl --user disable --now onepix
+sudo systemctl status onepix
+sudo journalctl -u onepix -f
+sudo systemctl restart onepix
+sudo systemctl stop onepix
+sudo systemctl disable --now onepix
 ```
 
-The app uses its existing Flask server on port 5000 with debug disabled. This
-service adds process supervision; it does not configure a production web server.
+Installation does not require DISPLAY in the terminal. The service sets
+`DISPLAY=:0`; ONE-PIX still detects screens at import time, so runtime requires
+an accessible graphical display. If necessary, adjust DISPLAY and XAUTHORITY
+with `sudo systemctl edit onepix`, then restart the service.
+The app runs its existing Flask server on port 5000 with debug disabled.
+
 
 ---
 

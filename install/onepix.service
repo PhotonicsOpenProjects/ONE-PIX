@@ -1,14 +1,15 @@
 [Unit]
 Description=ONE-PIX Flask application
-After=graphical-session.target
-PartOf=graphical-session.target
+After=graphical.target
 StartLimitIntervalSec=60
 StartLimitBurst=5
 
 [Service]
 Type=simple
-WorkingDirectory=@WORKDIR@
-ExecStart=@PYTHON@ -u app/GUI/flask/run.py
+User=pi
+WorkingDirectory=/home/pi/ONE-PIX
+ExecStart=/usr/bin/python3 -u /home/pi/ONE-PIX/app/GUI/flask/run.py
+Environment=DISPLAY=:0
 Environment=FLASK_DEBUG=0
 Environment=PYTHONUNBUFFERED=1
 Restart=on-failure
@@ -16,4 +17,4 @@ RestartSec=5
 TimeoutStopSec=30
 
 [Install]
-WantedBy=graphical-session.target
+WantedBy=graphical.target
