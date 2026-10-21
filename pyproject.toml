@@ -45,6 +45,7 @@ dependencies = [
     "onepix-stub-spectrometer",
     "analysis-pipeline",
     "basic-treatments",
+    "onepix-plugins-manager @ git+https://gitlab.com/photonics-open-projects/onepix_plugins/onepix_plugins_manager.git",
 
 ]
 
