@@ -23,8 +23,9 @@ if [[ $EUID != 0 ]]; then
     sudo -v
     privilege=(sudo)
 fi
-temporary_unit="$(mktemp)"
-trap 'rm -f -- "$temporary_unit"' EXIT
+temporary_dir="$(mktemp -d)"
+temporary_unit="$temporary_dir/onepix.service"
+trap 'rm -f -- "$temporary_unit"; rmdir -- "$temporary_dir"' EXIT
 "$python_bin" -B - "$script_dir/onepix.service" "$repo_dir" "$python_bin" "$service_user" "$temporary_unit" <<'PY'
 import os
 from pathlib import Path
@@ -42,15 +43,19 @@ def quote(value, command=False):
     return '"' + value + '"'
 
 unit = Path(template).read_text(encoding='utf-8')
+if any(char in repo + user for char in '\n\r\x00'):
+    raise ValueError('User and repository path must not contain newlines or NUL')
 settings = {
-    'User': quote(user),
-    'WorkingDirectory': quote(os.path.abspath(repo)),
+    'User': user,
+    'WorkingDirectory': os.path.abspath(repo).replace('%', '%%'),
     'ExecStart': quote(os.path.abspath(python), command=True) + ' -u ' + quote(os.path.join(repo, 'app/GUI/flask/run.py'), command=True),
 }
 for key, value in settings.items():
     unit = re.sub(r'^' + key + r'=.*$', lambda match: key + '=' + value, unit, flags=re.MULTILINE)
 Path(destination).write_text(unit, encoding='utf-8')
 PY
+# Validate before replacing the installed unit or stopping an existing service.
+systemd-analyze verify "$temporary_unit"
 # Stop the previous user service, if present, to release port 5000.
 if [[ $EUID != 0 ]] && systemctl --user cat onepix.service >/dev/null 2>&1; then
     systemctl --user disable --now onepix.service
