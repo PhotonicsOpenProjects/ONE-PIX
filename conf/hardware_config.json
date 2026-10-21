@@ -1,6 +1,6 @@
 {
-  "name_spectro": "oceaninsight",
-  "name_camera": "Picamera2",
+  "name_spectro": "StubSpectrometer",
+  "name_camera": "StubCamera",
   "height": 400,
   "width": 800,
   "wl_lim": [
