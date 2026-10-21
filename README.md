@@ -131,6 +131,45 @@ The graphical interface provides access to:
 - imaging method selection
 - spectral analysis tools
 
+### Run as a systemd service on Raspberry Pi
+
+After installing all dependencies, open a terminal **in the Raspberry Pi desktop**,
+activate the Python environment used to run ONE-PIX, and run from the repository root:
+
+```bash
+bash install/install_service.sh
+# Or explicitly select the Python environment:
+bash install/install_service.sh "$PWD/.venv/bin/python"
+```
+
+Run without `sudo`. This installs a user service in
+`~/.config/systemd/user/onepix.service`, enables it for `graphical-session.target`,
+and starts it immediately. Stop any manually launched ONE-PIX instance first so
+port 5000 is available. The installer checks the selected Python dependencies and
+display access; it does not install missing packages.
+
+ONE-PIX needs a working graphical session for monitor detection and projection,
+including X11 or XWayland (`DISPLAY`). It cannot start on a headless boot with this
+configuration. Automatic startup requires a desktop that activates the systemd
+user `graphical-session.target` and imports its display environment. Check with
+`systemctl --user is-active graphical-session.target`. If your desktop does not
+provide this integration, run the installer from a desktop terminal after login
+to start the service and refresh its display environment. For unattended startup,
+configure desktop automatic login and verify this integration on your Pi.
+Enabling user lingering alone does not create a graphical session.
+
+```bash
+systemctl --user status onepix
+journalctl --user -u onepix -f
+systemctl --user restart onepix
+systemctl --user stop onepix
+# Disable automatic startup and stop:
+systemctl --user disable --now onepix
+```
+
+The app uses its existing Flask server on port 5000 with debug disabled. This
+service adds process supervision; it does not configure a production web server.
+
 ---
 
 ### Python API
