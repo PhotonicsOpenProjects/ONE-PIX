@@ -50,6 +50,7 @@ class SpectrometerBridge:
             self.wl_lim = wl_lim
             self.repetition = repetition
             self.DeviceName = ""
+            self.is_open = False
 
             logger.info(f"🧩 Initialisation du spectromètre : {spectro_name}")
 
@@ -139,6 +140,7 @@ class SpectrometerBridge:
     # -------------------------------------------------------------------------
     def spec_open(self):
         self.spectrometer.spec_open()
+        self.is_open = True
         self.DeviceName = self.spectrometer.DeviceName
 
         wavelengths = self.spectrometer.get_wavelengths()
@@ -169,7 +171,20 @@ class SpectrometerBridge:
         ]
 
     def spec_close(self):
-        self.spectrometer.spec_close()
+        """Release the device, so the next spec_open() - from this or
+        another bridge - can open it again: USB spectrometers refuse a
+        second open while the first one holds them. A no-op when it
+        isn't open, so callers can always call it."""
+        if not self.is_open:
+            return
+
+        try:
+            self.spectrometer.spec_close()
+        finally:
+            self.is_open = False
+            # hardware_initialisation() reopens when this is empty
+            self.DeviceName = ""
+
         logging.info(f'{self.spectro_name} spectrometer plugin closed')
 
     # -------------------------------------------------------------------------

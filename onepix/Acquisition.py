@@ -266,13 +266,37 @@ class Acquisition:
                     f"error during init_measure : {e}"
                 )
 
-                self.is_init = False
+                # The spectrometer may already be open: release it, or
+                # the next attempt finds it busy.
+                self.close()
 
         else:
 
             logger.info(
                 "measure is already init"
             )
+
+    # ======================================================
+    # CLOSE
+    # ======================================================
+    def close(self):
+        """Release the spectrometer opened by init_measure(). Each
+        Acquisition opens its own: left open, it keeps the device
+        busy and the next acquisition can't open it. Safe to call more
+        than once, or after a failed init_measure(); the next
+        init_measure() opens it again."""
+
+        hardware = getattr(self, "hardware", None)
+        spectrometer = getattr(hardware, "spectrometer", None)
+
+        if spectrometer is not None:
+
+            try:
+                spectrometer.spec_close()
+            except Exception as e:
+                logger.warning(f"Could not close the spectrometer: {e}")
+
+        self.is_init = False
 
     # ======================================================
     # THREAD ACQUISITION

@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from pathlib import Path
-from onepix.Acquisition import Acquisition
+from onepix.ImagingMethodBridge import ImagingMethodBridge
 
 import gui_plugins
 from i18n import t
@@ -112,6 +112,20 @@ def software_settings():
 # ----------------------------
 #   ADDON SETTINGS (🔥 NOUVEAU)
 # ----------------------------
+def imaging_config_path(method):
+    """Path of an imaging method's own config file, or None.
+
+    Read from its CreationPatterns, only built - running it
+    (creation_patterns()) would project and photograph the scene, and
+    the full acquisition setup this used to go through also opened the
+    spectrometer and left it busy for the next acquisition.
+    """
+    bridge = ImagingMethodBridge(method)
+    module = bridge._import_submodule("PatternsCreation")
+    patterns = module.CreationPatterns(bridge.height, bridge.width)
+    return getattr(patterns, "config_path", None)
+
+
 def addon_settings():
     """
     Charge dynamiquement la configuration de l’addon
@@ -125,22 +139,18 @@ def addon_settings():
         print("⚠️ No imaging method selected in software settings")
         return {}
 
-    # 2. Créer une mini acquisition pour obtenir le chemin du JSON du plugin
+    # 2. Chemin du JSON du plugin, sans toucher au matériel
     try:
-        acq = Acquisition(imaging_method_name=method)
-        acq.init_measure()
+        path = imaging_config_path(method)
     except Exception as e:
         print(f"❌ Cannot initialize addon {method}: {e}")
         return {}
-
-    # 3. Récupérer le path du JSON dans le plugin
-    path = acq.imaging_method.config_path
 
     if not path or not os.path.exists(path):
         print(f"⚠️ Addon config not found at {path}")
         return {}
 
-    # 4. Charger le JSON du plugin
+    # 3. Charger le JSON du plugin
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -153,9 +163,8 @@ def acquisition_overview() -> dict:
     """What the next acquisition will use, plus known problems that
     would make it fail, for the main Acquisition page.
 
-    Reads the config files directly - unlike addon_settings(), this
-    must not initialize any hardware, since it runs on every load of
-    the main page.
+    Reads the config files directly - it runs on every load of the
+    main page, so it must not initialize any hardware.
 
     imaging_summary and warnings come from the selected imaging
     method's own plugin (gui_plugins.method_overview()): only it knows

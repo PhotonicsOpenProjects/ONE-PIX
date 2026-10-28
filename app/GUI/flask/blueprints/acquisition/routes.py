@@ -182,11 +182,7 @@ def save_addon():
     sw = ctl.software_settings()
     method = sw.get("imaging_method_name")
 
-    acq = Acquisition(imaging_method_name=method)
-
-    acq.init_measure()
-
-    path = acq.imaging_method.config_path
+    path = ctl.imaging_config_path(method)
 
     new_data = dict(request.form)
 
@@ -234,6 +230,8 @@ def run_acquisition():
     if not tuning.hardware_lock.acquire(blocking=False):
         return "The spectrometer/projector is in use by another acquisition.", 409
 
+    acq = None
+
     try:
         acq = Acquisition()
         acq.init_measure()
@@ -276,6 +274,10 @@ def run_acquisition():
         return f"Error in /run: {e}", 500
 
     finally:
+        # Released whatever happened: left open, the spectrometer is
+        # busy for the next acquisition (a new Acquisition each time).
+        if acq is not None:
+            acq.close()
         tuning.hardware_lock.release()
 
 
