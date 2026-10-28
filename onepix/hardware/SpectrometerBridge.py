@@ -16,8 +16,8 @@ class SpectrometerBridge:
     Generic ONE-PIX spectrometer bridge (plugin-based).
 
     Compatible with:
-    - entry points returning a module (Model)
-    - entry points returning a class (Model:Model)
+    - entry points naming a module (Model), searched for the class
+    - entry points naming the class itself (package.module:Class)
     - legacy plugins
 
     Convention supportée :
@@ -53,15 +53,18 @@ class SpectrometerBridge:
 
             logger.info(f"🧩 Initialisation du spectromètre : {spectro_name}")
 
-            # 🔍 Resolve plugin package
-            self.pkg_name = self._resolve_plugin_package(spectro_name)
+            # 🔍 Resolve plugin entry point
+            entry_point = self._resolve_entry_point(spectro_name)
+            self.pkg_name = entry_point.value
             logger.info(f"📦 Plugin détecté : {self.pkg_name}")
 
-            # 📦 Import module
-            module = importlib.import_module(self.pkg_name)
-
-            # 🔥 Find correct class (robuste)
-            bridge_class = self._find_bridge_class(module)
+            if ":" in entry_point.value:
+                # "package.module:Class" names the class itself
+                bridge_class = entry_point.load()
+            else:
+                # 📦 A module: find the class in it (robuste)
+                module = importlib.import_module(entry_point.value)
+                bridge_class = self._find_bridge_class(module)
 
             # Instantiate
             self.spectrometer = bridge_class(integration_time_ms)
@@ -72,9 +75,9 @@ class SpectrometerBridge:
             raise Exception(f'Spectrometer bridge "{spectro_name}" could not be loaded: {e}')
 
     # -------------------------------------------------------------------------
-    # 🔍 Resolve plugin package from entry-points
+    # 🔍 Resolve plugin entry point
     # -------------------------------------------------------------------------
-    def _resolve_plugin_package(self, spectro_name: str) -> str:
+    def _resolve_entry_point(self, spectro_name: str):
         eps = importlib.metadata.entry_points()
 
         if hasattr(eps, "select"):  # Python ≥3.10
@@ -84,7 +87,7 @@ class SpectrometerBridge:
 
         for ep in eps_group:
             if ep.name.lower() == spectro_name.lower():
-                return ep.value
+                return ep
 
         raise ImportError(
             f"❌ Aucun plugin trouvé pour '{spectro_name}'. Vérifie l'installation et le pyproject.toml."
