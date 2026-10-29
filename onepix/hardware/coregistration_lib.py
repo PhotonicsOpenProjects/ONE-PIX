@@ -16,7 +16,13 @@ sys.path.append(hardware_path)
 
 from CameraBridge import *
 
-screenWidth, proj_shape = get_display_configuration()
+def projector_resolution():
+    """(width, height) of the projector, looked up when needed - not when
+    this module is imported, so the app starts even before the desktop's
+    display is up (see Projection.get_display_configuration())."""
+    monitor = get_display_configuration()[1]
+    return monitor.width, monitor.height
+
 
 hardware_json_path = os.path.abspath(
     hardware_path + f"{os.sep}..{os.sep}..{os.sep}conf/hardware_config.json"
@@ -48,14 +54,14 @@ def order_corners(pts):
 
 
 def get_reference_image(
-    img_resolution=(proj_shape.width, proj_shape.height), grayscale=50
+    img_resolution=None, grayscale=50
 ):
     """
     Build the image we will be searching for.  In this case, we just want a
     large white box (full screen)
     :param img_resolution: this is our screen/projector resolution
     """
-    width, height = img_resolution
+    width, height = img_resolution or projector_resolution()
     img = grayscale * np.ones((height, width, 1), np.uint8)
     return img
 
@@ -194,9 +200,10 @@ def show_full_frame(frame):
     (e.g. from Projection.py) would hang forever trying to marshal onto
     that first, non-GUI-pumping thread.
     """
+    monitor = get_display_configuration()[1]
     gui_thread.run(cv2.namedWindow, "FullScreen", cv2.WND_PROP_FULLSCREEN)
     gui_thread.run(cv2.setWindowProperty, "FullScreen", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-    gui_thread.run(cv2.moveWindow, "FullScreen", proj_shape.x, proj_shape.y)
+    gui_thread.run(cv2.moveWindow, "FullScreen", monitor.x, monitor.y)
     gui_thread.run(cv2.imshow, "FullScreen", frame)
 
 
@@ -210,7 +217,7 @@ def hide_full_frame(window="FullScreen"):
 
 
 def get_perspective_transform(
-    tag, screen_resolution=(proj_shape.width, proj_shape.height), prop_file=None
+    tag, screen_resolution=None, prop_file=None
 ):
     """
     Determine the perspective transform for the current physical layout
@@ -218,6 +225,7 @@ def get_perspective_transform(
     projected region
 
     """
+    screen_resolution = screen_resolution or projector_resolution()
     # camera.camera_open()
     with open(hardware_json_path) as f:
         setup_dict = json.load(f)
@@ -287,17 +295,17 @@ def get_perspective_transform(
     # Uncomment the lines below to see the transformed image
     wrap = cv2.resize(
         cv2.warpPerspective(pict, corregistration_array, (max_width, max_height)),
-        (proj_shape.width, proj_shape.height),
+        screen_resolution,
     )
     cv2.imwrite(save_path, wrap)
 
 
-def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.height)):
+def coregistration_calibration(screen_resolution=None):
     """
     Function allow to calibrate teh coregistration between video projector and the PI camera
 
     """
-    screenWidth, proj_shape = get_display_configuration()
+    screen_resolution = screen_resolution or projector_resolution()
     reference_image = get_reference_image(screen_resolution)
     show_full_frame(reference_image)
     # Delay execution a quarter of a second to make sure the image is displayed
@@ -347,7 +355,7 @@ def coregistration_calibration(screen_resolution=(proj_shape.width, proj_shape.h
         json.dump(setup_dict, file, indent=4)
 
 
-def capture_calibration_photo(screen_resolution=(proj_shape.width, proj_shape.height)):
+def capture_calibration_photo(screen_resolution=None):
     """
     Project the white reference pattern and photograph it - camera and
     projector interaction only, no local display/click interaction.
@@ -456,7 +464,7 @@ def apply_corregistration(img):
 
         wrap = cv2.resize(
             cv2.warpPerspective(img, corregistration_array, (max_width, max_height)),
-            (proj_shape.width, proj_shape.height),
+            projector_resolution(),
         )
     else:
         wrap = img

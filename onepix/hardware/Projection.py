@@ -17,7 +17,18 @@ if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
 
 
 def get_display_configuration():
-    monitors = screeninfo.get_monitors()
+    """(width of the first monitor, the monitor patterns are projected on).
+
+    Called when projecting, never when a module is imported: the app (a
+    service started at boot) must come up even before the desktop's
+    display does - only projecting needs it."""
+    try:
+        monitors = screeninfo.get_monitors()
+    except screeninfo.common.ScreenInfoError as e:
+        raise RuntimeError(
+            f"No display available for the projector ({e}): is the "
+            "desktop session running?"
+        ) from e
 
     if len(monitors) == 0:
         raise RuntimeError(
@@ -41,8 +52,6 @@ def get_display_configuration():
     return screen_width, projector_monitor
 
 
-screenWidth, proj_monitor = get_display_configuration()
-
 class Projection:
     """
     Projection handler.
@@ -54,8 +63,12 @@ class Projection:
         self.periode_pattern = periode_pattern
         self.proj_position = proj_position
 
+        # Looked up for each Projection, so a projector plugged in after
+        # the app started is found too.
+        _, self.monitor = get_display_configuration()
+
         self.proj_shape = np.array(
-            [proj_monitor.height, proj_monitor.width]
+            [self.monitor.height, self.monitor.width]
         )
 
         logging.info("Projection system initialized")
@@ -72,7 +85,7 @@ class Projection:
             "ImageWindow",
             cv2.WINDOW_NORMAL | cv2.WINDOW_FREERATIO,
         )
-        gui_thread.run(cv2.moveWindow, "ImageWindow", proj_monitor.x, proj_monitor.y)
+        gui_thread.run(cv2.moveWindow, "ImageWindow", self.monitor.x, self.monitor.y)
         gui_thread.run(
             cv2.setWindowProperty,
             "ImageWindow",
@@ -82,7 +95,7 @@ class Projection:
 
     def create_integrated_frame(self):
         gui_thread.run(cv2.namedWindow, "background", cv2.WINDOW_NORMAL)
-        gui_thread.run(cv2.moveWindow, "background", proj_monitor.x, proj_monitor.y)
+        gui_thread.run(cv2.moveWindow, "background", self.monitor.x, self.monitor.y)
         gui_thread.run(
             cv2.setWindowProperty,
             "background",
@@ -112,8 +125,8 @@ class Projection:
         gui_thread.run(
             cv2.moveWindow,
             "ImageWindow",
-            proj_monitor.x + self.proj_position[0],
-            proj_monitor.y + self.proj_position[1],
+            self.monitor.x + self.proj_position[0],
+            self.monitor.y + self.proj_position[1],
         )
 
         gui_thread.run(
