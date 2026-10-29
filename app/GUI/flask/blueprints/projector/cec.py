@@ -17,6 +17,11 @@ Configuration (optional keys in conf/hardware_config.json):
 - ``cec_device``  : CEC adapter, default ``/dev/cec1`` (HDMI 1 on a Pi 4)
 - ``cec_address`` : projector's CEC logical address, default ``0``
   (the "TV" slot - where a display/projector normally sits)
+- ``cec_standby`` : ``true`` if the projector obeys the CEC Standby
+  command, default ``false``. Many projectors with a minimal CEC chip
+  (vendor id 00:00:00) accept "on" but silently ignore every way of
+  switching them off - the PA503X of the bench is one of them (tested:
+  standby to the projector, broadcast standby, Power and Power Off keys).
 """
 
 import json
@@ -48,17 +53,25 @@ class CecError(RuntimeError):
     """User-facing CEC error (tool missing, timeout, adapter busy...)."""
 
 
+def _read_conf():
+    try:
+        with open(_HARDWARE_JSON) as f:
+            return json.load(f)
+    except (OSError, ValueError) as exc:
+        logger.warning("CEC config: could not read %s (%s)", _HARDWARE_JSON, exc)
+        return {}
+
+
+def standby_supported():
+    return _read_conf().get("cec_standby", False) is True
+
+
 def get_config():
     """(device, logical_address), validated - they end up on a command
     line, so anything unexpected falls back to the defaults."""
-    device, address = DEFAULT_DEVICE, DEFAULT_ADDRESS
-    try:
-        with open(_HARDWARE_JSON) as f:
-            conf = json.load(f)
-        device = str(conf.get("cec_device", device))
-        address = str(conf.get("cec_address", address))
-    except (OSError, ValueError) as exc:
-        logger.warning("CEC config: could not read %s (%s)", _HARDWARE_JSON, exc)
+    conf = _read_conf()
+    device = str(conf.get("cec_device", DEFAULT_DEVICE))
+    address = str(conf.get("cec_address", DEFAULT_ADDRESS))
 
     if not re.fullmatch(r"/dev/cec\d+", device):
         logger.warning("CEC config: invalid cec_device %r, using default", device)

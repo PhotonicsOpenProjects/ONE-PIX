@@ -70,10 +70,15 @@
             <div class="card-body">
                 <div class="projector-actions">
                     <button type="button" id="projOn" class="btn btn-primary">{{ t('projector.power_on') }}</button>
+                    {% if standby_supported %}
                     <button type="button" id="projStandby" class="btn btn-outline">{{ t('projector.standby') }}</button>
+                    {% endif %}
                     <button type="button" id="projRefresh" class="btn btn-ghost">{{ t('projector.refresh') }}</button>
                 </div>
                 <p class="projector-hint">{{ t('projector.power_hint') }}</p>
+                {% if not standby_supported %}
+                <p class="projector-hint">{{ t('projector.standby_unsupported') }}</p>
+                {% endif %}
             </div>
         </div>
 
@@ -151,11 +156,12 @@
     var badge = document.getElementById("projStatusBadge");
     var dot = badge.querySelector(".status-dot");
     var label = document.getElementById("projStatusLabel");
+    var standbyButton = document.getElementById("projStandby");  // absent if unsupported
     var powerButtons = [
         document.getElementById("projOn"),
-        document.getElementById("projStandby"),
+        standbyButton,
         document.getElementById("projRefresh")
-    ];
+    ].filter(Boolean);
 
     function api(url, method) {
         return fetch(url, { method: method || "GET" })
@@ -230,11 +236,13 @@
     document.getElementById("projOn").addEventListener("click", function () {
         powerAction(URLS.on, "projector.sent_on");
     });
-    document.getElementById("projStandby").addEventListener("click", function () {
-        if (confirm(T("projector.confirm_standby"))) {
-            powerAction(URLS.standby, "projector.sent_standby");
-        }
-    });
+    if (standbyButton) {
+        standbyButton.addEventListener("click", function () {
+            if (confirm(T("projector.confirm_standby"))) {
+                powerAction(URLS.standby, "projector.sent_standby");
+            }
+        });
+    }
     document.getElementById("projRefresh").addEventListener("click", refreshPower);
 
     // ---- table helpers ----

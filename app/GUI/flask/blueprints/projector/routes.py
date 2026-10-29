@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 
 @bp.route("/")
 def projector_page():
-    return render_template("projector.html")
+    return render_template(
+        "projector.html",
+        standby_supported=cec.standby_supported(),
+    )
 
 
 def _error(exc, status=500):
@@ -36,6 +39,8 @@ def api_power_on():
 def api_power_standby():
     # Switching the projector off mid-acquisition would silently ruin the
     # measurement: refuse while the acquisition/tuning lock is held.
+    if not cec.standby_supported():
+        return _error("This projector ignores CEC standby (cec_standby is false).", 409)
     if hardware_lock.locked():
         return _error("An acquisition is running - standby refused.", 409)
     try:
