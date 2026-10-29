@@ -1,0 +1,319 @@
+{% extends "global_base.html" %}
+
+{% block title %}{{ t('projector.title') }}{% endblock %}
+
+{% block head %}
+<style>
+.projector-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: var(--space-5);
+    align-items: start;
+}
+
+.projector-grid .card-wide {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+    .projector-grid { grid-template-columns: 1fr; }
+}
+
+.projector-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.projector-hint,
+.projector-note {
+    margin-top: var(--space-3);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+}
+
+.projector-note code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+}
+
+.projector-mono {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+}
+</style>
+{% endblock %}
+
+{% block app_content %}
+<div class="page-shell">
+
+    <div class="page-header">
+        <div>
+            <div class="card-eyebrow">{{ t('projector.eyebrow') }}</div>
+            <h1>{{ t('projector.title') }}</h1>
+            <p class="page-sub">{{ t('projector.sub') }}</p>
+        </div>
+
+        <span id="projStatusBadge" class="badge badge-neutral">
+            <span class="status-dot is-idle"></span>
+            <span id="projStatusLabel">{{ t('projector.status_unknown') }}</span>
+        </span>
+    </div>
+
+    <div class="projector-grid">
+
+        <!-- POWER -->
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ t('projector.power_title') }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="projector-actions">
+                    <button type="button" id="projOn" class="btn btn-primary">{{ t('projector.power_on') }}</button>
+                    <button type="button" id="projStandby" class="btn btn-outline">{{ t('projector.standby') }}</button>
+                    <button type="button" id="projRefresh" class="btn btn-ghost">{{ t('projector.refresh') }}</button>
+                </div>
+                <p class="projector-hint">{{ t('projector.power_hint') }}</p>
+            </div>
+        </div>
+
+        <!-- DISPLAY -->
+        <div class="card">
+            <div class="card-header">
+                <h2>{{ t('projector.display_title') }}</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>{{ t('projector.display_monitor') }}</th>
+                                <th>{{ t('projector.display_resolution') }}</th>
+                                <th>{{ t('projector.display_position') }}</th>
+                                <th>{{ t('projector.display_role') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="displayRows">
+                            <tr><td colspan="4">{{ t('projector.loading') }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="projector-note" id="displayRefresh"></p>
+            </div>
+        </div>
+
+        <!-- CEC BUS -->
+        <div class="card card-wide">
+            <div class="card-header">
+                <h2>{{ t('projector.cec_title') }}</h2>
+                <button type="button" id="cecScan" class="btn btn-sm btn-outline">{{ t('projector.cec_scan') }}</button>
+            </div>
+            <div class="card-body">
+                <div class="table-wrap">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>{{ t('projector.cec_address') }}</th>
+                                <th>{{ t('projector.cec_type') }}</th>
+                                <th>{{ t('projector.cec_name') }}</th>
+                                <th>{{ t('projector.cec_vendor') }}</th>
+                                <th>{{ t('projector.cec_phys') }}</th>
+                                <th>{{ t('projector.cec_version') }}</th>
+                                <th>{{ t('projector.cec_power') }}</th>
+                                <th>{{ t('projector.cec_language') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cecRows">
+                            <tr><td colspan="8">{{ t('projector.loading') }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="projector-note" id="cecConfig"></p>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var T = ONEPIX.t;
+    var URLS = {
+        on: "{{ url_for('projector.api_power_on') }}",
+        standby: "{{ url_for('projector.api_power_standby') }}",
+        power: "{{ url_for('projector.api_power_status') }}",
+        cec: "{{ url_for('projector.api_cec_info') }}",
+        display: "{{ url_for('projector.api_display_info') }}"
+    };
+
+    var badge = document.getElementById("projStatusBadge");
+    var dot = badge.querySelector(".status-dot");
+    var label = document.getElementById("projStatusLabel");
+    var powerButtons = [
+        document.getElementById("projOn"),
+        document.getElementById("projStandby"),
+        document.getElementById("projRefresh")
+    ];
+
+    function api(url, method) {
+        return fetch(url, { method: method || "GET" })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (!data.ok) throw new Error(data.error || "error");
+                return data;
+            });
+    }
+
+    function setBadge(kind, text) {
+        badge.classList.remove("badge-neutral", "badge-warning", "badge-success", "badge-danger");
+        dot.classList.remove("is-idle", "is-busy", "is-success", "is-error");
+        var map = {
+            on: ["badge-success", "is-success"],
+            standby: ["badge-neutral", "is-idle"],
+            busy: ["badge-warning", "is-busy"],
+            error: ["badge-danger", "is-error"]
+        }[kind] || ["badge-neutral", "is-idle"];
+        badge.classList.add(map[0]);
+        dot.classList.add(map[1]);
+        label.textContent = text;
+    }
+
+    function showPower(status) {
+        var s = (status || "").toLowerCase();
+        if (s === "on") setBadge("on", T("projector.status_on"));
+        else if (s === "standby") setBadge("standby", T("projector.status_standby"));
+        else if (s.indexOf("transition") !== -1) setBadge("busy", T("projector.status_transition"));
+        else setBadge("standby", T("projector.status_unknown"));
+        return s;
+    }
+
+    function refreshPower() {
+        setBadge("busy", T("projector.status_checking"));
+        return api(URLS.power)
+            .then(function (d) { return showPower(d.status); })
+            .catch(function (e) {
+                setBadge("error", T("projector.status_error"));
+                ONEPIX.toast(e.message, "error");
+            });
+    }
+
+    // While the projector warms up or cools down, keep polling until it settles.
+    function pollUntilSettled(remaining) {
+        setTimeout(function () {
+            refreshPower().then(function (s) {
+                if (s && s.indexOf("transition") !== -1 && remaining > 0) {
+                    pollUntilSettled(remaining - 1);
+                }
+            });
+        }, 3000);
+    }
+
+    function powerAction(url, message) {
+        powerButtons.forEach(function (b) { b.disabled = true; });
+        setBadge("busy", T("projector.status_checking"));
+        api(url, "POST")
+            .then(function () {
+                ONEPIX.toast(T(message), "success");
+                pollUntilSettled(20);
+            })
+            .catch(function (e) {
+                setBadge("error", T("projector.status_error"));
+                ONEPIX.toast(e.message, "error");
+            })
+            .finally(function () {
+                powerButtons.forEach(function (b) { b.disabled = false; });
+            });
+    }
+
+    document.getElementById("projOn").addEventListener("click", function () {
+        powerAction(URLS.on, "projector.sent_on");
+    });
+    document.getElementById("projStandby").addEventListener("click", function () {
+        if (confirm(T("projector.confirm_standby"))) {
+            powerAction(URLS.standby, "projector.sent_standby");
+        }
+    });
+    document.getElementById("projRefresh").addEventListener("click", refreshPower);
+
+    // ---- table helpers ----
+    function cell(text, mono) {
+        var td = document.createElement("td");
+        td.textContent = text === undefined || text === null || text === "" ? "—" : text;
+        if (mono) td.className = "projector-mono";
+        return td;
+    }
+
+    function messageRow(tbody, colspan, text) {
+        tbody.textContent = "";
+        var tr = document.createElement("tr");
+        var td = cell(text);
+        td.colSpan = colspan;
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+    }
+
+    // ---- display ----
+    function loadDisplay() {
+        var tbody = document.getElementById("displayRows");
+        api(URLS.display)
+            .then(function (d) {
+                tbody.textContent = "";
+                d.monitors.forEach(function (m) {
+                    var tr = document.createElement("tr");
+                    tr.appendChild(cell(m.name, true));
+                    tr.appendChild(cell(m.width + " × " + m.height, true));
+                    tr.appendChild(cell("(" + m.x + ", " + m.y + ")", true));
+                    tr.appendChild(cell(T(m.is_projector
+                        ? "projector.display_role_projector"
+                        : "projector.display_role_desktop")));
+                    tbody.appendChild(tr);
+                });
+                document.getElementById("displayRefresh").textContent =
+                    T("projector.display_refresh") + " : " + Number(d.refresh_rate_hz).toFixed(2) + " Hz";
+            })
+            .catch(function (e) { messageRow(tbody, 4, e.message); });
+    }
+
+    // ---- CEC bus ----
+    function loadCec() {
+        var tbody = document.getElementById("cecRows");
+        var scanBtn = document.getElementById("cecScan");
+        scanBtn.disabled = true;
+        messageRow(tbody, 8, T("projector.cec_scanning"));
+        fetch(URLS.cec)
+            .then(function (res) { return res.json(); })
+            .then(function (d) {
+                document.getElementById("cecConfig").textContent =
+                    T("projector.cec_config", { device: d.device, address: d.address });
+                if (!d.available) { messageRow(tbody, 8, T("projector.cec_missing")); return; }
+                if (!d.ok) { messageRow(tbody, 8, d.error); return; }
+                if (!d.devices.length) { messageRow(tbody, 8, T("projector.cec_none")); return; }
+                tbody.textContent = "";
+                d.devices.forEach(function (dev) {
+                    var tr = document.createElement("tr");
+                    tr.appendChild(cell(dev.logical_address, true));
+                    tr.appendChild(cell(dev.type));
+                    tr.appendChild(cell(dev.osd_name));
+                    tr.appendChild(cell(dev.vendor));
+                    tr.appendChild(cell(dev.address, true));
+                    tr.appendChild(cell(dev.cec_version));
+                    tr.appendChild(cell(dev.power_status));
+                    tr.appendChild(cell(dev.language));
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(function (e) { messageRow(tbody, 8, e.message); })
+            .finally(function () { scanBtn.disabled = false; });
+    }
+
+    document.getElementById("cecScan").addEventListener("click", loadCec);
+
+    // The power query and the bus scan both need the CEC adapter (one at a
+    // time, serialised server-side): query power first, then scan.
+    loadDisplay();
+    refreshPower().then(loadCec);
+})();
+</script>
+{% endblock %}

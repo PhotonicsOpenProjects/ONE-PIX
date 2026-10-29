@@ -34,6 +34,10 @@ from blueprints.logs import (
     bp as logs_bp
 )
 
+from blueprints.projector import (
+    bp as projector_bp
+)
+
 from blueprints.acquisition import tuning
 
 import gui_plugins
@@ -79,6 +83,10 @@ def create_app():
 
     app.register_blueprint(
         logs_bp
+    )
+
+    app.register_blueprint(
+        projector_bp
     )
 
     # ====================================
