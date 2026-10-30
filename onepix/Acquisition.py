@@ -528,8 +528,13 @@ class Acquisition:
                 "spectrometer_device": spectrometer.DeviceName,
                 "camera_name": self.hardware.name_camera,
                 "integration_time_ms": spectrometer.integration_time_ms,
+                "effective_integration_time_ms": spectrometer.effective_integration_time_ms,
                 "repetition": spectrometer.repetition,
-                "stale_scan_flush_periods": spectrometer.STALE_SCAN_FLUSH_PERIODS,
+                "stale_scan_flush_periods": (
+                    0 if spectrometer.on_demand else spectrometer.STALE_SCAN_FLUSH_PERIODS
+                ),
+                "on_demand": spectrometer.on_demand,
+                "hw_averaging": getattr(spectrometer, "hw_averaging", False),
                 "wl_lim": self.hardware.wl_lim,
                 "periode_pattern_ms": self.hardware.periode_pattern,
                 "periode_mes_ms": self.hardware.periode_mes,

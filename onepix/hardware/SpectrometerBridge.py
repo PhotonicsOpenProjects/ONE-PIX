@@ -6,6 +6,7 @@ import warnings
 import cv2
 import logging
 import inspect
+import collections
 
 from onepix.logging_config import root
 logger = logging.getLogger(__name__)
@@ -24,6 +25,23 @@ class SpectrometerBridge:
         model = "Model"
         → module Model
         → class Model
+
+    Mandatory plugin API: spec_open(), set_integration_time(),
+    get_wavelengths(), get_intensities(), spec_close() and the attributes
+    DeviceName / integration_time_ms.
+
+    Optional plugin capabilities (a plugin without them behaves as before):
+        ON_DEMAND = True
+            get_intensities() starts its own exposure, so it never returns a
+            scan older than the call: no stale-scan flush is needed.
+        set_scans_to_average(n)
+            the device averages n scans per get_intensities() and returns the
+            number applied (n, or less if it cannot). The spectrum must stay a
+            mean, not a sum.
+        effective_integration_time_ms
+            the integration time the device really applies after
+            set_integration_time() (rounded or quantised by the device); the
+            spectra are normalised by it instead of the requested value.
     """
 
     # Reference band used to judge whether a measured signal is usable.
@@ -51,6 +69,11 @@ class SpectrometerBridge:
             self.repetition = repetition
             self.DeviceName = ""
             self.is_open = False
+            self.effective_integration_time_ms = integration_time_ms
+            self.hw_averaging = False
+            # duration of the last pattern measurements (s), read by the projection
+            # to show the next pattern while the last scans are still being read
+            self._measure_times_s = collections.deque(maxlen=20)
 
             logger.info(f"🧩 Initialisation du spectromètre : {spectro_name}")
 
@@ -157,6 +180,17 @@ class SpectrometerBridge:
         self.spectrometer.integration_time_ms = self.integration_time_ms
         self.spectrometer.set_integration_time()
 
+        applied = getattr(self.spectrometer, "effective_integration_time_ms", None)
+        self.effective_integration_time_ms = (
+            float(applied) if applied else self.integration_time_ms
+        )
+        if abs(self.effective_integration_time_ms - self.integration_time_ms) > 1e-6:
+            logging.warning(
+                f"{self.spectro_name} applies {self.effective_integration_time_ms} ms "
+                f"for the requested {self.integration_time_ms} ms: spectra are "
+                "normalised by the applied value"
+            )
+
         logging.info(f'{self.spectro_name} integration time set to {self.integration_time_ms} ms')
 
     def get_wavelengths(self):
@@ -169,6 +203,48 @@ class SpectrometerBridge:
         return self.spectrometer.get_intensities()[
             self.idx_wl_lim[0]: self.idx_wl_lim[1] + 1
         ]
+
+    # -------------------------------------------------------------------------
+    # Optional plugin capabilities (a plugin without them behaves as before)
+    #   ON_DEMAND = True          get_intensities() starts its own exposure, so
+    #                             it never returns a scan older than the call
+    #   set_scans_to_average(n)   the device averages n scans per get_intensities()
+    #                             (returns the number applied, may be lower than n)
+    # -------------------------------------------------------------------------
+    @property
+    def on_demand(self):
+        return bool(getattr(self.spectrometer, "ON_DEMAND", False))
+
+    @property
+    def can_hw_average(self):
+        return (
+            self.on_demand
+            and callable(getattr(self.spectrometer, "set_scans_to_average", None))
+            and self.repetition > 1
+        )
+
+    def flush_stale_scans(self, duration_s=None):
+        """Read and discard scans for `duration_s` (default: STALE_SCAN_FLUSH_PERIODS
+        integration periods) so that the next reading integrates after now.
+        Returns the number of scans discarded; nothing for an on-demand device,
+        which has no backlog."""
+        if self.on_demand:
+            return 0
+        if duration_s is None:
+            duration_s = (
+                self.STALE_SCAN_FLUSH_PERIODS * self.effective_integration_time_ms / 1000.0
+            )
+        start = time.monotonic()
+        flushed = 0
+        while True:
+            self.get_intensities()
+            flushed += 1
+            if time.monotonic() - start >= duration_s:
+                return flushed
+
+    def measure_time_s(self):
+        """Longest of the recent pattern measurements (s), None before any."""
+        return max(self._measure_times_s) if self._measure_times_s else None
 
     def spec_close(self):
         """Release the device, so the next spec_open() - from this or
@@ -240,6 +316,7 @@ class SpectrometerBridge:
         min_integration_time = self.MIN_INTEGRATION_TIME_MS
 
         self.set_integration_time()
+        self.flush_stale_scans()
 
         delta_wl = round(0.05 * np.size(self.get_wavelengths()))
         count = 0
@@ -279,6 +356,7 @@ class SpectrometerBridge:
             )
 
             self.set_integration_time()
+            self.flush_stale_scans()
             count += 1
 
         if verbose:
@@ -319,9 +397,29 @@ class SpectrometerBridge:
         # every *kept* sample's integration window is guaranteed to fall
         # after the drain started, i.e. after the pattern had already
         # settled.
+        # An on-demand device has no backlog to flush: each get_intensities()
+        # starts its exposure after the call.
         flush_duration_s = (
-            self.STALE_SCAN_FLUSH_PERIODS * self.integration_time_ms / 1000.0
+            0.0 if self.on_demand
+            else self.STALE_SCAN_FLUSH_PERIODS * self.effective_integration_time_ms / 1000.0
         )
+
+        # Let the device average the repetitions itself: one transfer per
+        # pattern instead of `repetition`. Only for the duration of the
+        # measurement, so autotune, live tuning and the projector probe keep
+        # getting raw single scans.
+        scans_per_read = 1
+        if self.can_hw_average:
+            applied = self.spectrometer.set_scans_to_average(self.repetition)
+            if applied == self.repetition:
+                scans_per_read = self.repetition
+            else:
+                logging.warning(
+                    f"{self.spectro_name} averages at most {applied} scan(s) "
+                    f"per reading, not {self.repetition}: averaging in software"
+                )
+                self.spectrometer.set_scans_to_average(None)
+        self.hw_averaging = scans_per_read > 1
 
         # Throttled diagnostics: log flush stats for a sample of patterns
         # (not every single one - there can be thousands) so it's
@@ -330,45 +428,50 @@ class SpectrometerBridge:
         # backlog) instead of just trusting it silently.
         diag_log_every = max(1, nb_patterns // 20)
 
-        while cnt < nb_patterns:
+        try:
+            while cnt < nb_patterns:
 
-            if stop_event.is_set():
-                logging.warning(
-                    f"{self.spectro_name} measurement stopped early "
-                    "(signalled by the other acquisition thread)"
-                )
-                break
-
-            if event.is_set():
-
-                trigger_time = time.monotonic()
-                flushed = 0
-                while True:
-                    self.get_intensities()
-                    flushed += 1
-                    if time.monotonic() - trigger_time >= flush_duration_s:
-                        break
-
-                chronograms = []
-                for _ in range(self.repetition):
-                    intensities = self.get_intensities()
-                    chronograms.append(intensities)
-
-                self.spectra[cnt, :] = np.mean(chronograms, axis=0) / self.integration_time_ms
-
-                if cnt % diag_log_every == 0:
-                    logging.info(
-                        f"{self.spectro_name} pattern {cnt}/{nb_patterns}: "
-                        f"flushed {flushed} stale scan(s) over "
-                        f"{time.monotonic() - trigger_time:.4f}s before "
-                        f"keeping {self.repetition} measurement(s)"
+                if stop_event.is_set():
+                    logging.warning(
+                        f"{self.spectro_name} measurement stopped early "
+                        "(signalled by the other acquisition thread)"
                     )
+                    break
 
-                cnt += 1
-                event.clear()
+                if event.is_set():
 
-                if progress_callback is not None:
-                    progress_callback(cnt)
+                    trigger_time = time.monotonic()
+                    flushed = self.flush_stale_scans(flush_duration_s) if flush_duration_s > 0 else 0
 
-            else:
-                time.sleep(1e-6)
+                    chronograms = []
+                    for _ in range(self.repetition // scans_per_read):
+                        intensities = self.get_intensities()
+                        chronograms.append(intensities)
+
+                    self.spectra[cnt, :] = (
+                        np.mean(chronograms, axis=0) / self.effective_integration_time_ms
+                    )
+                    self._measure_times_s.append(time.monotonic() - trigger_time)
+
+                    if cnt % diag_log_every == 0:
+                        logging.info(
+                            f"{self.spectro_name} pattern {cnt}/{nb_patterns}: "
+                            f"flushed {flushed} stale scan(s) over "
+                            f"{time.monotonic() - trigger_time:.4f}s before "
+                            f"keeping {self.repetition} measurement(s)"
+                        )
+
+                    cnt += 1
+                    event.clear()
+
+                    if progress_callback is not None:
+                        progress_callback(cnt)
+
+                else:
+                    # blocks until the projection thread sets the event
+                    # (no busy loop competing with the GUI/USB threads);
+                    # the timeout keeps stop_event checked
+                    event.wait(0.01)
+        finally:
+            if self.hw_averaging:
+                self.spectrometer.set_scans_to_average(None)

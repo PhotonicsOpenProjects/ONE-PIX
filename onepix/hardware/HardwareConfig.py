@@ -74,10 +74,8 @@ class Hardware:
         # every kept measurement (see thread_singlepixel_measure) so the
         # acquisition duration estimate - and the watchdog timeout derived
         # from it in Acquisition.thread_acquisition() - stays realistic.
-        self.periode_mes = int(
-            (self.repetition + SpectrometerBridge.STALE_SCAN_FLUSH_PERIODS)
-            * self.integration_time_ms
-        )
+        # An on-demand spectrometer has nothing to flush.
+        self.periode_mes = None
 
         # A single-chip DLP projector (colour wheel + DMD PWM) flickers a
         # "static" pattern at the wheel's rotation rate - a spectrometer
@@ -110,6 +108,8 @@ class Hardware:
         self.spectrometer = SpectrometerBridge(
             self.name_spectro, self.integration_time_ms, self.wl_lim, self.repetition
         )
+        flush_periods = 0 if self.spectrometer.on_demand else SpectrometerBridge.STALE_SCAN_FLUSH_PERIODS
+        self.periode_mes = int((self.repetition + flush_periods) * self.integration_time_ms)
         self.camera = CameraBridge(self.name_camera)
         self.projection = Projection(
             self.height, self.width, self.periode_pattern, self.proj_position
