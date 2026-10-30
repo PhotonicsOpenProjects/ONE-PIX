@@ -539,6 +539,8 @@ class Acquisition:
                 "wl_lim": self.hardware.wl_lim,
                 "periode_pattern_ms": self.hardware.periode_pattern,
                 "latency_hiding_ms": self.hardware.latency_hiding_ms,
+                "max_gray_level": self.hardware.max_gray_level,
+                "gray_response": bool(self.hardware.gray_response_path),
                 "periode_mes_ms": self.hardware.periode_mes,
                 "proj_position": proj_position,
             },

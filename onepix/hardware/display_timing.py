@@ -100,6 +100,27 @@ def frame_period_ms(refresh_rate_hz=None):
     return 1000.0 / refresh_rate_hz
 
 
+def frame_multiples_ms(count=6, refresh_rate_hz=None):
+    """The first `count` whole numbers of display frames, in ms."""
+    frame = frame_period_ms(refresh_rate_hz)
+    return [round(n * frame, 3) for n in range(1, count + 1)]
+
+
+def frame_multiple_hint(integration_time_ms, refresh_rate_hz=None, tolerance=0.05):
+    """None if `integration_time_ms` is a whole number of display frames (within `tolerance` of a
+    frame), else the closest whole number of frames in ms.
+
+    A single-chip DLP projector modulates its light at the frame rate and the grey levels are made of
+    short pulses: an integration window that is not a whole number of frames catches a different share
+    of them at each reading (about 20 % of fluctuation at 30 ms on a 60 Hz display, 1-3 % at 33.3 and
+    50 ms), which no averaging of the patterns removes."""
+    frame = frame_period_ms(refresh_rate_hz)
+    frames = integration_time_ms / frame
+    if round(frames) >= 1 and abs(frames - round(frames)) <= tolerance:
+        return None
+    return round(max(1, round(frames)) * frame, 3)
+
+
 def recommended_min_integration_time_ms(refresh_rate_hz=None, frame_periods=3):
     """Minimum spectrometer integration time (ms) recommended to average
     out colour-wheel/DMD-PWM flicker regardless of its (unknown, free-

@@ -5,7 +5,8 @@ import numpy as np
 from onepix.hardware.SpectrometerBridge import *
 from onepix.hardware.CameraBridge import *
 from onepix.hardware.Projection import *
-from onepix.hardware.display_timing import recommended_min_integration_time_ms
+from onepix.hardware.display_timing import frame_multiple_hint, recommended_min_integration_time_ms
+from onepix.hardware.gray_response import load_lut
 
 import logging
 from onepix.logging_config import root  
@@ -65,6 +66,12 @@ class Hardware:
             # measurement, hiding part of the projector's dead time. 0 = off;
             # measure it with app/cli/probe_settle_time.py --fine.
             "latency_hiding_ms": hardware_dict.get("latency_hiding_ms", 0),
+            # Brightest gray level projected (1-255). Lower it when the projector saturates the
+            # spectrometer on the brightest patterns; 255 leaves the patterns as they are.
+            "max_gray_level": hardware_dict.get("max_gray_level", 255),
+            # Measured gray-level response of the projector (app/cli/probe_gray_response.py), a path
+            # relative to this file; its inverse makes the light proportional to the gray patterns.
+            "gray_response_path": hardware_dict.get("gray_response_path", ""),
         }
 
         # Écraser avec les valeurs fournies en argument
@@ -92,6 +99,14 @@ class Hardware:
         try:
             min_recommended_ms = recommended_min_integration_time_ms()
 
+            hint = frame_multiple_hint(self.integration_time_ms)
+            if hint is not None:
+                logger.warning(
+                    f"integration_time_ms ({self.integration_time_ms} ms) is not a whole number of "
+                    f"display frames: the projector's flicker makes each reading fluctuate (about 20 % "
+                    f"at 30 ms on a 60 Hz display). Try {hint} ms."
+                )
+
             if self.integration_time_ms < min_recommended_ms:
                 logger.warning(
                     f"integration_time_ms ({self.integration_time_ms} ms) is "
@@ -118,8 +133,20 @@ class Hardware:
         self.projection = Projection(
             self.height, self.width, self.periode_pattern, self.proj_position,
             early_show_ms=self.latency_hiding_ms,
+            max_gray_level=self.max_gray_level,
+            gray_lut=self._load_gray_lut(),
         )
         logging.info("onepix Hardware class is init ")
+
+    def _load_gray_lut(self):
+        if not self.gray_response_path:
+            return None
+        path = os.path.join(os.path.dirname(os.path.abspath(self.hardware_config_path)), self.gray_response_path)
+        try:
+            return load_lut(path, self.max_gray_level)
+        except (OSError, ValueError, KeyError) as e:
+            logger.error(f"gray response {path} not used, patterns are displayed as they are: {e}")
+            return None
 
     @staticmethod
     def _load_json(path):

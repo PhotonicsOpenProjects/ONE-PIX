@@ -9,6 +9,7 @@ import logging
 
 from onepix.logging_config import root
 from onepix.hardware.gui_thread import gui_thread
+from onepix.hardware.gray_response import apply_lut
 
 logger = logging.getLogger(__name__)
 
@@ -52,12 +53,32 @@ def get_display_configuration():
     return screen_width, projector_monitor
 
 
+def limit_gray_level(image, max_gray_level):
+    """Scale an 8 bit pattern so that its brightest level is `max_gray_level` (255: unchanged).
+
+    A projector that is too bright for the spectrometer saturates it at the whole-field patterns; a
+    lower maximum gray level cuts the light for every pattern, so that a long integration time (which
+    averages out the projector's flicker) can be used. Floating point images (levels in 0-1) are
+    scaled the same way."""
+    if max_gray_level >= 255:
+        return image
+    if image.dtype == np.uint8:
+        return (image.astype(np.uint16) * int(max_gray_level) // 255).astype(np.uint8)
+    if np.issubdtype(image.dtype, np.floating):
+        return image * (int(max_gray_level) / 255.0)
+    return image
+
+
 class Projection:
     """
     Projection handler.
     """
 
-    def __init__(self, height, width, periode_pattern, proj_position, early_show_ms=0):
+    def __init__(self, height, width, periode_pattern, proj_position, early_show_ms=0, max_gray_level=255,
+                 gray_lut=None):
+        self.max_gray_level = int(max_gray_level)
+        # table from gray_response.build_lut (linearises the projector), None = patterns as they are
+        self.gray_lut = gray_lut
         self.height = height
         self.width = width
         self.periode_pattern = periode_pattern
@@ -75,6 +96,13 @@ class Projection:
         )
 
         logging.info("Projection system initialized")
+
+    def prepare_gray(self, image):
+        """A pattern as it is displayed: linearised with the measured response when there is one,
+        otherwise limited to max_gray_level."""
+        if self.gray_lut is not None:
+            return apply_lut(image, self.gray_lut)
+        return limit_gray_level(image, self.max_gray_level)
 
     def create_fullscreen_window(self):
         # WINDOW_FREERATIO: without it, the Qt backend keeps the
@@ -173,7 +201,7 @@ class Projection:
             cv2.imshow,
             "ImageWindow",
             cv2.resize(
-                test_pattern,
+                self.prepare_gray(test_pattern),
                 (self.width, self.height),
                 interpolation=cv2.INTER_LINEAR_EXACT,
             ),
@@ -210,7 +238,7 @@ class Projection:
             cv2.imshow,
             "ImageWindow",
             cv2.resize(
-                patterns[0],
+                self.prepare_gray(patterns[0]),
                 (self.width, self.height),
                 interpolation=interp_method,
             ),
@@ -260,7 +288,7 @@ class Projection:
 
         def resized(pattern):
             return cv2.resize(
-                pattern,
+                self.prepare_gray(pattern),
                 (self.width, self.height),
                 interpolation=interp_method,
             )

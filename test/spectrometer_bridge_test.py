@@ -105,3 +105,14 @@ def test_measure_time_is_recorded_for_the_projection():
     assert b.measure_time_s() is None
     measure(b, 2)
     assert b.measure_time_s() > 0
+
+
+def test_gray_level_is_limited_for_every_kind_of_pattern():
+    from onepix.hardware.Projection import limit_gray_level
+    binary = np.array([[0, 255], [255, 0]], np.uint8)
+    assert np.array_equal(limit_gray_level(binary, 255), binary)
+    assert np.array_equal(limit_gray_level(binary, 100), np.array([[0, 100], [100, 0]], np.uint8))
+    assert limit_gray_level(binary, 100).dtype == np.uint8
+    assert np.allclose(limit_gray_level(np.array([0.0, 1.0]), 100), [0.0, 100 / 255])
+    ints = np.array([1, 2], np.int32)
+    assert limit_gray_level(ints, 100) is ints
