@@ -10,6 +10,9 @@ Projection as-is - no new hardware communication is introduced here, only
 the session/threading plumbing around them.
 """
 
+import collections
+import json
+import os
 import threading
 import time
 import logging
@@ -17,9 +20,13 @@ import logging
 import numpy as np
 import cv2
 
+from onepix.ImagingMethodBridge import ImagingMethodBridge
 from onepix.hardware.HardwareConfig import Hardware
 from onepix.hardware.SpectrometerBridge import SpectrometerBridge
+from onepix.hardware.display_timing import frame_multiple_hint, frame_multiples_ms, frame_period_ms, get_refresh_rate_hz
+from onepix.hardware.gray_response import suggest_white_level
 from onepix.hardware.gui_thread import gui_thread
+from onepix.hardware.tuning_advice import recommend_whole_frames, signal_stability_pct, stability_status
 from onepix.logging_config import root
 
 logger = logging.getLogger(__name__)
@@ -35,6 +42,13 @@ hardware_lock = threading.Lock()
 # get_intensities(), but stub/fast plugins don't - this keeps the loop (and
 # the JSON snapshot it produces) from spinning needlessly fast.
 _MIN_LOOP_INTERVAL_S = 0.02
+
+# Readings (all at the same integration time) the signal stability is computed on.
+STABILITY_WINDOW = 12
+
+# What the integration time can be tuned on: the usual test pattern, or the open field (all white),
+# the brightest pattern of the single-sided methods, which is the one that saturates the detector first.
+PATTERNS = ("test", "open")
 
 
 class TuningError(RuntimeError):
@@ -57,6 +71,13 @@ class SpectrometerTuningSession:
         self._running = False
         self._latest = None
         self._error = None
+
+        self._pattern_kind = None
+        self._refresh_hz = None
+        self._gray_curve = None
+        self._readings = collections.deque(maxlen=STABILITY_WINDOW)
+        self._readings_time = None
+        self._flush_needed = False
 
         # Device I/O (get_intensities()) lives on this persistent worker
         # thread across any number of start()/stop() cycles, instead of a
@@ -84,7 +105,11 @@ class SpectrometerTuningSession:
     # ------------------------------------------------------------------
     # START
     # ------------------------------------------------------------------
-    def start(self, integration_time_ms=None):
+    def start(self, integration_time_ms=None, pattern=None):
+        """`pattern`: "test", "open", or None/"auto" to let the imaging method say which one it needs."""
+        if pattern not in (None, "auto") + PATTERNS:
+            raise TuningError(f"Unknown tuning pattern {pattern!r}.")
+
         with self._state_lock:
             if self._running:
                 raise TuningError("A tuning session is already running.")
@@ -121,6 +146,11 @@ class SpectrometerTuningSession:
             raise TuningError(f"Could not start spectrometer tuning: {exc}") from exc
 
         self.hardware = hardware
+        self._pattern_kind = _tuning_pattern_kind(hardware, pattern)
+        self._gray_curve = _load_gray_curve(hardware)
+        self._readings.clear()
+        self._readings_time = None
+        self._flush_needed = False
         self._error = None
         self._latest = None
         self._stop_requested.clear()
@@ -154,7 +184,10 @@ class SpectrometerTuningSession:
             # that will drive them for the rest of this run.
             hardware.hardware_initialisation()
 
-            pattern = hardware.projection.build_test_pattern()
+            if self._pattern_kind == "open":
+                pattern = np.ones((hardware.height, hardware.width), np.float32)
+            else:
+                pattern = hardware.projection.build_test_pattern()
             hardware.projection.init_projection(
                 [pattern],
                 None,
@@ -165,7 +198,14 @@ class SpectrometerTuningSession:
                 loop_start = time.time()
 
                 try:
+                    if self._flush_needed:
+                        # the integration time changed: a free-running device may still hand back
+                        # scans taken with the previous one (nothing to flush on an on-demand plugin)
+                        self._flush_needed = False
+                        spectrometer.flush_stale_scans()
+                    time_before = spectrometer.integration_time_ms
                     intensities = np.asarray(spectrometer.get_intensities())
+                    time_after = spectrometer.integration_time_ms
                 except Exception as exc:
                     logger.exception("Spectrometer read failed during tuning")
                     with self._state_lock:
@@ -173,6 +213,16 @@ class SpectrometerTuningSession:
                     break
 
                 peak = float(np.max(intensities)) if intensities.size else 0.0
+
+                # the stability is the fluctuation between readings taken with one integration time
+                if time_before != self._readings_time:
+                    self._readings.clear()
+                    self._readings_time = time_before
+                if time_before == time_after:
+                    self._readings.append(intensities)
+                stability = signal_stability_pct(list(self._readings))
+                refresh_hz = self._refresh()
+                advice = self._advice(peak, time_after, refresh_hz)
 
                 with self._state_lock:
                     self._latest = {
@@ -186,6 +236,10 @@ class SpectrometerTuningSession:
                         "status": spectrometer.classify_signal(peak),
                         "recommended_integration_time_ms":
                             spectrometer.recommend_integration_time(peak),
+                        "advice": advice,
+                        "stability_pct": None if stability is None else round(stability, 2),
+                        "stability_status": stability_status(stability),
+                        "is_whole_frames": frame_multiple_hint(time_after, refresh_hz) is None,
                         "timestamp": time.time(),
                     }
 
@@ -276,6 +330,7 @@ class SpectrometerTuningSession:
         try:
             self.hardware.spectrometer.integration_time_ms = value
             self.hardware.spectrometer.set_integration_time()
+            self._flush_needed = True
         except Exception as exc:
             raise TuningError(f"Could not apply integration time: {exc}") from exc
 
@@ -285,17 +340,81 @@ class SpectrometerTuningSession:
     # SNAPSHOT
     # ------------------------------------------------------------------
     def snapshot(self):
+        refresh_hz = self._refresh()
         with self._state_lock:
             return {
                 "running": self._running,
                 "error": self._error,
                 "spectrum": self._latest,
+                "pattern": self._pattern_kind if self._running else None,
                 "bounds": {
                     "min_integration_time_ms": SpectrometerBridge.MIN_INTEGRATION_TIME_MS,
                     "max_integration_time_ms": SpectrometerBridge.MAX_INTEGRATION_TIME_MS,
                     "target_peak_counts": SpectrometerBridge.TARGET_PEAK_COUNTS,
+                    "refresh_hz": round(refresh_hz, 2),
+                    "frame_period_ms": round(frame_period_ms(refresh_hz), 3),
+                    "frame_multiples_ms": frame_multiples_ms(8, refresh_hz),
                 },
             }
+
+    # ------------------------------------------------------------------
+    # ADVICE
+    # ------------------------------------------------------------------
+    def _refresh(self):
+        """Refresh rate of the projector's display (asked once: xrandr is slow)."""
+        if self._refresh_hz is None:
+            self._refresh_hz = get_refresh_rate_hz()
+        return self._refresh_hz
+
+    def _advice(self, peak, integration_time_ms, refresh_hz):
+        """Whole-frame recommendation, with the gray level to project when even one frame is too bright."""
+        advice = recommend_whole_frames(
+            peak, integration_time_ms, refresh_hz, target=SpectrometerBridge.TARGET_PEAK_COUNTS
+        )
+        if advice is None:
+            return None
+        advice["suggested_max_gray_level"] = None
+        hardware = self.hardware
+        if advice["too_bright"] and hardware is not None:
+            factor = advice["gray_factor"] if advice["gray_factor"] is not None else 0.5   # saturated: a first step
+            advice["current_max_gray_level"] = hardware.max_gray_level
+            if self._gray_curve is not None:
+                advice["suggested_max_gray_level"] = suggest_white_level(
+                    self._gray_curve[0], self._gray_curve[1], hardware.max_gray_level, factor)
+        return advice
+
+
+def _tuning_pattern_kind(hardware, requested):
+    """"test" or "open": what to project while tuning. Explicit if requested, else what the selected
+    imaging method asks for (its CreationPatterns.tuning_pattern), "test" if it says nothing."""
+    if requested in PATTERNS:
+        return requested
+    try:
+        params = Hardware._load_json(hardware.acquisition_parameter_path)
+        method = params.get("imaging_method_name")
+        if method:
+            bridge = ImagingMethodBridge(method)
+            module = bridge._import_submodule("PatternsCreation")
+            kind = getattr(module.CreationPatterns(bridge.height, bridge.width), "tuning_pattern", "test")
+            return kind if kind in PATTERNS else "test"
+    except Exception:
+        logger.exception("Could not ask the imaging method which pattern to tune on; using the test pattern")
+    return "test"
+
+
+def _load_gray_curve(hardware):
+    """(levels, response) of the measured gray-level response of the projector, or None."""
+    path = getattr(hardware, "gray_response_path", "")
+    if not path:
+        return None
+    try:
+        full = os.path.join(os.path.dirname(os.path.abspath(hardware.hardware_config_path)), path)
+        with open(full, encoding="utf-8") as f:
+            curve = json.load(f)
+        return curve["levels"], curve["response"]
+    except (OSError, ValueError, KeyError):
+        logger.warning("gray response curve %s not readable: no brightness suggestion", path)
+        return None
 
 
 def _validate_integration_time(value):

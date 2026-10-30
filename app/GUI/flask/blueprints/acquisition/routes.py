@@ -344,7 +344,7 @@ def hardware_tuning_start():
     payload = request.get_json(silent=True) or {}
 
     try:
-        state = tuning.session.start(payload.get("integration_time_ms"))
+        state = tuning.session.start(payload.get("integration_time_ms"), payload.get("pattern"))
         return jsonify({"ok": True, **state})
 
     except tuning.TuningError as exc:

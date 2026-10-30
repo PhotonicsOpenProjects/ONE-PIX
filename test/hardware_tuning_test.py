@@ -259,3 +259,69 @@ def test_spectrometer_read_error_surfaces_and_stops_cleanly(session):
     # The hardware lock must be released even though the session stopped
     # itself due to an error, not via stop().
     assert not tuning.hardware_lock.locked()
+
+
+# ======================================================================
+# WHOLE-FRAME ADVICE, STABILITY AND PATTERN CHOICE
+# ======================================================================
+
+def test_snapshot_reports_the_display_frames_and_the_advice(session):
+    session.start()
+    snap = wait_for_spectrum(session)
+    bounds = snap["bounds"]
+    assert bounds["frame_period_ms"] > 0 and bounds["refresh_hz"] > 0
+    assert len(bounds["frame_multiples_ms"]) == 8
+    assert bounds["frame_multiples_ms"][1] == pytest.approx(2 * bounds["frame_multiples_ms"][0], abs=0.01)
+    assert snap["pattern"] in tuning.PATTERNS
+    spectrum = snap["spectrum"]
+    for key in ("advice", "stability_pct", "stability_status", "is_whole_frames"):
+        assert key in spectrum
+
+
+def test_advice_follows_the_signal_and_stability_the_readings(session):
+    session.start()
+    wait_for_spectrum(session)
+    frame = session.snapshot()["bounds"]["frame_period_ms"]
+    session.set_integration_time(round(2 * frame, 3))
+    force_reading(session, 30000.0)                       # a constant reading on target: perfectly stable
+    deadline = time.time() + 6
+    while time.time() < deadline:
+        spectrum = session.snapshot()["spectrum"]
+        if spectrum["stability_pct"] is not None and spectrum["integration_time_ms"] == round(2 * frame, 3):
+            break
+        time.sleep(0.1)
+    assert spectrum["stability_pct"] == pytest.approx(0.0, abs=0.01)
+    assert spectrum["stability_status"] == "good" and spectrum["is_whole_frames"] is True
+    assert spectrum["advice"]["frames"] == 2 and not spectrum["advice"]["saturated"]
+
+    force_reading(session, 70000.0)                       # a clipped reading
+    time.sleep(0.5)
+    advice = session.snapshot()["spectrum"]["advice"]
+    assert advice["saturated"] is True and advice["expected_peak"] is None
+
+
+def test_unknown_tuning_pattern_is_refused(session):
+    with pytest.raises(tuning.TuningError):
+        session.start(pattern="checkerboard")
+    assert not session.snapshot()["running"]
+
+
+class _FakeHardware:
+    def __init__(self, acquisition_json):
+        self.acquisition_parameter_path = str(acquisition_json)
+
+
+def test_pattern_is_asked_to_the_imaging_method(tmp_path):
+    import json
+    path = tmp_path / "acquisition.json"
+
+    def kind(method, requested=None):
+        path.write_text(json.dumps({"imaging_method_name": method}))
+        return tuning._tuning_pattern_kind(_FakeHardware(path), requested)
+
+    assert kind("hadamardsingle") == "open"                # single-sided plugins ask for the open field
+    assert kind("fouriershift") == "open"                  # single-sided by default
+    assert kind("fouriersplit") == "test"                  # says nothing: the usual test pattern
+    assert kind("no_such_method") == "test"                # unknown: never an error
+    assert kind("hadamardsingle", "test") == "test"        # an explicit choice wins
+    assert kind("fouriersplit", "open") == "open"

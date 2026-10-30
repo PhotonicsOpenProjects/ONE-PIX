@@ -474,6 +474,61 @@
   font-weight: 600;
 }
 
+.tuning-pattern-field {
+  min-width: 200px;
+}
+
+.tuning-frames {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.tuning-frames-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tuning-frames-chips .btn.is-active {
+  background: var(--primary-soft);
+  border-color: var(--primary-border);
+  color: var(--primary-hover);
+}
+
+.tuning-note {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  font-size: var(--fs-sm);
+}
+
+.tuning-note-warning {
+  background: var(--warning-soft);
+  border-color: var(--warning-border);
+  color: var(--warning);
+}
+
+.tuning-note-danger {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+  color: var(--danger-hover);
+}
+
+.tuning-note-good {
+  background: var(--success-soft);
+  border-color: var(--success-border);
+  color: var(--success-hover);
+}
+
+.tuning-stability-good { color: var(--success-hover); }
+.tuning-stability-fair { color: var(--warning); }
+.tuning-stability-poor { color: var(--danger); }
+
 .tuning-apply-row {
   display: flex;
   align-items: center;

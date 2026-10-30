@@ -54,7 +54,27 @@
                     <span class="tuning-unit">ms</span>
                 </div>
             </div>
+
+            <div class="field tuning-pattern-field">
+                <label class="field-label" for="tuningPatternSelect">
+                    {{ t('acquisition_settings.tuning.pattern_label') }}
+                </label>
+                <select id="tuningPatternSelect">
+                    <option value="auto">{{ t('acquisition_settings.tuning.pattern_auto') }}</option>
+                    <option value="test">{{ t('acquisition_settings.tuning.pattern_test') }}</option>
+                    <option value="open">{{ t('acquisition_settings.tuning.pattern_open') }}</option>
+                </select>
+            </div>
         </div>
+
+        <div class="tuning-frames">
+            <span class="field-label" title="{{ t('acquisition_settings.tuning.frames_help') }}">
+                {{ t('acquisition_settings.tuning.frames_label') }}
+            </span>
+            <div class="tuning-frames-chips" id="tuningFrames"></div>
+        </div>
+
+        <div id="tuningFrameWarning" class="tuning-note tuning-note-warning" hidden></div>
 
         <div id="tuningErrorBox" class="field-error" hidden></div>
 
@@ -79,12 +99,27 @@
                 <span id="tuningPeakPctValue">—</span>
             </div>
             <div class="tuning-metric">
+                <span class="field-label" title="{{ t('acquisition_settings.tuning.stability_help') }}">
+                    {{ t('acquisition_settings.tuning.stability_label') }}
+                </span>
+                <span id="tuningStabilityValue">—</span>
+            </div>
+            <div class="tuning-metric">
                 <span class="field-label">{{ t('acquisition_settings.tuning.recommended_label') }}</span>
                 <span id="tuningRecommendedValue">—</span>
             </div>
+            <div class="tuning-metric">
+                <span class="field-label">{{ t('acquisition_settings.tuning.pattern_shown_label') }}</span>
+                <span id="tuningPatternValue">—</span>
+            </div>
         </div>
 
+        <div id="tuningAdvice" class="tuning-note" hidden></div>
+
         <div class="tuning-apply-row">
+            <button id="tuningUseRecommendedBtn" class="btn btn-outline" type="button" disabled>
+                {{ t('acquisition_settings.tuning.use_recommended_button') }}
+            </button>
             <button id="tuningApplyBtn" class="btn btn-outline" type="button" disabled>
                 {{ t('acquisition_settings.tuning.apply_button') }}
             </button>
