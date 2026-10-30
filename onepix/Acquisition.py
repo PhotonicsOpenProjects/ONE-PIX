@@ -355,6 +355,7 @@ class Acquisition:
                     self.imaging_method.acquisition_results["patterns"],
                     self.imaging_method.acquisition_results["patterns_order"],
                     self.imaging_method.pattern_creation_method.interp_method,
+                    measure_time_s=self.hardware.spectrometer.measure_time_s,
                 )
             except Exception as exc:
                 thread_errors.put(exc)
@@ -537,6 +538,7 @@ class Acquisition:
                 "hw_averaging": getattr(spectrometer, "hw_averaging", False),
                 "wl_lim": self.hardware.wl_lim,
                 "periode_pattern_ms": self.hardware.periode_pattern,
+                "latency_hiding_ms": self.hardware.latency_hiding_ms,
                 "periode_mes_ms": self.hardware.periode_mes,
                 "proj_position": proj_position,
             },

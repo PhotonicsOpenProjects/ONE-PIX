@@ -61,6 +61,10 @@ class Hardware:
             # in hardware_config.json (default 60) so it can be tuned
             # per projector without editing code.
             "periode_pattern": hardware_dict.get("periode_pattern", 60),
+            # Show the next pattern this long (ms) before the end of a
+            # measurement, hiding part of the projector's dead time. 0 = off;
+            # measure it with app/cli/probe_settle_time.py --fine.
+            "latency_hiding_ms": hardware_dict.get("latency_hiding_ms", 0),
         }
 
         # Écraser avec les valeurs fournies en argument
@@ -112,7 +116,8 @@ class Hardware:
         self.periode_mes = int((self.repetition + flush_periods) * self.integration_time_ms)
         self.camera = CameraBridge(self.name_camera)
         self.projection = Projection(
-            self.height, self.width, self.periode_pattern, self.proj_position
+            self.height, self.width, self.periode_pattern, self.proj_position,
+            early_show_ms=self.latency_hiding_ms,
         )
         logging.info("onepix Hardware class is init ")
 

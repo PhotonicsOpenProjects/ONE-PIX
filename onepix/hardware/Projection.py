@@ -57,11 +57,14 @@ class Projection:
     Projection handler.
     """
 
-    def __init__(self, height, width, periode_pattern, proj_position):
+    def __init__(self, height, width, periode_pattern, proj_position, early_show_ms=0):
         self.height = height
         self.width = width
         self.periode_pattern = periode_pattern
         self.proj_position = proj_position
+        # How long before the end of a measurement the next pattern is shown
+        # (0: only afterwards). See thread_projection().
+        self.early_show_ms = early_show_ms
 
         # Looked up for each Projection, so a projector plugged in after
         # the app started is found too.
@@ -223,7 +226,20 @@ class Projection:
         patterns,
         patterns_order,
         interp_method,
+        measure_time_s=None,
     ):
+        """Project the patterns one after the other: show, wait periode_pattern
+        (the display's latency), raise `event`, let the spectrometer thread
+        measure and clear it.
+
+        periode_pattern is counted from the moment the pattern is shown, and
+        the next pattern is resized while the spectrometer measures.
+
+        If early_show_ms > 0 and `measure_time_s()` (longest recent measurement)
+        is known, the next pattern is shown early_show_ms before the end of the
+        measurement. The projector needs a dead time (tens of ms) before the
+        light changes at all, so this hides part of it as long as early_show_ms
+        stays below that dead time - see app/cli/probe_settle_time.py --fine."""
         self.init_projection(
             patterns,
             patterns_order,
@@ -233,7 +249,8 @@ class Projection:
         logging.info(
             f"Projection system begins projecting patterns "
             f"({len(patterns)} patterns, "
-            f"periode_pattern={self.periode_pattern} ms)"
+            f"periode_pattern={self.periode_pattern} ms, "
+            f"early_show={self.early_show_ms} ms)"
         )
 
         # The projection loop is otherwise completely silent for the whole
@@ -241,7 +258,25 @@ class Projection:
         # logs. Log every 10% so progress (or a genuine stall) is visible.
         progress_step = max(1, len(patterns) // 10)
 
-        for idx, pattern in enumerate(patterns):
+        def resized(pattern):
+            return cv2.resize(
+                pattern,
+                (self.width, self.height),
+                interpolation=interp_method,
+            )
+
+        def show(image):
+            gui_thread.run(cv2.imshow, "ImageWindow", image)
+            # imshow only queues the image: the window is refreshed while
+            # waitKey pumps the GUI events, so pump right away
+            gui_thread.run(cv2.waitKey, 1)
+            return time.monotonic()
+
+        image = resized(patterns[0])
+        shown_at = show(image)
+        early = 0
+
+        for idx in range(len(patterns)):
 
             if stop_event.is_set():
                 logging.warning(
@@ -250,17 +285,9 @@ class Projection:
                 )
                 break
 
-            gui_thread.run(
-                cv2.imshow,
-                "ImageWindow",
-                cv2.resize(
-                    pattern,
-                    (self.width, self.height),
-                    interpolation=interp_method,
-                ),
-            )
-
-            gui_thread.run(cv2.waitKey, int(self.periode_pattern))
+            remaining_ms = self.periode_pattern - (time.monotonic() - shown_at) * 1000
+            if remaining_ms > 1:
+                gui_thread.run(cv2.waitKey, int(np.ceil(remaining_ms)))
 
             if idx % progress_step == 0:
                 logging.info(
@@ -268,16 +295,32 @@ class Projection:
                 )
 
             event.set()
+            triggered_at = time.monotonic()
 
-            time.sleep(1e-6)
+            next_image = resized(patterns[idx + 1]) if idx + 1 < len(patterns) else None
+            shown_early = False
+
+            measure_s = measure_time_s() if measure_time_s is not None else None
+            if next_image is not None and self.early_show_ms > 0 and measure_s:
+                show_at = triggered_at + measure_s - self.early_show_ms / 1000.0
+                while event.is_set() and not stop_event.is_set():
+                    if time.monotonic() >= show_at:
+                        shown_at = show(next_image)
+                        shown_early = True
+                        early += 1
+                        break
+                    time.sleep(5e-4)
 
             while event.is_set():
                 if stop_event.is_set():
                     break
-                time.sleep(1e-6)
+                time.sleep(5e-4)
+
+            if next_image is not None and not shown_early and not stop_event.is_set():
+                shown_at = show(next_image)
 
         gui_thread.run(cv2.destroyAllWindows)
 
         logging.info(
-            "Projection system finished projecting patterns"
+            f"Projection system finished projecting patterns ({early} shown early)"
         )
