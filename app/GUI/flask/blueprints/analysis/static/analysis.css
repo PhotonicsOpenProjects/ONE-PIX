@@ -266,12 +266,12 @@
   overflow: hidden;
 }
 
-/* Fills the column on its own; once the spectra card is shown, it
-   keeps a comfortable height and the column scrolls to the card. */
+/* As tall as the visible column, whatever the image: a tall image used
+   to stretch the viewer below the screen's edge. The results and
+   spectra cards follow underneath, the column scrolling to them. */
 .analysis-main .viewer-panel {
-  height: auto;
-  flex: 1 0 auto;
-  min-height: max(380px, 55vh);
+  flex: none;
+  height: max(380px, calc(100vh - var(--nav-height) - 2 * var(--space-5)));
 }
 
 .analysis-main > .card {
@@ -312,6 +312,7 @@
   position: relative;
   flex: 1;
   min-height: 0;
+  padding: var(--space-4);
   background: var(--surface-sunken);
   display: flex;
   align-items: center;

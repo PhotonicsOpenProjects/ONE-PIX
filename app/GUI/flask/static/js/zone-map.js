@@ -162,9 +162,11 @@
 
     // A chip - color swatch + name - on each of the zone's anchors (the
     // point deepest inside each of its large parts).
-    function drawLabels(ctx, map) {
-        var width = map.data.width;
-        var height = map.data.height;
+    // scale: how much larger than the result the canvas is - see
+    // composeScale().
+    function drawLabels(ctx, map, scale) {
+        var width = map.data.width * scale;
+        var height = map.data.height * scale;
         var font = Math.max(12, Math.round(width / 50));
         var pad = Math.round(font * 0.45);
         var swatch = Math.round(font * 0.75);
@@ -179,6 +181,7 @@
             var chipWidth = pad + swatch + pad + ctx.measureText(text).width + pad;
 
             (zone.anchors || []).forEach(function (anchor) {
+                anchor = [anchor[0] * scale, anchor[1] * scale];
                 var rect = placeChip(anchor, chipWidth, chipHeight, width, height, placed);
                 placed.push(rect);
 
@@ -199,21 +202,45 @@
         });
     }
 
+    // A result a few dozen pixels across, shown fitted to the viewer,
+    // had its outlines and name chips drawn at that tiny size: such a
+    // map is composed enlarged by a whole factor instead (pixels kept
+    // square and sharp), up to about this long side.
+    var COMPOSE_LONG_SIDE = 1200;
+
+    function composeScale(map) {
+        var longSide = Math.max(map.data.width, map.data.height);
+        return Math.max(1, Math.floor(COMPOSE_LONG_SIDE / longSide));
+    }
+
     function compose(map) {
-        var canvas = document.createElement("canvas");
-        canvas.width = map.data.width;
-        canvas.height = map.data.height;
-        var ctx = canvas.getContext("2d", { willReadFrequently: true });
+        var base = document.createElement("canvas");
+        base.width = map.data.width;
+        base.height = map.data.height;
+        var ctx = base.getContext("2d", { willReadFrequently: true });
 
         if (map.photo) {
-            ctx.drawImage(map.photo, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(map.photo, 0, 0, base.width, base.height);
         } else {
             ctx.fillStyle = cssVar("--surface-sunken") || "#eef0f3";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, base.width, base.height);
         }
 
         tintZones(ctx, map);
-        drawLabels(ctx, map);
+
+        var scale = composeScale(map);
+        var canvas = base;
+
+        if (scale > 1) {
+            canvas = document.createElement("canvas");
+            canvas.width = base.width * scale;
+            canvas.height = base.height * scale;
+            ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
+        }
+
+        drawLabels(ctx, map, scale);
         return canvas.toDataURL("image/png");
     }
 

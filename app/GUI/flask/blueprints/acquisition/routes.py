@@ -4,6 +4,7 @@ from .field_meta import FIELD_META
 from i18n import t
 import gui_plugins
 import zones
+import figures
 
 import io
 import json
@@ -306,16 +307,11 @@ def run_acquisition():
             message = "No image to display"
             return message, 500
 
-        fig, ax = plt.subplots()
-        ax.imshow(img, cmap="viridis")
-        ax.axis("off")
-
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png")
-        buf.seek(0)
-        plt.close(fig)
-
-        _last_figure_png = buf.getvalue()
+        # Sized to the image's own proportions, crisp pixels when small,
+        # transparent background - see figures.py. Kept for /last_figure
+        # too, so drawn at the preview's largest size, times 2 for
+        # high-density screens.
+        _last_figure_png = figures.render_png(img, axes=False, box=(1200, 900), scale=2.0)
         outcome = "success"
 
         return Response(_last_figure_png, mimetype="image/png")

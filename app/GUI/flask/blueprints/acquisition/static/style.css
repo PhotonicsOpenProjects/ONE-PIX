@@ -122,10 +122,14 @@
   padding: var(--space-4);
 }
 
+/* 4:3, but never taller than what's left of the screen under the
+   page's header: the whole result stays in view without scrolling. */
 .figure-box {
   position: relative;
   width: 100%;
   aspect-ratio: 4 / 3;
+  max-height: max(320px, calc(100vh - var(--nav-height) - 260px));
+  padding: var(--space-3);
   background: var(--surface-sunken);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);

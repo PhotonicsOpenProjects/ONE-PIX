@@ -336,6 +336,10 @@ function setUIBusy(isBusy) {
     });
 
     updateSpecificAnalysisButton();
+
+    // A resize while busy (the page settling as it loads, typically)
+    // was skipped: catch up once idle.
+    if (!isBusy) setTimeout(redrawFigureIfResized, 0);
 }
 
 
@@ -472,7 +476,7 @@ async function loadMeasure() {
     try {
 
         const response = await fetch(
-            "/analysis/load",
+            "/analysis/load?" + figureQuery(),
             {
                 method: "POST",
 
@@ -1437,7 +1441,7 @@ async function applyProcessing() {
         };
 
         const response = await fetch(
-            "/analysis/run",
+            "/analysis/run?" + figureQuery(),
             {
                 method: "POST",
 
@@ -1705,9 +1709,15 @@ document.getElementById("analysisOutputsExport").addEventListener("click", () =>
 // Zone-based results (one spectrum per zone): the viewer shows each
 // zone in its spectrum's color, with its name - see zone-map.js.
 
+// True while the viewer shows a zone map rather than the server's
+// figure (which then needn't be redrawn when the viewer is resized).
+let zoneMapShown = false;
+
 async function refreshZoneMap() {
 
     const img = document.getElementById("resultFigure");
+
+    zoneMapShown = false;
 
     try {
 
@@ -1718,6 +1728,8 @@ async function refreshZoneMap() {
             ONEPIX.clearZoneMap(img);
             return;
         }
+
+        zoneMapShown = true;
 
         await ONEPIX.renderZoneMap(img, "/analysis/zones", data, {
             // Same as clicking that zone in the chart's legend.
@@ -1827,6 +1839,80 @@ async function openSpecificAnalysis() {
 
 
 // =====================================
+// FIGURE SIZE
+// =====================================
+// The server draws the figure to fit the viewer exactly (see the
+// app's figures.py): image as large as fits whatever its proportions,
+// axis text at a fixed size. Each figure request says how much room
+// the viewer has; a figure is drawn again when that room changes
+// (window resized, fullscreen).
+
+const figureBox = document.getElementById("analysisFigureBox");
+let lastFigureSize = null;
+
+function figureRoom() {
+
+    const style = getComputedStyle(figureBox);
+
+    return {
+        w: Math.round(figureBox.clientWidth
+            - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)),
+        h: Math.round(figureBox.clientHeight
+            - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom)),
+    };
+}
+
+// w, h, dpr query arguments (plus a cache buster).
+function figureQuery() {
+
+    const room = figureRoom();
+    lastFigureSize = room;
+
+    return new URLSearchParams({
+        w: room.w,
+        h: room.h,
+        dpr: Math.min(window.devicePixelRatio || 1, 3).toFixed(2),
+        t: Date.now(),
+    }).toString();
+}
+
+async function redrawFigure() {
+
+    const response = await fetch("/analysis/current/figure?" + figureQuery());
+
+    if (!response.ok) return;
+
+    document.getElementById("resultFigure").src =
+        URL.createObjectURL(await response.blob());
+}
+
+// Draws the figure again if the viewer's room changed since it was
+// asked for - only a real change, not the odd pixel of a scrollbar.
+function redrawFigureIfResized() {
+
+    if (!hasLoadedResult || isUIBusy || zoneMapShown || !lastFigureSize) return;
+
+    const room = figureRoom();
+
+    if (
+        Math.abs(room.w - lastFigureSize.w) < 24 &&
+        Math.abs(room.h - lastFigureSize.h) < 24
+    ) return;
+
+    redrawFigure().catch(error => console.error("Figure:", error));
+}
+
+let figureResizeTimer = null;
+
+new ResizeObserver(() => {
+
+    clearTimeout(figureResizeTimer);
+    figureResizeTimer = setTimeout(redrawFigureIfResized, 250);
+
+}).observe(figureBox);
+
+
+// =====================================
 // VIEWER CONTROLS
 // (client-side only — CSS transform + Fullscreen API,
 // no backend calls, does not affect data loading/processing)
@@ -1892,7 +1978,7 @@ async function restoreLoadedAnalysis() {
 
     if (!current.loaded) return;
 
-    const figure = await fetch("/analysis/current/figure?t=" + Date.now());
+    const figure = await fetch("/analysis/current/figure?" + figureQuery());
 
     if (!figure.ok) return;
 

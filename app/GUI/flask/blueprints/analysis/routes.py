@@ -24,12 +24,6 @@ import numpy as np
 
 from PIL import Image
 
-import matplotlib
-matplotlib.use("Agg")
-
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
-
 from pathlib import Path
 
 from spectra_core.plugins.discovery import (
@@ -47,6 +41,7 @@ from onepix.ImagingMethodBridge import ImagingMethodBridge
 from onepix import utils as onepix_utils
 
 from security import safe_path
+import figures
 
 import zones
 
@@ -157,51 +152,14 @@ def save_reference_spectrum(spectrum, wavelengths):
 
 
 def image_response(img):
+    """The result image with row/column graduations, drawn to fit the
+    viewer the page says it has (w, h, dpr query arguments) - see
+    figures.py."""
 
-    img = np.array(img)
-
-    img = img.astype(
-        np.uint8
-    )
-
-    fig, ax = plt.subplots(
-        figsize=(12, 6)
-    )
-
-    ax.imshow(img)
-
-    # Integer-only pixel graduations (row/column indices), never
-    # fractional ticks, regardless of image size.
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-
-    ax.set_xlabel("Column")
-    ax.set_ylabel("Row")
-
-    ax.tick_params(colors="#5a6270", labelsize=9)
-    ax.xaxis.label.set_color("#16191f")
-    ax.yaxis.label.set_color("#16191f")
-
-    for spine in ax.spines.values():
-        spine.set_color("#c9ced6")
-
-    plt.tight_layout()
-
-    buf = io.BytesIO()
-
-    fig.savefig(
-        buf,
-        format="png",
-        bbox_inches="tight",
-        dpi=140
-    )
-
-    buf.seek(0)
-
-    plt.close(fig)
+    box, scale = figures.parse_box(request.args)
 
     return Response(
-        buf.getvalue(),
+        figures.render_png(img, axes=True, box=box, scale=scale),
         mimetype="image/png"
     )
 
