@@ -296,7 +296,7 @@ def run_acquisition():
         )
         rec.data_reconstruction()
 
-        rec.save_reconstruction_results() # ou ton vrai nom de fonction save core
+        rec.save_reconstruction_results()
 
         _last_reconstruction_results = rec.reconstruction_results
 
