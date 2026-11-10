@@ -142,6 +142,8 @@ def acquisition_page():
 
 @bp.route("/hardware")
 def hardware_page():
+    # Imported here: the projector blueprint itself imports acquisition.tuning.
+    from blueprints.projector import cec
 
     return render_template(
         "settings_page.html",
@@ -149,6 +151,7 @@ def hardware_page():
         title=t("acquisition_settings.hardware_page_title"),
         category="hardware",
         data=ctl.hardware_settings(),
+        standby_supported=cec.standby_supported(),
         plugins={
             "name_spectro": get_entrypoints("onepix.spectrometers"),
             "name_camera": get_entrypoints("onepix.cameras"),

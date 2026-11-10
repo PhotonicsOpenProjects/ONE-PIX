@@ -1,20 +1,12 @@
 import logging
 
-from flask import render_template, jsonify
+from flask import jsonify
 
 from . import bp
 from . import cec
 from blueprints.acquisition.tuning import hardware_lock
 
 logger = logging.getLogger(__name__)
-
-
-@bp.route("/")
-def projector_page():
-    return render_template(
-        "projector.html",
-        standby_supported=cec.standby_supported(),
-    )
 
 
 def _error(exc, status=500):

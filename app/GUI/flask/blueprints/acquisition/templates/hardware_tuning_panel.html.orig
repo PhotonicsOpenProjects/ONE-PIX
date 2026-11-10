@@ -1,0 +1,107 @@
+<!-- ============================================================
+     Spectrometer integration-time live tuning panel.
+     Included only from settings_page.html when category == 'hardware'.
+     ============================================================ -->
+
+<div class="card tuning-card" id="tuningCard">
+
+    <div class="card-header">
+        <div>
+            <h2>{{ t('acquisition_settings.tuning.title') }}</h2>
+            <div class="page-sub">{{ t('acquisition_settings.tuning.subtitle') }}</div>
+        </div>
+
+        <span class="badge badge-neutral" id="tuningStatusBadge">
+            <span class="status-dot is-idle"></span>
+            <span id="tuningStatusLabel">{{ t('acquisition_settings.tuning.status_idle') }}</span>
+        </span>
+    </div>
+
+    <div class="card-body">
+
+        <div class="tuning-toolbar">
+            <button id="tuningStartBtn" class="btn btn-primary" type="button">
+                {{ t('acquisition_settings.tuning.start_button') }}
+            </button>
+
+            <button id="tuningStopBtn" class="btn btn-outline" type="button" disabled>
+                {{ t('acquisition_settings.tuning.stop_button') }}
+            </button>
+
+            <div class="field tuning-integration-field">
+                <label class="field-label" for="tuningIntegrationInput">
+                    {{ t('acquisition_settings.tuning.integration_label') }}
+                </label>
+                <div class="tuning-integration-controls">
+                    <input
+                        type="range"
+                        id="tuningIntegrationSlider"
+                        min="1"
+                        max="10000"
+                        step="1"
+                        value="10"
+                        disabled
+                    >
+                    <input
+                        type="number"
+                        id="tuningIntegrationInput"
+                        min="1"
+                        max="10000"
+                        step="1"
+                        value="10"
+                        disabled
+                    >
+                    <span class="tuning-unit">ms</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="tuningErrorBox" class="field-error" hidden></div>
+
+        <div class="tuning-chart-box">
+            <div id="tuningChart" class="tuning-chart"></div>
+            <div id="tuningEmptyState" class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 17 8 9l4 5 4-8 5 11"></path>
+                </svg>
+                <div class="empty-state-title">{{ t('acquisition_settings.tuning.empty_title') }}</div>
+                <div class="empty-state-sub">{{ t('acquisition_settings.tuning.empty_sub') }}</div>
+            </div>
+        </div>
+
+        <div class="tuning-metrics">
+            <div class="tuning-metric">
+                <span class="field-label">{{ t('acquisition_settings.tuning.peak_label') }}</span>
+                <span id="tuningPeakValue">—</span>
+            </div>
+            <div class="tuning-metric">
+                <span class="field-label">{{ t('acquisition_settings.tuning.peak_pct_label') }}</span>
+                <span id="tuningPeakPctValue">—</span>
+            </div>
+            <div class="tuning-metric">
+                <span class="field-label">{{ t('acquisition_settings.tuning.recommended_label') }}</span>
+                <span id="tuningRecommendedValue">—</span>
+            </div>
+        </div>
+
+        <div class="tuning-apply-row">
+            <button id="tuningApplyBtn" class="btn btn-outline" type="button" disabled>
+                {{ t('acquisition_settings.tuning.apply_button') }}
+            </button>
+            <span id="tuningApplyStatus" class="panel-status"></span>
+        </div>
+
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/vendor/plotly-basic.min.js') }}"></script>
+<script>
+    window.ONEPIX_TUNING_URLS = {
+        start: "{{ url_for('acquisition.hardware_tuning_start') }}",
+        stop: "{{ url_for('acquisition.hardware_tuning_stop') }}",
+        snapshot: "{{ url_for('acquisition.hardware_tuning_snapshot') }}",
+        integrationTime: "{{ url_for('acquisition.hardware_tuning_integration_time') }}",
+        apply: "{{ url_for('acquisition.hardware_tuning_apply') }}"
+    };
+</script>
+<script src="{{ url_for('acquisition.static', filename='hardware_tuning.js') }}"></script>

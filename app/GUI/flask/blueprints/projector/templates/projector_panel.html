@@ -1,22 +1,20 @@
-{% extends "global_base.html" %}
+<!-- ============================================================
+     Projector panel: HDMI-CEC power, display info and CEC bus scan.
+     Included only from settings_page.html when category == 'hardware'.
+     Needs standby_supported in the template context.
+     ============================================================ -->
 
-{% block title %}{{ t('projector.title') }}{% endblock %}
-
-{% block head %}
 <style>
-.projector-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-    gap: var(--space-5);
-    align-items: start;
+.projector-section {
+    padding: var(--space-4) 0;
+    border-top: 1px solid var(--border);
 }
+.projector-section:first-child { border-top: 0; padding-top: 0; }
+.projector-section:last-child { padding-bottom: 0; }
 
-.projector-grid .card-wide {
-    grid-column: 1 / -1;
-}
-
-@media (max-width: 900px) {
-    .projector-grid { grid-template-columns: 1fr; }
+.projector-section h3 {
+    margin: 0 0 var(--space-3);
+    font-size: var(--fs-md);
 }
 
 .projector-actions {
@@ -27,7 +25,7 @@
 
 .projector-hint,
 .projector-note {
-    margin-top: var(--space-3);
+    margin: var(--space-3) 0 0;
     color: var(--text-muted);
     font-size: var(--fs-sm);
 }
@@ -41,17 +39,30 @@
     font-family: var(--font-mono);
     font-size: 0.85em;
 }
+
+.projector-cec > summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    cursor: pointer;
+    font-size: var(--fs-md);
+    font-weight: 600;
+}
+.projector-cec > summary .projector-cec-hint {
+    font-weight: 400;
+    font-size: var(--fs-sm);
+    color: var(--text-muted);
+}
+.projector-cec-body { margin-top: var(--space-3); }
+.projector-cec-toolbar { margin-bottom: var(--space-3); }
 </style>
-{% endblock %}
 
-{% block app_content %}
-<div class="page-shell">
+<div class="card" id="projectorCard">
 
-    <div class="page-header">
+    <div class="card-header">
         <div>
-            <div class="card-eyebrow">{{ t('projector.eyebrow') }}</div>
-            <h1>{{ t('projector.title') }}</h1>
-            <p class="page-sub">{{ t('projector.sub') }}</p>
+            <h2>{{ t('projector.title') }}</h2>
+            <div class="page-sub">{{ t('projector.sub') }}</div>
         </div>
 
         <span id="projStatusBadge" class="badge badge-neutral">
@@ -60,88 +71,80 @@
         </span>
     </div>
 
-    <div class="projector-grid">
+    <div class="card-body">
 
         <!-- POWER -->
-        <div class="card">
-            <div class="card-header">
-                <h2>{{ t('projector.power_title') }}</h2>
-            </div>
-            <div class="card-body">
-                <div class="projector-actions">
-                    <button type="button" id="projOn" class="btn btn-primary">{{ t('projector.power_on') }}</button>
-                    {% if standby_supported %}
-                    <button type="button" id="projStandby" class="btn btn-outline">{{ t('projector.standby') }}</button>
-                    {% endif %}
-                    <button type="button" id="projRefresh" class="btn btn-ghost">{{ t('projector.refresh') }}</button>
-                </div>
-                <p class="projector-hint">{{ t('projector.power_hint') }}</p>
-                {% if not standby_supported %}
-                <p class="projector-hint">{{ t('projector.standby_unsupported') }}</p>
+        <section class="projector-section">
+            <h3>{{ t('projector.power_title') }}</h3>
+            <div class="projector-actions">
+                <button type="button" id="projOn" class="btn btn-primary">{{ t('projector.power_on') }}</button>
+                {% if standby_supported %}
+                <button type="button" id="projStandby" class="btn btn-outline">{{ t('projector.standby') }}</button>
                 {% endif %}
+                <button type="button" id="projRefresh" class="btn btn-ghost">{{ t('projector.refresh') }}</button>
             </div>
-        </div>
+            <p class="projector-hint">{{ t('projector.power_hint') }}</p>
+            {% if not standby_supported %}
+            <p class="projector-hint">{{ t('projector.standby_unsupported') }}</p>
+            {% endif %}
+        </section>
 
         <!-- DISPLAY -->
-        <div class="card">
-            <div class="card-header">
-                <h2>{{ t('projector.display_title') }}</h2>
+        <section class="projector-section">
+            <h3>{{ t('projector.display_title') }}</h3>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('projector.display_monitor') }}</th>
+                            <th>{{ t('projector.display_resolution') }}</th>
+                            <th>{{ t('projector.display_position') }}</th>
+                            <th>{{ t('projector.display_role') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody id="displayRows">
+                        <tr><td colspan="4">{{ t('projector.loading') }}</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <div class="table-wrap">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>{{ t('projector.display_monitor') }}</th>
-                                <th>{{ t('projector.display_resolution') }}</th>
-                                <th>{{ t('projector.display_position') }}</th>
-                                <th>{{ t('projector.display_role') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody id="displayRows">
-                            <tr><td colspan="4">{{ t('projector.loading') }}</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <p class="projector-note" id="displayRefresh"></p>
-            </div>
-        </div>
+            <p class="projector-note" id="displayRefresh"></p>
+        </section>
 
-        <!-- CEC BUS -->
-        <div class="card card-wide">
-            <div class="card-header">
-                <h2>{{ t('projector.cec_title') }}</h2>
-                <button type="button" id="cecScan" class="btn btn-sm btn-outline">{{ t('projector.cec_scan') }}</button>
-            </div>
-            <div class="card-body">
-                <div class="table-wrap">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>{{ t('projector.cec_address') }}</th>
-                                <th>{{ t('projector.cec_type') }}</th>
-                                <th>{{ t('projector.cec_name') }}</th>
-                                <th>{{ t('projector.cec_vendor') }}</th>
-                                <th>{{ t('projector.cec_phys') }}</th>
-                                <th>{{ t('projector.cec_version') }}</th>
-                                <th>{{ t('projector.cec_power') }}</th>
-                                <th>{{ t('projector.cec_language') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cecRows">
-                            <tr><td colspan="8">{{ t('projector.loading') }}</td></tr>
-                        </tbody>
-                    </table>
+        <!-- CEC BUS: diagnostic, collapsed and scanned only when opened -->
+        <section class="projector-section">
+            <details class="projector-cec" id="cecDetails">
+                <summary>{{ t('projector.cec_title') }}</summary>
+                <div class="projector-cec-body">
+                    <div class="projector-cec-toolbar">
+                        <button type="button" id="cecScan" class="btn btn-sm btn-outline">{{ t('projector.cec_scan') }}</button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>{{ t('projector.cec_address') }}</th>
+                                    <th>{{ t('projector.cec_type') }}</th>
+                                    <th>{{ t('projector.cec_name') }}</th>
+                                    <th>{{ t('projector.cec_vendor') }}</th>
+                                    <th>{{ t('projector.cec_phys') }}</th>
+                                    <th>{{ t('projector.cec_version') }}</th>
+                                    <th>{{ t('projector.cec_power') }}</th>
+                                    <th>{{ t('projector.cec_language') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cecRows">
+                                <tr><td colspan="8">{{ t('projector.loading') }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="projector-note" id="cecConfig"></p>
                 </div>
-                <p class="projector-note" id="cecConfig"></p>
-            </div>
-        </div>
+            </details>
+        </section>
 
     </div>
 </div>
-{% endblock %}
 
-{% block scripts %}
 <script>
 (function () {
     var T = ONEPIX.t;
@@ -318,10 +321,18 @@
 
     document.getElementById("cecScan").addEventListener("click", loadCec);
 
-    // The power query and the bus scan both need the CEC adapter (one at a
-    // time, serialised server-side): query power first, then scan.
-    loadDisplay();
-    refreshPower().then(loadCec);
+    // Nothing is queried until the Projector tab is opened (the CEC adapter
+    // is slow and shared), and the bus scan - a diagnostic - waits until its
+    // section is expanded. The adapter serves one request at a time.
+    var loaded = false, cecLoaded = false;
+    document.addEventListener("hw:tabshown", function (e) {
+        if (e.detail !== "projector" || loaded) return;
+        loaded = true;
+        loadDisplay();
+        refreshPower();
+    });
+    document.getElementById("cecDetails").addEventListener("toggle", function () {
+        if (this.open && !cecLoaded) { cecLoaded = true; loadCec(); }
+    });
 })();
 </script>
-{% endblock %}

@@ -88,6 +88,20 @@
     </a>
 </div>
 
+{% if category == 'hardware' %}
+{# One section at a time instead of a long scroll: the settings form,
+   the integration-time tuning, the projector and the coregistration.
+   All panels stay in the DOM (their scripts keep working); the script
+   at the bottom shows the one selected, remembered in the URL hash. #}
+<nav class="hw-tabs" role="tablist" aria-label="{{ t('hw.tabs_label') }}">
+    <button type="button" class="hw-tab is-active" role="tab" id="hw-tab-settings" data-hw-tab="settings" aria-controls="hw-panel-settings" aria-selected="true">{{ t('hw.tab.settings') }}</button>
+    <button type="button" class="hw-tab" role="tab" id="hw-tab-tuning" data-hw-tab="tuning" aria-controls="hw-panel-tuning" aria-selected="false">{{ t('hw.tab.tuning') }}</button>
+    <button type="button" class="hw-tab" role="tab" id="hw-tab-projector" data-hw-tab="projector" aria-controls="hw-panel-projector" aria-selected="false">{{ t('hw.tab.projector') }}</button>
+    <button type="button" class="hw-tab" role="tab" id="hw-tab-coreg" data-hw-tab="coreg" aria-controls="hw-panel-coreg" aria-selected="false">{{ t('hw.tab.coreg') }}</button>
+</nav>
+<div class="hw-panel" id="hw-panel-settings" role="tabpanel" aria-labelledby="hw-tab-settings">
+{% endif %}
+
 {% if data %}
 
 {% if category == 'addon' %}
@@ -103,13 +117,31 @@
     {% endfor %}
 
     <div class="card-body">
-        <div class="settings-form-grid">
-            {% for key, value in data.items() %}
-                {% if not (meta_all.get(key) or {}).get('advanced') %}
-                    {{ render_field(key, value, meta_all.get(key) or {}, false) }}
-                {% endif %}
-            {% endfor %}
-        </div>
+        {# Sections: fields are grouped by their FIELD_META "group". When
+           no field has one (software, addon) it stays one flat grid. #}
+        {% set gs = namespace(order=[]) %}
+        {% for key in data %}
+            {% set m = meta_all.get(key) or {} %}
+            {% if not m.get('advanced') %}
+                {% set g = m.get('group', '') %}
+                {% if g not in gs.order %}{% set gs.order = gs.order + [g] %}{% endif %}
+            {% endif %}
+        {% endfor %}
+        {% for g in gs.order %}
+        <section class="settings-group">
+            {% if gs.order|length > 1 %}
+            <h3 class="settings-group-title">{{ t('settings_group.' ~ (g or 'other')) }}</h3>
+            {% endif %}
+            <div class="settings-form-grid">
+                {% for key, value in data.items() %}
+                    {% set m = meta_all.get(key) or {} %}
+                    {% if not m.get('advanced') and m.get('group', '') == g %}
+                        {{ render_field(key, value, m, false) }}
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
 
         {% if ns.has_advanced %}
         <details class="settings-advanced">
@@ -154,8 +186,54 @@
 {% endif %}
 
 {% if category == 'hardware' %}
+</div>{# /hw-panel-settings #}
+
+<div class="hw-panel" id="hw-panel-tuning" role="tabpanel" aria-labelledby="hw-tab-tuning" hidden>
 {% include "hardware_tuning_panel.html" %}
+</div>
+<div class="hw-panel" id="hw-panel-projector" role="tabpanel" aria-labelledby="hw-tab-projector" hidden>
+{% include "projector_panel.html" %}
+</div>
+<div class="hw-panel" id="hw-panel-coreg" role="tabpanel" aria-labelledby="hw-tab-coreg" hidden>
 {% include "coregistration_calibration_panel.html" %}
+</div>
+
+<script>
+(function () {
+    var tabs = Array.prototype.slice.call(document.querySelectorAll(".hw-tab"));
+    var names = tabs.map(function (t) { return t.dataset.hwTab; });
+
+    function show(name, updateHash) {
+        if (names.indexOf(name) === -1) name = names[0];
+        tabs.forEach(function (t) {
+            var on = t.dataset.hwTab === name;
+            t.classList.toggle("is-active", on);
+            t.setAttribute("aria-selected", on ? "true" : "false");
+            t.tabIndex = on ? 0 : -1;
+            document.getElementById("hw-panel-" + t.dataset.hwTab).hidden = !on;
+        });
+        if (updateHash) {
+            try { history.replaceState(null, "", "#" + name); } catch (e) {}
+        }
+        // Panels with lazy content (projector) listen for this.
+        document.dispatchEvent(new CustomEvent("hw:tabshown", { detail: name }));
+    }
+
+    tabs.forEach(function (t, i) {
+        t.addEventListener("click", function () { show(t.dataset.hwTab, true); });
+        t.addEventListener("keydown", function (e) {
+            var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+            if (!d) return;
+            var next = tabs[(i + d + tabs.length) % tabs.length];
+            next.focus();
+            show(next.dataset.hwTab, true);
+            e.preventDefault();
+        });
+    });
+    window.addEventListener("hashchange", function () { show(location.hash.slice(1), false); });
+    show(location.hash.slice(1), false);
+})();
+</script>
 {% endif %}
 
 {# Panels shipped by the selected imaging method's own plugin (its

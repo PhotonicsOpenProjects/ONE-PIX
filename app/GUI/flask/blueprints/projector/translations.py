@@ -3,7 +3,6 @@ blueprint creation (see i18n.register_translations)."""
 
 TRANSLATIONS = {
     "en": {
-        "nav.projector": "Projector",
         "projector.eyebrow": "Instrument",
         "projector.title": "Projector",
         "projector.sub": "Switch the video projector on or to standby over HDMI-CEC, and check what the Raspberry Pi sees of it.",
@@ -47,7 +46,6 @@ TRANSLATIONS = {
         "projector.loading": "Loading…",
     },
     "fr": {
-        "nav.projector": "Projecteur",
         "projector.eyebrow": "Instrument",
         "projector.title": "Vidéoprojecteur",
         "projector.sub": "Allumer le vidéoprojecteur ou le mettre en veille via HDMI-CEC, et voir ce que le Raspberry Pi en perçoit.",
@@ -91,7 +89,6 @@ TRANSLATIONS = {
         "projector.loading": "Chargement…",
     },
     "es": {
-        "nav.projector": "Proyector",
         "projector.eyebrow": "Instrumento",
         "projector.title": "Proyector",
         "projector.sub": "Encender el proyector o ponerlo en espera por HDMI-CEC, y ver lo que la Raspberry Pi detecta de él.",
@@ -135,7 +132,6 @@ TRANSLATIONS = {
         "projector.loading": "Cargando…",
     },
     "de": {
-        "nav.projector": "Projektor",
         "projector.eyebrow": "Instrument",
         "projector.title": "Projektor",
         "projector.sub": "Den Projektor über HDMI-CEC einschalten oder in Standby versetzen und prüfen, was der Raspberry Pi von ihm sieht.",

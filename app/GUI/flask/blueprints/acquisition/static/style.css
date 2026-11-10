@@ -567,3 +567,69 @@
     aspect-ratio: 16 / 10;
   }
 }
+
+/* ------------------------------------------------------------
+   Hardware page: one section at a time (tabs) and grouped settings
+   ------------------------------------------------------------ */
+.hw-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-5);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.hw-tab {
+  flex: 0 0 auto;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: -1px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.hw-tab:hover {
+  color: var(--text);
+}
+
+.hw-tab.is-active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.hw-tab:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
+.hw-panel[hidden] {
+  display: none;
+}
+
+/* The panels used to be stacked cards: no extra gap above them now. */
+.hw-panel .tuning-card {
+  margin-top: 0;
+}
+
+.settings-group + .settings-group {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.settings-group-title {
+  margin: 0 0 var(--space-4);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}

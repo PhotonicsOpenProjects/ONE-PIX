@@ -13,6 +13,9 @@ add the metadata of their own fields (gui_plugins.py's FIELD_META).
             most users should never need to touch
   widget    "range": a two-number list ([min, max]) edited as two
             separate inputs instead of raw JSON
+  group     title key (settings_group.<group> in i18n.py) of the section
+            a non-advanced field is shown under. Forms where no field
+            has a group render as one flat grid.
 """
 
 FIELD_META = {
@@ -24,11 +27,15 @@ FIELD_META = {
     "dynamic_tint": {"advanced": True},
 
     # ---- hardware (hardware_config.json) ----
-    "name_spectro": {},
-    "name_camera": {},
-    "height": {"unit": "px"},
-    "width": {"unit": "px"},
-    "wl_lim": {"unit": "nm", "widget": "range"},
+    "name_spectro": {"group": "devices"},
+    "name_camera": {"group": "devices"},
+    "height": {"unit": "px", "group": "image"},
+    "width": {"unit": "px", "group": "image"},
+    "wl_lim": {"unit": "nm", "widget": "range", "group": "image"},
+    "periode_pattern": {"group": "projection"},
+    "latency_hiding_ms": {"unit": "ms", "group": "projection"},
+    "max_gray_level": {"group": "projection"},
+    "gray_response_path": {"group": "projection"},
     "proj_position": {"advanced": True},
     "corregistration_array": {"advanced": True},
     "normalisation_path": {"advanced": True},
