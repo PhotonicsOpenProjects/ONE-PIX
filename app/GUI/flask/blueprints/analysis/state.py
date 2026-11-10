@@ -1,3 +1,5 @@
 CURRENT_RECONSTRUCTION = None
 CURRENT_RESULT = None
 ORIGINAL_RESULT = None
+# File CURRENT_RECONSTRUCTION was loaded from, shown again by the page.
+CURRENT_FILENAME = None

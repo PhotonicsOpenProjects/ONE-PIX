@@ -386,6 +386,8 @@ def load_measure():
         copy.deepcopy(data)
     )
 
+    state.CURRENT_FILENAME = filepath.name
+
     img = data.get(
         "result2plot"
     )
@@ -395,6 +397,37 @@ def load_measure():
         return jsonify({
             "error": "No result2plot found"
         }), 500
+
+    return image_response(img)
+
+
+# ==========================================
+# CURRENT ANALYSIS
+# ==========================================
+# Each tab is its own page, so the Analysis page starts blank whenever
+# it's opened again (back from Specific analysis, or any other tab),
+# though the loaded reconstruction and its processed result are still
+# here, in state. These let it show them again.
+
+@bp.route("/current")
+def current_analysis():
+
+    return jsonify({
+        "loaded": state.CURRENT_RESULT is not None,
+        "filename": state.CURRENT_FILENAME,
+    })
+
+
+@bp.route("/current/figure")
+def current_analysis_figure():
+
+    result = state.CURRENT_RESULT
+
+    img = result.get("result2plot") if result is not None else None
+
+    if img is None:
+
+        return "No analysis loaded", 404
 
     return image_response(img)
 

@@ -654,6 +654,9 @@ async function loadStepParams(step) {
 
     step.paramsContainer.innerHTML = "";
 
+    // The plugin may have changed while its params were fetched.
+    if (step.select.value !== plugin) return;
+
     data.params.forEach(param => {
 
         if (param.name === "reference_path") {
@@ -710,6 +713,8 @@ async function loadStepParams(step) {
             wrapper
         );
     });
+
+    savePipeline();
 }
 
 
@@ -871,18 +876,21 @@ function buildReferencePicker(param) {
 
     refreshStatus();
 
+    // Whoever sets the value (a pick, or restorePipeline()) sends
+    // "change": the status follows, and the pipeline is saved.
+    hidden.addEventListener("change", refreshStatus);
+
+    function pick(path) {
+        hidden.value = path;
+        hidden.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
     zoneBtn.addEventListener("click", () => {
-        openReferenceDialog("zone", path => {
-            hidden.value = path;
-            refreshStatus();
-        });
+        openReferenceDialog("zone", pick);
     });
 
     hypercubeBtn.addEventListener("click", () => {
-        openReferenceDialog("hypercube", path => {
-            hidden.value = path;
-            refreshStatus();
-        });
+        openReferenceDialog("hypercube", pick);
     });
 
     actions.appendChild(zoneBtn);
@@ -1159,7 +1167,9 @@ function renumberPipelineSteps() {
 }
 
 
-async function addPipelineStep() {
+// plugin: the step's initial plugin (restorePipeline()); the first
+// one listed otherwise.
+async function addPipelineStep(plugin) {
 
     await fetchAvailablePlugins();
 
@@ -1196,6 +1206,8 @@ async function addPipelineStep() {
     };
 
     populatePluginSelect(step.select);
+
+    if (plugin) step.select.value = plugin;
 
     step.select.addEventListener(
         "change",
@@ -1234,6 +1246,116 @@ function removePipelineStep(stepId) {
     pipelineSteps.splice(index, 1);
 
     renumberPipelineSteps();
+
+    savePipeline();
+}
+
+
+// =====================================
+// PIPELINE PERSISTENCE
+// =====================================
+// Each tab is its own page: without this, the steps being edited were
+// lost on every round trip to Specific analysis or any other tab. Kept
+// in sessionStorage - this browser tab only, until it's closed.
+
+const PIPELINE_STORAGE_KEY = "onepix.analysis.pipeline";
+
+function savePipeline() {
+
+    try {
+        sessionStorage.setItem(
+            PIPELINE_STORAGE_KEY,
+            JSON.stringify(collectPipelineSteps())
+        );
+    } catch (error) {
+        // Storage unavailable, or a parameter not valid yet: keep the
+        // last saved pipeline.
+    }
+}
+
+// Any edit in a step: typing, a dropdown, a checkbox, a reference pick
+// (see buildReferencePicker()), "select all/none" (a click).
+["input", "change", "click"].forEach(type =>
+    document.getElementById("pipelineSteps").addEventListener(type, savePipeline)
+);
+
+// Puts saved values back into a step's freshly built parameters.
+function applyStepParams(step, params) {
+
+    step.paramsContainer
+    .querySelectorAll("[data-param-name]")
+    .forEach(el => {
+
+        const name = el.dataset.paramName;
+
+        if (!(name in params)) return;
+
+        const value = params[name];
+
+        if (el.dataset.type === "json" && el.tagName === "SELECT") {
+
+            el.value = value === null ? "" : JSON.stringify(value);
+
+        } else if (el.dataset.type === "json") {
+
+            // Several choices: the checkboxes next to the hidden value.
+            const wanted = Array.isArray(value) ? value.map(String) : [];
+            const boxes = el.parentElement.querySelectorAll(".param-choice input[type=checkbox]");
+
+            boxes.forEach(box => {
+                box.checked = wanted.includes(box.parentElement.textContent);
+            });
+
+            // Re-syncs the hidden value and the "n selected" hint.
+            if (boxes.length) boxes[0].dispatchEvent(new Event("change"));
+
+        } else if (el.type === "hidden") {
+
+            el.value = value ?? "";
+            el.dispatchEvent(new Event("change"));
+
+        } else {
+
+            el.value = value === null || value === undefined ? "" : String(value);
+        }
+    });
+}
+
+async function restorePipeline() {
+
+    let saved = null;
+
+    try {
+        saved = JSON.parse(sessionStorage.getItem(PIPELINE_STORAGE_KEY));
+    } catch (error) {
+        saved = null;
+    }
+
+    if (Array.isArray(saved) && saved.length) {
+
+        await fetchAvailablePlugins();
+
+        // A plugin uninstalled since is skipped.
+        const known = new Set(
+            availablePlugins.transforms.concat(availablePlugins.analyses)
+        );
+
+        for (const entry of saved) {
+
+            if (!Array.isArray(entry) || !known.has(entry[0])) continue;
+
+            await addPipelineStep(entry[0]);
+
+            applyStepParams(
+                pipelineSteps[pipelineSteps.length - 1],
+                entry[1] || {}
+            );
+        }
+    }
+
+    if (!pipelineSteps.length) await addPipelineStep();
+
+    savePipeline();
 }
 
 
@@ -1241,73 +1363,77 @@ function removePipelineStep(stepId) {
 // APPLY PROCESSING
 // =====================================
 
+// [[plugin, params], ...] as /analysis/run takes them.
+function collectPipelineSteps() {
+
+    return pipelineSteps.map(step => {
+
+        const plugin = step.select.value;
+
+        const params = {};
+
+        // Only the elements carrying a parameter (not, e.g., the
+        // checkboxes a choice parameter is edited with).
+        step.paramsContainer
+        .querySelectorAll("[data-param-name]")
+        .forEach(input => {
+
+            const name =
+                input.dataset.paramName;
+
+            const type =
+                input.dataset.type;
+
+            let value =
+                input.value;
+
+            if (
+                type === "json"
+            ) {
+
+                value =
+                    value === "" ? null : JSON.parse(value);
+            }
+
+            else if (
+                type.includes("int")
+            ) {
+
+                value =
+                    parseInt(value);
+            }
+
+            else if (
+                type.includes("float")
+            ) {
+
+                value =
+                    parseFloat(value);
+            }
+
+            else if (
+                type === "bool"
+            ) {
+
+                value =
+                    value === "true";
+            }
+
+            params[name] = value;
+        });
+
+        return [plugin, params];
+    });
+}
+
 async function applyProcessing() {
 
     setUIBusy(true);
 
     try {
 
-        const steps = pipelineSteps.map(step => {
-
-            const plugin = step.select.value;
-
-            const params = {};
-
-            // Only the elements carrying a parameter (not, e.g., the
-            // checkboxes a choice parameter is edited with).
-            step.paramsContainer
-            .querySelectorAll("[data-param-name]")
-            .forEach(input => {
-
-                const name =
-                    input.dataset.paramName;
-
-                const type =
-                    input.dataset.type;
-
-                let value =
-                    input.value;
-
-                if (
-                    type === "json"
-                ) {
-
-                    value =
-                        value === "" ? null : JSON.parse(value);
-                }
-
-                else if (
-                    type.includes("int")
-                ) {
-
-                    value =
-                        parseInt(value);
-                }
-
-                else if (
-                    type.includes("float")
-                ) {
-
-                    value =
-                        parseFloat(value);
-                }
-
-                else if (
-                    type === "bool"
-                ) {
-
-                    value =
-                        value === "true";
-                }
-
-                params[name] = value;
-            });
-
-            return [plugin, params];
-        });
-
         const payload = {
-            steps: steps
+            steps: collectPipelineSteps()
         };
 
         const response = await fetch(
@@ -1751,14 +1877,74 @@ document.getElementById("viewerFullscreenBtn").addEventListener("click", () => {
 
 
 // =====================================
+// RESTORE THE LOADED ANALYSIS
+// =====================================
+// The server keeps the loaded reconstruction and its processed result
+// across pages: show them again instead of a blank viewer.
+
+async function restoreLoadedAnalysis() {
+
+    const response = await fetch("/analysis/current");
+
+    if (!response.ok) return;
+
+    const current = await response.json();
+
+    if (!current.loaded) return;
+
+    const figure = await fetch("/analysis/current/figure?t=" + Date.now());
+
+    if (!figure.ok) return;
+
+    document.getElementById("resultFigure").src =
+        URL.createObjectURL(await figure.blob());
+
+    document.getElementById("emptyFigure").style.display = "none";
+
+    const select = document.getElementById("measureSelect");
+
+    if (current.filename && [...select.options].some(o => o.value === current.filename)) {
+        select.value = current.filename;
+    }
+
+    document.getElementById("loadStatus").innerText =
+        ONEPIX.t("analysis.load_success");
+
+    hasLoadedResult = true;
+
+    await refreshSpecificAnalysisAvailability();
+    await refreshSpectraChart();
+    await refreshZoneMap();
+    await refreshAnalysisOutputs();
+}
+
+
+// =====================================
 // INIT
 // =====================================
 
-loadMeasures();
-
-addPipelineStep();
-
 updateSpecificAnalysisButton();
+
+// Once the chart/zone-map scripts below this one have loaded.
+document.addEventListener("DOMContentLoaded", async () => {
+
+    setUIBusy(true);
+
+    try {
+        await loadMeasures();
+    } catch (error) {
+        console.error(error);
+    }
+
+    try {
+        await restorePipeline();
+        await restoreLoadedAnalysis();
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setUIBusy(false);
+    }
+});
 
 </script>
 
