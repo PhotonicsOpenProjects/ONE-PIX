@@ -27,13 +27,16 @@ function queryParams() {
 }
 
 // keepConsole: refresh the list after an action without wiping its log.
-// refreshUpdates: ask PyPI/GitLab again instead of the server's cache.
+// refreshUpdates: download the plugin list and ask PyPI/GitLab again
+// instead of the server's caches.
 async function loadPlugins({keepConsole = false, refreshUpdates = false} = {}) {
   setStatus("loading");
   if (!keepConsole) output.textContent = ONEPIX.t("plugins.meta_loading");
   selectAll.checked = false;
 
-  const response = await fetch(`/plugins_manager/api/plugins?${queryParams().toString()}`);
+  const params = queryParams();
+  if (refreshUpdates) params.set("refresh", "1");
+  const response = await fetch(`/plugins_manager/api/plugins?${params.toString()}`);
   const data = await response.json();
 
   if (!data.ok) {

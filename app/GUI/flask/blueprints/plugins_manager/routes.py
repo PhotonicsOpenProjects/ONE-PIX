@@ -25,8 +25,14 @@ _action_lock = threading.Lock()
 _AVAILABLE_TTL = 600
 _available_cache = {}
 
-# Projects found by the last listing (all categories) and the GitLab
-# access used, reused by /api/updates instead of discovering again.
+# Projects found by the last listing (all categories), its warnings,
+# when it was made and the GitLab access used. Reused for _LIST_TTL
+# seconds by every route - filter changes, /api/updates, actions -
+# instead of listing again; the page's Refresh button bypasses it.
+# Listing reads the published plugin index (one download, cached on
+# disk by the manager), or queries the GitLab API in live mode, which
+# GitLab rate-limits per IP when unauthenticated.
+_LIST_TTL = 600
 _last_discovery = {}
 
 
@@ -77,6 +83,7 @@ def api_plugins():
         projects, meta = load_projects(
             category=request.args.get("category") or None,
             installed_only=request.args.get("installed") == "1",
+            refresh=request.args.get("refresh") == "1",
         )
     except Exception as exc:
         return jsonify({"ok": False, "error": str(exc)}), 500
@@ -267,14 +274,46 @@ def load_context():
     }
 
 
-def load_projects(category=None, installed_only=False):
-    ctx = load_context()
-    projects, warnings = cli.discover_sources(
-        ctx["sources"],
+def list_all_projects(ctx, refresh=False):
+    """(projects, warnings): every plugin, from the last listing if
+    younger than _LIST_TTL, else listed again (see _last_discovery)."""
+    now = time.monotonic()
+    if (
+        not refresh
+        and _last_discovery
+        and _last_discovery["token"] == ctx["token"]
+        and _last_discovery["base"] == ctx["base"]
+        and now - _last_discovery["time"] < _LIST_TTL
+    ):
+        return _last_discovery["projects"], _last_discovery["warnings"]
+
+    lister = getattr(cli, "list_plugins", None)
+    if lister is not None:
+        args = SimpleNamespace(config=None, group=None, token=None)
+        projects, warnings = lister(
+            args, ctx["config"], token=ctx["token"], base=ctx["base"], refresh=refresh
+        )
+    else:
+        # onepix_plugins_manager older than the published plugin index.
+        projects, warnings = cli.discover_sources(
+            ctx["sources"],
+            token=ctx["token"],
+            base=ctx["base"],
+        )
+
+    _last_discovery.update(
+        projects=projects,
+        warnings=list(warnings),
+        time=now,
         token=ctx["token"],
         base=ctx["base"],
     )
-    remember_discovery(projects, ctx)
+    return projects, warnings
+
+
+def load_projects(category=None, installed_only=False, refresh=False):
+    ctx = load_context()
+    projects, warnings = list_all_projects(ctx, refresh=refresh)
     # Over every project, before filtering: see cli.resolve_installed().
     installed_by_path = cli.resolve_installed(projects, cli.get_installed_plugins())
     projects = cli.filter_projects(
@@ -304,25 +343,11 @@ def load_projects(category=None, installed_only=False):
     return enriched, public_meta(ctx, warnings)
 
 
-def remember_discovery(projects, ctx):
-    _last_discovery.update(
-        projects=projects,
-        token=ctx["token"],
-        base=ctx["base"],
-    )
-
-
 def discovered_projects():
-    """(projects, token, base) of the last listing, discovering them
-    first if nothing was listed yet."""
+    """(projects, token, base) of the last listing, listing them first
+    if nothing was listed yet."""
     if not _last_discovery:
-        ctx = load_context()
-        projects, _warnings = cli.discover_sources(
-            ctx["sources"],
-            token=ctx["token"],
-            base=ctx["base"],
-        )
-        remember_discovery(projects, ctx)
+        list_all_projects(load_context())
 
     return (
         _last_discovery["projects"],
@@ -345,11 +370,7 @@ def resolve_action_projects(payload):
     category = payload.get("category") or None
     scope = payload.get("scope") or "selected"
 
-    projects, _warnings = cli.discover_sources(
-        ctx["sources"],
-        token=ctx["token"],
-        base=ctx["base"],
-    )
+    projects, _warnings = list_all_projects(ctx)
 
     if targets:
         selected = []
