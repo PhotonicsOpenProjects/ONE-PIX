@@ -541,6 +541,93 @@ def analysis_outputs():
 
 
 # ==========================================
+# MAPS (an analysis output per pixel, shown as an image)
+# ==========================================
+# Analysis steps that compute a value per pixel (PROCOSINE's leaf traits,
+# PCA scores, spectral indices...) give a map per output. Built from the
+# same table as /outputs, put back on the reconstruction's grid, so it
+# works whatever the imaging method and the plugin.
+
+def _result_maps(result):
+    """{name: (height, width) array} of the current result's outputs
+    when there is one value per pixel of its cube, else {} (zone-based
+    results have their own table, see /outputs)."""
+
+    outputs = (result or {}).get("analysis_outputs")
+    cube = (result or {}).get("reconstructed_data")
+
+    if not outputs or not len(outputs.get("names", [])) or cube is None:
+        return {}
+
+    shape = np.shape(cube)
+    if len(shape) != 3:
+        return {}
+    height, width = shape[:2]
+
+    names = [str(name) for name in outputs["names"]]
+    values = np.asarray(outputs["values"], dtype=float).reshape(-1, len(names))
+    if values.shape[0] != height * width or zones.zone_data(result) is not None:
+        return {}
+
+    return {
+        name: values[:, i].reshape(height, width)
+        for i, name in enumerate(names)
+    }
+
+
+@bp.route("/maps")
+def analysis_maps():
+
+    maps = _result_maps(state.CURRENT_RESULT)
+
+    if not maps:
+        return jsonify({"available": False})
+
+    first = next(iter(maps.values()))
+
+    def stats(values):
+        finite = values[np.isfinite(values)]
+        low, high = figures.map_range(values)
+        return {
+            "min": float(finite.min()) if finite.size else None,
+            "max": float(finite.max()) if finite.size else None,
+            "range": [low, high] if finite.size else None,
+            "missing": int(values.size - finite.size),
+        }
+
+    return jsonify({
+        "available": True,
+        "names": list(maps),
+        "height": int(first.shape[0]),
+        "width": int(first.shape[1]),
+        "stats": {name: stats(values) for name, values in maps.items()},
+    })
+
+
+@bp.route("/maps/image")
+def analysis_map_image():
+    """One map, drawn to fit the viewer (w, h, dpr as for the figure);
+    range=full for a min-max color range instead of 2nd-98th
+    percentiles."""
+
+    maps = _result_maps(state.CURRENT_RESULT)
+    name = request.args.get("name", "")
+
+    if name not in maps:
+        return "No such map", 404
+
+    box, scale = figures.parse_box(request.args)
+
+    return Response(
+        figures.render_map_png(
+            maps[name], name, box=box, scale=scale,
+            robust=request.args.get("range") != "full",
+        ),
+        mimetype="image/png",
+    )
+
+
+# ==========================================
 # ZONES (zone map of a zone-based result - see zones.py)
 # ==========================================
 

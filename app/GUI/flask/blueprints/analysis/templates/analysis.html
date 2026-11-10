@@ -146,6 +146,18 @@
         <div class="viewer-toolbar">
             <span class="viewer-toolbar-title">{{ t('analysis.viewer_title') }}</span>
 
+            <!-- What the viewer shows: the result image, or one of the
+                 maps an analysis computed (a value per pixel). Shown only
+                 when there are maps - see refreshMaps(). -->
+            <div class="viewer-layer" id="viewerLayer" hidden>
+                <label class="viewer-layer-label" for="viewerLayerSelect">{{ t('analysis.viewer_layer') }}</label>
+                <select id="viewerLayerSelect"></select>
+                <label class="viewer-layer-range" title="{{ t('analysis.viewer_layer_full_range') }}">
+                    <input type="checkbox" id="viewerLayerFullRange">
+                    <span>{{ t('analysis.viewer_layer_full_range') }}</span>
+                </label>
+            </div>
+
             <div class="viewer-toolbar-actions">
                 <button id="viewerZoomOutBtn" class="btn btn-icon btn-ghost" type="button" aria-label="{{ t('analysis.viewer_zoom_out') }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
@@ -162,6 +174,8 @@
                 </button>
             </div>
         </div>
+
+        <div class="viewer-layer-hint" id="viewerLayerHint" hidden></div>
 
         <div class="figure-box" id="analysisFigureBox">
 
@@ -537,6 +551,7 @@ async function loadMeasure() {
         await refreshSpectraChart();
         await refreshZoneMap();
         await refreshAnalysisOutputs();
+        await refreshMaps({ showFirst: true });
 
     } catch(error) {
 
@@ -1490,6 +1505,7 @@ async function applyProcessing() {
         await refreshSpectraChart();
         await refreshZoneMap();
         await refreshAnalysisOutputs();
+        await refreshMaps({ showFirst: true });
 
     } catch(error) {
 
@@ -1876,15 +1892,131 @@ function figureQuery() {
     }).toString();
 }
 
+// What the viewer draws: the result image, or the selected map (see
+// MAPS below).
+function currentFigureUrl() {
+
+    if (viewerLayer) {
+        return "/analysis/maps/image?" + new URLSearchParams({
+            name: viewerLayer,
+            range: document.getElementById("viewerLayerFullRange").checked ? "full" : "robust",
+        }).toString() + "&" + figureQuery();
+    }
+
+    return "/analysis/current/figure?" + figureQuery();
+}
+
 async function redrawFigure() {
 
-    const response = await fetch("/analysis/current/figure?" + figureQuery());
+    const response = await fetch(currentFigureUrl());
 
     if (!response.ok) return;
 
     document.getElementById("resultFigure").src =
         URL.createObjectURL(await response.blob());
 }
+
+
+// =====================================
+// MAPS
+// =====================================
+// An analysis computing a value per pixel (PROCOSINE's leaf traits, PCA
+// scores...) gives one map per output: the viewer's "Show" menu then
+// switches between the result image and those maps, each drawn with
+// its own color bar. After an analysis run, its first map is shown.
+
+let analysisMaps = null;
+let viewerLayer = "";
+
+function showLayerHint() {
+
+    const hint = document.getElementById("viewerLayerHint");
+    const stats = analysisMaps && viewerLayer ? analysisMaps.stats[viewerLayer] : null;
+
+    if (!stats || stats.min === null) {
+        hint.hidden = true;
+        return;
+    }
+
+    const fullRange = document.getElementById("viewerLayerFullRange").checked;
+    const range = fullRange ? [stats.min, stats.max] : stats.range;
+
+    hint.textContent = ONEPIX.t("analysis.viewer_layer_hint", {
+        name: viewerLayer,
+        min: formatOutput(stats.min),
+        max: formatOutput(stats.max),
+        low: formatOutput(range[0]),
+        high: formatOutput(range[1]),
+        missing: stats.missing
+            ? ONEPIX.t("analysis.viewer_layer_missing", { n: stats.missing })
+            : "",
+    });
+    hint.hidden = false;
+}
+
+// showFirst: switch to the first map (a new analysis result); else keep
+// what is shown if it still exists.
+async function refreshMaps({ showFirst = false } = {}) {
+
+    const box = document.getElementById("viewerLayer");
+    const select = document.getElementById("viewerLayerSelect");
+    const previous = viewerLayer;
+
+    analysisMaps = null;
+
+    try {
+        const data = await (await fetch("/analysis/maps")).json();
+        if (data.available) analysisMaps = data;
+    } catch (error) {
+        console.error("Maps:", error);
+    }
+
+    select.replaceChildren();
+
+    if (!analysisMaps) {
+        box.hidden = true;
+        viewerLayer = "";
+        showLayerHint();
+        return;
+    }
+
+    const image = document.createElement("option");
+    image.value = "";
+    image.textContent = ONEPIX.t("analysis.viewer_layer_image");
+    select.appendChild(image);
+
+    const group = document.createElement("optgroup");
+    group.label = ONEPIX.t("analysis.viewer_layer_maps");
+    analysisMaps.names.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        group.appendChild(option);
+    });
+    select.appendChild(group);
+
+    if (showFirst) {
+        viewerLayer = analysisMaps.names[0];
+    } else if (!analysisMaps.names.includes(viewerLayer)) {
+        viewerLayer = "";
+    }
+
+    select.value = viewerLayer;
+    box.hidden = false;
+
+    if (viewerLayer || previous) await redrawFigure();
+    showLayerHint();
+}
+
+function onLayerChange() {
+
+    viewerLayer = document.getElementById("viewerLayerSelect").value;
+    redrawFigure().catch(error => console.error("Figure:", error));
+    showLayerHint();
+}
+
+document.getElementById("viewerLayerSelect").addEventListener("change", onLayerChange);
+document.getElementById("viewerLayerFullRange").addEventListener("change", onLayerChange);
 
 // Draws the figure again if the viewer's room changed since it was
 // asked for - only a real change, not the odd pixel of a scrollbar.
@@ -2002,6 +2134,7 @@ async function restoreLoadedAnalysis() {
     await refreshSpectraChart();
     await refreshZoneMap();
     await refreshAnalysisOutputs();
+    await refreshMaps({ showFirst: true });
 }
 
 

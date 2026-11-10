@@ -288,6 +288,56 @@
   flex: none;
 }
 
+/* "Show" menu: the result image or one of the analysis maps */
+.viewer-layer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-right: auto;
+  margin-left: var(--space-3);
+  min-width: 0;
+}
+
+.viewer-layer[hidden] {
+  display: none;
+}
+
+.viewer-layer-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.viewer-layer select {
+  height: 30px;
+  width: auto;
+  min-width: 0;
+  max-width: 220px;
+  padding: 0 var(--space-2);
+  font-size: var(--fs-sm);
+}
+
+.viewer-layer-range {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* What the shown map holds: its values, its color range */
+.viewer-layer-hint {
+  flex: none;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 .viewer-toolbar-title {
   font-size: var(--fs-sm);
   font-weight: 600;

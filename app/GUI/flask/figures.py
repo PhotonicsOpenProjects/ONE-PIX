@@ -95,6 +95,124 @@ def parse_box(args):
     return box, number("dpr", 1.0, 1.0, MAX_SCALE)
 
 
+def _fit_box(height, width, box, margins):
+    """(image_w, image_h, fig_w, fig_h) in CSS pixels: the image as large
+    as fits in box once margins (left, right, top, bottom) are kept."""
+    box_w, box_h = box or DEFAULT_BOX
+    left, right, top, bottom = margins
+    fit = min(
+        max(box_w - left - right, 16) / width,
+        max(box_h - top - bottom, 16) / height,
+    )
+    image_w, image_h = width * fit, height * fit
+    return image_w, image_h, image_w + left + right, image_h + top + bottom
+
+
+def _clamp_scale(scale, fig_w, fig_h):
+    scale = min(scale, (MAX_OUTPUT_PIXELS / (fig_w * fig_h)) ** 0.5)
+    return max(scale, 0.5)
+
+
+def _pixel_axes(ax, image_w, image_h):
+    """Row/column graduations, spaced for the room each axis gets."""
+    ax.xaxis.set_major_locator(
+        MaxNLocator(nbins=max(2, round(image_w / TICK_SPACING_X)), integer=True)
+    )
+    ax.yaxis.set_major_locator(
+        MaxNLocator(nbins=max(2, round(image_h / TICK_SPACING_Y)), integer=True)
+    )
+    ax.set_xlabel("Column", fontsize=FONT_PX, color=AXIS_COLOR, labelpad=3)
+    ax.set_ylabel("Row", fontsize=FONT_PX, color=AXIS_COLOR, labelpad=3)
+    ax.tick_params(colors=AXIS_COLOR, labelsize=FONT_PX, length=3, pad=2)
+    for spine in ax.spines.values():
+        spine.set_color(AXIS_COLOR)
+        spine.set_alpha(0.6)
+
+
+# Map rendering (render_map_png): room for the color bar right of the
+# image - a gap, the bar, its graduations and its label.
+MAP_MARGINS = (54, 92, 10, 42)
+COLORBAR_GAP, COLORBAR_WIDTH = 12, 14
+# Pixels without a value: neutral gray, readable on both themes.
+MAP_NO_DATA_COLOR = "#9aa1ad"
+# Default color range: these percentiles of the map's values, so that a
+# few outliers (an inversion stuck on a bound) don't flatten the rest.
+MAP_ROBUST_PERCENTILES = (2, 98)
+
+
+def map_range(values, robust=True):
+    """(vmin, vmax) of a map's finite values: the 2nd-98th percentiles
+    when robust, else min-max. (nan, nan) when it has none."""
+    finite = np.asarray(values, dtype=float)
+    finite = finite[np.isfinite(finite)]
+    if finite.size == 0:
+        return float("nan"), float("nan")
+    if robust:
+        low, high = np.percentile(finite, MAP_ROBUST_PERCENTILES)
+    else:
+        low, high = finite.min(), finite.max()
+    if low == high:
+        low, high = finite.min(), finite.max()
+    return float(low), float(high)
+
+
+def render_map_png(values, label, box=None, scale=1.0, robust=True):
+    """PNG bytes of a 2-D map of one analysis output (a value per pixel)
+    fitting box, like render_png, with pixel graduations and a color bar
+    labelled ``label``. robust: color range on the 2nd-98th percentiles
+    (the bar's ends then show that values go beyond); else min-max."""
+
+    values = np.asarray(values, dtype=float)
+    if values.ndim != 2:
+        raise ValueError(f"A map must be 2-D, not of shape {values.shape}")
+    height, width = values.shape
+
+    image_w, image_h, fig_w, fig_h = _fit_box(height, width, box, MAP_MARGINS)
+    left, _right, _top, bottom = MAP_MARGINS
+    scale = _clamp_scale(scale, fig_w, fig_h)
+
+    vmin, vmax = map_range(values, robust)
+    finite = values[np.isfinite(values)]
+    extend = "neither"
+    if robust and finite.size and np.isfinite(vmin):
+        below, above = finite.min() < vmin, finite.max() > vmax
+        extend = {(True, True): "both", (True, False): "min", (False, True): "max"}.get(
+            (below, above), "neither")
+
+    cmap = matplotlib.colormaps["viridis"].copy()
+    cmap.set_bad(MAP_NO_DATA_COLOR)
+
+    fig = plt.figure(figsize=(fig_w / 72, fig_h / 72), dpi=72 * scale)
+
+    try:
+        ax = fig.add_axes([left / fig_w, bottom / fig_h, image_w / fig_w, image_h / fig_h])
+        image = ax.imshow(
+            np.ma.masked_invalid(values), cmap=cmap, interpolation="antialiased",
+            aspect="auto", vmin=None if np.isnan(vmin) else vmin,
+            vmax=None if np.isnan(vmax) else vmax,
+        )
+        _pixel_axes(ax, image_w, image_h)
+
+        cax = fig.add_axes([
+            (left + image_w + COLORBAR_GAP) / fig_w, bottom / fig_h,
+            COLORBAR_WIDTH / fig_w, image_h / fig_h,
+        ])
+        bar = fig.colorbar(image, cax=cax, extend=extend)
+        bar.set_label(label, fontsize=FONT_PX, color=AXIS_COLOR, labelpad=4)
+        bar.ax.tick_params(colors=AXIS_COLOR, labelsize=FONT_PX, length=3, pad=2)
+        bar.outline.set_edgecolor(AXIS_COLOR)
+        bar.outline.set_alpha(0.6)
+        bar.locator = MaxNLocator(nbins=max(2, round(image_h / TICK_SPACING_Y)))
+        bar.update_ticks()
+
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", transparent=True)
+        return buf.getvalue()
+
+    finally:
+        plt.close(fig)
+
+
 def render_png(img, axes=True, box=None, scale=1.0):
     """PNG bytes of ``img`` fitting ``box`` - (width, height) in CSS
     pixels - at ``scale`` device pixels per CSS pixel. axes: row/column
@@ -103,19 +221,11 @@ def render_png(img, axes=True, box=None, scale=1.0):
     img, cmap = displayable(img)
     height, width = img.shape[:2]
 
-    box_w, box_h = box or DEFAULT_BOX
-    left, right, top, bottom = AXES_MARGINS if axes else (0, 0, 0, 0)
-
+    margins = AXES_MARGINS if axes else (0, 0, 0, 0)
+    left, _right, _top, bottom = margins
     # The image as large as fits, proportions kept.
-    fit = min(
-        max(box_w - left - right, 16) / width,
-        max(box_h - top - bottom, 16) / height,
-    )
-    image_w, image_h = width * fit, height * fit
-    fig_w, fig_h = image_w + left + right, image_h + top + bottom
-
-    scale = min(scale, (MAX_OUTPUT_PIXELS / (fig_w * fig_h)) ** 0.5)
-    scale = max(scale, 0.5)
+    image_w, image_h, fig_w, fig_h = _fit_box(height, width, box, margins)
+    scale = _clamp_scale(scale, fig_w, fig_h)
 
     # Sizes in inches of 72 points, drawn at 72 * scale dpi: one point
     # is one CSS pixel, so FONT_PX points read as FONT_PX pixels.
@@ -130,20 +240,7 @@ def render_png(img, axes=True, box=None, scale=1.0):
         ax.imshow(img, cmap=cmap, interpolation="antialiased", aspect="auto")
 
         if axes:
-            ax.xaxis.set_major_locator(
-                MaxNLocator(nbins=max(2, round(image_w / TICK_SPACING_X)), integer=True)
-            )
-            ax.yaxis.set_major_locator(
-                MaxNLocator(nbins=max(2, round(image_h / TICK_SPACING_Y)), integer=True)
-            )
-
-            ax.set_xlabel("Column", fontsize=FONT_PX, color=AXIS_COLOR, labelpad=3)
-            ax.set_ylabel("Row", fontsize=FONT_PX, color=AXIS_COLOR, labelpad=3)
-            ax.tick_params(colors=AXIS_COLOR, labelsize=FONT_PX, length=3, pad=2)
-
-            for spine in ax.spines.values():
-                spine.set_color(AXIS_COLOR)
-                spine.set_alpha(0.6)
+            _pixel_axes(ax, image_w, image_h)
         else:
             ax.axis("off")
 
