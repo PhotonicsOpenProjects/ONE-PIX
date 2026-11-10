@@ -45,6 +45,11 @@ def install_standard():
     print(f"ROOT_DIR = {ROOT_DIR}")
 
     # install package + deps depuis pyproject.toml
+    # --upgrade --upgrade-strategy eager: re-running the installer also
+    # brings every dependency to its newest version allowed by
+    # pyproject.toml - plugins and the plugins manager included. Without
+    # it, a dependency already installed was left as is, so an existing
+    # install never got their fixes.
     run(
         [
             sys.executable,
@@ -53,6 +58,9 @@ def install_standard():
             "install",
             "-e",
             ".",
+            "--upgrade",
+            "--upgrade-strategy",
+            "eager",
             "--break-system-packages"
         ],
         cwd=ROOT_DIR
