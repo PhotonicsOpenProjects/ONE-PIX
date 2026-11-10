@@ -311,17 +311,52 @@ class _FakeHardware:
         self.acquisition_parameter_path = str(acquisition_json)
 
 
-def test_pattern_is_asked_to_the_imaging_method(tmp_path):
+def _tuning_kind(tmp_path, method, requested=None):
     import json
     path = tmp_path / "acquisition.json"
+    path.write_text(json.dumps({"imaging_method_name": method}))
+    return tuning._tuning_pattern_kind(_FakeHardware(path), requested)
 
-    def kind(method, requested=None):
-        path.write_text(json.dumps({"imaging_method_name": method}))
-        return tuning._tuning_pattern_kind(_FakeHardware(path), requested)
 
-    assert kind("hadamardsingle") == "open"                # single-sided plugins ask for the open field
-    assert kind("fouriershift") == "open"                  # single-sided by default
-    assert kind("fouriersplit") == "test"                  # says nothing: the usual test pattern
-    assert kind("no_such_method") == "test"                # unknown: never an error
-    assert kind("hadamardsingle", "test") == "test"        # an explicit choice wins
+def _imaging_method_installed(name):
+    import importlib.metadata
+    return any(
+        ep.name.lower() == name
+        for ep in importlib.metadata.entry_points(group="onepix.imaging_methods")
+    )
+
+
+# fouriersplit is a dependency of onepix: always there.
+def test_pattern_is_asked_to_the_imaging_method(tmp_path):
+    assert _tuning_kind(tmp_path, "fouriersplit") == "test"          # says nothing: the usual test pattern
+    assert _tuning_kind(tmp_path, "no_such_method") == "test"        # unknown: never an error
+    assert _tuning_kind(tmp_path, "fouriersplit", "open") == "open"  # an explicit choice wins
+
+
+def _fouriershift_single_sided():
+    import importlib.util
+    try:
+        return importlib.util.find_spec("fouriershift._single_sided") is not None
+    except ImportError:
+        return False
+
+
+# Same condition as fourier_single_sided_test.py.
+@pytest.mark.skipif(
+    not _fouriershift_single_sided(),
+    reason="needs a fouriershift with the single-sided mode",
+)
+def test_single_sided_fouriershift_asks_for_the_open_field(tmp_path):
+    assert _tuning_kind(tmp_path, "fouriershift") == "open"          # single-sided by default
+    assert _tuning_kind(tmp_path, "fouriershift", "test") == "test"  # an explicit choice wins
+
+
+# hadamardsingle is an optional plugin, not installed with onepix.
+@pytest.mark.skipif(
+    not _imaging_method_installed("hadamardsingle"),
+    reason="optional imaging method plugin hadamardsingle not installed",
+)
+def test_single_sided_plugin_asks_for_the_open_field(tmp_path):
+    assert _tuning_kind(tmp_path, "hadamardsingle") == "open"
+    assert _tuning_kind(tmp_path, "hadamardsingle", "test") == "test"
     assert kind("fouriersplit", "open") == "open"
