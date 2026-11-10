@@ -413,11 +413,24 @@ def run_analysis():
         plot_result=True
     )
 
-    with _registry_lock:
+    # A step refusing the data says why (wrong units, too few bands...):
+    # that message reaches the page, instead of a bare "Processing
+    # failed" over an unhandled error page.
+    try:
 
-        analysis.data_analysis(
-            steps
-        )
+        with _registry_lock:
+
+            analysis.data_analysis(
+                steps
+            )
+
+    except Exception as exc:
+
+        logger.exception("Analysis pipeline failed")
+
+        return jsonify({
+            "error": str(exc) or type(exc).__name__
+        }), 400 if isinstance(exc, (ValueError, TypeError)) else 500
 
     state.CURRENT_RESULT = (
         copy.deepcopy(

@@ -1473,9 +1473,18 @@ async function applyProcessing() {
 
         if (!response.ok) {
 
+            // The step's own reason when it gives one (JSON {error}).
+            let reason = "";
+            try {
+                reason = (await response.json()).error || "";
+            } catch (error) {
+                reason = "";
+            }
+
             ONEPIX.toast(
-                ONEPIX.t("analysis.toast_process_failed"),
-                "error"
+                ONEPIX.t("analysis.toast_process_failed") + (reason ? ": " + reason : ""),
+                "error",
+                reason ? 12000 : undefined
             );
 
             return;
