@@ -9,6 +9,15 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent
 INSTALL_DIR = ROOT_DIR / "install"
 
+# Windows encodes redirected output (pipe, log file) in the ANSI code
+# page (cp1252), which cannot represent the emojis printed below and
+# aborts the installer with UnicodeEncodeError. Limited to Windows so
+# that Linux / Raspberry Pi installs keep their behaviour unchanged.
+if sys.platform == "win32":
+    for _stream in (sys.stdout, sys.stderr):
+        if hasattr(_stream, "reconfigure"):
+            _stream.reconfigure(encoding="utf-8", errors="replace")
+
 
 def run(cmd, cwd=None):
 
