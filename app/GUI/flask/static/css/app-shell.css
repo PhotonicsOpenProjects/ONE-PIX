@@ -281,9 +281,9 @@
   }
 }
 
-/* Same, on a narrower large screen (1200-1439px wide): tighter pills,
+/* Same, on a narrower large screen (1200-1599px wide): tighter pills,
    so every tab still fits next to the logo, in every language. */
-@media (min-width: 1200px) and (max-width: 1439px) and (min-height: 801px) {
+@media (min-width: 1200px) and (max-width: 1599px) and (min-height: 801px) {
   .app-shell-nav {
     gap: var(--space-3);
   }
