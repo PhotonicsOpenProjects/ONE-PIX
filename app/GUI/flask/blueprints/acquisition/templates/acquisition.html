@@ -8,7 +8,7 @@
     <div>
         <div class="card-eyebrow">{{ t('acquisition.eyebrow') }}</div>
         <h1>{{ t('acquisition.title') }}</h1>
-        <p class="page-sub">{{ t('acquisition.subtitle') }}</p>
+        <p class="page-sub page-sub-wide">{{ t('acquisition.subtitle') }}</p>
     </div>
 
     <span id="acqStatusBadge" class="badge badge-neutral">
@@ -20,8 +20,10 @@
 <div class="acquisition-grid">
 
     <!-- ============================= -->
-    <!-- SETTINGS -->
+    <!-- SETTINGS, then RUN right under them -->
     <!-- ============================= -->
+
+    <div class="acquisition-side">
 
     <div class="card">
         <div class="card-header">
@@ -124,6 +126,20 @@
         {% endif %}
     </div>
 
+    <div class="run-bar">
+        <button id="runBtn" class="btn btn-primary btn-lg btn-block run-toggle-btn" onclick="onRunButtonClick()">
+            <svg id="runBtnIconPlay" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"></path>
+            </svg>
+            <svg id="runBtnIconStop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
+                <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+            </svg>
+            <span id="runBtnLabel">{{ t('acquisition.run_button') }}</span>
+        </button>
+    </div>
+
+    </div>
+
     <!-- ============================= -->
     <!-- PREVIEW -->
     <!-- ============================= -->
@@ -179,22 +195,6 @@
         <div id="acqSpectraLegend" class="spectra-legend"></div>
         <div id="acqSpectraTable" hidden></div>
     </div>
-</div>
-
-<!-- ===================================== -->
-<!-- RUN -->
-<!-- ===================================== -->
-
-<div class="run-bar">
-    <button id="runBtn" class="btn btn-primary btn-lg run-toggle-btn" onclick="onRunButtonClick()">
-        <svg id="runBtnIconPlay" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z"></path>
-        </svg>
-        <svg id="runBtnIconStop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden>
-            <rect x="6" y="6" width="12" height="12" rx="2"></rect>
-        </svg>
-        <span id="runBtnLabel">{{ t('acquisition.run_button') }}</span>
-    </button>
 </div>
 
 <script>

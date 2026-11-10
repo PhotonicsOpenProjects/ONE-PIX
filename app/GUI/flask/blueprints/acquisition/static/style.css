@@ -150,10 +150,24 @@
   margin-top: var(--space-5);
 }
 
+/* Left column: the settings card, with the Run button right under it. */
+.acquisition-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* The subtitle on a single line when there is room (the shared
+   .page-sub caps it at 56 characters); it still wraps on narrow
+   screens. */
+.page-sub.page-sub-wide {
+  max-width: none;
+}
+
 .run-bar {
   display: flex;
   justify-content: center;
-  margin-top: var(--space-6);
 }
 
 .run-bar .btn svg {
