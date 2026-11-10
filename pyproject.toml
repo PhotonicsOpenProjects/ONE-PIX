@@ -1,6 +1,7 @@
 [build-system]
 requires = [
-    "setuptools>=61.0",
+    # 77: license given as an SPDX expression (PEP 639)
+    "setuptools>=77.0",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
@@ -16,7 +17,12 @@ authors = [
     { name = "Antoine Fournier" }
 ]
 
-requires-python = ">=3.8,<=3.14"
+# 3.9: the oldest the dependencies still support (Flask 3.1, SciPy
+# 1.13, matplotlib 3.8). No upper bound: "<=3.14" excluded 3.14.1 on.
+requires-python = ">=3.9"
+
+license = "CC-BY-NC-4.0"
+license-files = ["LICENSE.md"]
 
 dependencies = [
     "numpy>=1.22.4,<3",

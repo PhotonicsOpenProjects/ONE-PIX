@@ -57,11 +57,9 @@ The acquisition workflow is orchestrated by the ONE-PIX core framework, while im
 
 ### Requirements
 
-`onepix` is compatible with Python 3.9 and 3.10.
+`onepix` requires Python 3.9 or later. Release 3.0.0 was tested with Python 3.11 on Windows.
 
 Make sure you are using `pip >= 21.0` to install dependencies correctly.
-
-Lower or higher versions of Python and `pip` have not been tested and are therefore not officially supported.
 
 ### Clone the repository
 
@@ -81,10 +79,12 @@ source .venv/bin/activate
 
 Windows:
 
-```bash
+```bat
 python -m venv .venv
 .venv\Scripts\activate
 ```
+
+In PowerShell, activate with `.venv\Scripts\Activate.ps1` instead.
 
 ### Install ONE-PIX
 
