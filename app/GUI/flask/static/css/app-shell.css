@@ -14,6 +14,7 @@
 }
 
 .app-shell-brand {
+  flex: none;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -24,27 +25,65 @@
   letter-spacing: -0.01em;
 }
 
+/* logo-nav.png is logo.png without its transparent margins, so the
+   whole height shows the badge. Width follows its proportions. */
 .app-shell-logo {
-  height: 38px;
-  width: 38px;
-  border-radius: 8px;
+  height: var(--nav-logo-height);
+  width: auto;
   flex: none;
   object-fit: contain;
 }
 
+.app-shell-brand:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* Laptop-size screens (under 1200px wide, or 800px high): a 164px bar
+   would take a quarter of the page, and the tabs wouldn't all fit next
+   to the big logo in every language - a smaller logo. */
+@media (max-width: 1199px), (max-height: 800px) {
+  :root {
+    --nav-height: 72px;
+    --nav-logo-height: 58px;
+  }
+}
+
+/* Small screens (phone, tablet, the Raspberry Pi's display): the bar
+   takes back its former height, leaving the room to the page. */
+@media (max-width: 960px), (max-height: 600px) {
+  :root {
+    --nav-height: 56px;
+    --nav-logo-height: 44px;
+  }
+}
+
+/* Allowed to shrink and scroll sideways when the bar is too narrow
+   for every tab, rather than widening the whole page and pushing the
+   theme and language controls off screen. */
 .app-shell-links {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   height: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-shell-links::-webkit-scrollbar {
+  display: none;
 }
 
 .app-shell-link {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex: none;
   height: 100%;
   padding: 0 var(--space-3);
+  white-space: nowrap;
   color: var(--text-muted);
   text-decoration: none;
   font-size: var(--fs-sm);
@@ -70,6 +109,11 @@
 
 .app-shell-spacer {
   flex: 1;
+}
+
+.app-shell-theme-toggle,
+.app-shell-lang {
+  flex: none;
 }
 
 .app-shell-theme-toggle {
@@ -120,7 +164,10 @@
   min-height: calc(100vh - var(--nav-height));
 }
 
-@media (max-width: 760px) {
+/* Up to 960px the tabs' labels don't all fit next to the logo and the
+   controls (the Raspberry Pi's 800px display among others): icons
+   only, with their name as a tooltip (title) and for screen readers. */
+@media (max-width: 960px) {
   .app-shell-nav {
     gap: var(--space-2);
     padding: 0 var(--space-3);
@@ -152,5 +199,101 @@
 
   .app-shell-theme-toggle {
     margin-right: 0;
+  }
+}
+
+/* Large screens, with the 150px logo: an underline at the bottom of so
+   tall a bar ends up far below its tab's name. The tabs become larger
+   pills instead, centered on the logo's height like the controls, the
+   active one filled; and the bar's bottom edge takes the logo's colors. */
+@media (min-width: 1200px) and (min-height: 801px) {
+  .app-shell-nav {
+    position: relative;
+    gap: var(--space-6);
+    padding: 0 var(--space-5);
+    border-bottom: 0;
+  }
+
+  /* The logo's ribbon colors, left to right. */
+  .app-shell-nav::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: linear-gradient(
+      90deg,
+      #232b45 0%,
+      #345982 18%,
+      #539f92 36%,
+      #e7c035 54%,
+      #d99143 72%,
+      #cf2140 100%
+    );
+  }
+
+  .app-shell-links {
+    height: auto;
+    gap: var(--space-2);
+    padding: var(--space-1);
+  }
+
+  .app-shell-link {
+    height: 46px;
+    padding: 0 var(--space-5);
+    border-bottom: 0;
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-md);
+    transition: color var(--transition-fast), background var(--transition-fast);
+  }
+
+  .app-shell-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .app-shell-link:hover {
+    background: var(--surface-sunken);
+  }
+
+  .app-shell-link.is-active {
+    background: var(--primary-soft);
+    color: var(--primary);
+    box-shadow: inset 0 0 0 1px var(--primary-border);
+  }
+
+  .app-shell-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+
+  .app-shell-theme-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-pill);
+  }
+
+  .app-shell-lang select {
+    height: 40px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-pill);
+  }
+}
+
+/* Same, on a narrower large screen (1200-1439px wide): tighter pills,
+   so every tab still fits next to the logo, in every language. */
+@media (min-width: 1200px) and (max-width: 1439px) and (min-height: 801px) {
+  .app-shell-nav {
+    gap: var(--space-3);
+  }
+
+  .app-shell-links {
+    gap: var(--space-1);
+  }
+
+  .app-shell-link {
+    padding: 0 10px;
+    font-size: var(--fs-base);
   }
 }

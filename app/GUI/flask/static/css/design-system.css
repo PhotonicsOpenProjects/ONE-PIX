@@ -82,7 +82,11 @@
   --transition-base: 200ms ease;
 
   /* Layout */
-  --nav-height: 56px;
+  /* Large screens: a logo big enough for its "ONE-PIX" and "PHOTONICS
+     OPEN PROJECTS" lettering to be read. Smaller on smaller screens -
+     see app-shell.css. */
+  --nav-height: 164px;
+  --nav-logo-height: 150px;
 
   /* Chart categorical series (data-viz skill's validated default
      palette - 8 hues, fixed order, never reordered per-chart).
