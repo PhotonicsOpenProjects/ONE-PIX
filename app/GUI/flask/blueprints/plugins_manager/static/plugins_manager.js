@@ -199,6 +199,8 @@ async function runAction(action) {
     return;
   }
 
+  const checkedBefore = selectedTargets();
+
   setStatus("running");
   output.textContent = ONEPIX.t("plugins.executing");
 
@@ -229,12 +231,41 @@ async function runAction(action) {
   }
 
   if (!result.ok) {
+    // Some plugins of the batch may still have been installed: show
+    // them as such, and unselect them too.
+    if (action === "install") {
+      await loadPlugins({keepConsole: true});
+      uncheckInstalled(checkedBefore, payload.targets);
+    }
     setStatus("error");
     return;
   }
 
   appendOutput(ONEPIX.t("plugins.done") + "\n");
   await loadPlugins({keepConsole: true});
+
+  if (action === "install") uncheckInstalled(checkedBefore, payload.targets);
+}
+
+// After an install: unselect the plugins it installed - those checked
+// when it started (and among its targets, when it had some) that the
+// refreshed list now shows as installed. Failed ones stay selected,
+// ready for another try.
+function uncheckInstalled(checkedBefore, targets) {
+  const installed = new Set(
+    state.plugins.filter((plugin) => plugin.installed).map((plugin) => plugin.path)
+  );
+  const acted = targets.length ? new Set(targets) : null;
+
+  for (const checkbox of document.querySelectorAll(".plugin-check")) {
+    const path = checkbox.value;
+    if (checkedBefore.includes(path) && installed.has(path) && (!acted || acted.has(path))) {
+      checkbox.checked = false;
+    }
+  }
+
+  selectAll.checked = false;
+  updateCounts();
 }
 
 // The response is newline-delimited JSON: {"type": "log", "text"} chunks
