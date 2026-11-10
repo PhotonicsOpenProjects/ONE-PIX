@@ -298,7 +298,7 @@ class Projection:
             # imshow only queues the image: the window is refreshed while
             # waitKey pumps the GUI events, so pump right away
             gui_thread.run(cv2.waitKey, 1)
-            return time.monotonic()
+            return time.perf_counter()
 
         image = resized(patterns[0])
         shown_at = show(image)
@@ -313,7 +313,7 @@ class Projection:
                 )
                 break
 
-            remaining_ms = self.periode_pattern - (time.monotonic() - shown_at) * 1000
+            remaining_ms = self.periode_pattern - (time.perf_counter() - shown_at) * 1000
             if remaining_ms > 1:
                 gui_thread.run(cv2.waitKey, int(np.ceil(remaining_ms)))
 
@@ -323,7 +323,7 @@ class Projection:
                 )
 
             event.set()
-            triggered_at = time.monotonic()
+            triggered_at = time.perf_counter()
 
             next_image = resized(patterns[idx + 1]) if idx + 1 < len(patterns) else None
             shown_early = False
@@ -332,7 +332,7 @@ class Projection:
             if next_image is not None and self.early_show_ms > 0 and measure_s:
                 show_at = triggered_at + measure_s - self.early_show_ms / 1000.0
                 while event.is_set() and not stop_event.is_set():
-                    if time.monotonic() >= show_at:
+                    if time.perf_counter() >= show_at:
                         shown_at = show(next_image)
                         shown_early = True
                         early += 1

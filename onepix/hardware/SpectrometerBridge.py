@@ -234,12 +234,12 @@ class SpectrometerBridge:
             duration_s = (
                 self.STALE_SCAN_FLUSH_PERIODS * self.effective_integration_time_ms / 1000.0
             )
-        start = time.monotonic()
+        start = time.perf_counter()
         flushed = 0
         while True:
             self.get_intensities()
             flushed += 1
-            if time.monotonic() - start >= duration_s:
+            if time.perf_counter() - start >= duration_s:
                 return flushed
 
     def measure_time_s(self):
@@ -440,7 +440,11 @@ class SpectrometerBridge:
 
                 if event.is_set():
 
-                    trigger_time = time.monotonic()
+                    # perf_counter, not monotonic: on Windows monotonic
+                    # only moves in ~15.6 ms steps, coarser than the
+                    # few-millisecond measurements timed here (and by
+                    # Projection, which paces patterns on them).
+                    trigger_time = time.perf_counter()
                     flushed = self.flush_stale_scans(flush_duration_s) if flush_duration_s > 0 else 0
 
                     chronograms = []
@@ -451,13 +455,13 @@ class SpectrometerBridge:
                     self.spectra[cnt, :] = (
                         np.mean(chronograms, axis=0) / self.effective_integration_time_ms
                     )
-                    self._measure_times_s.append(time.monotonic() - trigger_time)
+                    self._measure_times_s.append(time.perf_counter() - trigger_time)
 
                     if cnt % diag_log_every == 0:
                         logging.info(
                             f"{self.spectro_name} pattern {cnt}/{nb_patterns}: "
                             f"flushed {flushed} stale scan(s) over "
-                            f"{time.monotonic() - trigger_time:.4f}s before "
+                            f"{time.perf_counter() - trigger_time:.4f}s before "
                             f"keeping {self.repetition} measurement(s)"
                         )
 
