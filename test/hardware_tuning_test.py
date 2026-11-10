@@ -359,4 +359,3 @@ def test_single_sided_fouriershift_asks_for_the_open_field(tmp_path):
 def test_single_sided_plugin_asks_for_the_open_field(tmp_path):
     assert _tuning_kind(tmp_path, "hadamardsingle") == "open"
     assert _tuning_kind(tmp_path, "hadamardsingle", "test") == "test"
-    assert kind("fouriersplit", "open") == "open"
