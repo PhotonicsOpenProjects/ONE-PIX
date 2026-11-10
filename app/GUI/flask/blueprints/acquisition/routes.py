@@ -9,6 +9,7 @@ import io
 import json
 import orjson
 import logging
+import threading
 import numpy as np
 import cv2
 
@@ -44,6 +45,42 @@ logger = logging.getLogger(__name__)
 # instead), so /spectra reports "no data" rather than erroring when
 # these keys aren't present.
 _last_reconstruction_results = None
+
+# Each tab is its own page: leaving the Acquisition page aborts the
+# browser's /run request, but not the measurement, which carries on
+# server-side - and its result used to exist only in that aborted
+# response. So /run also records whether it is in flight and how the
+# last run ended (served with /progress), and keeps the figure it
+# rendered (GET /last_figure): a page opened mid-run picks the
+# measurement up, and shows its result once it's done.
+_run_state_lock = threading.Lock()
+_run_state = {
+    "in_flight": False,
+    "run_id": 0,
+    "outcome": None,  # None | success | cancelled | error
+    "message": None,
+}
+_last_figure_png = None
+
+
+def _run_started():
+    with _run_state_lock:
+        _run_state.update(
+            in_flight=True,
+            run_id=_run_state["run_id"] + 1,
+            outcome=None,
+            message=None,
+        )
+
+
+def _run_ended(outcome, message=None):
+    with _run_state_lock:
+        _run_state.update(in_flight=False, outcome=outcome, message=message)
+
+
+def _run_state_snapshot():
+    with _run_state_lock:
+        return dict(_run_state)
 
 
 # ----------------------------
@@ -208,7 +245,20 @@ def save_addon():
 # ----------------------------
 @bp.route("/progress")
 def acquisition_progress_route():
-    return jsonify(acquisition_progress.snapshot())
+    # "run": the whole /run request (acquisition, then reconstruction),
+    # unlike the progress fields, which only cover the acquisition.
+    return jsonify({**acquisition_progress.snapshot(), "run": _run_state_snapshot()})
+
+
+# ----------------------------
+# LAST FIGURE (the last successful /run's image, for a page opened
+# after the request that rendered it was aborted - see _run_state)
+# ----------------------------
+@bp.route("/last_figure")
+def acquisition_last_figure():
+    if _last_figure_png is None:
+        return "No measurement yet", 404
+    return Response(_last_figure_png, mimetype="image/png")
 
 
 # ----------------------------
@@ -225,12 +275,14 @@ def cancel_acquisition():
 # ----------------------------
 @bp.route("/run")
 def run_acquisition():
-    global _last_reconstruction_results
+    global _last_reconstruction_results, _last_figure_png
 
     if not tuning.hardware_lock.acquire(blocking=False):
         return "The spectrometer/projector is in use by another acquisition.", 409
 
     acq = None
+    outcome, message = "error", None
+    _run_started()
 
     try:
         acq = Acquisition()
@@ -251,7 +303,8 @@ def run_acquisition():
 
         if img is None:
             logger.error("No result2plot in reconstruction_results")
-            return "No image to display", 500
+            message = "No image to display"
+            return message, 500
 
         fig, ax = plt.subplots()
         ax.imshow(img, cmap="viridis")
@@ -262,23 +315,31 @@ def run_acquisition():
         buf.seek(0)
         plt.close(fig)
 
-        return Response(buf.getvalue(), mimetype="image/png")
+        _last_figure_png = buf.getvalue()
+        outcome = "success"
+
+        return Response(_last_figure_png, mimetype="image/png")
 
     except AcquisitionCancelled as e:
         logger.info("Acquisition cancelled by user: %s", e)
-        return str(e), 499
+        outcome, message = "cancelled", str(e)
+        return message, 499
 
     except Exception as e:
         print("ERREUR /run:", repr(e), flush=True)
         logger.exception("Error in /run acquisition route")
-        return f"Error in /run: {e}", 500
+        message = f"Error in /run: {e}"
+        return message, 500
 
     finally:
         # Released whatever happened: left open, the spectrometer is
         # busy for the next acquisition (a new Acquisition each time).
-        if acq is not None:
-            acq.close()
-        tuning.hardware_lock.release()
+        try:
+            if acq is not None:
+                acq.close()
+        finally:
+            _run_ended(outcome, message)
+            tuning.hardware_lock.release()
 
 
 # ----------------------------

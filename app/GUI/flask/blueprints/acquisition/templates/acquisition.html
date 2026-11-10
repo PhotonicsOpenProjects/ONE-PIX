@@ -224,13 +224,20 @@ function setAcqStatus(state, label) {
 
 let progressTimer = null;
 
-function startProgressPolling() {
+// onRunEnded(run): called once the server reports no /run in flight -
+// for a page that picked up a measurement started before it was
+// opened (see resumeAcquisition()), so has no /run response to wait
+// for. A page that started the run itself passes nothing.
+function startProgressPolling(onRunEnded) {
 
     const label = document.getElementById("loaderLabel");
     const fill = document.getElementById("loaderProgressFill");
     const baseLabel = ONEPIX.t("acquisition.loading_label");
 
     stopProgressPolling();
+
+    // Polls can overlap (a slow response): report the end only once.
+    let endReported = false;
 
     const poll = async () => {
 
@@ -241,6 +248,14 @@ function startProgressPolling() {
             if (!res.ok) return;
 
             const data = await res.json();
+
+            if (endReported) return;
+
+            if (onRunEnded && data.run && !data.run.in_flight) {
+                endReported = true;
+                onRunEnded(data.run);
+                return;
+            }
 
             if (data.total > 0) {
                 fill.style.width = data.percent + "%";
@@ -491,6 +506,88 @@ async function refreshFigure() {
         loader.style.display = "none";
     }
 }
+
+// The last successful measurement's figure, spectra and zone map.
+// Returns false when there is none yet.
+async function showLastResult() {
+
+    const img = document.getElementById("acq-figure");
+
+    const res = await fetch("{{ url_for('acquisition.acquisition_last_figure') }}?t=" + Date.now());
+
+    if (!res.ok) return false;
+
+    img.src = URL.createObjectURL(await res.blob());
+    img.hidden = false;
+    document.getElementById("acqEmptyState").style.display = "none";
+
+    await refreshSpectraChart();
+    await refreshZoneMap();
+
+    return true;
+}
+
+// Each tab is its own page: leaving this one mid-measurement aborts
+// the /run request, not the measurement. Coming back, take it up again
+// - progress, Cancel button, result once it's done - or show the last
+// result if it's already over.
+async function resumeAcquisition() {
+
+    let run;
+
+    try {
+        const res = await fetch("{{ url_for('acquisition.acquisition_progress_route') }}");
+        if (!res.ok) return;
+        run = (await res.json()).run;
+    } catch (err) {
+        return;
+    }
+
+    if (!run) return;
+
+    if (!run.in_flight) {
+        if (run.outcome === "success") {
+            showLastResult().catch(err => console.error("Last result:", err));
+        }
+        return;
+    }
+
+    if (acqRunning) return;
+
+    const loader = document.getElementById("loader");
+
+    acqRunning = true;
+    setRunButtonState("running");
+    loader.style.display = "flex";
+    setAcqStatus("busy", ONEPIX.t("acquisition.status_busy"));
+
+    startProgressPolling(async (ended) => {
+
+        stopProgressPolling();
+
+        try {
+            if (ended.outcome === "success" && await showLastResult()) {
+                setAcqStatus("success", ONEPIX.t("acquisition.status_success"));
+                ONEPIX.toast(ONEPIX.t("acquisition.toast_success"), "success");
+            } else if (ended.outcome === "cancelled") {
+                setAcqStatus("idle", ONEPIX.t("acquisition.status_ready"));
+                ONEPIX.toast(ONEPIX.t("acquisition.toast_cancelled"), "warning");
+            } else {
+                setAcqStatus("error", ONEPIX.t("acquisition.status_error"));
+                ONEPIX.toast(ONEPIX.t("acquisition.toast_error_prefix") + (ended.message || ""), "error", 6000);
+            }
+        } catch (err) {
+            console.error("Last result:", err);
+        } finally {
+            acqRunning = false;
+            setRunButtonState("idle");
+            loader.style.display = "none";
+        }
+    });
+}
+
+// Once the chart/zone-map scripts below this one have loaded.
+document.addEventListener("DOMContentLoaded", resumeAcquisition);
 
 </script>
 
