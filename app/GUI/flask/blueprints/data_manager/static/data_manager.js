@@ -220,10 +220,6 @@ function updateSelectionUI() {
     bar.hidden = count === 0;
 
     document.getElementById(
-        "downloadBtn"
-    ).disabled = count === 0;
-
-    document.getElementById(
         "removeBtn"
     ).disabled = count === 0;
 }
@@ -279,97 +275,6 @@ function deselectAllFiles() {
     });
 
     updateSelectionUI();
-}
-
-
-// ======================================
-// DOWNLOAD
-// ======================================
-
-async function downloadSelected() {
-
-    const checked = selectedCheckboxes().map(el => el.value);
-
-    if (!checked.length) {
-
-        ONEPIX.toast(ONEPIX.t("data.toast_none_selected"), "warning");
-
-        return;
-    }
-
-    setUIBusy(true);
-
-    try {
-
-        const response = await fetch(
-
-            "/data_manager/download",
-
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type":
-                    "application/json"
-                },
-
-                body: JSON.stringify({
-                    files: checked
-                })
-            }
-        );
-
-        if (!response.ok) {
-
-            ONEPIX.toast(
-                ONEPIX.t("data.toast_download_failed"),
-                "error"
-            );
-
-            return;
-        }
-
-        const blob =
-            await response.blob();
-
-        const url =
-            window.URL.createObjectURL(
-                blob
-            );
-
-        const a =
-            document.createElement("a");
-
-        a.href = url;
-
-        a.download =
-            timestampedFilename("onepix_data", "zip");
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        a.remove();
-
-        window.URL.revokeObjectURL(
-            url
-        );
-
-        ONEPIX.toast(ONEPIX.t("data.toast_download_success", {n: checked.length}), "success");
-
-    } catch(error) {
-
-        console.error(error);
-
-        ONEPIX.toast(
-            ONEPIX.t("data.toast_download_failed"),
-            "error"
-        );
-
-    } finally {
-
-        setUIBusy(false);
-    }
 }
 
 

@@ -4,7 +4,7 @@
 // ======================================
 
 const FAIR_FORMATS_KEY = "onepix.fairExportFormats";
-const FAIR_DEFAULT_FORMATS = ["hdf5"];
+const FAIR_DEFAULT_FORMATS = ["hdf5", "json"];
 
 let fairFormats = null;
 
