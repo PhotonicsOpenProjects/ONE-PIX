@@ -13,6 +13,8 @@ add the metadata of their own fields (gui_plugins.py's FIELD_META).
             most users should never need to touch
   widget    "range": a two-number list ([min, max]) edited as two
             separate inputs instead of raw JSON
+  min, max, step
+            bounds of a number input (the browser refuses values outside)
   group     title key (settings_group.<group> in i18n.py) of the section
             a non-advanced field is shown under. Forms where no field
             has a group render as one flat grid.
@@ -32,9 +34,9 @@ FIELD_META = {
     "height": {"unit": "px", "group": "image"},
     "width": {"unit": "px", "group": "image"},
     "wl_lim": {"unit": "nm", "widget": "range", "group": "image"},
-    "periode_pattern": {"group": "projection"},
-    "latency_hiding_ms": {"unit": "ms", "group": "projection"},
-    "max_gray_level": {"group": "projection"},
+    "periode_pattern": {"unit": "ms", "min": 0, "group": "projection"},
+    "latency_hiding_ms": {"unit": "ms", "min": 0, "group": "projection"},
+    "max_gray_level": {"min": 1, "max": 255, "step": 1, "group": "projection"},
     "gray_response_path": {"group": "projection"},
     "proj_position": {"advanced": True},
     "corregistration_array": {"advanced": True},

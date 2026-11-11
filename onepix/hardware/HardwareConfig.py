@@ -80,6 +80,7 @@ class Hardware:
         # Attribuer dynamiquement les attributs
         for key, value in params.items():
             setattr(self, key, value)
+        self.max_gray_level = self._valid_gray_level(self.max_gray_level)
 
         # Includes the stale-scan flush SpectrometerBridge now does before
         # every kept measurement (see thread_singlepixel_measure) so the
@@ -137,6 +138,21 @@ class Hardware:
             gray_lut=self._load_gray_lut(),
         )
         logging.info("onepix Hardware class is init ")
+
+    @staticmethod
+    def _valid_gray_level(value):
+        """max_gray_level as an int in 1-255. A value outside that range is brought back to it and an
+        unreadable one falls back to 255 (patterns unchanged), with a warning, rather than blacking
+        the patterns out or crashing the hardware initialisation."""
+        try:
+            level = int(float(value))
+        except (TypeError, ValueError):
+            logger.warning("max_gray_level %r is not a number: using 255", value)
+            return 255
+        bounded = min(255, max(1, level))
+        if bounded != value:
+            logger.warning("max_gray_level %r brought to %d (valid range 1-255)", value, bounded)
+        return bounded
 
     def _load_gray_lut(self):
         if not self.gray_response_path:

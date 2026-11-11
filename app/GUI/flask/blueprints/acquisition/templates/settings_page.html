@@ -48,7 +48,7 @@
         {% elif value is number %}
 
             <span class="input-with-unit">
-                <input type="number" step="any" name="{{ key }}" id="f_{{ key }}" value="{{ value }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
+                <input type="number" step="{{ meta.get('step', 'any') }}"{% if meta.get('min') is not none %} min="{{ meta.get('min') }}"{% endif %}{% if meta.get('max') is not none %} max="{{ meta.get('max') }}"{% endif %} name="{{ key }}" id="f_{{ key }}" value="{{ value }}" {% if has_help %}aria-describedby="h_{{ key }}"{% endif %}>
                 {% if meta.get('unit') %}<span class="input-unit">{{ meta.get('unit') }}</span>{% endif %}
             </span>
 
