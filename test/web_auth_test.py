@@ -85,3 +85,21 @@ def test_sign_in_never_redirects_to_another_site(client, monkeypatch):
     for target in ("https://evil.example/", "//evil.example/", "javascript:alert(1)", ""):
         r = client.post("/login", data={"token": TOKEN, "next": target})
         assert r.headers["Location"] == "/", target
+
+
+def test_a_session_survives_a_restart_but_not_a_new_token(monkeypatch):
+    monkeypatch.setattr(web_auth.time, "sleep", lambda s: None)
+
+    def app_with(token):
+        monkeypatch.setenv("ONEPIX_WEB_TOKEN", token)
+        return create_app().test_client()
+
+    first = app_with(TOKEN)
+    name, value = first.post("/login", data={"token": TOKEN}).headers["Set-Cookie"].split(";")[0].split("=", 1)
+
+    def request_with_cookie(client):
+        client.set_cookie(name, value)
+        return client.get("/logs/api/tail").status_code
+
+    assert request_with_cookie(app_with(TOKEN)) == 200                 # the service was restarted
+    assert request_with_cookie(app_with("another-token")) == 401       # the token was changed

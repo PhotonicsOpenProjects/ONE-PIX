@@ -253,6 +253,12 @@ export ONEPIX_WEB_TOKEN=$(python -c 'import secrets; print(secrets.token_urlsafe
 python app/GUI/flask/run.py
 ```
 
+With Tailscale, listen on the machine's tailnet address only (not on the local
+network): `ONEPIX_HOST=$(tailscale ip -4)`, then open
+`http://<machine name>:5000` from any device of your tailnet. Start the service
+after `tailscaled` (`After=tailscaled.service`), since the address must exist
+when it binds.
+
 A browser is sent to a sign-in page and keeps a `SameSite=Strict` session
 cookie; scripts send `Authorization: Bearer <token>`. The interface does not
 use HTTPS: on an untrusted network, put it behind a reverse proxy that does, or

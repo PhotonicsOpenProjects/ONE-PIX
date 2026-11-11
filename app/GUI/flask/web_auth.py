@@ -12,10 +12,10 @@ it. When a token is set, every request must carry it, either as the session cook
 in on /login or as an `Authorization: Bearer <token>` header (scripts). The session cookie is
 `SameSite=Strict`, so a page of another site cannot make the browser act on the interface.
 """
+import hashlib
 import hmac
 import ipaddress
 import os
-import secrets
 import time
 from urllib.parse import urlsplit
 
@@ -113,8 +113,9 @@ def init_auth(app, token):
         return
 
     register_translations(TRANSLATIONS)
-    # sessions do not survive a restart, which only means signing in again
-    app.secret_key = secrets.token_urlsafe(32)
+    # Derived from the token, so a signed-in browser stays signed in when the service restarts, and
+    # changing the token signs everyone out. Knowing the token already gives full access.
+    app.secret_key = hashlib.sha256(b"onepix-session:" + token.encode()).hexdigest()
     app.config.update(
         SESSION_COOKIE_NAME="onepix_session",
         SESSION_COOKIE_SAMESITE="Strict",
