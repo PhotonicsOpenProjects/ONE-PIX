@@ -93,11 +93,6 @@ class Acquisition:
                     "imaging_method_name"
                 ),
 
-            "dynamic_tint":
-                self.acquisition_results.get(
-                    "dynamic_tint"
-                ),
-
             "normalisation_path":
                 self.hardware_dict.get(
                     "normalisation_path"
@@ -367,7 +362,6 @@ class Acquisition:
                     event,
                     stop_event,
                     self.spectra,
-                    self.dynamic_tint,
                     progress_callback=acquisition_progress.update,
                 )
             except Exception as exc:
@@ -545,7 +539,6 @@ class Acquisition:
                 "proj_position": proj_position,
             },
             "acquisition_parameters": {
-                "dynamic_tint": self.dynamic_tint,
                 "normalisation": self.normalisation,
                 "normalisation_path": self.normalisation_path,
             },

@@ -125,7 +125,6 @@ The method `change_param(key, value)` allows dynamic modification of system sett
 | `imaging_method`  | `"FourierSplit"` | Imaging method used                   |
 | `spatial_res`     | `"3"`            | Spatial resolution of the datacube    |
 | `Normalisation`   | `"false"`        | Enable/disable normalization          |
-| `dynamic_tint`    | `"false"`        | Enable/disable search of optimal tint  |
 
 #### 📷 Camera / Spectrometer Parameters
 

@@ -369,7 +369,7 @@ class SpectrometerBridge:
     # 🧵 THREAD ACQUISITION
     # -------------------------------------------------------------------------
     def thread_singlepixel_measure(
-        self, event, stop_event, spectra, dynamic_tint=False, progress_callback=None
+        self, event, stop_event, spectra, progress_callback=None
     ):
 
         logging.info(f"{self.spectro_name} spectrometer begin to measure")
