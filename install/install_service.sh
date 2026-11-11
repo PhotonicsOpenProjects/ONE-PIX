@@ -60,18 +60,6 @@ systemd-analyze verify "$temporary_unit"
 if [[ $EUID != 0 ]] && systemctl --user cat onepix.service >/dev/null 2>&1; then
     systemctl --user disable --now onepix.service
 fi
-# The web interface can start acquisitions and change the configuration: when the service opens it to
-# the network it needs a token. Created once, readable by root only (systemd reads it before dropping
-# privileges); an existing file is left as it is.
-env_file=/etc/default/onepix
-if ! "${privilege[@]}" test -f "$env_file"; then
-    web_token="$("$python_bin" -c 'import secrets; print(secrets.token_urlsafe(32))')"
-    "${privilege[@]}" install -m 600 /dev/null "$env_file"
-    printf 'ONEPIX_HOST=0.0.0.0\nONEPIX_WEB_TOKEN=%s\n' "$web_token" | "${privilege[@]}" tee "$env_file" >/dev/null
-    echo "Web interface access token (sign in with it; also stored in $env_file):"
-    echo "    $web_token"
-    echo "Edit $env_file, then 'sudo systemctl restart onepix', to change it or to listen on this machine only (remove ONEPIX_HOST)."
-fi
 "${privilege[@]}" install -m 644 "$temporary_unit" /etc/systemd/system/onepix.service
 "${privilege[@]}" systemctl daemon-reload
 "${privilege[@]}" systemctl enable onepix.service

@@ -41,7 +41,6 @@ from blueprints.projector import (
 from blueprints.acquisition import tuning
 
 import gui_plugins
-import web_auth
 
 logger = logging.getLogger(__name__)
 
@@ -57,13 +56,6 @@ THEME_COOKIE = "onepix_theme"
 def create_app():
 
     app = Flask(__name__)
-
-    # ====================================
-    # ACCESS CONTROL
-    # ====================================
-    # Every request needs ONEPIX_WEB_TOKEN when it is set - see web_auth.py.
-
-    web_auth.init_auth(app, os.environ.get("ONEPIX_WEB_TOKEN") or None)
 
     # ====================================
     # REGISTER BLUEPRINTS
@@ -173,13 +165,6 @@ def create_app():
 
 if __name__ == "__main__":
 
-    # Listens on this machine only unless ONEPIX_HOST says otherwise, which then requires
-    # ONEPIX_WEB_TOKEN (web_auth.server_settings refuses to start without it).
-    try:
-        host, port, _token = web_auth.server_settings()
-    except RuntimeError as exc:
-        raise SystemExit(f"ONE-PIX: {exc}")
-
     app = create_app()
 
     # Debug mode enables the Werkzeug interactive debugger, which lets
@@ -189,8 +174,8 @@ if __name__ == "__main__":
     debug_mode = os.environ.get("FLASK_DEBUG", "0") == "1"
 
     app.run(
-        host=host,
-        port=port,
+        host="0.0.0.0",
+        port=5000,
         debug=debug_mode,
         # /acquisition/run blocks for the whole acquisition (up to several
         # minutes). Without threaded=True the single-threaded dev server

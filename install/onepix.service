@@ -12,9 +12,6 @@ ExecStart=/usr/bin/python3 -u /home/pi/ONE-PIX/app/GUI/flask/run.py
 Environment=DISPLAY=:0
 Environment=FLASK_DEBUG=0
 Environment=PYTHONUNBUFFERED=1
-# ONEPIX_HOST and ONEPIX_WEB_TOKEN: created by install_service.sh, root-readable only.
-# Without them the interface listens on this machine only.
-EnvironmentFile=-/etc/default/onepix
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=30
