@@ -571,7 +571,7 @@
 /* ------------------------------------------------------------
    Hardware page: one section at a time (tabs) and grouped settings
    ------------------------------------------------------------ */
-.hw-tabs {
+.sec-tabs {
   display: flex;
   gap: var(--space-1);
   margin-bottom: var(--space-5);
@@ -580,7 +580,7 @@
   scrollbar-width: thin;
 }
 
-.hw-tab {
+.sec-tab {
   flex: 0 0 auto;
   padding: var(--space-3) var(--space-4);
   margin-bottom: -1px;
@@ -595,27 +595,27 @@
   transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.hw-tab:hover {
+.sec-tab:hover {
   color: var(--text);
 }
 
-.hw-tab.is-active {
+.sec-tab.is-active {
   color: var(--primary);
   border-bottom-color: var(--primary);
 }
 
-.hw-tab:focus-visible {
+.sec-tab:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
   border-radius: var(--radius-sm);
 }
 
-.hw-panel[hidden] {
+.sec-panel[hidden] {
   display: none;
 }
 
 /* The panels used to be stacked cards: no extra gap above them now. */
-.hw-panel .tuning-card {
+.sec-panel .tuning-card {
   margin-top: 0;
 }
 

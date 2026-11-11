@@ -1,0 +1,271 @@
+<!-- ============================================================
+     Normalisation panel: acquire a reference datacube and keep it as it is.
+     Included only from settings_page.html when category == 'software'.
+     Backend: normalisation.py (acquisition blueprint).
+     ============================================================ -->
+
+<style>
+.norm-intro { margin: 0 0 var(--space-3); }
+.norm-checklist {
+    margin: 0 0 var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+}
+.norm-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--space-3);
+}
+.norm-form .field { flex: 1 1 260px; max-width: 420px; margin: 0; }
+.norm-progress {
+    margin-top: var(--space-4);
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-sunken);
+    overflow: hidden;
+}
+.norm-progress-fill {
+    height: 100%;
+    width: 0;
+    background: var(--primary);
+    transition: width var(--transition-base);
+}
+.norm-status { margin-top: var(--space-2); font-size: var(--fs-sm); color: var(--text-muted); }
+.norm-section { margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px solid var(--border); }
+.norm-section h3 { margin: 0 0 var(--space-3); font-size: var(--fs-md); }
+.norm-folder { margin: var(--space-3) 0 0; font-size: var(--fs-sm); color: var(--text-muted); font-family: var(--font-mono); }
+.norm-actions { display: flex; gap: var(--space-2); justify-content: flex-end; white-space: nowrap; }
+.norm-mono { font-family: var(--font-mono); font-size: 0.85em; }
+</style>
+
+<div class="card" id="normCard">
+
+    <div class="card-header">
+        <div>
+            <h2>{{ t('normalisation.title') }}</h2>
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <p class="norm-intro">{{ t('normalisation.intro') }}</p>
+        <p class="norm-checklist">{{ t('normalisation.checklist') }}</p>
+
+        <div class="norm-form">
+            <div class="field">
+                <label class="field-label" for="normName">{{ t('normalisation.name') }}</label>
+                <input type="text" id="normName" maxlength="64" autocomplete="off" spellcheck="false"
+                       placeholder="{{ t('normalisation.name_ph') }}">
+            </div>
+            <button type="button" id="normAcquire" class="btn btn-primary">{{ t('normalisation.acquire') }}</button>
+            <button type="button" id="normCancel" class="btn btn-outline" hidden>{{ t('normalisation.cancel') }}</button>
+        </div>
+
+        <div id="normProgress" hidden>
+            <div class="norm-progress"><div class="norm-progress-fill" id="normProgressFill"></div></div>
+            <div class="norm-status" id="normStatus" role="status"></div>
+        </div>
+
+        <div class="norm-section">
+            <h3>{{ t('normalisation.stored') }}</h3>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('normalisation.col_name') }}</th>
+                            <th>{{ t('normalisation.col_date') }}</th>
+                            <th>{{ t('normalisation.col_method') }}</th>
+                            <th>{{ t('normalisation.col_time') }}</th>
+                            <th>{{ t('normalisation.col_cube') }}</th>
+                            <th>{{ t('normalisation.col_size') }}</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="normRows">
+                        <tr><td colspan="7">…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="norm-folder">{{ t('normalisation.folder') }}</p>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    var T = ONEPIX.t;
+    var URLS = {
+        list: "{{ url_for('acquisition.normalisation_list') }}",
+        run: "{{ url_for('acquisition.normalisation_run') }}",
+        del: "{{ url_for('acquisition.normalisation_delete') }}",
+        download: "{{ url_for('acquisition.normalisation_download', name='__NAME__') }}",
+        progress: "{{ url_for('acquisition.acquisition_progress_route') }}",
+        cancel: "{{ url_for('acquisition.cancel_acquisition') }}"
+    };
+
+    var nameInput = document.getElementById("normName");
+    var acquireBtn = document.getElementById("normAcquire");
+    var cancelBtn = document.getElementById("normCancel");
+    var progressBox = document.getElementById("normProgress");
+    var fill = document.getElementById("normProgressFill");
+    var status = document.getElementById("normStatus");
+    var rows = document.getElementById("normRows");
+    var timer = null;
+
+    function cell(text, mono) {
+        var td = document.createElement("td");
+        td.textContent = (text === undefined || text === null || text === "") ? "—" : text;
+        if (mono) td.className = "norm-mono";
+        return td;
+    }
+
+    function formatSize(bytes) {
+        return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(bytes / 1024)) + " kB";
+    }
+
+    function cubeText(r) {
+        var parts = [];
+        if (r.shape && r.shape.length) parts.push(r.shape.join(" × "));
+        if (r.wavelength_min_nm !== null && r.wavelength_max_nm !== null) {
+            parts.push(Math.round(r.wavelength_min_nm) + "–" + Math.round(r.wavelength_max_nm) + " nm");
+        }
+        return parts.join(" · ");
+    }
+
+    function renderList(refs) {
+        rows.textContent = "";
+        if (!refs.length) {
+            var tr = document.createElement("tr");
+            var td = cell(T("normalisation.empty"));
+            td.colSpan = 7;
+            tr.appendChild(td);
+            rows.appendChild(tr);
+            return;
+        }
+        refs.forEach(function (r) {
+            var tr = document.createElement("tr");
+            tr.appendChild(cell(r.name, true));
+            tr.appendChild(cell(r.created ? new Date(r.created).toLocaleString() : ""));
+            tr.appendChild(cell(r.imaging_method_name));
+            tr.appendChild(cell(r.integration_time_ms !== null && r.integration_time_ms !== undefined
+                ? Number(r.integration_time_ms).toFixed(2) + " ms" : ""));
+            tr.appendChild(cell(cubeText(r), true));
+            tr.appendChild(cell(r.size_bytes ? formatSize(r.size_bytes) : ""));
+
+            var actions = document.createElement("td");
+            actions.className = "norm-actions";
+            var dl = document.createElement("a");
+            dl.className = "btn btn-sm btn-ghost";
+            dl.textContent = T("normalisation.download");
+            dl.href = URLS.download.replace("__NAME__", encodeURIComponent(r.name));
+            var del = document.createElement("button");
+            del.type = "button";
+            del.className = "btn btn-sm btn-outline";
+            del.textContent = T("normalisation.delete");
+            del.addEventListener("click", function () { removeRef(r.name); });
+            actions.appendChild(dl);
+            actions.appendChild(del);
+            tr.appendChild(actions);
+            rows.appendChild(tr);
+        });
+    }
+
+    function loadList() {
+        return fetch(URLS.list)
+            .then(function (res) { return res.json(); })
+            .then(function (d) { renderList(d.references || []); })
+            .catch(function (e) { ONEPIX.toast(e.message, "error"); });
+    }
+
+    function removeRef(name) {
+        if (!confirm(T("normalisation.confirm_delete", { name: name }))) return;
+        fetch(URLS.del, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name })
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (d) {
+                if (d.error) throw new Error(d.error);
+                ONEPIX.toast(T("normalisation.deleted"), "success");
+                return loadList();
+            })
+            .catch(function (e) { ONEPIX.toast(e.message, "error"); });
+    }
+
+    // ---- acquisition ----
+    function setRunning(running) {
+        acquireBtn.disabled = running;
+        nameInput.disabled = running;
+        cancelBtn.hidden = !running;
+        progressBox.hidden = !running;
+        if (!running && timer) { clearInterval(timer); timer = null; }
+    }
+
+    function poll() {
+        fetch(URLS.progress)
+            .then(function (res) { return res.json(); })
+            .then(function (p) {
+                var pct = Math.max(0, Math.min(100, p.percent || 0));
+                fill.style.width = pct + "%";
+                status.textContent = p.total
+                    ? T("normalisation.running", { percent: Math.round(pct) })
+                    : T("normalisation.starting");
+            })
+            .catch(function () {});
+    }
+
+    acquireBtn.addEventListener("click", function () {
+        var name = nameInput.value;
+        setRunning(true);
+        fill.style.width = "0%";
+        status.textContent = T("normalisation.starting");
+        timer = setInterval(poll, 700);
+
+        fetch(URLS.run, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name })
+        })
+            .then(function (res) { return res.json().then(function (d) { return { status: res.status, body: d }; }); })
+            .then(function (r) {
+                if (r.status === 200 && r.body.ok) {
+                    ONEPIX.toast(T("normalisation.done", { name: r.body.reference.name }), "success");
+                    nameInput.value = "";
+                } else if (r.body.error === "exists") {
+                    ONEPIX.toast(T("normalisation.exists", { name: r.body.name }), "error");
+                } else if (r.body.error === "busy") {
+                    ONEPIX.toast(T("normalisation.busy"), "error");
+                } else if (r.body.error === "cancelled") {
+                    ONEPIX.toast(T("normalisation.cancelled"), "info");
+                } else {
+                    ONEPIX.toast(T("normalisation.failed", { message: r.body.message || r.body.error }), "error");
+                }
+            })
+            .catch(function (e) {
+                ONEPIX.toast(T("normalisation.failed", { message: e.message }), "error");
+            })
+            .finally(function () {
+                setRunning(false);
+                loadList();
+            });
+    });
+
+    cancelBtn.addEventListener("click", function () {
+        fetch(URLS.cancel, { method: "POST" }).catch(function () {});
+    });
+
+    var loaded = false;
+    document.addEventListener("sec:tabshown", function (e) {
+        if (e.detail !== "normalisation" || loaded) return;
+        loaded = true;
+        loadList();
+    });
+})();
+</script>

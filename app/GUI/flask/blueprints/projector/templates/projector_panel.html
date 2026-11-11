@@ -325,7 +325,7 @@
     // is slow and shared), and the bus scan - a diagnostic - waits until its
     // section is expanded. The adapter serves one request at a time.
     var loaded = false, cecLoaded = false;
-    document.addEventListener("hw:tabshown", function (e) {
+    document.addEventListener("sec:tabshown", function (e) {
         if (e.detail !== "projector" || loaded) return;
         loaded = true;
         loadDisplay();

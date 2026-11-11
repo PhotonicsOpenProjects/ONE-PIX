@@ -9,3 +9,4 @@ bp = Blueprint(
 )
 
 from . import routes
+from . import normalisation  # noqa: E402,F401  (registers the Normalisation tab routes)

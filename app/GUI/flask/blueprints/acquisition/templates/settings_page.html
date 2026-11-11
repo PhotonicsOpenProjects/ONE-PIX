@@ -88,18 +88,21 @@
     </a>
 </div>
 
-{% if category == 'hardware' %}
-{# One section at a time instead of a long scroll: the settings form,
-   the integration-time tuning, the projector and the coregistration.
-   All panels stay in the DOM (their scripts keep working); the script
-   at the bottom shows the one selected, remembered in the URL hash. #}
-<nav class="hw-tabs" role="tablist" aria-label="{{ t('hw.tabs_label') }}">
-    <button type="button" class="hw-tab is-active" role="tab" id="hw-tab-settings" data-hw-tab="settings" aria-controls="hw-panel-settings" aria-selected="true">{{ t('hw.tab.settings') }}</button>
-    <button type="button" class="hw-tab" role="tab" id="hw-tab-tuning" data-hw-tab="tuning" aria-controls="hw-panel-tuning" aria-selected="false">{{ t('hw.tab.tuning') }}</button>
-    <button type="button" class="hw-tab" role="tab" id="hw-tab-projector" data-hw-tab="projector" aria-controls="hw-panel-projector" aria-selected="false">{{ t('hw.tab.projector') }}</button>
-    <button type="button" class="hw-tab" role="tab" id="hw-tab-coreg" data-hw-tab="coreg" aria-controls="hw-panel-coreg" aria-selected="false">{{ t('hw.tab.coreg') }}</button>
+{% if category in ('hardware', 'software') %}
+{# One section at a time instead of a long scroll. All panels stay in the
+   DOM (their scripts keep working); the script at the bottom shows the
+   one selected, remembered in the URL hash. #}
+<nav class="sec-tabs" role="tablist" aria-label="{{ t('hw.tabs_label') }}">
+    <button type="button" class="sec-tab is-active" role="tab" id="sec-tab-settings" data-sec-tab="settings" aria-controls="sec-panel-settings" aria-selected="true">{{ t('hw.tab.settings') }}</button>
+    {% if category == 'hardware' %}
+    <button type="button" class="sec-tab" role="tab" id="sec-tab-tuning" data-sec-tab="tuning" aria-controls="sec-panel-tuning" aria-selected="false">{{ t('hw.tab.tuning') }}</button>
+    <button type="button" class="sec-tab" role="tab" id="sec-tab-projector" data-sec-tab="projector" aria-controls="sec-panel-projector" aria-selected="false">{{ t('hw.tab.projector') }}</button>
+    <button type="button" class="sec-tab" role="tab" id="sec-tab-coreg" data-sec-tab="coreg" aria-controls="sec-panel-coreg" aria-selected="false">{{ t('hw.tab.coreg') }}</button>
+    {% else %}
+    <button type="button" class="sec-tab" role="tab" id="sec-tab-normalisation" data-sec-tab="normalisation" aria-controls="sec-panel-normalisation" aria-selected="false">{{ t('normalisation.tab') }}</button>
+    {% endif %}
 </nav>
-<div class="hw-panel" id="hw-panel-settings" role="tabpanel" aria-labelledby="hw-tab-settings">
+<div class="sec-panel" id="sec-panel-settings" role="tabpanel" aria-labelledby="sec-tab-settings">
 {% endif %}
 
 {% if data %}
@@ -185,48 +188,56 @@
 
 {% endif %}
 
-{% if category == 'hardware' %}
-</div>{# /hw-panel-settings #}
+{% if category in ('hardware', 'software') %}
+</div>{# /sec-panel-settings #}
+{% endif %}
 
-<div class="hw-panel" id="hw-panel-tuning" role="tabpanel" aria-labelledby="hw-tab-tuning" hidden>
+{% if category == 'hardware' %}
+<div class="sec-panel" id="sec-panel-tuning" role="tabpanel" aria-labelledby="sec-tab-tuning" hidden>
 {% include "hardware_tuning_panel.html" %}
 </div>
-<div class="hw-panel" id="hw-panel-projector" role="tabpanel" aria-labelledby="hw-tab-projector" hidden>
+<div class="sec-panel" id="sec-panel-projector" role="tabpanel" aria-labelledby="sec-tab-projector" hidden>
 {% include "projector_panel.html" %}
 </div>
-<div class="hw-panel" id="hw-panel-coreg" role="tabpanel" aria-labelledby="hw-tab-coreg" hidden>
+<div class="sec-panel" id="sec-panel-coreg" role="tabpanel" aria-labelledby="sec-tab-coreg" hidden>
 {% include "coregistration_calibration_panel.html" %}
 </div>
+{% elif category == 'software' %}
+<div class="sec-panel" id="sec-panel-normalisation" role="tabpanel" aria-labelledby="sec-tab-normalisation" hidden>
+{% include "normalisation_panel.html" %}
+</div>
+{% endif %}
 
+{% if category in ('hardware', 'software') %}
 <script>
 (function () {
-    var tabs = Array.prototype.slice.call(document.querySelectorAll(".hw-tab"));
-    var names = tabs.map(function (t) { return t.dataset.hwTab; });
+    var tabs = Array.prototype.slice.call(document.querySelectorAll(".sec-tab"));
+    var names = tabs.map(function (t) { return t.dataset.secTab; });
 
     function show(name, updateHash) {
         if (names.indexOf(name) === -1) name = names[0];
         tabs.forEach(function (t) {
-            var on = t.dataset.hwTab === name;
+            var on = t.dataset.secTab === name;
             t.classList.toggle("is-active", on);
             t.setAttribute("aria-selected", on ? "true" : "false");
             t.tabIndex = on ? 0 : -1;
-            document.getElementById("hw-panel-" + t.dataset.hwTab).hidden = !on;
+            document.getElementById("sec-panel-" + t.dataset.secTab).hidden = !on;
         });
         if (updateHash) {
             try { history.replaceState(null, "", "#" + name); } catch (e) {}
         }
         // Panels with lazy content (projector) listen for this.
-        document.dispatchEvent(new CustomEvent("hw:tabshown", { detail: name }));
+        document.dispatchEvent(new CustomEvent("sec:tabshown", { detail: name }));
     }
 
     tabs.forEach(function (t, i) {
-        t.addEventListener("click", function () { show(t.dataset.hwTab, true); });
+        t.addEventListener("click", function () { show(t.dataset.secTab, true); });
         t.addEventListener("keydown", function (e) {
             var d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
             if (!d) return;
             var next = tabs[(i + d + tabs.length) % tabs.length];
             next.focus();
-            show(next.dataset.hwTab, true);
+            show(next.dataset.secTab, true);
             e.preventDefault();
         });
     });
