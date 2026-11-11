@@ -157,6 +157,11 @@ sudo systemctl stop onepix
 sudo systemctl disable --now onepix
 ```
 
+The installer also creates `/etc/default/onepix` (readable by root only) with
+`ONEPIX_HOST=0.0.0.0` and a random `ONEPIX_WEB_TOKEN`, and prints the token once:
+the web interface can start acquisitions and change the configuration, so it
+asks for that token (see [Network access and security](#network-access-and-security)).
+
 Installation does not require DISPLAY in the terminal. The service sets
 `DISPLAY=:0`; ONE-PIX still detects screens at import time, so runtime requires
 an accessible graphical display. If necessary, adjust DISPLAY and XAUTHORITY
@@ -221,6 +226,32 @@ The core framework is responsible for:
 ONE-PIX is designed around a modular architecture where imaging methods, hardware drivers and processing pipelines can evolve independently while remaining compatible through shared interfaces and standardized data structures.
 
 The framework can operate on both embedded acquisition systems such as Raspberry Pi devices and standard desktop environments for advanced reconstruction and spectral processing workflows.
+
+## Network access and security
+
+The web interface can start acquisitions, rewrite the hardware configuration,
+read and delete measurements and install plugins. It therefore listens on this
+machine only (`127.0.0.1:5000`) unless you open it explicitly:
+
+| Variable | Role |
+|---|---|
+| `ONEPIX_HOST` | Address to listen on. Default `127.0.0.1`. Use `0.0.0.0` to reach it from another machine. |
+| `ONEPIX_PORT` | Port. Default `5000`. |
+| `ONEPIX_WEB_TOKEN` | Shared secret. **Required** when `ONEPIX_HOST` is not a loopback address: the server refuses to start without it. When set, every request must carry it. |
+| `ONEPIX_WS_TOKEN` | Shared secret of the Socket.IO server (`app/websocket_server`), which refuses every connection without it. |
+| `ONEPIX_WS_CORS_ORIGINS` | Browser origins allowed to reach the Socket.IO server. None by default. |
+| `FLASK_DEBUG` | `1` enables Flask's debugger. Never on a shared network. |
+
+```bash
+export ONEPIX_HOST=0.0.0.0
+export ONEPIX_WEB_TOKEN=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')
+python app/GUI/flask/run.py
+```
+
+A browser is sent to a sign-in page and keeps a `SameSite=Strict` session
+cookie; scripts send `Authorization: Bearer <token>`. The interface does not
+use HTTPS: on an untrusted network, put it behind a reverse proxy that does, or
+use an SSH tunnel. See [SECURITY.md](SECURITY.md) to report a vulnerability.
 
 ## Ecosystem Architecture
 
