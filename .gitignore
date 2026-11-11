@@ -86,3 +86,7 @@ desktop.ini
 
 # Personal FAIR metadata (author, ORCID, e-mail): written by Data manager > FAIR metadata
 conf/fair_config.json
+
+# Backups left by patch(1)
+*.orig
+*.rej
