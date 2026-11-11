@@ -247,6 +247,26 @@ class Projection:
         gui_thread.run(cv2.waitKey, 3000)
         logging.info("INIT PROJ END")
 
+    def show_dark(self, settle_ms=None):
+        """Project black and wait for the projector to settle on it: the dark exposure of a dynamic
+        integration time acquisition (SpectrometerBridge.measure_dark_and_correct). hide_dark()
+        closes the window afterwards."""
+        (
+            self.create_fullscreen_window()
+            if np.all(self.proj_position == "auto")
+            else self.create_integrated_frame()
+        )
+        black = np.zeros((self.height, self.width), dtype=np.uint8)
+        gui_thread.run(cv2.imshow, "ImageWindow", black)
+        # a projector needs tens of ms before the light changes at all: wait for several patterns' worth
+        gui_thread.run(
+            cv2.waitKey,
+            int(settle_ms if settle_ms is not None else max(300, 3 * self.periode_pattern)),
+        )
+
+    def hide_dark(self):
+        gui_thread.run(cv2.destroyAllWindows)
+
     def thread_projection(
         self,
         event,

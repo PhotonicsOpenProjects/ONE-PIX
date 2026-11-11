@@ -1,5 +1,6 @@
 import importlib
 import importlib.metadata
+import math
 import numpy as np
 import time
 import warnings
@@ -60,6 +61,17 @@ class SpectrometerBridge:
     # over a single scan of internal buffering without adding much real
     # time (a couple of ms at typical integration times).
     STALE_SCAN_FLUSH_PERIODS = 2
+
+    # Dynamic integration time (dynamic_tint): the time is re-tuned for each
+    # pattern, starting from the previous one, so a couple of corrections are
+    # enough; the allowed times are a coarse geometric ladder (this many steps
+    # per doubling) so that few distinct times need a dark measurement.
+    DYNAMIC_TINT_MAX_ITERATIONS = 6
+    DYNAMIC_TINT_STEPS_PER_OCTAVE = 4
+    # A reading far above the target is probably saturated, so its level is a lower bound and the
+    # proportional correction falls short: step back further (a pattern much brighter than the
+    # previous one, e.g. after a dark one that needed a long time).
+    DYNAMIC_TINT_SATURATION_BACKOFF = 0.5
 
     def __init__(self, spectro_name, integration_time_ms, wl_lim, repetition):
         try:
@@ -306,15 +318,32 @@ class SpectrometerBridge:
             min(recommended, self.MAX_INTEGRATION_TIME_MS)
         )
 
-    def get_optimal_integration_time(self, verbose=True):
+    @classmethod
+    def snap_to_ladder(cls, time_ms):
+        """`time_ms` moved to the nearest step of a geometric ladder (DYNAMIC_TINT_STEPS_PER_OCTAVE
+        steps per doubling)."""
+        steps = cls.DYNAMIC_TINT_STEPS_PER_OCTAVE
+        return round(2 ** (round(math.log2(time_ms) * steps) / steps), 3)
 
+    @classmethod
+    def snap_to_frames(cls, time_ms, frame_ms):
+        """`time_ms` moved to a whole number of display frames (`frame_ms` each), the number of
+        frames being on the geometric ladder: a time that is not a whole number of frames makes the
+        projector's flicker fluctuate each reading (see display_timing.frame_multiple_hint)."""
+        steps = cls.DYNAMIC_TINT_STEPS_PER_OCTAVE
+        frames = max(1.0, time_ms / frame_ms)
+        count = max(1, round(2 ** (round(math.log2(frames) * steps) / steps)))
+        return round(count * frame_ms, 3)
+
+    def autoexpose(self, max_iterations=10, snap=None, verbose=True, saturation_backoff=1.0):
+        """Adjust integration_time_ms, from its current value, until the peak of the spectrum is
+        within PEAK_TOLERANCE of TARGET_PEAK_COUNTS. `snap(time_ms)`, when given, maps each proposed
+        time to an allowed one (whole display frames, ladder...). `saturation_backoff` < 1 shortens
+        the proposed time further when the peak is more than twice the target. Returns the
+        integration time.
+
+        It leaves the projector windows alone, so it can run between two patterns."""
         repetitions = 2
-        max_counts = self.TARGET_PEAK_COUNTS
-        tolerance = self.PEAK_TOLERANCE
-        max_iterations = 10
-        max_integration_time = self.MAX_INTEGRATION_TIME_MS
-        min_integration_time = self.MIN_INTEGRATION_TIME_MS
-
         self.set_integration_time()
         self.flush_stale_scans()
 
@@ -331,14 +360,12 @@ class SpectrometerBridge:
             else:
                 peak_intensity = np.max(np.asarray(measurements))
 
-            delta_intensity = peak_intensity - max_counts
-
             if verbose:
                 logging.info(
                     f"T{count}={self.integration_time_ms} ms | peak={round(peak_intensity)}"
                 )
 
-            if abs(delta_intensity) < tolerance:
+            if abs(peak_intensity - self.TARGET_PEAK_COUNTS) < self.PEAK_TOLERANCE:
                 break
 
             if count >= max_iterations:
@@ -347,14 +374,20 @@ class SpectrometerBridge:
                 )
                 break
 
-            adjustment_factor = max_counts / peak_intensity
-            self.integration_time_ms = int(self.integration_time_ms * adjustment_factor)
+            proposed = self.recommend_integration_time(peak_intensity, self.integration_time_ms)
+            if peak_intensity > 2 * self.TARGET_PEAK_COUNTS:
+                proposed = max(self.MIN_INTEGRATION_TIME_MS, int(proposed * saturation_backoff))
+            if snap is not None:
+                proposed = max(
+                    self.MIN_INTEGRATION_TIME_MS,
+                    min(snap(proposed), self.MAX_INTEGRATION_TIME_MS),
+                )
 
-            self.integration_time_ms = max(
-                min_integration_time,
-                min(self.integration_time_ms, max_integration_time)
-            )
+            if proposed == self.integration_time_ms:
+                # at a limit, or the allowed times are too far apart to get closer
+                break
 
+            self.integration_time_ms = proposed
             self.set_integration_time()
             self.flush_stale_scans()
             count += 1
@@ -362,15 +395,62 @@ class SpectrometerBridge:
         if verbose:
             logging.info(f"Final integration time: {self.integration_time_ms} ms")
 
+        return self.integration_time_ms
+
+    def get_optimal_integration_time(self, verbose=True):
+        self.autoexpose(max_iterations=10, verbose=verbose)
         cv2.destroyAllWindows()
         return self.integration_time_ms
+
+    def measure_dark_and_correct(self, spectra=None):
+        """Subtract the dark signal from the spectra measured with a dynamic integration time.
+
+        The signal of a dark exposure is not proportional to its duration (readout offset), so spectra
+        normalised by different times do not share the same offset and the differences between
+        patterns that split methods rely on would carry a bias. The dark is measured, with the
+        projector black, once for each integration time that was used, and removed. Call it after the
+        measurement thread, with the projector showing black."""
+        requested = getattr(self, "tints_requested_ms", None)
+        if requested is None:
+            raise RuntimeError("no dynamic measurement to correct")
+        spectra = self.spectra if spectra is None else spectra
+
+        initial = self.initial_integration_time_ms
+        rates = {}
+        try:
+            for tint in sorted(set(float(t) for t in requested if not np.isnan(t))):
+                self.integration_time_ms = tint
+                self.set_integration_time()
+                self.flush_stale_scans()
+                reads = [self.get_intensities() for _ in range(self.repetition)]
+                rates[tint] = np.mean(reads, axis=0) / self.effective_integration_time_ms
+        finally:
+            self.integration_time_ms = initial
+            self.set_integration_time()
+
+        for i, tint in enumerate(requested):
+            if not np.isnan(tint):
+                spectra[i, :] -= rates[float(tint)]
+
+        self.dark_rates = rates
+        logging.info(f"dark subtracted for {len(rates)} integration time(s)")
+        return rates
 
     # -------------------------------------------------------------------------
     # 🧵 THREAD ACQUISITION
     # -------------------------------------------------------------------------
     def thread_singlepixel_measure(
-        self, event, stop_event, spectra, progress_callback=None
+        self, event, stop_event, spectra, progress_callback=None,
+        dynamic_tint=False, tint_frame_ms=None,
     ):
+        """Measure one spectrum each time `event` is set, until `spectra` is full.
+
+        dynamic_tint: re-tune the integration time for every pattern (autoexpose, starting from the
+        previous pattern's time) so each spectrum uses the detector's range whatever the pattern's
+        brightness. The times are kept in tints_requested_ms / tints_effective_ms and the spectra stay
+        normalised by the time actually applied; measure_dark_and_correct() then removes the dark.
+        `tint_frame_ms`: the display's frame period, to keep the times to whole numbers of frames.
+        """
 
         logging.info(f"{self.spectro_name} spectrometer begin to measure")
 
@@ -421,6 +501,17 @@ class SpectrometerBridge:
                 self.spectrometer.set_scans_to_average(None)
         self.hw_averaging = scans_per_read > 1
 
+        self.initial_integration_time_ms = self.integration_time_ms
+        self.tints_requested_ms = np.full(nb_patterns, np.nan) if dynamic_tint else None
+        self.tints_effective_ms = np.full(nb_patterns, np.nan) if dynamic_tint else None
+        snap = None
+        if dynamic_tint:
+            snap = (
+                (lambda t: self.snap_to_frames(t, tint_frame_ms))
+                if tint_frame_ms
+                else self.snap_to_ladder
+            )
+
         # Throttled diagnostics: log flush stats for a sample of patterns
         # (not every single one - there can be thousands) so it's
         # possible to tell from the logs whether the drain is doing real
@@ -445,6 +536,19 @@ class SpectrometerBridge:
                     # few-millisecond measurements timed here (and by
                     # Projection, which paces patterns on them).
                     trigger_time = time.perf_counter()
+
+                    if dynamic_tint:
+                        self.autoexpose(
+                            self.DYNAMIC_TINT_MAX_ITERATIONS, snap=snap, verbose=False,
+                            saturation_backoff=self.DYNAMIC_TINT_SATURATION_BACKOFF,
+                        )
+                        self.tints_requested_ms[cnt] = self.integration_time_ms
+                        self.tints_effective_ms[cnt] = self.effective_integration_time_ms
+                        flush_duration_s = (
+                            0.0 if self.on_demand
+                            else self.STALE_SCAN_FLUSH_PERIODS * self.effective_integration_time_ms / 1000.0
+                        )
+
                     flushed = self.flush_stale_scans(flush_duration_s) if flush_duration_s > 0 else 0
 
                     chronograms = []
@@ -479,3 +583,11 @@ class SpectrometerBridge:
         finally:
             if self.hw_averaging:
                 self.spectrometer.set_scans_to_average(None)
+            if dynamic_tint:
+                # back to the configured time (measure_dark_and_correct() relies on the arrays above,
+                # not on the device state)
+                try:
+                    self.integration_time_ms = self.initial_integration_time_ms
+                    self.set_integration_time()
+                except Exception as exc:
+                    logging.warning(f"could not restore the integration time: {exc}")

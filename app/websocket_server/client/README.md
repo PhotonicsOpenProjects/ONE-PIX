@@ -124,6 +124,7 @@ The method `change_param(key, value)` allows dynamic modification of system sett
 |-------------------|------------------|---------------------------------------|
 | `imaging_method`  | `"FourierSplit"` | Imaging method used                   |
 | `spatial_res`     | `"3"`            | Spatial resolution of the datacube    |
+| `dynamic_tint`    | `"false"`        | Re-tune the integration time for every pattern, then subtract a dark measurement |
 
 #### 📷 Camera / Spectrometer Parameters
 

@@ -25,6 +25,7 @@ FIELD_META = {
     "imaging_method_name": {},
     "integration_time_ms": {"unit": "ms"},
     "spectro_scans2avg": {},
+    "dynamic_tint": {},
 
     # ---- hardware (hardware_config.json) ----
     "name_spectro": {"group": "devices"},

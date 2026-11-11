@@ -154,3 +154,34 @@ def test_thread_acquisition_full():
     # ✅ Vérifie la présence d’un header
     assert hasattr(acq, "header"), "⚠️ 'header' non créé"
     assert "Imaging method" in acq.header, "⚠️ 'header' semble incomplet"
+
+def test_thread_acquisition_with_a_dynamic_integration_time(tmp_path, monkeypatch):
+    """dynamic_tint: a time for every pattern is recorded, the dark is measured and subtracted, and the
+    setting is traced in the metadata."""
+    import json
+    from fis_common_function import FIS_common_acquisition as FIS
+
+    # a small cube (12 patterns): the plugin's default resolution changes between versions
+    monkeypatch.setattr(FIS.FisCommonAcquisition, "_load_json", lambda self, path: {"spatial_res": 3})
+
+    base_dir = os.path.dirname(__file__)
+    params = json.load(open(os.path.join(base_dir, "test_params", "acquisition_parameters.json")))
+    params["dynamic_tint"] = True
+    acquisition_json = tmp_path / "acquisition_parameters.json"
+    acquisition_json.write_text(json.dumps(params))
+
+    acq = Acquisition(
+        hardware_json_path=os.path.join(base_dir, "test_params", "hardware_config.json"),
+        acquisition_json_path=str(acquisition_json),
+    )
+    assert acq.dynamic_tint is True
+
+    acq.thread_acquisition()
+
+    results = acq.acquisition_results
+    times = np.asarray(results["integration_times_ms"], dtype=float)
+    assert times.shape == (len(results["patterns_order"]),)
+    assert np.isfinite(times).all() and (times > 0).all()
+    assert np.isfinite(results["spectra"]).all()
+    assert results["metadata"]["acquisition_parameters"] == {"dynamic_tint": True}
+    assert acq.hardware.spectrometer.integration_time_ms == acq.hardware.spectrometer.initial_integration_time_ms

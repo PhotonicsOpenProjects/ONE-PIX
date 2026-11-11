@@ -15,6 +15,7 @@ import orjson
 
 from onepix import utils as utils
 from onepix import fair
+from onepix.hardware.display_timing import frame_period_ms
 from onepix.progress import progress as acquisition_progress
 from onepix.progress import AcquisitionCancelled
 
@@ -92,6 +93,15 @@ class Acquisition:
             "imaging_method_name":
                 self.acquisition_results.get(
                     "imaging_method_name"
+                ),
+
+            # re-tune the integration time for every pattern (see
+            # SpectrometerBridge.thread_singlepixel_measure)
+            "dynamic_tint":
+                bool(
+                    self.acquisition_results.get(
+                        "dynamic_tint", False
+                    )
                 ),
 
             "width":
@@ -226,13 +236,26 @@ class Acquisition:
                     self.hardware.periode_pattern,
                 )
 
+                measure_ms = self.hardware.periode_mes
+
+                dark_ms = 0
+
+                if self.dynamic_tint:
+                    # each pattern is preceded by a search of its integration time
+                    # (a couple of corrections of 2 readings each, plus the flush),
+                    # and a dark exposure follows the sequence for every time used
+                    tint = self.hardware.spectrometer.integration_time_ms
+                    measure_ms += 8 * tint
+                    dark_ms = 60 * tint
+
                 self.est_duration = round(
                     (
                         self.nb_patterns
                         * (
-                            self.hardware.periode_mes
+                            measure_ms
                             + periode_pattern
                         )
+                        + dark_ms
                     ) / (60 * 1000),
                     2
                 )
@@ -283,6 +306,17 @@ class Acquisition:
                 logger.warning(f"Could not close the spectrometer: {e}")
 
         self.is_init = False
+
+    def _correct_dark(self):
+        """Dynamic integration time: measure the dark with the projector black and subtract it."""
+        projection = self.hardware.projection
+
+        projection.show_dark()
+
+        try:
+            self.hardware.spectrometer.measure_dark_and_correct()
+        finally:
+            projection.hide_dark()
 
     # ======================================================
     # THREAD ACQUISITION
@@ -354,10 +388,16 @@ class Acquisition:
                     stop_event,
                     self.spectra,
                     progress_callback=acquisition_progress.update,
+                    dynamic_tint=self.dynamic_tint,
+                    tint_frame_ms=tint_frame_ms,
                 )
             except Exception as exc:
                 thread_errors.put(exc)
                 stop_event.set()
+
+        # With a dynamic integration time, each time is a whole number of display
+        # frames (a projector's flicker fluctuates readings otherwise)
+        tint_frame_ms = frame_period_ms() if self.dynamic_tint else None
 
         acquisition_progress.start(len(patterns), stop_event=stop_event)
 
@@ -416,6 +456,9 @@ class Acquisition:
                     "Acquisition annulée par l'utilisateur."
                 )
 
+            if self.dynamic_tint:
+                self._correct_dark()
+
             # ==============================================
             # Retrieve results
             # ==============================================
@@ -434,6 +477,13 @@ class Acquisition:
             self.acquisition_results["spectra"] = (
                 self.spectra
             )
+
+            if self.dynamic_tint:
+
+                # the time applied to each pattern (the spectra are in counts per ms)
+                self.acquisition_results["integration_times_ms"] = (
+                    self.hardware.spectrometer.tints_effective_ms.tolist()
+                )
 
             self.acquisition_results = (
                 self.acquisition_results
@@ -530,6 +580,9 @@ class Acquisition:
                 "proj_position": proj_position,
             },
             # who/licence/software/identifier of the data (conf/fair_config.json), see onepix.fair
+            "acquisition_parameters": {
+                "dynamic_tint": self.dynamic_tint,
+            },
             "fair": fair.fair_block(),
         }
 
