@@ -46,9 +46,6 @@ class Hardware:
             "width": hardware_dict.get("width"),
             "proj_position": np.array(hardware_dict.get("proj_position", [])),
             "spectra": [],
-            "res": [],
-            "normalised_datacube": [],
-            "spectro_flag": False,
             "wl_lim": hardware_dict.get("wl_lim"),
             "interp_method": None,
             # Time (ms) each pattern stays on screen before the

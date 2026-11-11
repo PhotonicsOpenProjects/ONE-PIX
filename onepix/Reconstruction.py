@@ -17,48 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 # ==========================================================
-# HEADER UTILS
-# ==========================================================
-def get_header_data(path):
-
-    header = []
-
-    with open(path, "r") as file:
-
-        for line in file.readlines():
-
-            header.append(
-                line.split(":")
-            )
-
-    acq_data = dict()
-
-    acq_data["acquisition_name"] = (
-        header[0][0][8:]
-    )
-
-    for x in header:
-
-        if x[0].strip() == "Imaging method":
-
-            acq_data["imaging_method_name"] = (
-                x[1].strip()
-            )
-
-        if x[0].strip() == "Integration time":
-
-            acq_data["integration_time_ms"] = (
-                float(x[1].strip()[:-2])
-            )
-
-    logging.info(
-        "header data is loaded"
-    )
-
-    return acq_data
-
-
-# ==========================================================
 # RECONSTRUCTION
 # ==========================================================
 class Reconstruction:
@@ -250,25 +208,6 @@ class Reconstruction:
             "⚠️ No acquisition_results_*.json "
             "found in this folder"
         )
-
-    # ======================================================
-    # NAN CORRECTION
-    # ======================================================
-    def nan_corr(self):
-
-        try:
-
-            idx_nan = np.argwhere(
-                np.isnan(self.spectra)
-            )[0, :-1]
-
-            self.spectra[idx_nan, :] = (
-                self.spectra[idx_nan - 1, :]
-            )
-
-        except IndexError:
-
-            pass
 
     # ======================================================
     # DATA RECONSTRUCTION

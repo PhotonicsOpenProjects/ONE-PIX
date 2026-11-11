@@ -25,7 +25,6 @@ FIELD_META = {
     "imaging_method_name": {},
     "integration_time_ms": {"unit": "ms"},
     "spectro_scans2avg": {},
-    "Normalisation": {"advanced": True},
 
     # ---- hardware (hardware_config.json) ----
     "name_spectro": {"group": "devices"},
@@ -39,7 +38,6 @@ FIELD_META = {
     "gray_response_path": {"group": "projection"},
     "proj_position": {"advanced": True},
     "corregistration_array": {"advanced": True},
-    "normalisation_path": {"advanced": True},
     "max_width": {"unit": "px", "advanced": True},
     "max_height": {"unit": "px", "advanced": True},
 }

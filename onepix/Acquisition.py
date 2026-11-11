@@ -93,16 +93,6 @@ class Acquisition:
                     "imaging_method_name"
                 ),
 
-            "normalisation_path":
-                self.hardware_dict.get(
-                    "normalisation_path"
-                ),
-
-            "normalisation":
-                self.acquisition_results.get(
-                    "Normalisation"
-                ),
-
             "width":
                 self.hardware_dict.get(
                     "width"
@@ -537,10 +527,6 @@ class Acquisition:
                 "gray_response": bool(self.hardware.gray_response_path),
                 "periode_mes_ms": self.hardware.periode_mes,
                 "proj_position": proj_position,
-            },
-            "acquisition_parameters": {
-                "normalisation": self.normalisation,
-                "normalisation_path": self.normalisation_path,
             },
         }
 

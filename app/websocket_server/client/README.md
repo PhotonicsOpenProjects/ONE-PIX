@@ -124,7 +124,6 @@ The method `change_param(key, value)` allows dynamic modification of system sett
 |-------------------|------------------|---------------------------------------|
 | `imaging_method`  | `"FourierSplit"` | Imaging method used                   |
 | `spatial_res`     | `"3"`            | Spatial resolution of the datacube    |
-| `Normalisation`   | `"false"`        | Enable/disable normalization          |
 
 #### 📷 Camera / Spectrometer Parameters
 
@@ -152,7 +151,6 @@ The method `change_param(key, value)` allows dynamic modification of system sett
 | `port`                 | `"8000"`                            | Server port                          |
 | `mode_choice`          | `"Advanced"`                        | Selected operating mode              |
 | `acquisition_method`   | `"Complete"`                        | Acquisition method                   |
-| `normalisation_path`   | `""`                                | Path to normalization file (optional)|
 
 ---
 
@@ -161,7 +159,7 @@ The method `change_param(key, value)` allows dynamic modification of system sett
 ```python
 client.change_param("integration_time_ms", "10")
 client.change_param("clustering_parameters", "[2, 4]")
-client.change_param("Normalisation", "true")
+client.change_param("spectro_scans2avg", "5")
 ```
 
 > ⚠️ Complex types such as lists and matrices must be passed as **JSON strings** (`"[...]"`, `"[[...]]"`).
