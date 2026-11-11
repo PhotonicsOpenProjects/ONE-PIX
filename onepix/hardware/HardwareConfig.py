@@ -33,6 +33,16 @@ class Hardware:
         self.hardware_config_path = hardware_config_path or os.path.join(conf_path, "hardware_config.json")
         self.acquisition_parameter_path = acquisition_parameter_path or os.path.join(conf_path, "acquisition_parameters.json")
 
+        if not os.path.exists(self.hardware_config_path):
+            # conf/ sits next to the package in a clone of the repository and is not part of the
+            # pip package: without this, a missing file only shows up later as an empty
+            # configuration ("Spectrometer bridge None could not be loaded").
+            raise FileNotFoundError(
+                f"Hardware configuration not found: {os.path.abspath(self.hardware_config_path)}. "
+                "ONE-PIX is meant to be run from a clone of its repository (the conf/ folder is not "
+                "installed by pip); pass hardware_config_path to use another location."
+            )
+
         hardware_dict = self._load_json(self.hardware_config_path)
         param_dict = self._load_json(self.acquisition_parameter_path)
 

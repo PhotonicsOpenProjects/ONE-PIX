@@ -23,6 +23,7 @@ requires-python = ">=3.9"
 
 license = "CC-BY-NC-4.0"
 license-files = ["LICENSE.md"]
+readme = "README.md"
 
 dependencies = [
     "numpy>=1.22.4,<3",
@@ -60,6 +61,11 @@ dependencies = [
 
 ]
 
+[project.urls]
+Homepage = "https://github.com/PhotonicsOpenProjects/ONE-PIX"
+Documentation = "https://one-pix.readthedocs.io/"
+Issues = "https://github.com/PhotonicsOpenProjects/ONE-PIX/issues"
+
 [project.optional-dependencies]
 
 dev = [
@@ -87,6 +93,5 @@ analysis-plugins = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "onepix*",
-    "plugins*"
+    "onepix*"
 ]

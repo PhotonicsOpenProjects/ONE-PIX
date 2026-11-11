@@ -57,6 +57,11 @@ The acquisition workflow is orchestrated by the ONE-PIX core framework, while im
 
 ### Requirements
 
+ONE-PIX is installed from a clone of this repository (below): the configuration
+(`conf/`) and the applications (`app/`) live next to the `onepix` package and are
+not part of what `pip` builds, so `pip install onepix` alone does not give a
+working installation.
+
 `onepix` requires Python 3.9 or later. Release 3.0.0 was tested with Python 3.11 on Windows.
 
 Make sure you are using `pip >= 21.0` to install dependencies correctly.
