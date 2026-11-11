@@ -61,6 +61,13 @@
             </button>
 
             <button
+                class="btn btn-outline"
+                onclick="openFairConfig()"
+            >
+                {{ t('data.fair.fair_metadata') }}
+            </button>
+
+            <button
                 class="btn btn-primary"
                 onclick="openUploadDialog()"
             >
@@ -122,6 +129,17 @@
     <div class="selection-bar-actions">
 
         <button
+            id="exportBtn"
+            class="btn btn-primary"
+            onclick="openExportDialog()"
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12M8 7l4-4 4 4M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6"></path>
+            </svg>
+            {{ t('data.fair.export') }}
+        </button>
+
+        <button
             id="downloadBtn"
             class="btn btn-success"
             onclick="downloadSelected()"
@@ -149,6 +167,101 @@
 
 
 <!-- ================================= -->
+<!-- FAIR EXPORT DIALOG -->
+<!-- ================================= -->
+
+<dialog id="exportDialog" class="reference-dialog">
+
+    <div class="reference-dialog-header">
+        <h2>{{ t('data.fair.export_title') }}</h2>
+        <button type="button" class="btn btn-icon btn-ghost" data-close-dialog aria-label="{{ t('data.fair.close') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <div class="reference-dialog-panel">
+
+        <p class="reference-dialog-hint">{{ t('data.fair.export_intro') }}</p>
+
+        <fieldset class="fair-formats" id="exportFormats">
+            <legend>{{ t('data.fair.formats') }}</legend>
+        </fieldset>
+
+        <div class="reference-dialog-actions">
+            <button type="button" class="btn btn-ghost" data-close-dialog>{{ t('data.fair.cancel') }}</button>
+            <button type="button" class="btn btn-primary" id="exportRunBtn">{{ t('data.fair.do_export') }}</button>
+        </div>
+
+    </div>
+
+</dialog>
+
+
+<!-- ================================= -->
+<!-- FAIR METADATA DIALOG -->
+<!-- ================================= -->
+
+<dialog id="fairDialog" class="reference-dialog">
+
+    <div class="reference-dialog-header">
+        <h2>{{ t('data.fair.config_title') }}</h2>
+        <button type="button" class="btn btn-icon btn-ghost" data-close-dialog aria-label="{{ t('data.fair.close') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <form class="reference-dialog-panel" id="fairForm" autocomplete="off">
+
+        <p class="reference-dialog-hint">{{ t('data.fair.config_intro') }}</p>
+
+        <div class="field">
+            <label class="field-label" for="fairCreatorName">{{ t('data.fair.creator_name') }}</label>
+            <input type="text" id="fairCreatorName" name="creator_name">
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="fairOrcid">{{ t('data.fair.creator_orcid') }}</label>
+            <input type="text" id="fairOrcid" name="creator_orcid" placeholder="0000-0002-1825-0097" inputmode="numeric">
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="fairAffiliation">{{ t('data.fair.affiliation') }}</label>
+            <input type="text" id="fairAffiliation" name="affiliation">
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="fairEmail">{{ t('data.fair.contact_email') }}</label>
+            <input type="email" id="fairEmail" name="contact_email">
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="fairProject">{{ t('data.fair.project') }}</label>
+            <input type="text" id="fairProject" name="project">
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="fairKeywords">{{ t('data.fair.keywords') }}</label>
+            <input type="text" id="fairKeywords" name="keywords">
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="fairLicense">{{ t('data.fair.license') }}</label>
+            <select id="fairLicense" name="license"></select>
+        </div>
+
+        <p class="reference-dialog-hint">{{ t('data.fair.config_note') }}</p>
+
+        <div class="reference-dialog-actions">
+            <button type="button" class="btn btn-ghost" data-close-dialog>{{ t('data.fair.cancel') }}</button>
+            <button type="submit" class="btn btn-primary">{{ t('data.fair.save') }}</button>
+        </div>
+
+    </form>
+
+</dialog>
+
+
+<!-- ================================= -->
 <!-- LOADING OVERLAY -->
 <!-- ================================= -->
 
@@ -170,6 +283,14 @@
     url_for(
         'data_manager.static',
         filename='data_manager.js'
+    )
+}}">
+</script>
+
+<script src="{{
+    url_for(
+        'data_manager.static',
+        filename='fair_export.js'
     )
 }}">
 </script>

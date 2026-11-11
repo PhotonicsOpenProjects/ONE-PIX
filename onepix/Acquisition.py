@@ -14,6 +14,7 @@ from pathlib import Path
 import orjson
 
 from onepix import utils as utils
+from onepix import fair
 from onepix.progress import progress as acquisition_progress
 from onepix.progress import AcquisitionCancelled
 
@@ -528,6 +529,8 @@ class Acquisition:
                 "periode_mes_ms": self.hardware.periode_mes,
                 "proj_position": proj_position,
             },
+            # who/licence/software/identifier of the data (conf/fair_config.json), see onepix.fair
+            "fair": fair.fair_block(),
         }
 
     # ======================================================

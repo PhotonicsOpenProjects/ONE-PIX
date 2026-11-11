@@ -83,3 +83,6 @@ venv.bak/
 Thumbs.db
 ehthumbs.db
 desktop.ini
+
+# Personal FAIR metadata (author, ORCID, e-mail): written by Data manager > FAIR metadata
+conf/fair_config.json

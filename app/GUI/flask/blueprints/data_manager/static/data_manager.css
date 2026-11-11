@@ -202,3 +202,49 @@
     flex: 1;
   }
 }
+
+/* ------------------------------------------------------------
+   FAIR export dialog
+   ------------------------------------------------------------ */
+.fair-formats {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.fair-formats legend {
+  padding: 0 var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.fair-format {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  cursor: pointer;
+}
+
+.fair-format input {
+  margin-top: 3px;
+}
+
+.fair-format.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.fair-format-label {
+  font-weight: 500;
+}
+
+.fair-format-hint {
+  display: block;
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}

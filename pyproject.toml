@@ -35,6 +35,9 @@ dependencies = [
     "screeninfo==0.8.1",
 
     "spectral==0.22.4",
+    # FAIR export of the data (Data manager > Export): HDF5 and TIFF stacks
+    "h5py",
+    "tifffile",
     "flask==3.1.3",
     # 5.3.6 crashes on every connection attempt against Flask 3.1.x
     # (AttributeError: can't set attribute 'session' in
