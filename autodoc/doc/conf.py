@@ -22,8 +22,15 @@ project = 'ONE-PIX kit'
 copyright = '2022, Mathieu Ribes, Gaspard Russias'
 author = 'Mathieu Ribes, Gaspard Russias'
 
-# The full version, including alpha/beta/rc tags
-release = '28/06/2022'
+# The full version, including alpha/beta/rc tags: read from pyproject.toml, the one place it is set
+import re
+from pathlib import Path
+
+release = re.search(
+    r'^version\s*=\s*"([^"]+)"',
+    (Path(__file__).resolve().parents[2] / "pyproject.toml").read_text(encoding="utf-8"),
+    re.MULTILINE,
+).group(1)
 
 
 # -- General configuration ---------------------------------------------------

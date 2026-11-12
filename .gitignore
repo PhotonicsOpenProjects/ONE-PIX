@@ -90,3 +90,5 @@ conf/fair_config.json
 # Backups left by patch(1)
 *.orig
 *.rej
+*.log.*
+app/python_code_examples/logs/

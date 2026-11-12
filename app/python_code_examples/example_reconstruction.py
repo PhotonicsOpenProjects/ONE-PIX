@@ -1,12 +1,26 @@
+import sys
+from pathlib import Path
+
 from onepix.Reconstruction import Reconstruction
 
 import matplotlib.pyplot as plt
 
 
+def latest_measure(pattern):
+    """The file given on the command line, else the newest measure/ file matching `pattern`."""
+    if len(sys.argv) > 1:
+        return Path(sys.argv[1])
+    measure_dir = Path(__file__).resolve().parents[2] / "measure"
+    files = sorted(measure_dir.glob(pattern), key=lambda path: path.stat().st_mtime)
+    if not files:
+        sys.exit(f"No {pattern} in {measure_dir}: run an acquisition first, or pass a file as argument.")
+    return files[-1]
+
+
 # ==========================================================
 # LOAD ACQUISITION JSON
 # ==========================================================
-acquisition_json = (r"C:\Users\grussias\Desktop\repo git\POP\ONEPIX\test_install\one-pix_private_mirror\measure\acquisition_results_28_05_2026_13-50-45.json")
+acquisition_json = latest_measure("acquisition_results_*.json")
 
 
 

@@ -1,8 +1,20 @@
+import sys
 from pathlib import Path
 
 from onepix.Analysis import Analysis
 
 import matplotlib.pyplot as plt
+
+
+def latest_measure(pattern):
+    """The file given on the command line, else the newest measure/ file matching `pattern`."""
+    if len(sys.argv) > 1:
+        return Path(sys.argv[1])
+    measure_dir = Path(__file__).resolve().parents[2] / "measure"
+    files = sorted(measure_dir.glob(pattern), key=lambda path: path.stat().st_mtime)
+    if not files:
+        sys.exit(f"No {pattern} in {measure_dir}: run an acquisition first, or pass a file as argument.")
+    return files[-1]
 
 
 # =========================================================
@@ -37,9 +49,7 @@ pipeline_steps = [
 # LOAD RECONSTRUCTION JSON
 # =========================================================
 
-json_path = Path(
-    r"C:\Users\grussias\Desktop\repo git\POP\ONEPIX\test_install\one-pix_private_mirror\measure\reconstruction_results_28_05_2026_17-03-08.json"
-)
+json_path = latest_measure("reconstruction_results_*.json")
 
 ana = Analysis(
     reconstruction_dict=json_path,

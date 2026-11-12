@@ -96,6 +96,11 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
 - ONE-PIX is installed from a clone of the repository: `conf/` and `app/` are not
   part of the pip package.
 
+### Removed
+- `install/requirements.txt`, `install/rasp_requirements.txt` and `install/get_packages.py`: V2 leftovers
+  (they listed `customtkinter` and other versions that contradicted `pyproject.toml`, the only
+  source of the dependencies) that nothing in the repository used.
+
 ### Breaking Changes
 - `core.*` is now `onepix.*`.
 - Imaging methods, spectrometers and cameras are no longer in the repository:

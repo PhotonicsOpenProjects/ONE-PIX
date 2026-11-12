@@ -237,6 +237,7 @@ VPN such as Tailscale), not on the open internet. See [SECURITY.md](SECURITY.md)
 | Variable | Role |
 |---|---|
 | `ONEPIX_WS_TOKEN` | Shared secret of the Socket.IO server (`app/websocket_server`), which refuses every connection without it. |
+| `ONEPIX_WS_HOST` | Address the Socket.IO server listens on. Default `0.0.0.0`. |
 | `ONEPIX_WS_CORS_ORIGINS` | Browser origins allowed to reach the Socket.IO server. None by default. |
 | `ONEPIX_MAX_UPLOAD_MB` | Largest upload accepted by the web interface. Default `1024`. |
 | `ONEPIX_TRUSTED_ORIGINS` | Extra hosts (`host[:port]`, comma separated) accepted in the `Origin` of a request, for a reverse proxy that rewrites the `Host` header. |
