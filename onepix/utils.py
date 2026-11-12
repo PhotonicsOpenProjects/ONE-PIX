@@ -14,14 +14,20 @@ import orjson
 # ==========================================================
 def is_image_like(arr):
     """
-    Detect if ndarray is probably an image.
+    Detect if ndarray is an image that a PNG stores without loss.
 
     Rules:
+    - 8-bit or boolean data only: PNG keeps 8 bits per value, so any other type (a float map, a
+      cube of 3 or 4 bands, 16-bit counts) would be truncated to 0-255 and come back as uint8
     - RGB / RGBA ndarray
     - Large 2D array (mask / grayscale)
     """
 
     if not isinstance(arr, np.ndarray):
+
+        return False
+
+    if arr.dtype not in (np.uint8, np.bool_):
 
         return False
 
@@ -276,6 +282,11 @@ def deserialize_from_json(obj):
             img_array,
             cv2.IMREAD_UNCHANGED
         )
+
+        # a (rows, columns, 1) array comes back from the PNG as (rows, columns)
+        shape = tuple(obj.get("shape", img.shape))
+        if img.shape != shape and img.size == int(np.prod(shape)):
+            img = img.reshape(shape)
 
         # restore bool masks
         if obj["dtype"] == "bool":
