@@ -7,8 +7,6 @@ import numpy as np
 from datetime import date, datetime
 from pathlib import Path
 
-from tkinter import *
-from tkinter.filedialog import askdirectory
 
 from spectra_core.pipeline import Pipeline
 
@@ -141,11 +139,7 @@ class Analysis:
             / "measure"
         )
 
-        root = Tk()
-        root.withdraw()
-        root.attributes("-topmost", 1)
-
-        folder_path = askdirectory(
+        folder_path = utils.ask_directory(
             title=(
                 "Select the folder containing "
                 "the reconstructed data"

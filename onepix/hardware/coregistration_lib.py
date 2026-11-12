@@ -4,7 +4,6 @@ import imutils
 import cv2
 import json
 import os
-from tkinter.messagebox import showinfo
 import screeninfo
 import sys
 

@@ -4,8 +4,6 @@ import time
 from datetime import date
 from pathlib import Path
 
-from tkinter import *
-from tkinter.filedialog import askdirectory
 
 from onepix.ImagingMethodBridge import *
 from onepix import utils as utils
@@ -167,13 +165,7 @@ class Reconstruction:
             "measure"
         )
 
-        root = Tk()
-
-        root.withdraw()
-
-        root.attributes("-topmost", 1)
-
-        folder_path = askdirectory(
+        folder_path = utils.ask_directory(
             title=(
                 "Select the folder "
                 "containing the acquisitions"

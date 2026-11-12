@@ -85,6 +85,32 @@ def write_json_atomic(path, data, indent=2, ensure_ascii=True):
 
 
 # ==========================================================
+# FOLDER DIALOG
+# ==========================================================
+def ask_directory(title, initialdir):
+    """Folder chosen in a dialog window ("" when cancelled).
+
+    tkinter is imported here, not at module level: a server without a screen, a minimal Python or a
+    container has no tkinter, and the web interface and the command line never open this dialog."""
+    try:
+        from tkinter import Tk
+        from tkinter.filedialog import askdirectory
+    except ImportError as exc:
+        raise RuntimeError(
+            "A folder dialog needs tkinter, which is not installed (Debian and Raspberry Pi OS: "
+            "sudo apt install python3-tk). Pass the folder explicitly instead."
+        ) from exc
+
+    root = Tk()
+    root.withdraw()
+    root.attributes("-topmost", 1)
+    try:
+        return askdirectory(title=title, initialdir=initialdir)
+    finally:
+        root.destroy()
+
+
+# ==========================================================
 # SERIALIZATION
 # ==========================================================
 def serialize_for_json(obj):
