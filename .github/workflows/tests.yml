@@ -12,7 +12,8 @@ permissions:
 jobs:
   tests:
     name: Python ${{ matrix.python }}
-    runs-on: ubuntu-latest
+    # Python 3.9 is no longer provided on the latest runner image
+    runs-on: ${{ matrix.python == '3.9' && 'ubuntu-22.04' || 'ubuntu-latest' }}
     strategy:
       fail-fast: false
       matrix:
