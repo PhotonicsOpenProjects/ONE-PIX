@@ -119,6 +119,17 @@ def ask_directory(title, initialdir):
 # ==========================================================
 # SERIALIZATION
 # ==========================================================
+# Arrays with at least this many values are stored as base64 binary (a fifth to a third of the size of
+# the decimal text, and much faster to read); smaller ones stay readable lists. ONEPIX_COMPACT_JSON=0
+# keeps the plain lists, for a program that reads these files without onepix.utils and does not know the
+# binary form yet (files already written in either form are read by load_dict_json).
+COMPACT_MIN_ELEMENTS = 1024
+
+
+def compact_json_enabled():
+    return os.environ.get("ONEPIX_COMPACT_JSON", "1").strip().lower() not in ("0", "false", "no", "off")
+
+
 def serialize_for_json(obj):
     """
     Smart recursive serializer for ONE-PIX.
@@ -196,6 +207,18 @@ def serialize_for_json(obj):
                 arr = arr.astype(
                     np.int32
                 )
+
+            if arr.size >= COMPACT_MIN_ELEMENTS and arr.dtype.kind in "biufc" and compact_json_enabled():
+                # raw little-endian bytes, C order: lossless, and a float32 costs 5.3 characters
+                # instead of up to 18 as decimal text
+                raw = np.ascontiguousarray(arr.astype(arr.dtype.newbyteorder("<"), copy=False))
+                return {
+                    "__type__": "ndarray",
+                    "dtype": str(arr.dtype),
+                    "shape": arr.shape,
+                    "encoding": "base64",
+                    "data": base64.b64encode(raw.tobytes()).decode("ascii")
+                }
 
             return {
                 "__type__": "ndarray",
@@ -303,6 +326,11 @@ def deserialize_from_json(obj):
         and obj.get("__type__")
         == "ndarray"
     ):
+
+        if obj.get("encoding") == "base64":
+            dtype = np.dtype(obj["dtype"])
+            flat = np.frombuffer(base64.b64decode(obj["data"]), dtype=dtype.newbyteorder("<"))
+            return flat.astype(dtype).reshape(obj["shape"])      # a copy: writable, native byte order
 
         return np.asarray(
             obj["data"],

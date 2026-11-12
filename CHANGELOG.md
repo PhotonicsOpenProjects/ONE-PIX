@@ -58,6 +58,11 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
   others.
 - Logging replaces `print`; acquisitions, reconstructions and analyses share one
   JSON format.
+- Saved JSON files are 3 to 6 times smaller and load much faster: arrays of 1024 values
+  or more are stored as base64 binary, without loss (a 81.6 MB measurement became 14.5 MB and
+  loads in 0.2 s instead of 2.8 s). Files written before still load. A program that reads
+  the files without `onepix.utils`, such as the command line of `onepix-spectral-indices`
+  before its 0.1.2, needs `ONEPIX_COMPACT_JSON=0`.
 
 ### Fixed
 - Thread deadlock between acquisition, projection and the spectrometer;
