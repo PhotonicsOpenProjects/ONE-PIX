@@ -172,6 +172,44 @@ def create_app():
     return app
 
 
+def serve(app, host="0.0.0.0", port=5000, server=None, debug=False):
+    """Run `app`. By default with Flask's own server; ONEPIX_SERVER=waitress uses waitress, a production
+    server (pip install waitress) that keeps serving requests while an acquisition runs."""
+    server = (server or os.environ.get("ONEPIX_SERVER", "werkzeug")).strip().lower()
+
+    if server == "waitress":
+        try:
+            import waitress
+        except ImportError:
+            raise SystemExit("ONEPIX_SERVER=waitress needs the waitress package: pip install waitress")
+
+        # /acquisition/run answers only when the acquisition is over (minutes): a connection is "inactive"
+        # for waitress while it waits, so its timeout is an hour; threads = the pages polling progress
+        # while a measurement runs, plus the measurement itself.
+        waitress.serve(
+            app,
+            host=host,
+            port=port,
+            threads=int(os.environ.get("ONEPIX_THREADS", "8")),
+            channel_timeout=int(os.environ.get("ONEPIX_CHANNEL_TIMEOUT", "3600")),
+        )
+        return
+
+    if server != "werkzeug":
+        raise SystemExit(f"ONEPIX_SERVER must be 'werkzeug' or 'waitress', not '{server}'")
+
+    app.run(
+        host=host,
+        port=port,
+        debug=debug,
+        # /acquisition/run blocks for the whole acquisition (up to several
+        # minutes). Without threaded=True the single-threaded dev server
+        # can't serve /acquisition/progress polls (or anything else)
+        # while that request is in flight.
+        threaded=True,
+    )
+
+
 if __name__ == "__main__":
 
     app = create_app()
@@ -182,13 +220,4 @@ if __name__ == "__main__":
     # with FLASK_DEBUG=1.
     debug_mode = os.environ.get("FLASK_DEBUG", "0") == "1"
 
-    app.run(
-        host="0.0.0.0",
-        port=5000,
-        debug=debug_mode,
-        # /acquisition/run blocks for the whole acquisition (up to several
-        # minutes). Without threaded=True the single-threaded dev server
-        # can't serve /acquisition/progress polls (or anything else)
-        # while that request is in flight.
-        threaded=True,
-    )
+    serve(app, host="0.0.0.0", port=5000, debug=debug_mode)

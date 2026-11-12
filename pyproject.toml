@@ -82,6 +82,11 @@ docs = [
     "sphinx-autoapi"
 ]
 
+# A production server for the web interface: ONEPIX_SERVER=waitress (see README)
+server = [
+    "waitress"
+]
+
 # Optional analysis blueprints: not required for acquisition/reconstruction,
 # soft-loaded by app/GUI/flask/run.py (a missing plugin is logged and
 # skipped, never crashes app startup). Not yet published to PyPI, hence

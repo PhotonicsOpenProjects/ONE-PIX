@@ -236,6 +236,8 @@ VPN such as Tailscale), not on the open internet. See [SECURITY.md](SECURITY.md)
 
 | Variable | Role |
 |---|---|
+| `ONEPIX_SERVER` | `waitress` runs the web interface with waitress, a production server (`pip install "onepix[server]"`), instead of Flask's development server. Default `werkzeug`. For the service: `sudo systemctl edit onepix`, add `Environment=ONEPIX_SERVER=waitress`. |
+| `ONEPIX_THREADS`, `ONEPIX_CHANNEL_TIMEOUT` | Threads (default 8) and idle-connection timeout in seconds (default 3600) of waitress. |
 | `ONEPIX_COMPACT_JSON` | `0` keeps arrays as plain lists in saved JSON files instead of base64 binary (default `1`), for a program that reads them without `onepix.utils`. |
 | `ONEPIX_WS_TOKEN` | Shared secret of the Socket.IO server (`app/websocket_server`), which refuses every connection without it. |
 | `ONEPIX_WS_HOST` | Address the Socket.IO server listens on. Default `0.0.0.0`. |

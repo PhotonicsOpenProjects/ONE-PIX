@@ -36,7 +36,7 @@ jobs:
       - name: Install from a clean environment
         run: |
           python -m pip install --upgrade pip
-          python -m pip install . pytest
+          python -m pip install ".[server]" pytest
 
       - name: The installed package imports, away from the source tree
         run: cd "$RUNNER_TEMP" && python -c "import onepix, onepix.export, onepix.fair; print(onepix.__file__)"

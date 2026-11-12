@@ -39,6 +39,8 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
 - Unified installer (`install.py`), Raspberry Pi installer and a systemd service.
 - A test suite, a GitHub Actions workflow, and the community files (contributing
   guide, code of conduct, security policy, issue and pull request templates).
+- `ONEPIX_SERVER=waitress` runs the web interface with waitress, a production server
+  (`pip install "onepix[server]"`), instead of Flask's development server.
 
 ### Improved
 - Dynamic integration time (`dynamic_tint`, Software settings): the time is
