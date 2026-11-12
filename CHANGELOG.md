@@ -4,7 +4,7 @@ All notable changes to ONE-PIX are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the project uses
 [semantic versioning](https://semver.org/).
 
-## [3.0.0] - unreleased
+## [3.0.0] - 2026-11-13
 
 The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
 `onepix` package with a web interface and plugins installed with pip.

@@ -3,7 +3,7 @@ message: "If you use this project, please quote the following work:"
 title: "ONE-PIX"
 version: "3.0.0"
 doi: "10.3390/s20041132"  
-date-released: 2026-11-10
+date-released: 2026-11-13
 authors:
   - family-names: "Ribes"
     given-names: "Mathieu"
