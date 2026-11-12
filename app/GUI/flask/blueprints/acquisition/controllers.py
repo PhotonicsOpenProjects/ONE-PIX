@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from onepix.ImagingMethodBridge import ImagingMethodBridge
 from onepix.utils import write_json_atomic
+from onepix.hardware.HardwareConfig import HARDWARE_DEFAULTS, ACQUISITION_DEFAULTS
 
 import gui_plugins
 from i18n import t
@@ -35,6 +36,21 @@ def get_config_path(category: str) -> str:
         return None
 
     return os.path.abspath(os.path.join(BASE_DIR, rel_path))
+
+
+# Settings with a default in the code, per category: shown (and saved) even when the file lacks them
+DEFAULTS = {
+    "hardware": HARDWARE_DEFAULTS,
+    "software": ACQUISITION_DEFAULTS,
+}
+
+
+def settings_with_defaults(category: str) -> dict:
+    """The settings of a category as the settings page shows them: what the file holds, plus the settings
+    that have a default in the code and are not in the file."""
+    settings = load_settings(category)
+    missing = {k: v for k, v in DEFAULTS.get(category, {}).items() if k not in settings}
+    return {**settings, **missing}
 
 
 def load_settings(category: str) -> dict:
@@ -84,14 +100,16 @@ def save_settings(category: str, data: dict):
         raise FileNotFoundError(f"Aucun chemin configuré pour {category}")
 
     old = load_settings(category)
+    # the type of a setting that is not in the file yet is that of its default
+    reference = {**DEFAULTS.get(category, {}), **old}
 
     # Merged into what is there: a request that carries only some of the keys must not erase the
     # others (the hardware cannot start without its configuration).
     new = dict(old)
 
     for k, v in data.items():
-        if k in old:
-            new[k] = _cast_like(v, old[k])
+        if k in reference:
+            new[k] = _cast_like(v, reference[k])
         else:
             try:
                 new[k] = json.loads(v)
@@ -105,11 +123,11 @@ def save_settings(category: str, data: dict):
 #   WRAPPERS PRATIQUES
 # ----------------------------
 def hardware_settings():
-    return load_settings("hardware")
+    return settings_with_defaults("hardware")
 
 
 def software_settings():
-    return load_settings("software")
+    return settings_with_defaults("software")
 
 
 # ----------------------------

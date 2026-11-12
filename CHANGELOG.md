@@ -79,6 +79,10 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
   the Python API uses it).
 - Saving settings with a request that carries only some of the keys no longer
   erases the others; an unknown settings category answers 404.
+- Settings that have a default in the code (`max_gray_level`, `gray_response_path`,
+  `periode_pattern`, `latency_hiding_ms`, `dynamic_tint`) are shown on the settings pages
+  even when the configuration file does not contain them: they could not be adjusted
+  from the web interface otherwise.
 - Saving a result as JSON truncated to 8 bits any array shaped like an image that was
   not 8-bit: a float map larger than 64 x 64, or a cube of 1, 3 or 4 bands, came back
   as `uint8` values. Only 8-bit and boolean images are stored as PNG now; files

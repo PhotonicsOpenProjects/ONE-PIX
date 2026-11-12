@@ -12,6 +12,19 @@ import logging
 from onepix.logging_config import root  
 logger = logging.getLogger(__name__)
 
+# Settings that have a default in the code. The web interface shows them with these values even when the
+# file does not contain them (a file reset to the repository's, or never edited): a setting that is not in
+# the file must still be adjustable.
+HARDWARE_DEFAULTS = {
+    "periode_pattern": 60,
+    "latency_hiding_ms": 0,
+    "max_gray_level": 255,
+    "gray_response_path": "",
+}
+ACQUISITION_DEFAULTS = {
+    "dynamic_tint": False,
+}
+
 # import screeninfo
 
 # screenWidth = screeninfo.get_monitors()[0].width
@@ -68,17 +81,17 @@ class Hardware:
             # instead of the expected sparse Fourier spectrum. Exposed
             # in hardware_config.json (default 60) so it can be tuned
             # per projector without editing code.
-            "periode_pattern": hardware_dict.get("periode_pattern", 60),
+            "periode_pattern": hardware_dict.get("periode_pattern", HARDWARE_DEFAULTS["periode_pattern"]),
             # Show the next pattern this long (ms) before the end of a
             # measurement, hiding part of the projector's dead time. 0 = off;
             # measure it with app/cli/probe_settle_time.py --fine.
-            "latency_hiding_ms": hardware_dict.get("latency_hiding_ms", 0),
+            "latency_hiding_ms": hardware_dict.get("latency_hiding_ms", HARDWARE_DEFAULTS["latency_hiding_ms"]),
             # Brightest gray level projected (1-255). Lower it when the projector saturates the
             # spectrometer on the brightest patterns; 255 leaves the patterns as they are.
-            "max_gray_level": hardware_dict.get("max_gray_level", 255),
+            "max_gray_level": hardware_dict.get("max_gray_level", HARDWARE_DEFAULTS["max_gray_level"]),
             # Measured gray-level response of the projector (app/cli/probe_gray_response.py), a path
             # relative to this file; its inverse makes the light proportional to the gray patterns.
-            "gray_response_path": hardware_dict.get("gray_response_path", ""),
+            "gray_response_path": hardware_dict.get("gray_response_path", HARDWARE_DEFAULTS["gray_response_path"]),
         }
 
         # Écraser avec les valeurs fournies en argument

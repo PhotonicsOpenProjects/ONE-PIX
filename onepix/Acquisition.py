@@ -100,7 +100,7 @@ class Acquisition:
             "dynamic_tint":
                 bool(
                     self.acquisition_results.get(
-                        "dynamic_tint", False
+                        "dynamic_tint", ACQUISITION_DEFAULTS["dynamic_tint"]
                     )
                 ),
 
