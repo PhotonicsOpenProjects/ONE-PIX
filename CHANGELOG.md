@@ -105,6 +105,8 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
   copied into the metadata. Older JSON files that contain them still load.
 - ONE-PIX is installed from a clone of the repository: `conf/` and `app/` are not
   part of the pip package.
+- `scikit-learn`, which ONE-PIX never imports, is no longer a dependency (the plugins
+  that need it declare it); `Pillow`, which it does import, is declared.
 
 ### Removed
 - `install/requirements.txt`, `install/rasp_requirements.txt` and `install/get_packages.py`: V2 leftovers

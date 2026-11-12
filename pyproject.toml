@@ -27,9 +27,10 @@ readme = "README.md"
 
 dependencies = [
     "numpy>=1.22.4,<3",
-    "scikit-learn>=1.0.2,<2",
     "scipy>=1.13.1,<2",
     "matplotlib>=3.8.4,<4",
+    # imported directly by the web interface (it comes with matplotlib, but should not depend on that)
+    "Pillow",
 
     "opencv-python",
     "imutils==0.5.4",
