@@ -14,6 +14,7 @@ covered in test/hardware_tuning_test.py.
 
 import json
 import os
+import shutil
 import sys
 import time
 
@@ -30,6 +31,32 @@ ACQUISITION_PARAMETERS_JSON = os.path.abspath(
 )
 
 SPECTRUM_TIMEOUT_S = 12.0
+
+
+TEST_PARAMS = os.path.join(os.path.dirname(__file__), "test_params")
+
+
+@pytest.fixture(scope="module", autouse=True)
+def isolated_configuration(tmp_path_factory):
+    """These tests start the stub hardware and rewrite acquisition_parameters.json: they run on copies of
+    test/test_params (stub spectrometer and camera), never on the machine's own conf/ - which may name a
+    real spectrometer that is not plugged in - and never write to it."""
+    from blueprints.acquisition import controllers as ctl
+
+    folder = tmp_path_factory.mktemp("conf")
+    hardware_json = str(folder / "hardware_config.json")
+    acquisition_json = str(folder / "acquisition_parameters.json")
+    shutil.copy(os.path.join(TEST_PARAMS, "hardware_config.json"), hardware_json)
+    shutil.copy(os.path.join(TEST_PARAMS, "acquisition_parameters.json"), acquisition_json)
+
+    mp = pytest.MonkeyPatch()
+    mp.setattr(tuning.session, "_hardware_json_path", hardware_json)
+    mp.setattr(tuning.session, "_acquisition_json_path", acquisition_json)
+    original = ctl.get_config_path
+    mp.setattr(ctl, "get_config_path", lambda category: acquisition_json if category == "software" else original(category))
+    mp.setattr(sys.modules[__name__], "ACQUISITION_PARAMETERS_JSON", acquisition_json)
+    yield
+    mp.undo()
 
 
 @pytest.fixture(scope="module")
