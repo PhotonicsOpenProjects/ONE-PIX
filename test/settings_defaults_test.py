@@ -65,7 +65,13 @@ def test_saving_writes_the_setting_with_the_type_of_its_default_and_keeps_the_re
     assert soft["dynamic_tint"] is True and soft["integration_time_ms"] == 33.378
 
 
-def test_hardware_uses_the_same_defaults_as_the_page_when_the_file_lacks_the_settings():
+def test_hardware_uses_the_same_defaults_as_the_page_when_the_file_lacks_the_settings(monkeypatch):
+    class NoScreenProjection:
+        """Projection looks for the projector's screen, which a machine without a display does not have."""
+        def __init__(self, *args, **kwargs):
+            pass
+
+    monkeypatch.setattr("onepix.hardware.HardwareConfig.Projection", NoScreenProjection)
     params = os.path.join(os.path.dirname(__file__), "test_params")
     hardware = Hardware(
         hardware_config_path=os.path.join(params, "hardware_config.json"),
