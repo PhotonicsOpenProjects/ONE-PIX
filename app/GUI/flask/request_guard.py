@@ -18,6 +18,11 @@ proxy that rewrites the Host header. A DNS-rebinding page, whose name resolves t
 same-origin to these checks: use the interface on a network you trust.
 
 ONEPIX_MAX_UPLOAD_MB (default 1024) caps the size of an upload.
+
+Every response also carries headers that make the browser stricter: the interface cannot be shown in a
+frame of another site (a page could otherwise overlay it and have a button clicked), a file is not
+interpreted as another type than the one announced, and the address of a page is not sent to other sites.
+There is no Content-Security-Policy: the pages use inline scripts and styles.
 """
 import os
 from urllib.parse import urlsplit
@@ -30,6 +35,20 @@ SAFE_METHODS = {"GET", "HEAD", "OPTIONS", "TRACE"}
 STATE_CHANGING_GET = {"acquisition.run_acquisition"}
 
 DEFAULT_MAX_UPLOAD_MB = 1024
+
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Content-Security-Policy": "frame-ancestors 'self'",
+    "Referrer-Policy": "same-origin",
+}
+
+
+def same_site_target(target, req):
+    """`target` (a Referer) if it is a page of this site, else None: a redirect must never leave it."""
+    if not target:
+        return None
+    return target if urlsplit(target).netloc == req.host else None
 
 
 def trusted_hosts(environ=None):
@@ -71,6 +90,12 @@ def init_guard(app):
         if changes_something and comes_from_another_site(request, trusted):
             return jsonify({"error": "cross-site request refused"}), 403
         return None
+
+    @app.after_request
+    def _add_security_headers(response):
+        for name, value in SECURITY_HEADERS.items():
+            response.headers.setdefault(name, value)
+        return response
 
     @app.errorhandler(413)
     def _too_large(_error):

@@ -93,6 +93,9 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
   (`ONEPIX_MAX_UPLOAD_MB`).
 - The web interface has no sign-in and listens on all interfaces: see
   [SECURITY.md](SECURITY.md).
+- Responses carry `X-Frame-Options`, `Content-Security-Policy: frame-ancestors`,
+  `X-Content-Type-Options` and `Referrer-Policy`; the language switch no longer redirects
+  to another site.
 
 ### Changed
 - Python 3.9 or later; the package is named `onepix`; licence CC-BY-NC-4.0.

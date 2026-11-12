@@ -90,3 +90,25 @@ def test_the_default_limit_and_bad_values():
     assert request_guard.max_upload_bytes({"ONEPIX_MAX_UPLOAD_MB": "200"}) == 200 * 1024 * 1024
     assert request_guard.max_upload_bytes({"ONEPIX_MAX_UPLOAD_MB": "many"}) == 1024 * 1024 * 1024
     assert request_guard.max_upload_bytes({"ONEPIX_MAX_UPLOAD_MB": "0"}) == 1024 * 1024
+
+
+# ---------------------------------------------------------------- headers and redirects
+
+def test_every_response_carries_the_security_headers(client):
+    for path in ("/logs/", "/acquisition/hardware", "/logs/api/tail", "/does-not-exist"):
+        h = client.get(path).headers
+        assert h["X-Content-Type-Options"] == "nosniff"
+        assert h["X-Frame-Options"] == "SAMEORIGIN"
+        assert h["Content-Security-Policy"] == "frame-ancestors 'self'"
+        assert h["Referrer-Policy"] == "same-origin"
+
+
+def test_the_language_choice_returns_to_this_site_only(client):
+    back = client.get("/set-language/fr", headers={"Referer": "http://localhost/acquisition/hardware"})
+    assert back.status_code == 302 and back.headers["Location"] == "http://localhost/acquisition/hardware"
+    assert "onepix_lang=fr" in back.headers["Set-Cookie"]
+
+    for referer in ("https://evil.example/page", "//evil.example/", ""):
+        r = client.get("/set-language/en", headers={"Referer": referer})
+        assert "evil.example" not in r.headers["Location"], referer
+        assert r.headers["Location"].endswith("/acquisition/")

@@ -141,7 +141,8 @@ def create_app():
         if lang not in SUPPORTED_LANGUAGES:
             lang = DEFAULT_LANGUAGE
 
-        target = request.referrer or url_for(
+        # back to the page the language was chosen on, but never to another site
+        target = request_guard.same_site_target(request.referrer, request) or url_for(
             "acquisition.acquisition_page"
         )
 
