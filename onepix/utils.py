@@ -1,4 +1,7 @@
 import base64
+import json
+import os
+import tempfile
 from pathlib import Path
 
 import cv2
@@ -44,6 +47,41 @@ def is_image_like(arr):
         return True
 
     return False
+
+
+# ==========================================================
+# ATOMIC WRITE OF A CONFIGURATION FILE
+# ==========================================================
+def write_json_atomic(path, data, indent=2, ensure_ascii=True):
+    """Write `data` as JSON to `path` so that the file is never left half written.
+
+    The text is produced first (an object that cannot be serialised fails before the disk is
+    touched), written to a temporary file in the same folder, flushed to disk, then moved over the
+    destination in one step: a crash or a full disk leaves the previous file as it was. The
+    permissions of an existing file are kept. Meant for the configuration files, which the hardware
+    cannot start without."""
+    path = Path(os.path.realpath(path))
+    text = json.dumps(data, indent=indent, ensure_ascii=ensure_ascii)
+
+    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as tmp:
+            tmp.write(text)
+            tmp.flush()
+            os.fsync(tmp.fileno())
+        try:
+            os.chmod(tmp_name, path.stat().st_mode & 0o7777)
+        except FileNotFoundError:
+            umask = os.umask(0)
+            os.umask(umask)
+            os.chmod(tmp_name, 0o666 & ~umask)
+        os.replace(tmp_name, path)
+    except BaseException:
+        try:
+            os.unlink(tmp_name)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 # ==========================================================

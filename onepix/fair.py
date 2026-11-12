@@ -24,6 +24,8 @@ from functools import lru_cache
 from importlib import metadata as importlib_metadata
 from pathlib import Path
 
+from onepix.utils import write_json_atomic
+
 logger = logging.getLogger(__name__)
 
 SCHEMA = "onepix-fair/1"
@@ -94,8 +96,7 @@ def save_fair_config(values, path=None):
     config = validate_config(values)
     path = Path(path or FAIR_CONFIG_PATH)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(config, f, indent=2, ensure_ascii=False)
+    write_json_atomic(path, config, indent=2, ensure_ascii=False)
     return config
 
 

@@ -3,6 +3,7 @@ import json
 import logging
 from pathlib import Path
 from onepix.ImagingMethodBridge import ImagingMethodBridge
+from onepix.utils import write_json_atomic
 
 import gui_plugins
 from i18n import t
@@ -83,7 +84,10 @@ def save_settings(category: str, data: dict):
         raise FileNotFoundError(f"Aucun chemin configuré pour {category}")
 
     old = load_settings(category)
-    new = {}
+
+    # Merged into what is there: a request that carries only some of the keys must not erase the
+    # others (the hardware cannot start without its configuration).
+    new = dict(old)
 
     for k, v in data.items():
         if k in old:
@@ -91,11 +95,10 @@ def save_settings(category: str, data: dict):
         else:
             try:
                 new[k] = json.loads(v)
-            except:
+            except (ValueError, TypeError):
                 new[k] = v
 
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(new, f, indent=2, ensure_ascii=False)
+    write_json_atomic(path, new, indent=2, ensure_ascii=False)
 
 
 # ----------------------------

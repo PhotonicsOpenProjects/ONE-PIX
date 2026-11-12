@@ -1,4 +1,4 @@
-from flask import render_template, Response, request, redirect, url_for, jsonify
+from flask import render_template, Response, request, redirect, url_for, jsonify, abort
 from . import bp, controllers as ctl, tuning
 from .field_meta import FIELD_META
 from i18n import t
@@ -27,6 +27,7 @@ from pathlib import Path
 from importlib.metadata import entry_points
 
 from onepix.Acquisition import Acquisition
+from onepix.utils import write_json_atomic
 from onepix.Reconstruction import Reconstruction
 from onepix.progress import progress as acquisition_progress
 from onepix.progress import AcquisitionCancelled
@@ -210,6 +211,9 @@ def imaging_page():
 @bp.route("/save/<category>", methods=["POST"])
 def save_settings(category):
 
+    if ctl.get_config_path(category) is None:
+        abort(404)
+
     new_data = dict(request.form)
 
     ctl.save_settings(category, new_data)
@@ -225,6 +229,9 @@ def save_addon():
 
     path = ctl.imaging_config_path(method)
 
+    if not path:
+        abort(404)
+
     new_data = dict(request.form)
 
     with open(path, "r") as f:
@@ -235,11 +242,10 @@ def save_addon():
         try:
             old[k] = json.loads(v)
 
-        except:
+        except (ValueError, TypeError):
             old[k] = v
 
-    with open(path, "w") as f:
-        json.dump(old, f, indent=2)
+    write_json_atomic(path, old, indent=2)
 
     return redirect(url_for("acquisition.addon_page", saved=1))
 
@@ -483,8 +489,7 @@ def hardware_tuning_apply():
     current = ctl.load_settings("software")
     current["integration_time_ms"] = value
 
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(current, f, indent=2, ensure_ascii=False)
+    write_json_atomic(path, current, indent=2, ensure_ascii=False)
 
     return jsonify({"ok": True, "integration_time_ms": value})
 
@@ -538,8 +543,7 @@ def _write_coregistration_fields(fields):
     with open(hardware_json_path) as f:
         setup = json.load(f)
     setup.update(fields)
-    with open(hardware_json_path, "w") as f:
-        json.dump(setup, f, indent=4)
+    write_json_atomic(hardware_json_path, setup, indent=4)
 
 
 @bp.route("/hardware/coregistration/capture", methods=["POST"])

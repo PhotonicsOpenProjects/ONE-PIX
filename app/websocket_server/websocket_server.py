@@ -5,6 +5,7 @@ import threading
 from flask import Flask
 from flask_socketio import SocketIO, emit, ConnectionRefusedError
 from onepix.Acquisition import Acquisition
+from onepix.utils import write_json_atomic
 from onepix.Reconstruction import Reconstruction
 from onepix.progress import progress as acquisition_progress
 from onepix.progress import AcquisitionCancelled
@@ -189,8 +190,7 @@ def on_instruction(data):
                 config[key] = new_value
 
                 try:
-                    with open(path, "w") as f:
-                        json.dump(config, f, indent=2)
+                    write_json_atomic(path, config, indent=2)
                 except Exception as e:
                     emit("erreur", {"message": f"Erreur lors de l'écriture du fichier {filename}: {e}"})
                     return

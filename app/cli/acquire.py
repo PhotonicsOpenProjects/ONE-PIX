@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 
 from onepix.Acquisition import Acquisition
+from onepix.utils import write_json_atomic
 
 CONF_DIR = Path(__file__).resolve().parent.parent.parent / "conf"
 ACQUISITION_JSON_PATH = CONF_DIR / "acquisition_parameters.json"
@@ -26,8 +27,7 @@ def read_json(path):
 
 
 def write_json(path, data):
-    with open(path, "w") as file:
-        json.dump(data, file, indent=4)
+    write_json_atomic(path, data, indent=4)
 
 
 def apply_overrides(args):

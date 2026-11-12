@@ -24,6 +24,7 @@ import cv2
 import numpy as np
 
 from onepix.hardware.HardwareConfig import Hardware
+from onepix.utils import write_json_atomic
 from onepix.hardware.display_timing import get_refresh_rate_hz, frame_period_ms
 from onepix.hardware.gui_thread import gui_thread
 
@@ -176,8 +177,7 @@ def _write(hardware, rec, latency_hiding_ms=None):
     conf["periode_pattern"] = rec
     if latency_hiding_ms is not None:
         conf["latency_hiding_ms"] = latency_hiding_ms
-    with open(hardware.hardware_config_path, "w") as f:
-        json.dump(conf, f, indent=2)
+    write_json_atomic(hardware.hardware_config_path, conf, indent=2)
     print(f"Written to {hardware.hardware_config_path} (was {before})")
 
 

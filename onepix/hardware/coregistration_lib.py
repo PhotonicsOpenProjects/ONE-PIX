@@ -9,6 +9,7 @@ import screeninfo
 import sys
 
 from onepix.hardware.Projection import get_display_configuration
+from onepix.utils import write_json_atomic
 from onepix.hardware.gui_thread import gui_thread
 
 hardware_path = os.path.dirname(os.path.abspath(__file__))
@@ -267,8 +268,7 @@ def coregistration_calibration(screen_resolution=None):
     setup_dict["max_width"] = max_width
     setup_dict["max_height"] = max_height
 
-    with open(hardware_json_path, "w") as file:
-        json.dump(setup_dict, file, indent=4)
+    write_json_atomic(hardware_json_path, setup_dict, indent=4)
 
 
 def capture_calibration_photo(screen_resolution=None):
@@ -342,8 +342,7 @@ def save_coregistration_from_corners(frame, corners):
     setup_dict["max_width"] = max_width
     setup_dict["max_height"] = max_height
 
-    with open(hardware_json_path, "w") as file:
-        json.dump(setup_dict, file, indent=4)
+    write_json_atomic(hardware_json_path, setup_dict, indent=4)
 
 
 def apply_corregistration(img):
