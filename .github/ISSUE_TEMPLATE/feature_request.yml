@@ -1,0 +1,25 @@
+name: Feature request
+description: An idea for ONE-PIX
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What you need to do
+      description: The problem or the workflow, before the solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you imagine
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where it would live
+      options:
+        - ONE-PIX core or web interface
+        - An imaging method plugin
+        - A spectrometer or camera plugin
+        - An analysis plugin
+        - Not sure

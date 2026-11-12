@@ -1,0 +1,43 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: What you did, what you expected and what you got. Error messages as text, not screenshots.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Open Hardware settings\n2. ..."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ONE-PIX version or commit
+      description: "`git rev-parse --short HEAD`, or the version in pyproject.toml"
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Machine and Python
+      placeholder: Raspberry Pi 4 / Raspberry Pi OS, Python 3.11
+    validations:
+      required: true
+  - type: textarea
+    id: hardware
+    attributes:
+      label: Hardware and plugins
+      description: Spectrometer, camera, projector, imaging method, and the output of `pip list | grep -i onepix`.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: The Logs page of the interface, or `journalctl -u onepix` for the service. Remove anything private.
+      render: text

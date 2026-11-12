@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or how-to
+    url: https://github.com/PhotonicsOpenProjects/ONE-PIX/wiki
+    about: The wiki covers installation, hardware, imaging methods and plugins.
+  - name: Security vulnerability
+    url: https://github.com/PhotonicsOpenProjects/ONE-PIX/security/policy
+    about: Please report vulnerabilities privately (see SECURITY.md), not in a public issue.

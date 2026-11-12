@@ -227,17 +227,32 @@ ONE-PIX is designed around a modular architecture where imaging methods, hardwar
 
 The framework can operate on both embedded acquisition systems such as Raspberry Pi devices and standard desktop environments for advanced reconstruction and spectral processing workflows.
 
+## Security and network access
+
+The web interface has **no sign-in** and listens on all interfaces (port 5000): anyone
+who can reach it can start an acquisition, change the configuration, read and delete
+measurements and install plugins. Use it on a network you trust (a private network, a
+VPN such as Tailscale), not on the open internet. See [SECURITY.md](SECURITY.md).
+
+| Variable | Role |
+|---|---|
+| `ONEPIX_WS_TOKEN` | Shared secret of the Socket.IO server (`app/websocket_server`), which refuses every connection without it. |
+| `ONEPIX_WS_CORS_ORIGINS` | Browser origins allowed to reach the Socket.IO server. None by default. |
+| `ONEPIX_MAX_UPLOAD_MB` | Largest upload accepted by the web interface. Default `1024`. |
+| `ONEPIX_TRUSTED_ORIGINS` | Extra hosts (`host[:port]`, comma separated) accepted in the `Origin` of a request, for a reverse proxy that rewrites the `Host` header. |
+| `FLASK_DEBUG` | `1` enables Flask's debugger. Never on a shared network. |
+
 ## Ecosystem Architecture
 
 | Component | Role |
 |---|---|
 | [ONE-PIX](https://github.com/PhotonicsOpenProjects/ONE-PIX) | Central framework orchestrating acquisition, reconstruction and analysis workflows |
 | [onepix_plugins](https://gitlab.com/photonics-open-projects/onepix_plugins) | Main plugin ecosystem containing imaging methods, spectrometers, RGB cameras and analysis plugin families |
-| [onepix_plugins_manager](https://gitlab.com/photonics-open-projects/onepix_plugins_manager) | Command-line plugin installation and ecosystem management system |
+| [onepix_plugins_manager](https://gitlab.com/photonics-open-projects/onepix_plugins/onepix_plugins_manager) | Command-line plugin installation and ecosystem management system |
 | Imaging Method Plugins | Plugins implementing acquisition, reconstruction and analysis workflows for single-pixel imaging methods |
 | Spectrometer Plugins | Plugins implementing spectrometer hardware interfaces |
 | RGB Camera Plugins | Plugins implementing RGB and auxiliary camera interfaces |
-| pipeline-analysis | Abstract spectral processing and analysis framework |
+| analysis-pipeline | Abstract spectral processing and analysis framework |
 | Analysis Plugins | Spectral processing and machine learning plugin family compatible with the analysis pipeline ecosystem |
 
 ## Core Architecture
