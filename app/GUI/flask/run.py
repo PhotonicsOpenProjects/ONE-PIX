@@ -41,6 +41,7 @@ from blueprints.projector import (
 from blueprints.acquisition import tuning
 
 import gui_plugins
+import request_guard
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +57,13 @@ THEME_COOKIE = "onepix_theme"
 def create_app():
 
     app = Flask(__name__)
+
+    # ====================================
+    # REQUESTS FROM OTHER SITES, UPLOAD SIZE
+    # ====================================
+    # See request_guard.py.
+
+    request_guard.init_guard(app)
 
     # ====================================
     # REGISTER BLUEPRINTS

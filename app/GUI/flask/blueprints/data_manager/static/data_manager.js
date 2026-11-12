@@ -408,10 +408,20 @@ async function uploadFiles(files) {
 
         if (!response.ok) {
 
-            ONEPIX.toast(
-                ONEPIX.t("data.toast_upload_failed"),
-                "error"
-            );
+            let message = ONEPIX.t("data.toast_upload_failed");
+
+            if (response.status === 413) {
+
+                try {
+
+                    const body = await response.json();
+
+                    message = ONEPIX.t("data.toast_upload_too_large", {max: body.max_mb});
+
+                } catch (error) { /* keep the generic message */ }
+            }
+
+            ONEPIX.toast(message, "error");
 
             return;
         }

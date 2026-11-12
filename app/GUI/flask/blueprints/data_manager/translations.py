@@ -2,6 +2,7 @@
 
 TRANSLATIONS = {
     "en": {
+        "data.toast_upload_too_large": "File too large (limit {max} MB)",
         "data.fair.export": "Export",
         "data.fair.fair_metadata": "FAIR metadata",
         "data.fair.export_title": "Export as FAIR data",
@@ -41,6 +42,7 @@ TRANSLATIONS = {
         "data.fair.err_license": "Unknown licence.",
     },
     "fr": {
+        "data.toast_upload_too_large": "Fichier trop volumineux (limite {max} Mo)",
         "data.fair.export": "Exporter",
         "data.fair.fair_metadata": "Métadonnées FAIR",
         "data.fair.export_title": "Exporter en données FAIR",
@@ -80,6 +82,7 @@ TRANSLATIONS = {
         "data.fair.err_license": "Licence inconnue.",
     },
     "es": {
+        "data.toast_upload_too_large": "Archivo demasiado grande (límite {max} MB)",
         "data.fair.export": "Exportar",
         "data.fair.fair_metadata": "Metadatos FAIR",
         "data.fair.export_title": "Exportar como datos FAIR",
@@ -119,6 +122,7 @@ TRANSLATIONS = {
         "data.fair.err_license": "Licencia desconocida.",
     },
     "de": {
+        "data.toast_upload_too_large": "Datei zu groß (Limit {max} MB)",
         "data.fair.export": "Exportieren",
         "data.fair.fair_metadata": "FAIR-Metadaten",
         "data.fair.export_title": "Als FAIR-Daten exportieren",
