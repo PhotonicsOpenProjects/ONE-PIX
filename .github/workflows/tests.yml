@@ -1,0 +1,85 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, ONE-PIX_v3_dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.11", "3.13"]
+    # 3.9 is the declared minimum: a failure there is reported but does not block, until it has been
+    # green once.
+    continue-on-error: ${{ matrix.python == '3.9' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: System libraries (OpenCV, virtual display)
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends xvfb libgl1 libglib2.0-0
+
+      - name: Install from a clean environment
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install . pytest
+
+      - name: The installed package imports, away from the source tree
+        run: cd "$RUNNER_TEMP" && python -c "import onepix, onepix.export, onepix.fair; print(onepix.__file__)"
+
+      - name: Tests that need no display
+        run: >
+          python -m pytest test -q
+          --ignore=test/acquisition_test.py
+          --ignore=test/acquisition_hardware_routes_test.py
+          --ignore=test/hardware_tuning_test.py
+
+      # These open OpenCV windows (the projection). Not yet run on a hosted runner: reported, not blocking,
+      # until they have been green once.
+      - name: Tests that open a window (virtual display)
+        continue-on-error: true
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: >
+          xvfb-run -a python -m pytest -q
+          test/acquisition_test.py test/acquisition_hardware_routes_test.py test/hardware_tuning_test.py
+
+  security:
+    name: Security checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: System libraries
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install . bandit pip-audit
+
+      # B104 (listening on all interfaces) is how the web interface and the Socket.IO server are meant to run.
+      - name: Static analysis (bandit, medium severity and above)
+        run: bandit -r onepix app -ll -x app/GUI/flask/static --skip B104
+
+      - name: Known vulnerabilities in the dependencies
+        run: pip-audit --skip-editable

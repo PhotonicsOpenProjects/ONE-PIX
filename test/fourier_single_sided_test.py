@@ -22,12 +22,15 @@ BANDS = 3
 PKG = os.path.dirname(shift_patterns.__file__)
 
 
-def odd_size():
-    res = shift_patterns.CreationPatterns(8, 8).spatial_res
-    return res + 1 if res % 2 == 0 else res
+# The resolution is set here, not read from the plugin: onepix-fis-common-function changed its default
+# (21, then 5) and the scene below has a bright block that needs a cube of at least 12 pixels.
+SIZE = 21
 
 
-SIZE = odd_size()
+@pytest.fixture(autouse=True)
+def fixed_spatial_resolution(monkeypatch):
+    from fis_common_function import FIS_common_acquisition as FIS
+    monkeypatch.setattr(FIS.FisCommonAcquisition, "_load_json", lambda self, path: {"spatial_res": SIZE})
 
 
 def scene(seed=0):
