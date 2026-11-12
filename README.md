@@ -333,4 +333,6 @@ Contributions are welcome at multiple levels of the ecosystem, including:
 
 The plugin-based architecture allows contributors to develop and distribute independent packages without modifying the central ONE-PIX framework.
 
-For contribution guidelines, plugin development and technical discussions, please refer to the project Wiki and GitHub Issues.
+For contribution guidelines, plugin development and technical discussions, please refer to the project Wiki and GitHub Issues
+(see also [CONTRIBUTING.md](CONTRIBUTING.md)). GitHub issues are the preferred channel for questions, bugs and ideas;
+write to community@photonics-open-projects.com only for private matters (security, conduct).

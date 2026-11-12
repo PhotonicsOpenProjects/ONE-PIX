@@ -8,8 +8,8 @@ The latest release receives security fixes.
 
 Please do not publish the details of a vulnerability in a public issue. Use the
 "Report a vulnerability" button of the repository's Security tab (GitHub private
-vulnerability reporting) if it is available; otherwise open an issue that asks
-for a private contact and contains no details of the problem.
+vulnerability reporting) if it is available, or write to community@photonics-open-projects.com.
+For anything that is not a vulnerability, a GitHub issue is the best place.
 
 ## What to know before exposing ONE-PIX
 

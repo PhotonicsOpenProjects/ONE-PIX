@@ -5,8 +5,11 @@ that drives hardware (projector, spectrometer, camera); most contributions are
 imaging methods, hardware plugins, analysis, documentation and bug fixes.
 
 By taking part you agree to follow the [code of conduct](CODE_OF_CONDUCT.md).
-Report security problems as described in [SECURITY.md](SECURITY.md), not in a
-public issue.
+
+**Questions, bugs and ideas: please use GitHub issues**, so that the answers help
+everyone. Write to community@photonics-open-projects.com only for what has to stay private: a security problem
+(see [SECURITY.md](SECURITY.md), and do not describe it in a public issue) or a
+conduct concern.
 
 ## Set up
 
