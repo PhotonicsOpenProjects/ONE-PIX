@@ -1,7 +1,7 @@
 """fouriershift single-sided mode, and the fouriersplit dependency on fouriershift.
 
-These tests run against the installed plugins; PatternsCreation.py.orig / ImageReconstruction.py.orig
-(next to the installed modules) are the versions before the single-sided mode, when present."""
+These tests run against the installed plugins. The versions before the single-sided mode
+(onepix-fouriershift 0.1.3) are in test/fixtures/fouriershift_0.1.3/."""
 import importlib.machinery
 import importlib.util
 import os
@@ -19,7 +19,7 @@ from fouriersplit import PatternsCreation as split_patterns
 from fouriersplit.ImageReconstruction import Reconstruction as SplitReconstruction
 
 BANDS = 3
-PKG = os.path.dirname(shift_patterns.__file__)
+REFERENCE_SOURCES = os.path.join(os.path.dirname(__file__), "fixtures", "fouriershift_0.1.3")
 
 
 # The resolution is set here, not read from the plugin: onepix-fis-common-function changed its default
@@ -60,9 +60,7 @@ def shift_acquisition(c, patterns, spectra):
 
 
 def load_orig(name):
-    path = os.path.join(PKG, name + ".py.orig")
-    if not os.path.exists(path):
-        pytest.skip(f"{path} not available")
+    path = os.path.join(REFERENCE_SOURCES, name + ".py")
     loader = importlib.machinery.SourceFileLoader("orig_" + name, path)
     spec = importlib.util.spec_from_loader(loader.name, loader)
     module = importlib.util.module_from_spec(spec)
