@@ -295,8 +295,12 @@ def measures():
 
         return jsonify([])
 
+    # Newest first, by modification time: the names embed the date as
+    # dd_mm_yyyy, which does not sort chronologically (31_10 comes after
+    # 02_11). The Data page orders its files the same way.
     files = sorted(
         save_path.glob("*.json"),
+        key=lambda f: (f.stat().st_mtime, f.name),
         reverse=True
     )
 
