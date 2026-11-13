@@ -1,8 +1,8 @@
+# ONE-PIX
+
 <p align="center">
 <img src="imgs/logo.png" alt="logo" width="200"/>
 </p>
-
-# ONE-PIX
 
 <p align="center">
 Open-source modular hyperspectral single-pixel imaging ecosystem
