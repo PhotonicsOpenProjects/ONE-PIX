@@ -53,6 +53,41 @@ During acquisition, a sequence of structured light patterns is projected onto th
 The acquisition workflow is orchestrated by the ONE-PIX core framework, while imaging methods, hardware drivers and analysis pipelines can be extended independently through the modular plugin ecosystem.
 
 
+## What's new in 3.0.0
+
+ONE-PIX 3.0.0 is a new base for hyperspectral single-pixel imaging: a redesigned web interface, a reorganised Python core and independent plugins for imaging methods, hardware and spectral analysis. Each component can evolve without changing the whole software, while acquisition, reconstruction and analysis stay at the centre of the project.
+
+| Area | Previous version (`main`) | ONE-PIX 3.0.0 |
+|---|---|---|
+| Interface | Desktop applications | Flask web interface: acquisition, analysis, data, plugins and logs |
+| Core | Modules in `core/` | `onepix` package, versioned and installed with its dependencies |
+| Extensions | Methods and drivers inside `plugins/` | Independent Python packages found through entry points |
+| Analysis | Processing tied to each imaging method | Composable pipelines and analysis plugins |
+| Results | Per-workflow save formats | Result dictionaries and JSON files with metadata |
+| Installation | Historical scripts, mostly for Raspberry Pi | `install.py` for Windows, Linux and macOS, optional systemd service |
+
+- **One interface.** Acquisition (method choice, hardware setup, progress, cancellation), settings (including panels provided by plugins), analysis, data (browse, import, download, delete), plugins and logs.
+- **Plugins.** Imaging methods, spectrometer drivers, cameras and analysis pages are developed and distributed apart from this repository. A plugins manager installs, updates and removes them from the web interface. The base installation declares the FourierShift and FourierSplit methods, the common FIS components, the stub camera and spectrometer, `analysis-pipeline` and `basic-treatments`; other methods and drivers are installed separately.
+- **Analysis pipelines.** Steps are chained from top to bottom (crop, smoothing, normalisation, spectral indices...), with reflectance normalisation from a reference zone or datacube. The history of applied steps is kept in the metadata, also across successive analyses. Available tools depend on the imaging method and installed plugins.
+- **Better-controlled acquisitions.** Integration time in whole display frames, gray-level cap and projector response correction, pattern settling time with part of the waiting hidden in the projection sequence, averaging inside the spectrometer when the plugin allows it, live tuning with advice, and command-line probes for the projector.
+- **Reusable results.** Acquisition, reconstruction and analysis exchange result dictionaries that can be saved as JSON; the examples in `app/python_code_examples/` follow this organisation, including a full acquisition, reconstruction and analysis chain.
+- **Remote control and IoT.** A Socket.IO server configures and starts measurements remotely, to integrate ONE-PIX in connected applications.
+- **Lighter repository.** The histories between branches were cleaned up to shrink a repository that had become too large.
+
+<p align="center">
+<img src="imgs/plugins_manager.png" alt="ONE-PIX plugins manager: filters, extension list, installation status and management actions" width="800"/>
+</p>
+
+<p align="center"><em>The plugins manager lists extensions, filters them and installs, updates or removes them from the web interface.</em></p>
+
+<p align="center">
+<img src="imgs/analysis_pipeline.png" alt="Analysis pipeline in the ONE-PIX interface: spectral crop, smoothing, normalisation and indices" width="280"/>
+</p>
+
+<p align="center"><em>A pipeline run from top to bottom: 400-700 nm crop (<code>crop</code>), smoothing (<code>golay_smoothing</code>), normalisation (<code>max_normalization</code>), then indices (<code>indices</code>).</em></p>
+
+Migration from the previous version: install the plugins you need, replace `core.*` by `onepix.*` in your scripts and use the web interface instead of the Tkinter applications. The full list is in [CHANGELOG.md](CHANGELOG.md).
+
 ## Quick Installation
 
 ### Requirements
@@ -272,6 +307,12 @@ ONE-PIX is organized around a modular workflow architecture separating:
 This architecture allows imaging methods, hardware interfaces and analysis workflows to evolve independently while remaining interoperable inside the ONE-PIX ecosystem.
 
 The framework supports interchangeable spectrometers, RGB cameras and single-pixel imaging strategies through a modular plugin-based ecosystem.
+
+<p align="center">
+<img src="imgs/onepix_v3_architecture.png" alt="ONE-PIX 3.0.0 architecture: user interfaces, Python core and plugin ecosystem" width="600"/>
+</p>
+
+<p align="center"><em>The interfaces rely on the <code>onepix</code> Python core, connected to the hardware, imaging method and analysis plugins.</em></p>
 
 ### Repository Architecture
 

@@ -7,7 +7,10 @@ All notable changes to ONE-PIX are listed here. The format follows
 ## [3.0.0] - 2026-11-13
 
 The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
-`onepix` package with a web interface and plugins installed with pip.
+`onepix` package with a web interface and plugins installed with pip. Each component
+(core, imaging methods, hardware drivers, analysis) can now evolve without changing the
+others. The histories between branches were cleaned up to shrink a repository that had
+become too large.
 
 ### Added
 - Web interface (Flask): Acquisition, Analysis, Data, Logs and Plugins pages, with
@@ -35,7 +38,8 @@ The first release since the V2 snapshot (`main`): ONE-PIX becomes an installable
   NumPy, MATLAB, ENVI, TIFF stacks and the original JSON as RO-Crate packages
   with a README and SHA-256 checksums.
 - Socket.IO server and Python client, with token authentication
-  (`ONEPIX_WS_TOKEN`).
+  (`ONEPIX_WS_TOKEN`), to configure and start measurements remotely and integrate
+  ONE-PIX in connected applications (IoT).
 - Unified installer (`install.py`), Raspberry Pi installer and a systemd service.
 - A test suite, a GitHub Actions workflow, and the community files (contributing
   guide, code of conduct, security policy, issue and pull request templates).
