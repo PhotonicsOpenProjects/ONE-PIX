@@ -17,7 +17,7 @@ git tag -a vX.Y.Z -m "ONE-PIX X.Y.Z"
 git push github vX.Y.Z
 ```
 
-Create the GitHub Release from the tag, with `RELEASE_NOTES_3.0.0.md` (the changelog entry for a new version) as notes. ONE-PIX is installed from a
+Create the GitHub Release from the tag, with `RELEASE_NOTES_3.0.0.md` (the changelog entry for a new version) as notes, followed by the French, Spanish and German versions in `docs/release_3.0.0/` (or links to them). ONE-PIX is installed from a
 clone of the repository (the pip package holds only `onepix/`, not `conf/` or `app/`) and is not
 published to PyPI.
 

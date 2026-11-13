@@ -55,6 +55,8 @@ The acquisition workflow is orchestrated by the ONE-PIX core framework, while im
 
 ## What's new in 3.0.0
 
+*Also available in: [Français](docs/release_3.0.0/whats_new.fr.md) · [Español](docs/release_3.0.0/whats_new.es.md) · [Deutsch](docs/release_3.0.0/whats_new.de.md)*
+
 ONE-PIX 3.0.0 is a new base for hyperspectral single-pixel imaging: a redesigned web interface, a reorganised Python core and independent plugins for imaging methods, hardware and spectral analysis. Each component can evolve without changing the whole software, while acquisition, reconstruction and analysis stay at the centre of the project.
 
 | Area | Previous version (`main`) | ONE-PIX 3.0.0 |

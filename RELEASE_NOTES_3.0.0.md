@@ -1,5 +1,7 @@
 # ONE-PIX 3.0.0: a new base for hyperspectral imaging
 
+**English** · [Français](docs/release_3.0.0/release_notes.fr.md) · [Español](docs/release_3.0.0/release_notes.es.md) · [Deutsch](docs/release_3.0.0/release_notes.de.md)
+
 ONE-PIX 3.0.0 turns a set of desktop applications into a hyperspectral camera you drive from a browser, extend with plugins and whose data you reuse outside the project. Acquisition, reconstruction and analysis stay at the centre, with a web interface, a reorganised `onepix` Python core and independent plugins for imaging methods, hardware and analysis.
 
 ## Highlights
