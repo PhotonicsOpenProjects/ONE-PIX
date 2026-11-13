@@ -156,3 +156,40 @@ def test_dark_correction_needs_a_dynamic_measurement():
     b = make_bridge(FakeSpectrometer())
     with pytest.raises(RuntimeError):
         b.measure_dark_and_correct()
+
+
+# ---------------------------------------------------------------- black pattern (HAS)
+
+def test_a_black_pattern_is_measured_with_the_previous_time_not_searched_for():
+    plugin = FakeSpectrometer()
+    b = make_bridge(plugin)
+    b.tints_requested_ms = None
+    # zones, then the black pattern HAS ends with
+    rates = [40.0, 20.0, 80.0, 0.0]
+    spectra = run_measure(b, plugin, rates, dynamic_tint=True,
+                          dark_patterns=np.array([False, False, False, True]))
+    tints = b.tints_requested_ms
+    assert not np.isnan(tints).any()
+    assert tints[3] == tints[2], "the black pattern keeps the time of the zone before it"
+    assert tints[3] in set(tints[:3]), "no time of its own: no extra dark exposure needed"
+    assert tints.max() < b.MAX_INTEGRATION_TIME_MS, "no climb to MAX_INTEGRATION_TIME_MS"
+
+
+def test_without_the_black_pattern_flag_it_is_searched_for_as_before():
+    plugin = FakeSpectrometer()
+    b = make_bridge(plugin)
+    run_measure(b, plugin, [40.0, 0.0], dynamic_tint=True)
+    assert b.tints_requested_ms[1] > b.tints_requested_ms[0]
+
+
+def test_the_dark_correction_zeroes_the_black_pattern_at_every_time_used():
+    plugin = FakeSpectrometer()
+    b = make_bridge(plugin)
+    rates = [40.0, 20.0, 80.0, 0.0]
+    spectra = run_measure(b, plugin, rates, dynamic_tint=True,
+                          dark_patterns=np.array([False, False, False, True]))
+    plugin.rate = 0.0       # projector black for the dark exposures
+    b.measure_dark_and_correct()
+    assert np.allclose(spectra[3], 0.0, atol=1e-6)
+    for i, rate in enumerate(rates[:3]):
+        assert np.allclose(spectra[i], rate, rtol=1e-6), "offset removed: back to counts per ms of the signal"

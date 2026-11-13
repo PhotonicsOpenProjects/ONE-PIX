@@ -416,6 +416,7 @@ class Acquisition:
                     progress_callback=acquisition_progress.update,
                     dynamic_tint=self.dynamic_tint,
                     tint_frame_ms=tint_frame_ms,
+                    dark_patterns=dark_patterns,
                 )
             except Exception as exc:
                 thread_errors.put(exc)
@@ -424,6 +425,12 @@ class Acquisition:
         # With a dynamic integration time, each time is a whole number of display
         # frames (a projector's flicker fluctuates readings otherwise)
         tint_frame_ms = frame_period_ms() if self.dynamic_tint else None
+
+        # black patterns (HAS ends with one) have no flux to tune the integration time on
+        dark_patterns = (
+            np.array([not np.any(p) for p in self.imaging_method.acquisition_results["patterns"]])
+            if self.dynamic_tint else None
+        )
 
         acquisition_progress.start(len(patterns), stop_event=stop_event)
 

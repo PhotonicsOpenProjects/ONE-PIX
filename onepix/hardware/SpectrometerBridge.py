@@ -442,7 +442,7 @@ class SpectrometerBridge:
     # -------------------------------------------------------------------------
     def thread_singlepixel_measure(
         self, event, stop_event, spectra, progress_callback=None,
-        dynamic_tint=False, tint_frame_ms=None,
+        dynamic_tint=False, tint_frame_ms=None, dark_patterns=None,
     ):
         """Measure one spectrum each time `event` is set, until `spectra` is full.
 
@@ -451,6 +451,11 @@ class SpectrometerBridge:
         brightness. The times are kept in tints_requested_ms / tints_effective_ms and the spectra stay
         normalised by the time actually applied; measure_dark_and_correct() then removes the dark.
         `tint_frame_ms`: the display's frame period, to keep the times to whole numbers of frames.
+        `dark_patterns`: one boolean per pattern, True for a black one (HAS projects one after its
+        zones). There is no flux to tune on: the search would climb to MAX_INTEGRATION_TIME_MS and
+        still not reach the target, taking minutes and measuring the dark with a time of its own. A
+        black pattern is measured with the time of the pattern before it, a time the zones used too,
+        so the dark correction that follows (measure_dark_and_correct) takes it off like the others.
         """
 
         logging.info(f"{self.spectro_name} spectrometer begin to measure")
@@ -539,10 +544,13 @@ class SpectrometerBridge:
                     trigger_time = time.perf_counter()
 
                     if dynamic_tint:
-                        self.autoexpose(
-                            self.DYNAMIC_TINT_MAX_ITERATIONS, snap=snap, verbose=False,
-                            saturation_backoff=self.DYNAMIC_TINT_SATURATION_BACKOFF,
-                        )
+                        if dark_patterns is not None and dark_patterns[cnt]:
+                            self.set_integration_time()
+                        else:
+                            self.autoexpose(
+                                self.DYNAMIC_TINT_MAX_ITERATIONS, snap=snap, verbose=False,
+                                saturation_backoff=self.DYNAMIC_TINT_SATURATION_BACKOFF,
+                            )
                         self.tints_requested_ms[cnt] = self.integration_time_ms
                         self.tints_effective_ms[cnt] = self.effective_integration_time_ms
                         flush_duration_s = (
