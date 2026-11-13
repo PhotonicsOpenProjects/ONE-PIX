@@ -34,7 +34,7 @@ ONE-PIX 3.0.0 es una nueva base para la imagen hiperespectral de un solo píxel:
 <p align="center"><em>Pipeline ejecutado de arriba abajo: selección de 400–700 nm (<code>crop</code>), suavizado (<code>golay_smoothing</code>), normalización (<code>max_normalization</code>) y después índices (<code>indices</code>).</em></p>
 
 <p align="center">
-<img src="../../imgs/onepix_v3_architecture.png" alt="Arquitectura de ONE-PIX 3.0.0: interfaces, núcleo Python y ecosistema de plugins" width="600"/>
+<img src="../../imgs/onepix_v3_architecture_es.png" alt="Arquitectura de ONE-PIX 3.0.0: interfaces, núcleo Python y ecosistema de plugins" width="600"/>
 </p>
 
 <p align="center"><em>Las interfaces se apoyan en el núcleo Python <code>onepix</code>, conectado a los plugins de hardware, de métodos de imagen y de análisis.</em></p>

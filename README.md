@@ -311,7 +311,7 @@ This architecture allows imaging methods, hardware interfaces and analysis workf
 The framework supports interchangeable spectrometers, RGB cameras and single-pixel imaging strategies through a modular plugin-based ecosystem.
 
 <p align="center">
-<img src="imgs/onepix_v3_architecture.png" alt="ONE-PIX 3.0.0 architecture: user interfaces, Python core and plugin ecosystem" width="600"/>
+<img src="imgs/onepix_v3_architecture_en.png" alt="ONE-PIX 3.0.0 architecture: user interfaces, Python core and plugin ecosystem" width="600"/>
 </p>
 
 <p align="center"><em>The interfaces rely on the <code>onepix</code> Python core, connected to the hardware, imaging method and analysis plugins.</em></p>
