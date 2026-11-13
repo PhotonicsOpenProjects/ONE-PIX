@@ -8,7 +8,7 @@ import time
 import logging
 
 from onepix.logging_config import root
-from onepix.hardware.gui_thread import gui_thread
+from onepix.hardware.gui_thread import gui_thread, close_all_windows
 from onepix.hardware.gray_response import apply_lut
 
 logger = logging.getLogger(__name__)
@@ -265,7 +265,7 @@ class Projection:
         )
 
     def hide_dark(self):
-        gui_thread.run(cv2.destroyAllWindows)
+        close_all_windows()
 
     def thread_projection(
         self,
@@ -367,7 +367,7 @@ class Projection:
             if next_image is not None and not shown_early and not stop_event.is_set():
                 shown_at = show(next_image)
 
-        gui_thread.run(cv2.destroyAllWindows)
+        close_all_windows()
 
         logging.info(
             f"Projection system finished projecting patterns ({early} shown early)"

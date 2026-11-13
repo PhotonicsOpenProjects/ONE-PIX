@@ -16,6 +16,7 @@ import orjson
 from onepix import utils as utils
 from onepix import fair
 from onepix.hardware.display_timing import frame_period_ms
+from onepix.hardware.gui_thread import close_all_windows
 from onepix.progress import progress as acquisition_progress
 from onepix.progress import AcquisitionCancelled
 
@@ -508,7 +509,7 @@ class Acquisition:
 
             acquisition_progress.stopped()
 
-            cv2.destroyAllWindows()
+            close_all_windows()
 
             raise
 
@@ -520,7 +521,7 @@ class Acquisition:
 
             acquisition_progress.fail(e)
 
-            cv2.destroyAllWindows()
+            close_all_windows()
 
             raise
 

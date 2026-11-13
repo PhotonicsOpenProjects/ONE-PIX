@@ -108,3 +108,20 @@ class _GuiThread:
 
 
 gui_thread = _GuiThread()
+
+
+def close_all_windows():
+    """Close every OpenCV window, from the GUI thread.
+
+    cv2.destroyAllWindows() called from any other thread (a Flask request, the acquisition thread)
+    leaves the Qt backend in a broken state: the next window created with the same name comes up
+    small and misplaced instead of fullscreen (getWindowImageRect gives -1). A cancelled acquisition
+    did exactly that. Never fails: closing is a clean-up, and a wedged GUI thread already reports itself."""
+    import cv2
+
+    try:
+        gui_thread.run(cv2.destroyAllWindows)
+        # the window is only really gone once the event loop has run
+        gui_thread.run(cv2.waitKey, 1)
+    except Exception as exc:
+        logger.warning("Could not close the OpenCV windows: %s", exc)

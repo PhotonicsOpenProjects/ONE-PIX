@@ -1,4 +1,5 @@
 from onepix.hardware.HardwareConfig import *
+from onepix.hardware.gui_thread import close_all_windows
 import cv2
 import os
 import time
@@ -122,7 +123,7 @@ class Profilo_Acquisition :
         except Exception as e:
             # Handle any potential errors during the acquisition process
             print(f"An error occurred during profilo acquisition: {e}")
-            cv2.destroyAllWindows()
+            close_all_windows()
 
         finally:
             self.is_init = False

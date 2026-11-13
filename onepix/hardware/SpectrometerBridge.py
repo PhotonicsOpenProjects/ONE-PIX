@@ -399,7 +399,8 @@ class SpectrometerBridge:
 
     def get_optimal_integration_time(self, verbose=True):
         self.autoexpose(max_iterations=10, verbose=verbose)
-        cv2.destroyAllWindows()
+        from onepix.hardware.gui_thread import close_all_windows
+        close_all_windows()
         return self.integration_time_ms
 
     def measure_dark_and_correct(self, spectra=None):
