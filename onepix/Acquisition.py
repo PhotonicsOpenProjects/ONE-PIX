@@ -26,6 +26,31 @@ from onepix.logging_config import root
 logger = logging.getLogger(__name__)
 
 
+
+def wait_for_threads(threads, current_progress, hard_timeout=None, stall_timeout=None, poll_s=0.5):
+    """Wait for `threads` to finish; True if they all did, False if the wait was given up on.
+
+    hard_timeout: give up this long after the start, whatever happens (None: never).
+    stall_timeout: give up when `current_progress()` (patterns measured so far) has not moved for
+    this long (None: never). A dynamic integration time can spend minutes on one dim pattern (up to
+    MAX_INTEGRATION_TIME_MS per reading), so the total time cannot be predicted from the duration
+    estimate, while the absence of progress still tells a stuck device from a slow one."""
+    start = time.monotonic()
+    last_value = current_progress()
+    last_change = start
+    while any(t.is_alive() for t in threads):
+        for t in threads:
+            t.join(timeout=poll_s / max(1, len(threads)))
+        now = time.monotonic()
+        value = current_progress()
+        if value != last_value:
+            last_value, last_change = value, now
+        if hard_timeout is not None and now - start > hard_timeout:
+            return False
+        if stall_timeout is not None and now - last_change > stall_timeout:
+            return False
+    return True
+
 class Acquisition:
     """
     Class Acquisition is used to set up ONE-PIX acquisitions.
@@ -435,15 +460,34 @@ class Acquisition:
             spectrometer_thread.start()
             logger.info("spectrometer thread started")
 
-            patterns_thread.join(timeout=join_timeout)
-            spectrometer_thread.join(timeout=join_timeout)
+            if self.dynamic_tint:
+                # no total limit: the integration time of each pattern is searched for (up to
+                # MAX_INTEGRATION_TIME_MS per reading), so the estimate made with the starting time
+                # means nothing. A stall of the progress is what tells a stuck device.
+                spectro = self.hardware.spectrometer
+                worst_pattern_s = 1.5 * (
+                    (spectro.DYNAMIC_TINT_MAX_ITERATIONS + 1) * 2 + 2 + spectro.repetition
+                ) * spectro.MAX_INTEGRATION_TIME_MS / 1000.0
+                finished = wait_for_threads(
+                    [patterns_thread, spectrometer_thread],
+                    lambda: acquisition_progress.snapshot()["current"],
+                    stall_timeout=max(join_timeout, worst_pattern_s),
+                )
+                limit_text = f"no progress for {max(join_timeout, worst_pattern_s):.0f}s"
+            else:
+                finished = wait_for_threads(
+                    [patterns_thread, spectrometer_thread],
+                    lambda: acquisition_progress.snapshot()["current"],
+                    hard_timeout=join_timeout,
+                )
+                limit_text = f"{join_timeout:.0f}s"
 
-            if patterns_thread.is_alive() or spectrometer_thread.is_alive():
+            if not finished:
                 stop_event.set()
                 raise TimeoutError(
-                    f"Acquisition threads did not finish within "
-                    f"{join_timeout:.0f}s (estimated duration: "
-                    f"{self.est_duration} min)."
+                    f"Acquisition threads did not finish ({limit_text}; estimated duration: "
+                    f"{self.est_duration} min). The spectrometer may be stuck: check the USB "
+                    f"connection and the integration time."
                 )
 
             if not thread_errors.empty():
