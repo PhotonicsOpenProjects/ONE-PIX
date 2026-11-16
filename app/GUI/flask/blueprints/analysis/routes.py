@@ -167,6 +167,20 @@ def save_reference_spectrum(spectrum, wavelengths, target=None):
     return filepath
 
 
+def measured_result():
+    """The loaded measurement as it was loaded, never a processed copy of
+    it: every Apply of the pipeline starts from it (the pipeline sent is
+    the whole chain of steps), and a reference zone is read in it - not
+    in a cube a previous Apply already normalised. state.CURRENT_RESULT
+    is what the last Apply gave, shown by the other routes."""
+
+    if state.ORIGINAL_RESULT is not None:
+
+        return state.ORIGINAL_RESULT
+
+    return state.CURRENT_RESULT
+
+
 def image_response(img):
     """The result image with row/column graduations, drawn to fit the
     viewer the page says it has (w, h, dpr query arguments) - see
@@ -428,8 +442,11 @@ def run_analysis():
         []
     )
 
+    # From the measurement, on a copy (a step may work in place): an
+    # Apply never builds on the result of the previous one, which would
+    # apply the steps twice over.
     analysis = Analysis(
-        reconstruction_dict=state.CURRENT_RESULT,
+        reconstruction_dict=copy.deepcopy(measured_result()),
         plot_result=True
     )
 
@@ -745,12 +762,12 @@ def reference_preview():
         }), 400
 
     analysis = Analysis(
-        reconstruction_dict=state.CURRENT_RESULT,
+        reconstruction_dict=measured_result(),
         plot_result=False
     )
 
     img = analysis.imaging_method.reference_preview_image(
-        state.CURRENT_RESULT
+        measured_result()
     )
 
     if img is None:
@@ -801,7 +818,7 @@ def reference_zone():
         }), 400
 
     analysis = Analysis(
-        reconstruction_dict=state.CURRENT_RESULT,
+        reconstruction_dict=measured_result(),
         plot_result=False
     )
 
@@ -810,7 +827,7 @@ def reference_zone():
         spectrum, wavelengths = (
             analysis.imaging_method
             .reference_spectrum_zone(
-                state.CURRENT_RESULT,
+                measured_result(),
                 x0, y0, x1, y1
             )
         )
