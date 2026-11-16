@@ -40,19 +40,19 @@
   border-radius: var(--radius-sm);
 }
 
-/* Laptop-size screens (under 1200px wide, or 800px high): a 164px bar
-   would take a quarter of the page, and the tabs wouldn't all fit next
-   to the big logo in every language - a smaller logo. */
+/* Laptop-size screens and the Raspberry Pi's 1024x768 display (under
+   1200px wide, or 800px high): a 164px bar would take a quarter of the
+   page - a logo still big enough to read its lettering. */
 @media (max-width: 1199px), (max-height: 800px) {
   :root {
-    --nav-height: 72px;
-    --nav-logo-height: 58px;
+    --nav-height: 124px;
+    --nav-logo-height: 110px;
   }
 }
 
-/* Small screens (phone, tablet, the Raspberry Pi's display): the bar
-   takes back its former height, leaving the room to the page. */
-@media (max-width: 960px), (max-height: 600px) {
+/* Small screens (phone, small tablet): the bar takes back its former
+   height, leaving the room to the page. */
+@media (max-width: 800px), (max-height: 500px) {
   :root {
     --nav-height: 56px;
     --nav-logo-height: 44px;
