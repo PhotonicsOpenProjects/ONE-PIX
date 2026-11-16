@@ -211,6 +211,42 @@
    selection box) stays here.
    ---------------------------------------------------------- */
 
+/* Reflectance of the reference target, above the tabs: it applies to
+   both ways of capturing the reference. */
+.reference-target {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-4) var(--space-5) 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.reference-target legend {
+  padding: 0 var(--space-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.reference-target-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--fs-sm);
+}
+
+.reference-target-option input[type="number"] {
+  width: 80px;
+}
+
+.reference-target-file {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-left: var(--space-5);
+}
+
 .reference-dialog-tabs {
   display: flex;
   gap: var(--space-1);

@@ -7,6 +7,7 @@ from flask import (
 
 from . import bp
 from . import state
+from . import reference_target
 
 import collections.abc
 import json
@@ -124,13 +125,26 @@ def get_reference_dir():
     return reference_dir
 
 
-def save_reference_spectrum(spectrum, wavelengths):
+def save_reference_spectrum(spectrum, wavelengths, target=None):
     """Written as plain JSON (not via onepix_utils.save_dict_json,
     whose serialize_for_json wraps ndarrays as
     {"__type__": "ndarray", ...} for ONE-PIX's own internal round-
     tripping) - reflectance_normalization.transform() is an external
     plugin that reads this file with a plain json.load() and expects
-    exactly {"wavelengths": [...], "spectrum": [...]}."""
+    exactly {"wavelengths": [...], "spectrum": [...]}.
+
+    target: the reflectance request of the reference target (see
+    reference_target.py). The plugin divides by "spectrum", so the
+    target's absolute reflectance is folded into it (measured spectrum /
+    R(lambda)): the plugin then returns an absolute reflectance without
+    any change. "target" is kept in the file as a record only, the
+    plugin ignores it."""
+
+    spectrum, target_info = reference_target.apply_target(
+        spectrum,
+        wavelengths,
+        target
+    )
 
     filename = (
         f"reference_{time.strftime('%Y%m%d_%H%M%S')}.json"
@@ -138,15 +152,17 @@ def save_reference_spectrum(spectrum, wavelengths):
 
     filepath = get_reference_dir() / filename
 
+    content = {
+        "wavelengths": np.asarray(wavelengths).tolist(),
+        "spectrum": np.asarray(spectrum).tolist(),
+    }
+
+    if target_info is not None:
+        content["target"] = target_info
+
     with open(filepath, "w", encoding="utf-8") as f:
 
-        json.dump(
-            {
-                "wavelengths": np.asarray(wavelengths).tolist(),
-                "spectrum": np.asarray(spectrum).tolist(),
-            },
-            f
-        )
+        json.dump(content, f)
 
     return filepath
 
@@ -803,13 +819,61 @@ def reference_zone():
 
         return jsonify({"error": str(exc)}), 400
 
-    filepath = save_reference_spectrum(
-        spectrum,
-        wavelengths
-    )
+    try:
+
+        filepath = save_reference_spectrum(
+            spectrum,
+            wavelengths,
+            payload.get("target")
+        )
+
+    except ValueError as exc:
+
+        return jsonify({"error": str(exc)}), 400
 
     return jsonify({
         "reference_path": str(filepath)
+    })
+
+
+MAX_TARGET_TABLE_BYTES = 2 * 1024 * 1024
+
+
+@bp.route("/reference/target_table", methods=["POST"])
+def reference_target_table():
+    """Reads the calibration table of the reference target (wavelengths +
+    reflectance) a user uploaded, and sends it back parsed: the page
+    keeps it and gives it back with the reference it captures, so
+    nothing is stored here."""
+
+    uploaded = request.files.get("file")
+
+    if uploaded is None or not uploaded.filename:
+
+        return jsonify({"error": "No file received"}), 400
+
+    raw = uploaded.stream.read(MAX_TARGET_TABLE_BYTES + 1)
+
+    if len(raw) > MAX_TARGET_TABLE_BYTES:
+
+        return jsonify({"error": "The file is too large"}), 413
+
+    try:
+
+        wavelengths, reflectance = reference_target.parse_table(
+            raw.decode("utf-8", errors="replace")
+        )
+
+    except ValueError as exc:
+
+        return jsonify({"error": str(exc)}), 400
+
+    return jsonify({
+        "wavelengths": wavelengths.tolist(),
+        "reflectance": reflectance.tolist(),
+        "n_points": int(wavelengths.size),
+        "min_nm": float(wavelengths[0]),
+        "max_nm": float(wavelengths[-1]),
     })
 
 
@@ -869,10 +933,17 @@ def reference_hypercube():
 
         return jsonify({"error": str(exc)}), 400
 
-    reference_filepath = save_reference_spectrum(
-        spectrum,
-        wavelengths
-    )
+    try:
+
+        reference_filepath = save_reference_spectrum(
+            spectrum,
+            wavelengths,
+            (request.json or {}).get("target")
+        )
+
+    except ValueError as exc:
+
+        return jsonify({"error": str(exc)}), 400
 
     return jsonify({
         "reference_path": str(reference_filepath)
